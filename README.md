@@ -79,6 +79,7 @@ make -j$(nproc)
 | `bsp/vendor-rockchip-toplevel/` | 获奖后 PR 到 `vendor_rockchip` 所需的顶层 Kconfig / Make.defs / Makefile |
 | `docs/rk3576-soc-recon.md` | SoC 硬件参数勘察（GIC / CPU / 定时器 / 12 路 UART 全表） |
 | `docs/xts-checklist.md` | xTS 必测项清单 = 开发路线图与验收标准 |
+| `docs/m1a-gicv2-qemu.md` | M1a：QEMU 上 GICv2 路径验证与驱动分析 |
 | `docs/refs/` | 官方文档离线副本 |
 | `notes/DEBUG-CASES.md` | 踩坑记录（现象—排查—根因—修复—验证） |
 | `scripts/` | `env.sh` / `check-addr.sh` / `sync-bsp.sh` / `logs.sh` / `run-qemu.sh` |
