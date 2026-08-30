@@ -1,0 +1,1114 @@
+From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sun, 30 Aug 2026 22:11:05 +0800
+Subject: [PATCH] arm64/rk3576: add Rockchip RK3576 SoC port
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+新增 RK3576 SoC 层端口，覆盖启动、MMU、GICv2、定时器与串口。
+
+硬件参数来源（均为 Rockchip 官方提交，GPL-2.0+ OR MIT 双许可，按 MIT 使用）：
+  - Linux 主线 arch/arm64/boot/dts/rockchip/rk3576.dtsi
+  - U-Boot 主线 include/configs/rk3576_common.h
+
+三个与同厂商其它型号的关键差异，均属填错不报错的静默失效类型：
+
+  1. 中断控制器是 GIC-400（GICv2），而 RK3399/RK3568 用 GIC-500、
+     RK3588 用 GIC-600（均为 GICv3）。dtsi 中四段 reg（GICD/GICC/GICH/GICV）
+     是 GICv2 的标志。需设 CONFIG_ARM64_GIC_VERSION=2；设成 3 的表现是
+     能打印但收不到输入。GICD 0x2a701000，GICC 0x2a702000。
+
+  2. DRAM 物理基址是 0x40000000，不是 0。RK3576 把外设放在低位
+     （0x22000000~0x2b060000），照抄 RK3568 的 0x02000000 会落进外设区。
+     依据 U-Boot 的 CFG_SYS_SDRAM_BASE 与 kernel_addr_r=0x42000000。
+
+  3. 外设映射窗口取 0x20000000 起 192MB，需同时覆盖 GIC、UART、CRU、
+     GRF、GPIO，且与 DRAM 不重叠。
+
+串口为 Synopsys DesignWare 8250，与 16550 兼容，SoC 层仅作转发，
+驱动本体是 drivers/serial/uart_16550.c（参照 vdk 的做法）。
+调试口 UART0 @ 0x2ad40000、时钟 24MHz、波特率 1500000、reg-shift=2，
+已由 KICKPI 官方 Armbian 源码的厂商 U-Boot defconfig 确认。
+
+启动阶段只跑 A53 簇 core 0 单核，未开 SMP。
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FBQkQQFX3kTDP3AzvLzDGx
+Signed-off-by: zhouyllll <xuezhou28@gmail.com>
+---
+ arch/arm64/Kconfig                            |  22 +++
+ arch/arm64/include/rk3576/chip.h              | 172 ++++++++++++++++++
+ arch/arm64/include/rk3576/irq.h               | 102 +++++++++++
+ arch/arm64/src/rk3576/Kconfig                 |  27 +++
+ arch/arm64/src/rk3576/Make.defs               |  34 ++++
+ arch/arm64/src/rk3576/chip.h                  |  44 +++++
+ .../src/rk3576/hardware/rk3576_memorymap.h    | 115 ++++++++++++
+ arch/arm64/src/rk3576/rk3576_boot.c           | 144 +++++++++++++++
+ arch/arm64/src/rk3576/rk3576_boot.h           |  73 ++++++++
+ arch/arm64/src/rk3576/rk3576_lowputc.S        |  91 +++++++++
+ arch/arm64/src/rk3576/rk3576_serial.c         |  77 ++++++++
+ arch/arm64/src/rk3576/rk3576_serial.h         |  55 ++++++
+ 12 files changed, 956 insertions(+)
+ create mode 100644 arch/arm64/include/rk3576/chip.h
+ create mode 100644 arch/arm64/include/rk3576/irq.h
+ create mode 100644 arch/arm64/src/rk3576/Kconfig
+ create mode 100644 arch/arm64/src/rk3576/Make.defs
+ create mode 100644 arch/arm64/src/rk3576/chip.h
+ create mode 100644 arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+ create mode 100644 arch/arm64/src/rk3576/rk3576_boot.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_boot.h
+ create mode 100644 arch/arm64/src/rk3576/rk3576_lowputc.S
+ create mode 100644 arch/arm64/src/rk3576/rk3576_serial.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_serial.h
+
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 9f0561ae..f69d89d8 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -53,6 +53,23 @@ config ARCH_CHIP_RK3399
+ 	---help---
+ 		Rockchip RK3399 SoC
+ 
++config ARCH_CHIP_RK3576
++	bool "Rockchip RK3576"
++	select ARCH_CORTEX_A53
++	select ARCH_HAVE_ADDRENV
++	select ARCH_HAVE_RESET
++	select ARCH_NEED_ADDRENV_MAPPING
++	select ARM64_HAVE_PSCI
++	select ARCH_HAVE_IRQPRIO
++	---help---
++		Rockchip RK3576 SoC (quad Cortex-A53 + quad Cortex-A72).
++
++		中断控制器是 GIC-400（GICv2），与 RK3399/RK3568/RK3588 的 GICv3
++		不同，defconfig 中须设 CONFIG_ARM64_GIC_VERSION=2。
++
++		启动核是 A53 簇 core 0（MPIDR 0x0），此处按 ARCH_CORTEX_A53 选。
++		A72 簇（MPIDR 0x100~0x103）的启动留待 SMP 阶段处理。
++
+ config ARCH_CHIP_QEMU_ARM64
+ 	bool "QEMU virt platform (ARMv8a)"
+ 	select ARCH_HAVE_ADDRENV
+@@ -348,6 +365,7 @@ config ARCH_CHIP
+ 	default "a64"       if ARCH_CHIP_A64
+ 	default "rk3399"    if ARCH_CHIP_RK3399
+ 	default "zynq-mpsoc" if ARCH_CHIP_ZYNQ_MPSOC
++	default "rk3576"    if ARCH_CHIP_RK3576
+ 	default "qemu"      if ARCH_CHIP_QEMU_ARM64
+ 	default "goldfish"  if ARCH_CHIP_GOLDFISH_ARM64
+ 	default "fvp-v8r"   if ARCH_CHIP_FVP_ARMV8R
+@@ -513,6 +531,10 @@ if ARCH_CHIP_RK3399
+ source "arch/arm64/src/rk3399/Kconfig"
+ endif
+ 
++if ARCH_CHIP_RK3576
++source "arch/arm64/src/rk3576/Kconfig"
++endif
++
+ if ARCH_CHIP_QEMU_ARM64
+ source "arch/arm64/src/qemu/Kconfig"
+ endif
+diff --git a/arch/arm64/include/rk3576/chip.h b/arch/arm64/include/rk3576/chip.h
+new file mode 100644
+index 00000000..c7c52b7a
+--- /dev/null
++++ b/arch/arm64/include/rk3576/chip.h
+@@ -0,0 +1,172 @@
++/****************************************************************************
++ * arch/arm64/include/rk3576/chip.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_INCLUDE_RK3576_CHIP_H
++#define __ARCH_ARM64_INCLUDE_RK3576_CHIP_H
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* ==========================================================================
++ * 地址来源：Linux 主线 arch/arm64/boot/dts/rockchip/rk356x-base.dtsi
++ *          与 U-Boot 主线 include/configs/rk3576_common.h
++ *
++ * 两者均为上游正式合入、经过验证的实现，比原厂 SDK 更可靠。
++ * dtsi 的许可证是 (GPL-2.0+ OR MIT)，可按 MIT 分支使用，与本项目的
++ * Apache-2.0 兼容。
++ *
++ * 仍未确证的项见 notes/RK3576-ADDR-TODO.md，均已在下方就地标注。
++ * ==========================================================================
++ */
++
++/* Number of bytes in x kibibytes/mebibytes/gibibytes */
++
++#define KB(x)           ((x) << 10)
++#define MB(x)           (KB(x) << 10)
++#define GB(x)           (MB(UINT64_C(x)) << 10)
++
++/* ★★ Rockchip RK3576 Generic Interrupt Controller —— GIC-400，即 GICv2。
++ *
++ * ★ 与 RK3568/RK3399/RK3588 不同，务必不要照抄它们的值和版本。
++ *   RK3568 是 GIC-500、RK3399 是 GIC-500、RK3588 是 GIC-600，全是 GICv3；
++ *   RK3576 是 GIC-400，是 GICv2。
++ *
++ * 取值来源：Linux 主线 arch/arm64/boot/dts/rockchip/rk3576.dtsi
++ *
++ *   gic: interrupt-controller@2a701000 {
++ *           compatible = "arm,gic-400";
++ *           reg = <0x0 0x2a701000 0 0x10000>,   // GICD 分发器
++ *                 <0x0 0x2a702000 0 0x10000>,   // GICC CPU 接口
++ *                 <0x0 0x2a704000 0 0x10000>,   // GICH 虚拟化控制
++ *                 <0x0 0x2a706000 0 0x10000>;   // GICV 虚拟 CPU 接口
++ *   };
++ *
++ * 校验：四段 reg 是 GICv2 的标志（GICv3 只有 GICD + GICR 两段）。
++ *
++ * ★ 在 GICv2 代码路径（arch/arm64/src/common/arm64_gicv2.c）下，
++ *   CONFIG_GICR_BASE 承载的是 GICC（CPU 接口）地址，不是 GICv3 的
++ *   redistributor。参照 boards/arm64/zynq-mpsoc/zcu111 的做法，
++ *   它同样是 GIC-400：GICD 0xf9010000 / GICC 0xf9020000。
++ *
++ * ★ GICv2 没有 per-CPU redistributor，因此不定义 CONFIG_GICR_OFFSET。
++ *
++ * ★ defconfig 中必须有 CONFIG_ARM64_GIC_VERSION=2，否则会走 GICv3 路径，
++ *   表现为中断完全不触发（轮询发送仍正常，即"能打印但收不到输入"）。
++ */
++
++#define CONFIG_GICD_BASE          0x2a701000
++#define CONFIG_GICR_BASE          0x2a702000
++
++/* Rockchip RK3576 Memory Map: RAM and Device I/O
++ *
++ * RAMBANK1  : DDR 的起始地址与本端口可用的大小。
++ *             LogicPi A1 实际 DDR 容量以板卡规格为准。
++ * DEVICEIO  : 外设寄存器区，需覆盖 GIC、UART、CRU、GRF 等全部用到的
++ *             控制器；这段会被 rk3576_boot.c 建成一整块 device 映射。
++ */
++
++/* ★★ RK3576 的 DDR 物理起始地址是 0x40000000，不是 0。
++ *
++ * 来源：U-Boot 主线 include/configs/rk3576_common.h（Rockchip 官方提交）
++ *   #define CFG_SYS_SDRAM_BASE   0x40000000
++ *   #define CFG_IRAM_BASE        0x3ff80000
++ *
++ * ★ 这是 RK3576 与 RK3568 最容易踩的差异：RK3568 的 DDR 从 0 起、外设在
++ *   0xfxxxxxxx；RK3576 反过来 —— 外设占了低位（0x22000000~0x2b060000），
++ *   DDR 被推到 0x40000000。照抄 RK3568 的 0x02000000 会落在外设区里，
++ *   表现是上板完全没有输出、也不报错。
++ *
++ * 交叉验证：dtsi 中 sram@3ff88000 与 U-Boot 的 CFG_IRAM_BASE 0x3ff80000
++ * 吻合，且 scmi-shmem@4010f000 落在 0x40000000 之后，与 DDR 基址自洽。
++ *
++ * 这里沿用 RK3568/RK3399 端口的做法，从镜像加载地址开始映射，
++ * 不映射加载地址之前的 ATF/OP-TEE 保留区。
++ *
++ * TODO(M0)：512MB 是保守取值，KICKPI-K7 有 4/8/16GB 版本，实际容量需按
++ * 板卡规格确认。偏小只是用不满内存，不影响启动；偏大会映射到不存在的
++ * 物理地址。
++ */
++
++#define CONFIG_RAMBANK1_ADDR      0x42000000
++#define CONFIG_RAMBANK1_SIZE      MB(512)
++
++/* 外设寄存器区。RK3576 的外设都在低位地址段：
++ *
++ *   0x22000000  PCIe0        0x26000000  GRF 群（sys/ioc/pmu…）
++ *   0x23000000  USB DWC3     0x27200000  CRU
++ *   0x27300000  I2C0         0x27310000  UART1
++ *   0x27320000  GPIO0        0x2a701000  ★ GIC
++ *   0x2ac40000  I2C1-8       0x2ad40000  ★ UART0（M1 调试口）
++ *   0x2ae10000  GPIO1-4      0x2b000000  各类 PHY（最高 0x2b060000）
++ *
++ * 取 0x20000000 起 192MB，上界 0x2c000000，把上述全部包住，
++ * 且与 DDR（0x40000000 起）不重叠。
++ *
++ * ★ 新增外设地址时先确认它落在本范围内，否则 MMU 不建映射，
++ *   访问时直接异常。用 contest/scripts/check-addr.sh 校验。
++ */
++
++#define CONFIG_DEVICEIO_BASEADDR  0x20000000
++#define CONFIG_DEVICEIO_SIZE      MB(192)
++
++/* U-Boot loads NuttX at this address (kernel_addr_r)
++ *
++ * 来源：U-Boot 主线 include/configs/rk3576_common.h（Rockchip 官方提交）
++ *   ENV_MEM_LAYOUT_SETTINGS 中 "kernel_addr_r=0x42000000"
++ *
++ * ★ 注意这与 RK3568 的 0x02000000、RK3399 的 0x02080000 都不同，
++ *   不要照抄。板厂可能改过这个环境变量，上板后用
++ *   printenv kernel_addr_r 复核一次（RECON B3）。
++ *
++ * 本值必须与三处保持一致，改一处就要改三处：
++ *   1. 这里的 CONFIG_LOAD_BASE
++ *   2. vendor/rockchip/boards/rk3576/kickpi-k7/configs/nsh/defconfig
++ *      的 CONFIG_RAM_START
++ *   3. vendor/rockchip/boards/rk3576/kickpi-k7/scripts/dramboot.ld
++ *      的第一行 ". ="
++ */
++
++#define CONFIG_LOAD_BASE          0x42000000
++
++#define MPID_TO_CLUSTER_ID(mpid)  ((mpid) & ~0xff)
++
++/****************************************************************************
++ * Assembly Macros
++ ****************************************************************************/
++
++#ifdef __ASSEMBLY__
++
++.macro  get_cpu_id xreg0
++  mrs    \xreg0, mpidr_el1
++  ubfx   \xreg0, \xreg0, #0, #8
++.endm
++
++#endif /* __ASSEMBLY__ */
++
++#endif /* __ARCH_ARM64_INCLUDE_RK3576_CHIP_H */
+diff --git a/arch/arm64/include/rk3576/irq.h b/arch/arm64/include/rk3576/irq.h
+new file mode 100644
+index 00000000..e34a4549
+--- /dev/null
++++ b/arch/arm64/include/rk3576/irq.h
+@@ -0,0 +1,102 @@
++/****************************************************************************
++ * arch/arm64/include/rk3576/irq.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* This file should never be included directly but, rather,
++ * only indirectly through nuttx/irq.h
++ */
++
++#ifndef __ARCH_ARM64_INCLUDE_RK3576_IRQ_H
++#define __ARCH_ARM64_INCLUDE_RK3576_IRQ_H
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* Rockchip RK3576 Interrupts
++ *
++ * GICv3 中断号布局（与 SoC 无关的固定部分）：
++ *   0  - 15   SGI  软件生成中断
++ *   16 - 31   PPI  私有外设中断（含 Generic Timer）
++ *   32 - ...  SPI  共享外设中断  ← 外设中断号 = dtsi 里的 SPI 号 + 32
++ *
++ * NR_IRQS：主线 rk356x-base.dtsi + rk3576.dtsi 中出现的最大 SPI 号为 231，
++ * 对应中断号 231 + 32 = 263。取 288（32 的整数倍）留余量。
++ * 该值偏大只多占一点内存，偏小会让对应外设中断静默挂不上且不报错。
++ */
++
++#define NR_IRQS                 288
++
++/* Software Generated Interrupts (SGI) */
++
++#define RK3576_IRQ_SGI0         (0)
++#define RK3576_IRQ_SGI1         (1)
++#define RK3576_IRQ_SGI2         (2)
++#define RK3576_IRQ_SGI3         (3)
++#define RK3576_IRQ_SGI4         (4)
++#define RK3576_IRQ_SGI5         (5)
++#define RK3576_IRQ_SGI6         (6)
++#define RK3576_IRQ_SGI7         (7)
++#define RK3576_IRQ_SGI8         (8)
++#define RK3576_IRQ_SGI9         (9)
++#define RK3576_IRQ_SGI10        (10)
++#define RK3576_IRQ_SGI11        (11)
++#define RK3576_IRQ_SGI12        (12)
++#define RK3576_IRQ_SGI13        (13)
++#define RK3576_IRQ_SGI14        (14)
++#define RK3576_IRQ_SGI15        (15)
++
++/* Private Peripheral Interrupts (PPI) */
++
++#define RK3576_IRQ_PPI0         (16)
++#define RK3576_IRQ_PPI1         (17)
++#define RK3576_IRQ_PPI2         (18)
++#define RK3576_IRQ_PPI3         (19)
++#define RK3576_IRQ_PPI4         (20)
++#define RK3576_IRQ_PPI5         (21)
++#define RK3576_IRQ_PPI6         (22)
++#define RK3576_IRQ_PPI7         (23)
++#define RK3576_IRQ_PPI8         (24)
++#define RK3576_IRQ_PPI9         (25)
++#define RK3576_IRQ_PPI10        (26)
++#define RK3576_IRQ_PPI11        (27)
++#define RK3576_IRQ_PPI12        (28)
++#define RK3576_IRQ_PPI13        (29)
++#define RK3576_IRQ_PPI14        (30)
++#define RK3576_IRQ_PPI15        (31)
++
++/* Shared Peripheral Interrupts (SPI)
++ *
++ * dtsi 里写的是 SPI 号，实际中断号要 +32。用下面的宏做转换，
++ * 避免每次手算出错。
++ */
++
++#define RK3576_IRQ_SPI(n)       ((n) + 32)
++
++/* UART（来源：rk356x-base.dtsi）*/
++
++#define RK3576_IRQ_UART0        RK3576_IRQ_SPI(116)   /* 148 */
++#define RK3576_IRQ_UART1        RK3576_IRQ_SPI(117)   /* 149 */
++#define RK3576_IRQ_UART2        RK3576_IRQ_SPI(118)   /* 150 ← 调试口 */
++#define RK3576_IRQ_UART3        RK3576_IRQ_SPI(119)   /* 151 */
++#define RK3576_IRQ_UART4        RK3576_IRQ_SPI(120)   /* 152 */
++
++#endif /* __ARCH_ARM64_INCLUDE_RK3576_IRQ_H */
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+new file mode 100644
+index 00000000..d5f8c8c2
+--- /dev/null
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -0,0 +1,27 @@
++#
++# For a description of the syntax of this configuration file,
++# see the file kconfig-language.txt in the NuttX tools repository.
++#
++
++if ARCH_CHIP_RK3576
++
++menu "Rockchip RK3576 Peripheral Selection"
++
++comment "RK3576 的调试串口不在此处配置。"
++comment "DW 8250 与 16550 兼容，直接使用通用驱动："
++comment "  Device Drivers -> Serial Driver Support -> 16550 UART Chip support"
++comment "并在 defconfig 中填 16550_UART0_BASE / CLOCK / IRQ / BAUD。"
++
++config RK3576_UART0_IS_CONSOLE
++	bool "UART0 作为调试控制台"
++	default y
++	---help---
++		标记 RK3576 的调试控制台走 UART0（0x2ad40000，GIC_SPI 76 -> IRQ 108）。
++		本选项只作记录用途，实际基址、时钟与中断号由通用 16550 驱动提供。
++
++		已由 KICKPI 官方 Armbian 源码的 U-Boot defconfig 确认：
++		CONFIG_DEBUG_UART_BASE=0x2ad40000，即 UART0。
++
++endmenu # Rockchip RK3576 Peripheral Selection
++
++endif # ARCH_CHIP_RK3576
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+new file mode 100644
+index 00000000..3cea2262
+--- /dev/null
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -0,0 +1,34 @@
++############################################################################
++# arch/arm64/src/rk3576/Make.defs
++#
++# SPDX-License-Identifier: Apache-2.0
++#
++# Licensed to the Apache Software Foundation (ASF) under one or more
++# contributor license agreements.  See the NOTICE file distributed with
++# this work for additional information regarding copyright ownership.  The
++# ASF licenses this file to you under the Apache License, Version 2.0 (the
++# "License"); you may not use this file except in compliance with the
++# License.  You may obtain a copy of the License at
++#
++#   http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++# License for the specific language governing permissions and limitations
++# under the License.
++#
++############################################################################
++
++include common/Make.defs
++
++# Rockchip RK3576 specific C source files
++#
++# 注意这里没有 rk3576_serial.c 之外的串口驱动：DW 8250 与 16550 兼容，
++# 驱动本体在 drivers/serial/uart_16550.c，本文件只提供两个转发函数。
++
++CHIP_CSRCS  = rk3576_boot.c rk3576_serial.c
++
++ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
++CHIP_ASRCS  = rk3576_lowputc.S
++endif
+diff --git a/arch/arm64/src/rk3576/chip.h b/arch/arm64/src/rk3576/chip.h
+new file mode 100644
+index 00000000..fcb79700
+--- /dev/null
++++ b/arch/arm64/src/rk3576/chip.h
+@@ -0,0 +1,44 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/chip.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_CHIP_H
++#define __ARCH_ARM64_SRC_RK3576_CHIP_H
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#ifndef __ASSEMBLY__
++#  include <nuttx/arch.h>
++#endif
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Macro Definitions
++ ****************************************************************************/
++
++#endif /* __ARCH_ARM64_SRC_RK3576_CHIP_H */
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h b/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+new file mode 100644
+index 00000000..1537411c
+--- /dev/null
++++ b/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+@@ -0,0 +1,115 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_MEMORYMAP_H
++#define __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_MEMORYMAP_H
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <arch/chip/chip.h>
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* ==========================================================================
++ * 外设基址。来源：Linux 主线 arch/arm64/boot/dts/rockchip/rk3576.dtsi
++ * 各节点的 reg 属性（许可证 GPL-2.0+ OR MIT，按 MIT 分支使用）。
++ *
++ * 全部落在 CONFIG_DEVICEIO_BASEADDR(0x20000000) + 192MB 的映射范围内。
++ * 新增外设地址时先确认这一点，否则 MMU 不建映射，访问时直接异常。
++ * ==========================================================================
++ */
++
++/* UART —— RK3576 共 12 路，M1 只需要调试串口一路。
++ *
++ * 全部为 snps,dw-apb-uart（DesignWare 8250，16550 兼容），
++ * dtsi 属性 reg-shift = <2>、reg-io-width = <4>，即寄存器按 4 字节步进、
++ * 32 位访问。对应 defconfig 的 CONFIG_16550_REGINCR=4 / REGWIDTH=32。
++ *
++ * 中断号：dtsi 给的是 GIC_SPI 号，NuttX 的 IRQ 号需 +32。
++ *
++ * ★ 调试口已确认为 UART0，依据 KICKPI 官方 Armbian 源码中的 U-Boot
++ * defconfig（kickpi-k7-rk3576_defconfig）：CONFIG_DEBUG_UART_BASE=0x2ad40000、
++ * CONFIG_DEBUG_UART_CLOCK=24000000、CONFIG_DEBUG_UART_SHIFT=2、
++ * CONFIG_BAUDRATE=1500000。
++ */
++
++#define RK3576_UART0_ADDR      0x2ad40000   /* SPI 76 -> IRQ 108  <- M1 调试口 */
++#define RK3576_UART1_ADDR      0x27310000
++#define RK3576_UART2_ADDR      0x2ad50000   /* SPI 78 -> IRQ 110 */
++#define RK3576_UART3_ADDR      0x2ad60000   /* SPI 79 -> IRQ 111 */
++#define RK3576_UART4_ADDR      0x2ad70000   /* SPI 80 -> IRQ 112 */
++#define RK3576_UART5_ADDR      0x2ad80000   /* SPI 81 -> IRQ 113 */
++#define RK3576_UART6_ADDR      0x2ad90000   /* SPI 82 -> IRQ 114 */
++#define RK3576_UART7_ADDR      0x2ada0000   /* SPI 83 -> IRQ 115 */
++#define RK3576_UART8_ADDR      0x2adb0000   /* SPI 84 -> IRQ 116 */
++#define RK3576_UART9_ADDR      0x2adc0000   /* SPI 85 -> IRQ 117 */
++#define RK3576_UART10_ADDR     0x2afc0000   /* SPI 86 -> IRQ 118 */
++#define RK3576_UART11_ADDR     0x2afd0000   /* SPI 87 -> IRQ 119 */
++
++#define RK3576_UART_DBG_ADDR   RK3576_UART0_ADDR
++#define RK3576_UART_DBG_IRQ    108
++
++/* CRU —— M1 用不到（调试串口的时钟由 U-Boot 配好）。
++ * RK3576 的 CRU 与 RK3399/RK3568 差异很大，是本平台最不能照抄的部分。
++ */
++
++#define RK3576_CRU_ADDR        0x27200000
++
++/* GRF —— 引脚复用 IOMUX 在 ioc_grf 里 */
++
++#define RK3576_SYS_GRF_ADDR    0x2600a000
++#define RK3576_IOC_GRF_ADDR    0x26040000
++#define RK3576_PMU0_GRF_ADDR   0x26024000
++#define RK3576_PMU1_GRF_ADDR   0x26026000
++
++/* GPIO —— 注意 GPIO0 与 GPIO1-4 不在同一段地址 */
++
++#define RK3576_GPIO0_ADDR      0x27320000
++#define RK3576_GPIO1_ADDR      0x2ae10000
++#define RK3576_GPIO2_ADDR      0x2ae20000
++#define RK3576_GPIO3_ADDR      0x2ae30000
++#define RK3576_GPIO4_ADDR      0x2ae40000
++
++/* I2C —— 同样分两段 */
++
++#define RK3576_I2C0_ADDR       0x27300000
++#define RK3576_I2C1_ADDR       0x2ac40000
++#define RK3576_I2C2_ADDR       0x2ac50000
++#define RK3576_I2C3_ADDR       0x2ac60000
++#define RK3576_I2C4_ADDR       0x2ac70000
++#define RK3576_I2C5_ADDR       0x2ac80000
++#define RK3576_I2C6_ADDR       0x2ac90000
++#define RK3576_I2C7_ADDR       0x2aca0000
++#define RK3576_I2C8_ADDR       0x2acb0000
++#define RK3576_I2C9_ADDR       0x2ae80000
++
++/* PMU / SRAM */
++
++#define RK3576_PMU_ADDR        0x27380000
++#define RK3576_SRAM_ADDR       0x3ff88000
++
++#endif /* __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_MEMORYMAP_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_boot.c b/arch/arm64/src/rk3576/rk3576_boot.c
+new file mode 100644
+index 00000000..559489f6
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_boot.c
+@@ -0,0 +1,144 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_boot.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include <stdint.h>
++#include <assert.h>
++#include <debug.h>
++
++#include <nuttx/cache.h>
++#ifdef CONFIG_LEGACY_PAGING
++#  include <nuttx/page.h>
++#endif
++
++#include <arch/chip/chip.h>
++
++#ifdef CONFIG_SMP
++#include "arm64_smp.h"
++#endif
++
++#include "arm64_arch.h"
++#include "arm64_internal.h"
++#include "arm64_mmu.h"
++#include "rk3576_boot.h"
++#include "rk3576_serial.h"
++
++/****************************************************************************
++ * Private Data
++ ****************************************************************************/
++
++/* MMU 映射表。
++ *
++ * DEVICE_REGION 必须覆盖本端口访问的全部外设寄存器（GIC、UART、CRU、
++ * GRF …）。漏掉一段的表现是访问时直接取指/数据异常，而不是报错，
++ * 所以填地址时要先把 DEVICEIO 的范围算准。
++ */
++
++static const struct arm_mmu_region g_mmu_regions[] =
++{
++  MMU_REGION_FLAT_ENTRY("DEVICE_REGION",
++                        CONFIG_DEVICEIO_BASEADDR, CONFIG_DEVICEIO_SIZE,
++                        MT_DEVICE_NGNRNE | MT_RW | MT_SECURE),
++
++  MMU_REGION_FLAT_ENTRY("DRAM0_S0",
++                        CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
++                        MT_NORMAL | MT_RW | MT_SECURE),
++};
++
++const struct arm_mmu_config g_mmu_config =
++{
++  .num_regions = nitems(g_mmu_regions),
++  .mmu_regions = g_mmu_regions,
++};
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: arm64_el_init
++ *
++ * Description:
++ *   The function called from arm64_head.S at very early stage for these
++ * platform, it's use to:
++ *   - Handling special hardware initialize routine which is need to
++ *     run at high ELs
++ *   - Initialize system software such as hypervisor or security firmware
++ *     which is need to run at high ELs
++ *
++ ****************************************************************************/
++
++void arm64_el_init(void)
++{
++  /* RK3576 的基础时钟由启动链路上游（TPL/SPL/U-Boot）配置完毕，
++   * M1 阶段这里不需要做任何事。
++   *
++   * 与 RK3399 端口保持一致（其 arm64_el_init 同样为空）。
++   * 后续若某个外设需要在极早期就改时钟，再在这里补 CRU 操作。
++   */
++}
++
++/****************************************************************************
++ * Name: arm64_chip_boot
++ *
++ * Description:
++ *   Complete boot operations started in arm64_head.S
++ *
++ ****************************************************************************/
++
++void arm64_chip_boot(void)
++{
++  /* MAP IO and DRAM, enable MMU. */
++
++  arm64_mmu_init(true);
++
++#if defined(CONFIG_ARM64_PSCI)
++  arm64_psci_init("smc");
++
++#endif
++
++  /* Perform board-specific device initialization. This would include
++   * configuration of board specific resources such as GPIOs, LEDs, etc.
++   */
++
++  rk3576_board_initialize();
++
++#ifdef USE_EARLYSERIALINIT
++  /* Perform early serial initialization if we are going to use the serial
++   * driver.
++   */
++
++  arm64_earlyserialinit();
++#endif
++}
++
++#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
++void arm64_netinitialize(void)
++{
++  /* TODO(M4): DW GMAC 驱动接入点 */
++}
++#endif
+diff --git a/arch/arm64/src/rk3576/rk3576_boot.h b/arch/arm64/src/rk3576/rk3576_boot.h
+new file mode 100644
+index 00000000..4e57adb4
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_boot.h
+@@ -0,0 +1,73 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_boot.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_BOOT_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_BOOT_H
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <nuttx/compiler.h>
++#include <sys/types.h>
++#include <stdint.h>
++#include <stdbool.h>
++#include <arch/chip/chip.h>
++#include "arm64_internal.h"
++#include "arm64_arch.h"
++
++/****************************************************************************
++ * Public Function Prototypes
++ ****************************************************************************/
++
++#ifndef __ASSEMBLY__
++
++#undef EXTERN
++#if defined(__cplusplus)
++#define EXTERN extern "C"
++extern "C"
++{
++#else
++#define EXTERN extern
++#endif
++
++/****************************************************************************
++ * Name: rk3576_board_initialize
++ *
++ * Description:
++ *   All rk3576 boards must provide the following entry point.  This entry
++ *   point is called in the initialization phase -- after
++ *   rk3576_memory_initialize and after all memory has been configured and
++ *   mapped but before any devices have been initialized.
++ *
++ ****************************************************************************/
++
++void rk3576_board_initialize(void);
++
++#undef EXTERN
++#if defined(__cplusplus)
++}
++#endif
++
++#endif /* __ASSEMBLY__ */
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_BOOT_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_lowputc.S b/arch/arm64/src/rk3576/rk3576_lowputc.S
+new file mode 100644
+index 00000000..bd66e65d
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_lowputc.S
+@@ -0,0 +1,91 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_lowputc.S
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include "arm64_macro.inc"
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++    .file    "rk3576_lowputc.S"
++
++/* RK3576 调试串口基址（来源：rk3576.dtsi serial@2ad40000，UART0）。
++ *
++ * 汇编阶段取不到 hardware/rk3576_memorymap.h 的 C 宏，只能写字面量。
++ * ★ 必须和 defconfig 的 CONFIG_16550_UART0_BASE 保持一致。
++ *
++ * ★ 这是全项目第一个会向外吐字符的地方。M1 调试时，如果这里都出不了
++ *   字符，说明问题在加载地址、异常向量或 MMU，而不在串口。
++ *
++ * ★ M1 阶段不需要配时钟、引脚复用和波特率 —— U-Boot 已经把这一路串口
++ *   初始化好了（它自己就在往这个口打印启动日志），这里只是往已经能用的
++ *   FIFO 里写字节。
++ *
++ * ★ 已由厂商资料确认（KICKPI 官方 Armbian 源码的 U-Boot defconfig
++ *   patch/u-boot/legacy/u-boot-radxa-rk35xx/defconfig/kickpi-k7-rk3576_defconfig）：
++ *     CONFIG_DEBUG_UART_BASE=0x2ad40000   -> UART0
++ *     CONFIG_DEBUG_UART_CLOCK=24000000    -> 24 MHz
++ *     CONFIG_DEBUG_UART_SHIFT=2           -> reg-shift=2, 即 REGINCR=4
++ *     CONFIG_BAUDRATE=1500000
++ */
++
++#define UART_DBG_BASE_ADDRESS 0x2ad40000    /* RK3576 UART0 */
++
++/****************************************************************************
++ * Assembly Macros
++ ****************************************************************************/
++
++/* Wait for the DW 8250 UART to be ready to transmit.
++ * 寄存器按 4 字节步进：LSR 是第 5 个寄存器，偏移 5 * 4 = 0x14。
++ */
++
++.macro early_uart_ready xb, wt
++1:
++    ldrh  \wt, [\xb, #0x14]      /* UART_LSR (Line Status Register) */
++    tst   \wt, #0x20             /* Check THRE (TX Holding Register Empty) */
++    b.eq  1b                     /* Wait for the UART to be ready (THRE=1) */
++.endm
++
++/* Transmit a character. THR 是第 0 个寄存器，偏移 0。 */
++
++.macro early_uart_transmit xb, wt
++    strb  \wt, [\xb]             /* UART_THR (Transmit Holding Register) */
++.endm
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/* Print a character on the UART - this function is called by C */
++
++GTEXT(arm64_lowputc)
++SECTION_FUNC(text, arm64_lowputc)
++    ldr   x15, =UART_DBG_BASE_ADDRESS
++    early_uart_ready x15, w2
++    early_uart_transmit x15, w0
++    ret
+diff --git a/arch/arm64/src/rk3576/rk3576_serial.c b/arch/arm64/src/rk3576/rk3576_serial.c
+new file mode 100644
+index 00000000..5343cf39
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_serial.c
+@@ -0,0 +1,77 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_serial.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include <sys/types.h>
++#include <stdint.h>
++#include <stdbool.h>
++#include <debug.h>
++
++#include <nuttx/serial/uart_16550.h>
++
++#include "arm64_internal.h"
++#include "rk3576_serial.h"
++
++/* RK3576 的 DW 8250 与 16550 兼容，这里只做转发，
++ * 驱动本体是 drivers/serial/uart_16550.c。
++ * 参照 arch/arm64/src/vdk/vdk_serial.c 的做法。
++ */
++
++#ifdef USE_SERIALDRIVER
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: arm64_serialinit
++ *
++ * Description:
++ *   Register serial console and serial ports.
++ *
++ ****************************************************************************/
++
++void arm64_serialinit(void)
++{
++  u16550_serialinit();
++}
++
++/****************************************************************************
++ * Name: arm64_earlyserialinit
++ *
++ * Description:
++ *   Performs the low level UART initialization early so that the serial
++ *   console will be available during boot up.
++ *
++ ****************************************************************************/
++
++void arm64_earlyserialinit(void)
++{
++  u16550_earlyserialinit();
++}
++
++#endif /* USE_SERIALDRIVER */
+diff --git a/arch/arm64/src/rk3576/rk3576_serial.h b/arch/arm64/src/rk3576/rk3576_serial.h
+new file mode 100644
+index 00000000..6ae4d210
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_serial.h
+@@ -0,0 +1,55 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_serial.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_SERIAL_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_SERIAL_H
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include "hardware/rk3576_memorymap.h"
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* RK3576 的串口控制器是 Synopsys DW 8250，寄存器模型与 16550 兼容，
++ * 因此本端口不自带串口驱动，直接复用 NuttX 通用的
++ * drivers/serial/uart_16550.c，参数全部经 defconfig 配置：
++ *
++ *   CONFIG_16550_UART0_BASE    控制器基址
++ *   CONFIG_16550_UART0_CLOCK   串口时钟源频率
++ *   CONFIG_16550_UART0_IRQ     GIC 中断号（dtsi 的 SPI 号 + 32）
++ *   CONFIG_16550_UART0_BAUD    波特率（RK 平台调试口惯例 1500000）
++ *   CONFIG_16550_REGINCR=4     DW UART 寄存器按 4 字节步进
++ *   CONFIG_16550_ADDRWIDTH=64  arm64
++ *
++ * 先例：boards/risc-v/sg2000/milkv_duos（同为 DW UART）
++ *       boards/arm64/vdk/vdk-armv8r（同为 arm64 + 16550）
++ *
++ * 若后续发现 RK3576 有通用驱动覆盖不了的特性（如 DLF 小数分频），
++ * 再参照 arch/arm64/src/rk3399/rk3399_serial.c 写专用驱动。
++ */
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_SERIAL_H */
+-- 
+2.43.0
+
