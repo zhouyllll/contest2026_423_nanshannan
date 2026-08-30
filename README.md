@@ -1,148 +1,95 @@
-# contest2026_423_nanshannan
+# openvela × Rockchip RK3576（KICKPI-K7）BSP 适配
 
-👋 欢迎参加 **2026 首届 openvela AI 硬件开发者大赛**！
+**队伍**：`contest2026_423_nanshannan`　**赛道**：新硬件适配
 
-这是组委会为你的队伍创建的**专属参赛仓库**（本仓为样例/模板，队伍编号 `423`；你看到的将是你自己的 `contest2026_<编号>_<队伍名>`）。比赛期间，你的全部参赛代码、打包产物与 AI Coding 日志都提交到这里。
+在 KICKPI-K7（Rockchip RK3576）上完成 openvela 从 0 到 1 的首次适配 ——
+启动引导、GICv2 中断、串口控制台、基础外设驱动，以及端侧 AI 能力 Demo。
 
-> 本仓既是「代码仓」，又内置了一键拉取整套 openvela 工程的 `repo` 清单（manifest）。你只需跟它打交道，**自始至终只动一个文件夹**。
+## 作品简介
 
----
+openvela 官方已在大赛分支上把 KICKPI-K7 挂为**待适配目标**：
+`vendor_rockchip` 的 `boards/rk3576/kickpi-k7/` 目录下只有一份适配指引 README，
+明文标注「尚未适配、本目录不包含任何板级支持代码、欢迎提交可用的板级适配 PR」。
+本作品即针对该目标完成 openvela 在 RK3576 平台上的首次适配。
 
-## 一、先读这些官方文档
+| 核查项 | 结论 |
+|---|---|
+| openvela `arch/arm64/src/` | 有 a64 / rk3399 / imx8 / imx9 / vdk / zynq-mpsoc，**无 rk3576** |
+| 上游 Apache NuttX | 有 rk3399、rk3588，**无 rk3576** |
+| `vendor_rockchip/boards/rk3576/kickpi-k7/` | **仅有 README，无任何板级代码** |
 
-**通用（所有赛道必读）：**
+## 当前状态
 
-| 文档                                                                                                                                     | 用途                                           |
-| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| [《大赛总览》](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/contest_overview.md)                        | 赛道、流程、评分、资源，建议先通读             |
-| [《参赛代码提交指南》](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/code_submission_guide.md)           | 仓库获取、提交流程、时间与权限（**以此为准**） |
-| [《AI Coding 日志归集与提交手册》](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/ai_coding_log_guide.md) | 如何导出 AI 对话日志并提交到 `logs/`           |
+**SoC 层与板级层已建立，编译通过，等待开发板到位验证。**
 
-**按你的赛道选读（三选一）：**
+```
+nuttx.bin        311296 字节
+Entry point      0x42000000
+Image 魔数       ARMd（U-Boot booti 可直接加载）
+中断控制器       arm64_gicv2.o（GICv3 未编入）
+地址一致性       scripts/check-addr.sh 六组检查全过
+```
 
-| 赛道                  | 教程导航                                                                                                                                                 |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 快应用 / 手表应用创新 | [快应用教程导航](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/quickapp/quickapp_guide_index.md)                         |
-| AI 硬件产品创新       | [AI 硬件赛道教程导航](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/ai_hardware/ai_hardware_guide_index.md)              |
-| 新硬件适配            | [新硬件适配赛道教程导航](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/hardware_porting/hardware_porting_guide_index.md) |
+已完成：启动入口 / MMU / 异常向量、GICv2 接入、Generic Timer、PSCI、
+早期打印与 16550 串口控制台配置、SoC 参数勘察、xTS 必测项清单、
+地址一致性自动校验、Skill 沉淀。
 
----
+唯一阻塞：**KICKPI-K7 的调试串口是哪一路 UART**，需原理图确认（见 `RECON.md` B1）。
 
-## 二、第一步：拉取完整工程
+## ★ RK3576 的三个坑（都属于"填错不报错、上板无输出"）
 
-用组委会提供的命令一键拉取「openvela 全量源码 + 你的专属仓」：
+| | RK3399 / RK3568 / RK3588 | **RK3576** |
+|---|---|---|
+| 中断控制器 | GIC-500 / GIC-600，**GICv3** | GIC-400，**GICv2** |
+| DRAM 物理基址 | RK3568 从 `0x0` 起 | **`0x40000000`** |
+| 外设地址段 | `0xfxxxxxxx` 高位 | **`0x22000000`–`0x2b060000` 低位** |
+
+依据：Linux 主线 `rk3576.dtsi` 与 U-Boot 主线 `include/configs/rk3576_common.h`
+（`CFG_SYS_SDRAM_BASE 0x40000000`、`kernel_addr_r=0x42000000`），均为 Rockchip 官方提交。
+
+## 运行方式
 
 ```bash
+# 1. 拉取工程
 repo init -u https://github.com/open-vela/contest2026_423_nanshannan \
   -b dev-ai-contest-2026 -m contest2026_423_nanshannan.xml
 repo sync -c -j8
+
+# 2. 编译
+cd contest2026_423_nanshannan && source scripts/env.sh
+cd ../nuttx
+./tools/configure.sh -e ../vendor/openvela/boards/contest2026_423_board/configs/nsh
+make -j$(nproc)
+
+# 3. 校验地址一致性
+../contest2026_423_nanshannan/scripts/check-addr.sh
 ```
 
-同步后，你的整个仓库位于工作区的 `contest2026_423_nanshannan/`，openvela 全量源码在外层（`nuttx/`、`apps/`、`packages/`、`vendor/` 等）。
+板级代码在本仓 `board/kickpi-k7/`，由 manifest 的 `<linkfile>` 映射到
+`vendor/openvela/boards/contest2026_423_board`，**生产仓库零改动**。
 
----
+烧录与上板步骤见 [`board/kickpi-k7/README_zh-cn.md`](board/kickpi-k7/README_zh-cn.md)。
 
-## 三、第二步：在哪里写代码
+## 目录说明
 
-**只在自己的仓目录 `contest2026_423_nanshannan/` 里开发。** 不同作品形态放在对应子目录，manifest 会通过 `<linkfile>` 把它们**软链**到 openvela 编译树该在的位置——你不用手动 copy：
+| 路径 | 内容 |
+|---|---|
+| `board/kickpi-k7/` | ★ **板级适配代码**（结构与最终 PR 目标 `vendor_rockchip/boards/rk3576/kickpi-k7/` 一一对应） |
+| `bsp/nuttx-rk3576.patch` | ★ **SoC 层补丁**（`arch/arm64/**/rk3576` + Kconfig 注册），按规则不入本仓本体 |
+| `bsp/vendor-rockchip-toplevel/` | 获奖后 PR 到 `vendor_rockchip` 所需的顶层 Kconfig / Make.defs / Makefile |
+| `docs/rk3576-soc-recon.md` | SoC 硬件参数勘察（GIC / CPU / 定时器 / 12 路 UART 全表） |
+| `docs/xts-checklist.md` | xTS 必测项清单 = 开发路线图与验收标准 |
+| `docs/refs/` | 官方文档离线副本 |
+| `notes/DEBUG-CASES.md` | 踩坑记录（现象—排查—根因—修复—验证） |
+| `scripts/` | `env.sh` / `check-addr.sh` / `sync-bsp.sh` / `logs.sh` / `run-qemu.sh` |
+| `.claude/skills/soc-hw-recon` | ★ Skill 沉淀：新 SoC 硬件参数勘察方法论 |
+| `logs/` | AI Coding 日志 |
+| `archive/` | 前身项目（Amlogic A311Y2）产物，不参与构建 |
+| `PLAN.md` / `RECON.md` / `VelaPort-K7-项目描述.md` | 方案、待核实问题、★ 报名正文 |
 
-| 作品形态 | 你的代码放这里             | 系统自动映射到                                 |
-| -------- | -------------------------- | ---------------------------------------------- |
-| 应用     | `app/hello_app/`           | `packages/demos/contest2026_423_hello_app`     |
-| 快应用   | `quickapp/hello_quickapp/` | `packages/apps/contest2026_423_hello_quickapp` |
-| 板级适配 | `board/contest_board/`     | `vendor/openvela/boards/contest2026_423_board` |
+## 提交路径
 
-> 用不到的形态目录可以删掉；新增作品时按同样规则加子目录，并在 `contest2026_423_nanshannan.xml` 里补一条 `<linkfile>` 映射即可。**生产仓库（packages/nuttx/vendor 等）零改动。**
-
-建议仓库目录约定（便于评委定位）：
-
-```text
-app/ | quickapp/ | board/   # 你的作品代码
-logs/                       # AI Coding 日志（主动导出后提交，格式见 logs/README.md）
-README.md                   # 作品说明（提交前请改成你自己的，见第六节）
-```
-
-> 仓内附带了一个 `.gitignore.example`，给出了**编译产物**等不需要进仓的文件示例。如需启用，`cp .gitignore.example .gitignore` 后按需增删即可。**注意 `logs/` 下最终导出的 AI Coding 日志必须提交，不要忽略。**
->
-> `logs/` 的目录结构与提交格式见 [logs/README.md](logs/README.md)。
-
----
-
-## 四、第三步：编译与运行
-
-编译/运行步骤随作品形态不同而不同，请参考你所在赛道的教程导航：
-
-- 快应用 / 手表应用：[快应用教程导航](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/quickapp/quickapp_guide_index.md)（含模拟器与开发板部署）。
-- AI 硬件产品创新：[AI 硬件赛道教程导航](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/ai_hardware/ai_hardware_guide_index.md)（环境搭建、编译烧录、Skill 开发）。
-- 新硬件适配：[新硬件适配赛道教程导航](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/hardware_porting/hardware_porting_guide_index.md)（BSP 移植、最小 NSH 基线）。
-
-子目录已通过 manifest 中的 `<linkfile>` 软链进 openvela 编译树，因此构建在 openvela 工作区**根目录**（即你这个仓的上一级）进行。openvela 使用 `build.sh` 作为统一入口，接收一个 **board config 路径**作为参数：
-
-```bash
-# 进入 openvela 工作区根目录（你的仓的上一级）
-cd ..
-
-# 通用语法：第一个参数是 board config 路径，第二个参数可以是 menuconfig / distclean 等
-./build.sh <board-config-path> [menuconfig|distclean] [-j8]
-```
-
-> 具体的 board config 路径、目标产物、模拟器/真机部署方式请以你所在赛道的教程导航为准。本仓 `app/` `quickapp/` `board/` 三个示例骨架对应的 Kconfig 选项可通过 `menuconfig` 启用。
-
----
-
-## 五、第四步：提交作品
-
-1. **fork** 你的专属仓 → 开发 → `git commit` 并推送 → 向专属仓发起 **Pull Request**，可**自行 review 并合入**（无需等组委会）。
-2. **AI Coding 日志**：与 AI 工具的对话会自动记录到本机 staging（不会自动上传），需你**主动导出/打包**选定会话到仓内 `logs/` 目录后一并提交。详见[《AI Coding 日志归集与提交手册》](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/ai_coding_log_guide.md)。
-3. 若需改动 **nuttx 等公共仓库**，不在本仓改，而是 fork 对应公共仓、以 PR 提交到 `dev-ai-contest-2026` 分支，由组委会 review 后合入。
-
-> ⏰ **提交作品截止：9 月 20 日**。截止后统一收回 push 权限，仍可查看 / clone。
->
-> 获奖后再按要求将作品 PR 至 openvela 上游对应仓库（走标准 PR + CI 流程）。
-
-### 关于 PR 与 CLA
-
-- 本仓所有改动通过 **Pull Request** 合入（分支保护强制，可自行合入自己的 PR）。
-- 首次贡献需在[**官网签署 CLA**](https://openvela.com/#/community/cla)；PR 上会自动跑 `cla/signature` 检查，在官网签署成功后，在 PR 评论 `/check-cla` 复检即可通过。
-
----
-
-## 六、提交前：把本 README 改成你的作品说明
-
-本文件目前是组委会给的**使用说明书**。**作品提交前，请把它替换成你自己作品的说明**，方便评委快速了解你做了什么、怎么跑起来。建议至少包含以下内容：
-
-```markdown
-# <你的作品名>
-
-## 一、作品简介
-<一句话/一段话说明这个作品是什么、解决什么问题、亮点在哪>
-
-## 二、选题方向
-<快应用 / 手表应用创新 ｜ AI 硬件产品创新 ｜ 新硬件适配 ｜ 自定方向，并简述理由>
-
-## 三、目录结构
-<列出你这个仓里各目录/文件的作用，例如：>
-- `app/xxx/`        — <说明>
-- `board/xxx/`      — <说明>
-- `quickapp/xxx/`   — <说明>
-- `logs/`           — AI Coding 日志
-- `docs/` 或其他    — <说明>
-
-## 四、运行方式
-<拉取工程后，如何编译、烧录/部署、运行的完整步骤；最好能让评委照着一步步复现>
-
-## 五、AI Coding 使用说明
-<说明本作品如何借助 AI 辅助开发：
-- 在需求拆解 / 方案设计 / 编码 / 调试 / 文档等环节如何与 AI 协作；
-- AI 对开发效率或质量带来的实际帮助。
-完整对话日志见 logs/ 目录>
-```
-
-> 提示：将会根据「作品本身 + 你的 README 说明 + `logs/` 里的 AI Coding 日志」来理解和评估你的作品，README 写清楚很重要。
-
----
-
-## 附：仓库命名规范
-
-`contest2026_<编号>_<队伍名>` — 编号三位零填充；队名 slug（全小写、英文/拼音、连字符）。例：`contest2026_423_nanshannan`。
-（仓库由组委会统一创建，**每队仅一个仓**，无需自行命名。）
+| 代码 | 比赛期间 | 获奖后 |
+|---|---|---|
+| 板级 `board/kickpi-k7/` | fork 本仓 → PR → 自行 review 合入 | PR 到 `vendor_rockchip` 的 `dev-ai-contest-2026` |
+| SoC 层 `bsp/nuttx-rk3576.patch` | fork `open-vela/nuttx` → PR 到 `dev-ai-contest-2026`，组委会 review | — |

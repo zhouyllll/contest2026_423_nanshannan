@@ -1,0 +1,1465 @@
+From 0eafa57cedd575fc0296447d3f0324eee616bfb5 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Fri, 21 Aug 2026 11:17:17 +0800
+Subject: [PATCH] arm64/a311y2: add Amlogic A311Y2 SoC port with Meson UART
+ driver
+
+First openvela port for any Amlogic SoC. Neither openvela nor upstream
+Apache NuttX has an Amlogic platform or a Meson UART driver, so this is
+a from-scratch port rather than a redirect of an existing one.
+
+- arch/arm64/include/a311y2/{chip.h,irq.h}  GIC/memory/load-address constants
+- arch/arm64/src/a311y2/                    MMU map, boot entry, early print
+- arch/arm64/src/a311y2/a311y2_serial.c     full Meson UART driver
+
+The UART controller is an Amlogic in-house IP (compatible
+"amlogic,meson-s4-uart"): 6 registers in a 0x18 window, neither 16550 nor
+PL011 compatible, so no existing NuttX driver applies. Register semantics
+are documented in docs/meson-uart-spec.md, derived by reading the hardware
+behaviour described by mainline drivers/tty/serial/meson_uart.c (GPL-2.0)
+and reimplemented independently; no source was copied.
+
+Two details that are easy to get wrong are called out in the code:
+- the 24MHz baud divisor uses xtal_div = 2 (not 3) and must set
+  BAUD_XTAL_DIV2; getting this wrong puts the baud rate off by 50%
+- the interrupt is edge triggered, so the ISR loops until RX_EMPTY is set;
+  leaving early loses edges and the receive path stalls
+
+Addresses come from mainline amlogic-s6.dtsi (GPL-2.0+ OR MIT, used under
+MIT), identified as the correct reference by matching the vendor manual's
+quad Cortex-A510 against every mainline Amlogic dtsi. All values still need
+verification against the real device tree once hardware is available.
+
+Cortex-A510 is ARMv9-A and has no openvela toolchain option yet, so
+ARCH_CORTEX_A55 is selected for now; adding proper A510 support is a
+candidate upstream contribution.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01YRMXM15DswJZFb8eiqvhGg
+---
+ arch/arm64/Kconfig                            |  21 +
+ arch/arm64/include/a311y2/chip.h              | 115 ++++
+ arch/arm64/include/a311y2/irq.h               |  51 ++
+ arch/arm64/src/a311y2/Kconfig                 |  26 +
+ arch/arm64/src/a311y2/Make.defs               |  34 ++
+ arch/arm64/src/a311y2/a311y2_boot.c           | 122 ++++
+ arch/arm64/src/a311y2/a311y2_boot.h           |  56 ++
+ arch/arm64/src/a311y2/a311y2_lowputc.S        |  86 +++
+ arch/arm64/src/a311y2/a311y2_serial.c         | 539 ++++++++++++++++++
+ arch/arm64/src/a311y2/a311y2_serial.h         |  33 ++
+ arch/arm64/src/a311y2/chip.h                  |  30 +
+ .../src/a311y2/hardware/a311y2_memorymap.h    |  56 ++
+ arch/arm64/src/a311y2/hardware/a311y2_uart.h  | 130 +++++
+ 13 files changed, 1299 insertions(+)
+ create mode 100644 arch/arm64/include/a311y2/chip.h
+ create mode 100644 arch/arm64/include/a311y2/irq.h
+ create mode 100644 arch/arm64/src/a311y2/Kconfig
+ create mode 100644 arch/arm64/src/a311y2/Make.defs
+ create mode 100644 arch/arm64/src/a311y2/a311y2_boot.c
+ create mode 100644 arch/arm64/src/a311y2/a311y2_boot.h
+ create mode 100644 arch/arm64/src/a311y2/a311y2_lowputc.S
+ create mode 100644 arch/arm64/src/a311y2/a311y2_serial.c
+ create mode 100644 arch/arm64/src/a311y2/a311y2_serial.h
+ create mode 100644 arch/arm64/src/a311y2/chip.h
+ create mode 100644 arch/arm64/src/a311y2/hardware/a311y2_memorymap.h
+ create mode 100644 arch/arm64/src/a311y2/hardware/a311y2_uart.h
+
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 9f0561ae..15e8e365 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -53,6 +53,22 @@ config ARCH_CHIP_RK3399
+ 	---help---
+ 		Rockchip RK3399 SoC
+ 
++config ARCH_CHIP_A311Y2
++	bool "Amlogic A311Y2"
++	select ARCH_CORTEX_A55
++	select ARCH_HAVE_ADDRENV
++	select ARCH_HAVE_RESET
++	select ARCH_NEED_ADDRENV_MAPPING
++	select ARM64_HAVE_PSCI
++	select ARCH_HAVE_IRQPRIO
++	---help---
++		Amlogic A311Y2 SoC (quad Cortex-A510, 6nm edge AI SoC).
++
++		注：A311Y2 的核心为 Cortex-A510（ARMv9-A），而 openvela 目前仅提供
++		A53/A55/A57/A72 的工具链选项。ARMv9-A 向下兼容 ARMv8-A，此处选用
++		ARCH_CORTEX_A55（A510 的前代同定位核心）作为编译选项。
++		后续可评估为 arch/arm64 补充 Cortex-A510 支持并向上游贡献。
++
+ config ARCH_CHIP_QEMU_ARM64
+ 	bool "QEMU virt platform (ARMv8a)"
+ 	select ARCH_HAVE_ADDRENV
+@@ -347,6 +363,7 @@ config ARCH_CHIP
+ 	string
+ 	default "a64"       if ARCH_CHIP_A64
+ 	default "rk3399"    if ARCH_CHIP_RK3399
++	default "a311y2"    if ARCH_CHIP_A311Y2
+ 	default "zynq-mpsoc" if ARCH_CHIP_ZYNQ_MPSOC
+ 	default "qemu"      if ARCH_CHIP_QEMU_ARM64
+ 	default "goldfish"  if ARCH_CHIP_GOLDFISH_ARM64
+@@ -513,6 +530,10 @@ if ARCH_CHIP_RK3399
+ source "arch/arm64/src/rk3399/Kconfig"
+ endif
+ 
++if ARCH_CHIP_A311Y2
++source "arch/arm64/src/a311y2/Kconfig"
++endif
++
+ if ARCH_CHIP_QEMU_ARM64
+ source "arch/arm64/src/qemu/Kconfig"
+ endif
+diff --git a/arch/arm64/include/a311y2/chip.h b/arch/arm64/include/a311y2/chip.h
+new file mode 100644
+index 00000000..da1027bb
+--- /dev/null
++++ b/arch/arm64/include/a311y2/chip.h
+@@ -0,0 +1,115 @@
++/****************************************************************************
++ * arch/arm64/include/a311y2/chip.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_INCLUDE_A311Y2_CHIP_H
++#define __ARCH_ARM64_INCLUDE_A311Y2_CHIP_H
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* ==========================================================================
++ * Amlogic A311Y2 (LogicPi A1) platform constants.
++ *
++ * 数据来源：Linux 主线 arch/arm64/boot/dts/amlogic/amlogic-s6.dtsi
++ *          （许可证 GPL-2.0+ OR MIT，按 MIT 分支使用，与 Apache-2.0 兼容）
++ *
++ * 参考平台的确定：厂商手册确认 LogicPi A1 为四核 Cortex-A510，遍历主线全部
++ * Amlogic dtsi 后，唯一匹配的是 amlogic-s6.dtsi（S905X5 家族）。
++ * 交叉验证：其 GICR 长度 0x80000 / 0x20000 = 4 核，与四核 A510 自洽。
++ *
++ * ⚠️ S905X5(S6) 与 A311Y2 是不同产品名，属强旁证而非证据。
++ * 上板后须按 RECON.md A5 导出真实设备树逐项复核。
++ * ==========================================================================
++ */
++
++/* Number of bytes in x kibibytes/mebibytes/gibibytes */
++
++#define KB(x)           ((x) << 10)
++#define MB(x)           (KB(x) << 10)
++#define GB(x)           (MB(UINT64_C(x)) << 10)
++
++/* Generic Interrupt Controller v3: Distributor and Redistributor
++ * dtsi: interrupt-controller@ff200000, reg = <0xff200000 0x10000>,
++ *                                            <0xff240000 0x80000>
++ */
++
++#define CONFIG_GICD_BASE          0xff200000
++#define CONFIG_GICR_BASE          0xff240000
++#define CONFIG_GICR_OFFSET        0x20000
++
++/* Memory map: RAM and Device I/O
++ *
++ * DDR 物理起始为 0，但 0 到加载地址之间是 ATF/BL31 的保留区
++ * （dtsi 中 secmon_reserved 为 27MiB @ 0x05000000），不应映射。
++ * 这里从镜像加载地址开始映射，与 openvela 其他 arm64 端口的做法一致。
++ *
++ * TODO(M1)：512MB 为保守取值。LogicPi A1 实配 8GB LPDDR5，
++ * 待实机确认可用范围后放大。偏小只是用不满内存，不影响启动。
++ */
++
++#define CONFIG_RAMBANK1_ADDR      0x08000000
++#define CONFIG_RAMBANK1_SIZE      MB(512)
++
++/* Device I/O：覆盖 apb 总线(0xfe000000 + 0x480000) 与 GIC(0xff2xxxxx)。
++ * 取 0xfe000000 起 32MB，上界 0x100000000，两者均落在范围内。
++ */
++
++#define CONFIG_DEVICEIO_BASEADDR  0xfe000000
++#define CONFIG_DEVICEIO_SIZE      MB(32)
++
++/* U-Boot loads the image at this address.
++ *
++ * TODO(M1)：占位值，必须以实机 U-Boot 的 kernel_addr_r 为准
++ * （上板 printenv 可查）。Amlogic 平台常见值与 Rockchip 不同，不可沿用前例。
++ *
++ * ★ 本值必须与三处保持一致，改一处就要改三处：
++ *   1. 这里的 CONFIG_LOAD_BASE
++ *   2. 板级 configs/nsh/defconfig 的 CONFIG_RAM_START
++ *   3. 板级 scripts/dramboot.ld 的起始地址
++ * 用 scripts/check-addr.sh 校验。
++ */
++
++#define CONFIG_LOAD_BASE          0x08080000
++
++#define MPID_TO_CLUSTER_ID(mpid)  ((mpid) & ~0xff)
++
++/****************************************************************************
++ * Assembly Macros
++ ****************************************************************************/
++
++#ifdef __ASSEMBLY__
++
++.macro  get_cpu_id xreg0
++  mrs    \xreg0, mpidr_el1
++  ubfx   \xreg0, \xreg0, #0, #8
++.endm
++
++#endif /* __ASSEMBLY__ */
++
++#endif /* __ARCH_ARM64_INCLUDE_A311Y2_CHIP_H */
+diff --git a/arch/arm64/include/a311y2/irq.h b/arch/arm64/include/a311y2/irq.h
+new file mode 100644
+index 00000000..5aed9253
+--- /dev/null
++++ b/arch/arm64/include/a311y2/irq.h
+@@ -0,0 +1,51 @@
++/****************************************************************************
++ * arch/arm64/include/a311y2/irq.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* This file should never be included directly but, rather,
++ * only indirectly through nuttx/irq.h
++ */
++
++#ifndef __ARCH_ARM64_INCLUDE_A311Y2_IRQ_H
++#define __ARCH_ARM64_INCLUDE_A311Y2_IRQ_H
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* GICv3 中断号布局（与 SoC 无关的固定部分）：
++ *   0  - 15   SGI  软件生成中断
++ *   16 - 31   PPI  私有外设中断（含 Generic Timer）
++ *   32 - ...  SPI  共享外设中断  ← 中断号 = dtsi 里的 SPI 号 + 32
++ *
++ * NR_IRQS 取 512：dtsi 中出现的最大 SPI 号约 250 余，加 32 后仍有充足余量。
++ * 该值偏大只多占一点内存，偏小会让对应外设中断静默挂不上且不报错。
++ */
++
++#define NR_IRQS                 512
++
++#define A311Y2_IRQ_SPI(n)       ((n) + 32)
++
++/* UART（来源：amlogic-s6.dtsi，uart_b: serial@7a000）*/
++
++#define A311Y2_IRQ_UART_B       A311Y2_IRQ_SPI(169)   /* 201，调试控制台 */
++
++#endif /* __ARCH_ARM64_INCLUDE_A311Y2_IRQ_H */
+diff --git a/arch/arm64/src/a311y2/Kconfig b/arch/arm64/src/a311y2/Kconfig
+new file mode 100644
+index 00000000..a869970c
+--- /dev/null
++++ b/arch/arm64/src/a311y2/Kconfig
+@@ -0,0 +1,26 @@
++#
++# For a description of the syntax of this configuration file,
++# see the file kconfig-language.txt in the NuttX tools repository.
++#
++
++if ARCH_CHIP_A311Y2
++
++menu "Amlogic A311Y2 Peripheral Selection"
++
++config A311Y2_UART_B
++	bool "UART B (debug console)"
++	default y
++	select UART0_SERIALDRIVER
++	---help---
++		Amlogic Meson UART (compatible: amlogic,meson-s4-uart)。
++		参考设计中 uart_b 为 serial0 别名，即调试控制台。
++
++		该控制器为 Amlogic 自有 IP，与 16550 / PL011 均不兼容，
++		驱动为本项目实现，寄存器规格见 docs/meson-uart-spec.md。
++
++		TODO(M1)：LogicPi A1 实际引出的是否为 uart_b，
++		需原理图或实机确认。
++
++endmenu # Amlogic A311Y2 Peripheral Selection
++
++endif # ARCH_CHIP_A311Y2
+diff --git a/arch/arm64/src/a311y2/Make.defs b/arch/arm64/src/a311y2/Make.defs
+new file mode 100644
+index 00000000..5fa94915
+--- /dev/null
++++ b/arch/arm64/src/a311y2/Make.defs
+@@ -0,0 +1,34 @@
++############################################################################
++# arch/arm64/src/a311y2/Make.defs
++#
++# SPDX-License-Identifier: Apache-2.0
++#
++# Licensed to the Apache Software Foundation (ASF) under one or more
++# contributor license agreements.  See the NOTICE file distributed with
++# this work for additional information regarding copyright ownership.  The
++# ASF licenses this file to you under the Apache License, Version 2.0 (the
++# "License"); you may not use this file except in compliance with the
++# License.  You may obtain a copy of the License at
++#
++#   http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++# License for the specific language governing permissions and limitations
++# under the License.
++#
++############################################################################
++
++include common/Make.defs
++
++# Amlogic A311Y2 specific C source files
++#
++# a311y2_serial.c 是完整的 Meson UART 驱动（非转发层）：该控制器为
++# Amlogic 自有 IP，openvela 与上游 NuttX 均无可复用的通用驱动。
++
++CHIP_CSRCS  = a311y2_boot.c a311y2_serial.c
++
++ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
++CHIP_ASRCS  = a311y2_lowputc.S
++endif
+diff --git a/arch/arm64/src/a311y2/a311y2_boot.c b/arch/arm64/src/a311y2/a311y2_boot.c
+new file mode 100644
+index 00000000..f6947e81
+--- /dev/null
++++ b/arch/arm64/src/a311y2/a311y2_boot.c
+@@ -0,0 +1,122 @@
++/****************************************************************************
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include <stdint.h>
++#include <assert.h>
++#include <debug.h>
++
++#include <nuttx/cache.h>
++#ifdef CONFIG_LEGACY_PAGING
++#  include <nuttx/page.h>
++#endif
++
++#include <arch/chip/chip.h>
++
++#ifdef CONFIG_SMP
++#include "arm64_smp.h"
++#endif
++
++#include "arm64_arch.h"
++#include "arm64_internal.h"
++#include "arm64_mmu.h"
++#include "a311y2_boot.h"
++
++/****************************************************************************
++ * Private Data
++ ****************************************************************************/
++
++/* MMU 映射表。
++ *
++ * DEVICE_REGION 需覆盖本端口访问的全部外设寄存器（GIC 0xff2xxxxx、
++ * APB 总线 0xfe000000 上的 UART 等）。漏掉一段的表现是访问时直接异常，
++ * 而不是报错。
++ */
++
++static const struct arm_mmu_region g_mmu_regions[] =
++{
++  MMU_REGION_FLAT_ENTRY("DEVICE_REGION",
++                        CONFIG_DEVICEIO_BASEADDR, CONFIG_DEVICEIO_SIZE,
++                        MT_DEVICE_NGNRNE | MT_RW | MT_SECURE),
++
++  MMU_REGION_FLAT_ENTRY("DRAM0_S0",
++                        CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
++                        MT_NORMAL | MT_RW | MT_SECURE),
++};
++
++const struct arm_mmu_config g_mmu_config =
++{
++  .num_regions = nitems(g_mmu_regions),
++  .mmu_regions = g_mmu_regions,
++};
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: arm64_el_init
++ *
++ * Description:
++ *   由 arm64_head.S 在极早期调用，用于处理必须在高异常等级执行的初始化。
++ *
++ ****************************************************************************/
++
++void arm64_el_init(void)
++{
++  /* A311Y2 的基础时钟由启动链路上游（BL2 / ATF / U-Boot）配置完毕，
++   * M1 阶段这里无需动作。
++   */
++}
++
++/****************************************************************************
++ * Name: arm64_chip_boot
++ *
++ * Description:
++ *   完成 arm64_head.S 之后的启动动作。
++ *
++ ****************************************************************************/
++
++void arm64_chip_boot(void)
++{
++  /* 建立 IO 与 DRAM 映射，使能 MMU */
++
++  arm64_mmu_init(true);
++
++#if defined(CONFIG_ARM64_PSCI)
++  arm64_psci_init("smc");
++#endif
++
++  /* 板级设备初始化 */
++
++  a311y2_board_initialize();
++
++#ifdef USE_EARLYSERIALINIT
++  arm64_earlyserialinit();
++#endif
++}
++
++#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
++void arm64_netinitialize(void)
++{
++  /* TODO：网络驱动接入点（拓展项） */
++}
++#endif
+diff --git a/arch/arm64/src/a311y2/a311y2_boot.h b/arch/arm64/src/a311y2/a311y2_boot.h
+new file mode 100644
+index 00000000..2ec7d84b
+--- /dev/null
++++ b/arch/arm64/src/a311y2/a311y2_boot.h
+@@ -0,0 +1,56 @@
++/****************************************************************************
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_A311Y2_A311Y2_BOOT_H
++#define __ARCH_ARM64_SRC_A311Y2_A311Y2_BOOT_H
++
++#include <nuttx/config.h>
++#include <nuttx/compiler.h>
++#include <sys/types.h>
++#include <stdint.h>
++#include <stdbool.h>
++#include <arch/chip/chip.h>
++#include "arm64_internal.h"
++#include "arm64_arch.h"
++
++#ifndef __ASSEMBLY__
++
++#undef EXTERN
++#if defined(__cplusplus)
++#define EXTERN extern "C"
++extern "C"
++{
++#else
++#define EXTERN extern
++#endif
++
++/* 所有 A311Y2 板级必须提供的入口，在内存映射建立之后、
++ * 设备初始化之前调用。
++ */
++
++void a311y2_board_initialize(void);
++
++#undef EXTERN
++#if defined(__cplusplus)
++}
++#endif
++
++#endif /* __ASSEMBLY__ */
++#endif /* __ARCH_ARM64_SRC_A311Y2_A311Y2_BOOT_H */
+diff --git a/arch/arm64/src/a311y2/a311y2_lowputc.S b/arch/arm64/src/a311y2/a311y2_lowputc.S
+new file mode 100644
+index 00000000..109799e4
+--- /dev/null
++++ b/arch/arm64/src/a311y2/a311y2_lowputc.S
+@@ -0,0 +1,86 @@
++/****************************************************************************
++ * arch/arm64/src/a311y2/a311y2_lowputc.S
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include "arm64_macro.inc"
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++    .file    "a311y2_lowputc.S"
++
++/* Amlogic Meson UART (uart_b) 基址。
++ *
++ * 汇编阶段取不到 C 头文件的宏，只能写字面量。
++ * ★ 本值必须与 hardware/a311y2_memorymap.h 的 A311Y2_UART_B_BASE
++ *   保持一致（apb 0xfe000000 + 0x7a000）。
++ *
++ * ★ 这是全项目第一个向外吐字符的地方。M1 调试时若此处都出不了字符，
++ *   说明问题在加载地址、异常向量或 MMU，而不在串口本身。
++ *
++ * U-Boot 已把串口配好，early print 阶段无需初始化，
++ * 只要轮询 TX_FULL 再写 WFIFO 即可。
++ */
++
++#define UART_BASE_ADDRESS   0xfe07a000
++
++#define UART_WFIFO          0x00      /* 发送数据寄存器 */
++#define UART_STATUS         0x0c      /* 状态寄存器 */
++#define UART_STAT_TX_FULL   (1 << 21) /* 发送 FIFO 满 */
++
++/****************************************************************************
++ * Assembly Macros
++ ****************************************************************************/
++
++/* 等待发送 FIFO 不满 */
++
++.macro early_uart_ready xb, wt
++1:
++    ldr   \wt, [\xb, #UART_STATUS]   /* 读 STATUS */
++    tst   \wt, #UART_STAT_TX_FULL    /* 检查 TX_FULL(bit 21) */
++    b.ne  1b                         /* 满则继续等 */
++.endm
++
++/* 写入一个字符 */
++
++.macro early_uart_transmit xb, wt
++    str   \wt, [\xb, #UART_WFIFO]    /* 写 WFIFO */
++.endm
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/* void arm64_lowputc(char ch) —— 由 C 代码调用 */
++
++GTEXT(arm64_lowputc)
++SECTION_FUNC(text, arm64_lowputc)
++    ldr   x15, =UART_BASE_ADDRESS
++    early_uart_ready x15, w2
++    early_uart_transmit x15, w0
++    ret
+diff --git a/arch/arm64/src/a311y2/a311y2_serial.c b/arch/arm64/src/a311y2/a311y2_serial.c
+new file mode 100644
+index 00000000..8562d23c
+--- /dev/null
++++ b/arch/arm64/src/a311y2/a311y2_serial.c
+@@ -0,0 +1,539 @@
++/****************************************************************************
++ * arch/arm64/src/a311y2/a311y2_serial.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include <sys/types.h>
++#include <stdint.h>
++#include <stdbool.h>
++#include <errno.h>
++#include <debug.h>
++
++#include <nuttx/arch.h>
++#include <nuttx/irq.h>
++#include <nuttx/serial/serial.h>
++#include <nuttx/spinlock.h>
++
++#include <arch/chip/chip.h>
++
++#include "arm64_arch.h"
++#include "arm64_internal.h"
++#include "a311y2_serial.h"
++#include "hardware/a311y2_memorymap.h"
++#include "hardware/a311y2_uart.h"
++
++#ifdef USE_SERIALDRIVER
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* uart_b 映射到 NuttX 的 UART0 槽位 */
++
++#define CONSOLE_DEV     g_uart_b_port
++#define TTYS0_DEV       g_uart_b_port
++
++/****************************************************************************
++ * Private Types
++ ****************************************************************************/
++
++struct a311y2_uart_s
++{
++  uintptr_t  base;      /* 控制器基址 */
++  uint32_t   baud;      /* 配置的波特率 */
++  uint32_t   clk;       /* 时钟源频率 */
++  int        irq;       /* 中断号 */
++  uint8_t    bits;      /* 数据位 */
++  bool       stopbits2; /* true: 2 个停止位 */
++  bool       parity_en; /* 校验使能 */
++  bool       parity_odd;/* true: 奇校验 */
++  spinlock_t lock;
++};
++
++/****************************************************************************
++ * Private Function Prototypes
++ ****************************************************************************/
++
++static int  a311y2_setup(struct uart_dev_s *dev);
++static void a311y2_shutdown(struct uart_dev_s *dev);
++static int  a311y2_attach(struct uart_dev_s *dev);
++static void a311y2_detach(struct uart_dev_s *dev);
++static int  a311y2_ioctl(struct file *filep, int cmd, unsigned long arg);
++static int  a311y2_receive(struct uart_dev_s *dev, unsigned int *status);
++static void a311y2_rxint(struct uart_dev_s *dev, bool enable);
++static bool a311y2_rxavailable(struct uart_dev_s *dev);
++static void a311y2_send(struct uart_dev_s *dev, int ch);
++static void a311y2_txint(struct uart_dev_s *dev, bool enable);
++static bool a311y2_txready(struct uart_dev_s *dev);
++static bool a311y2_txempty(struct uart_dev_s *dev);
++
++/****************************************************************************
++ * Private Data
++ ****************************************************************************/
++
++static const struct uart_ops_s g_uart_ops =
++{
++  .setup       = a311y2_setup,
++  .shutdown    = a311y2_shutdown,
++  .attach      = a311y2_attach,
++  .detach      = a311y2_detach,
++  .ioctl       = a311y2_ioctl,
++  .receive     = a311y2_receive,
++  .rxint       = a311y2_rxint,
++  .rxavailable = a311y2_rxavailable,
++  .send        = a311y2_send,
++  .txint       = a311y2_txint,
++  .txready     = a311y2_txready,
++  .txempty     = a311y2_txempty,
++};
++
++static char g_uart_b_rxbuf[CONFIG_UART0_RXBUFSIZE];
++static char g_uart_b_txbuf[CONFIG_UART0_TXBUFSIZE];
++
++static struct a311y2_uart_s g_uart_b_priv =
++{
++  .base       = A311Y2_UART_B_BASE,
++  .baud       = CONFIG_UART0_BAUD,
++  .clk        = MESON_UART_XTAL_FREQ,
++  .irq        = A311Y2_IRQ_UART_B,
++  .bits       = CONFIG_UART0_BITS,
++  .stopbits2  = CONFIG_UART0_2STOP != 0,
++  .parity_en  = CONFIG_UART0_PARITY != 0,
++  .parity_odd = CONFIG_UART0_PARITY == 1,
++  .lock       = SP_UNLOCKED,
++};
++
++static struct uart_dev_s g_uart_b_port =
++{
++#ifdef CONFIG_UART0_SERIAL_CONSOLE
++  .isconsole = true,
++#endif
++  .recv      =
++  {
++    .size    = CONFIG_UART0_RXBUFSIZE,
++    .buffer  = g_uart_b_rxbuf,
++  },
++  .xmit      =
++  {
++    .size    = CONFIG_UART0_TXBUFSIZE,
++    .buffer  = g_uart_b_txbuf,
++  },
++  .ops       = &g_uart_ops,
++  .priv      = &g_uart_b_priv,
++};
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint32_t a311y2_getreg(struct a311y2_uart_s *priv,
++                                     unsigned int offset)
++{
++  return getreg32(priv->base + offset);
++}
++
++static inline void a311y2_putreg(struct a311y2_uart_s *priv,
++                                 unsigned int offset, uint32_t value)
++{
++  putreg32(value, priv->base + offset);
++}
++
++static inline void a311y2_modifyreg(struct a311y2_uart_s *priv,
++                                    unsigned int offset,
++                                    uint32_t clearbits, uint32_t setbits)
++{
++  uint32_t regval = a311y2_getreg(priv, offset);
++
++  regval &= ~clearbits;
++  regval |= setbits;
++  a311y2_putreg(priv, offset, regval);
++}
++
++/****************************************************************************
++ * Name: a311y2_setbaud
++ *
++ * Description:
++ *   写 REG5 设置波特率。
++ *
++ *   ★ xtal_div 取 2 而非 3 —— 该系数分 SoC，取错波特率差 50%，
++ *   表现为串口出字符但全是乱码。详见 docs/meson-uart-spec.md。
++ *
++ ****************************************************************************/
++
++static void a311y2_setbaud(struct a311y2_uart_s *priv)
++{
++  uint32_t regval;
++
++  /* 切波特率前等发送真正完成。只看 TX_EMPTY 会在最后一个字节
++   * 还在移位时就返回，必须与 XMIT_BUSY 组合判断。
++   */
++
++  while ((a311y2_getreg(priv, MESON_UART_STATUS) &
++          (UART_STAT_TX_EMPTY | UART_STAT_XMIT_BUSY)) != UART_STAT_TX_EMPTY);
++
++  regval  = MESON_UART_BAUD_DIV(priv->clk, priv->baud) & UART_BAUD_DIV_MASK;
++  regval |= UART_BAUD_USE | UART_BAUD_XTAL | UART_BAUD_XTAL_DIV2;
++
++  a311y2_putreg(priv, MESON_UART_REG5, regval);
++}
++
++/****************************************************************************
++ * Name: a311y2_interrupt
++ *
++ * Description:
++ *   中断服务程序。
++ *
++ *   ★ 本控制器的中断是边沿触发（dtsi: IRQ_TYPE_EDGE_RISING），不是常见的
++ *   电平触发。必须循环读到 RX_EMPTY 置位为止 —— 处理期间新到达的数据会
++ *   产生新边沿，若在此之前退出就会漏掉中断，导致接收假死。
++ *
++ ****************************************************************************/
++
++static int a311y2_interrupt(int irq, void *context, void *arg)
++{
++  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
++  struct a311y2_uart_s *priv = dev->priv;
++  uint32_t status;
++
++  do
++    {
++      status = a311y2_getreg(priv, MESON_UART_STATUS);
++
++      /* 有错误标志先清掉，否则会持续置位 */
++
++      if ((status & UART_STAT_ERR_MASK) != 0)
++        {
++          a311y2_modifyreg(priv, MESON_UART_CONTROL, 0, UART_CTRL_CLEAR_ERR);
++          a311y2_modifyreg(priv, MESON_UART_CONTROL, UART_CTRL_CLEAR_ERR, 0);
++        }
++
++      /* 收：FIFO 非空就一直取 */
++
++      if ((status & UART_STAT_RX_EMPTY) == 0)
++        {
++          uart_recvchars(dev);
++        }
++
++      /* 发：FIFO 未满且上层有待发数据 */
++
++      if ((status & UART_STAT_TX_FULL) == 0)
++        {
++          uart_xmitchars(dev);
++        }
++
++      status = a311y2_getreg(priv, MESON_UART_STATUS);
++    }
++  while ((status & UART_STAT_RX_EMPTY) == 0);
++
++  return OK;
++}
++
++/****************************************************************************
++ * Name: a311y2_setup
++ ****************************************************************************/
++
++static int a311y2_setup(struct uart_dev_s *dev)
++{
++  struct a311y2_uart_s *priv = dev->priv;
++  irqstate_t flags;
++  uint32_t regval;
++
++  flags = spin_lock_irqsave(&priv->lock);
++
++  /* 1. 关中断 */
++
++  a311y2_modifyreg(priv, MESON_UART_CONTROL,
++                   UART_CTRL_RX_INT_EN | UART_CTRL_TX_INT_EN, 0);
++
++  /* 2. 复位收发通道并清错误（写 1 触发，随后清 0） */
++
++  a311y2_modifyreg(priv, MESON_UART_CONTROL, 0,
++                   UART_CTRL_TX_RST | UART_CTRL_RX_RST | UART_CTRL_CLEAR_ERR);
++  a311y2_modifyreg(priv, MESON_UART_CONTROL,
++                   UART_CTRL_TX_RST | UART_CTRL_RX_RST | UART_CTRL_CLEAR_ERR,
++                   0);
++
++  /* 3. 帧格式。注意 DATA_LEN 编码不是位宽数值本身：0 代表 8 位 */
++
++  regval = a311y2_getreg(priv, MESON_UART_CONTROL);
++  regval &= ~(UART_CTRL_DATA_MASK | UART_CTRL_STOP_MASK |
++              UART_CTRL_PARITY_EN | UART_CTRL_PARITY_TYPE);
++
++  switch (priv->bits)
++    {
++      case 5:  regval |= UART_CTRL_DATA_5BIT; break;
++      case 6:  regval |= UART_CTRL_DATA_6BIT; break;
++      case 7:  regval |= UART_CTRL_DATA_7BIT; break;
++      default: regval |= UART_CTRL_DATA_8BIT; break;
++    }
++
++  regval |= priv->stopbits2 ? UART_CTRL_STOP_2SB : UART_CTRL_STOP_1SB;
++
++  if (priv->parity_en)
++    {
++      regval |= UART_CTRL_PARITY_EN;
++      if (priv->parity_odd)
++        {
++          regval |= UART_CTRL_PARITY_TYPE;
++        }
++    }
++
++  /* 调试串口无硬件流控，使用两线模式 */
++
++  regval |= UART_CTRL_TWO_WIRE_EN;
++  a311y2_putreg(priv, MESON_UART_CONTROL, regval);
++
++  /* 4. 波特率 */
++
++  a311y2_setbaud(priv);
++
++  /* 5. 中断阈值：收到 1 字节即触发，发送 FIFO 降到 0 时触发 */
++
++  a311y2_putreg(priv, MESON_UART_MISC,
++                UART_MISC_RECV_IRQ(1) | UART_MISC_XMIT_IRQ(0));
++
++  /* 6. 使能收发 */
++
++  a311y2_modifyreg(priv, MESON_UART_CONTROL, 0,
++                   UART_CTRL_TX_EN | UART_CTRL_RX_EN);
++
++  spin_unlock_irqrestore(&priv->lock, flags);
++  return OK;
++}
++
++/****************************************************************************
++ * Name: a311y2_shutdown
++ ****************************************************************************/
++
++static void a311y2_shutdown(struct uart_dev_s *dev)
++{
++  struct a311y2_uart_s *priv = dev->priv;
++
++  a311y2_modifyreg(priv, MESON_UART_CONTROL,
++                   UART_CTRL_TX_EN | UART_CTRL_RX_EN |
++                   UART_CTRL_RX_INT_EN | UART_CTRL_TX_INT_EN, 0);
++}
++
++/****************************************************************************
++ * Name: a311y2_attach
++ ****************************************************************************/
++
++static int a311y2_attach(struct uart_dev_s *dev)
++{
++  struct a311y2_uart_s *priv = dev->priv;
++  int ret;
++
++  ret = irq_attach(priv->irq, a311y2_interrupt, dev);
++  if (ret == OK)
++    {
++      up_enable_irq(priv->irq);
++    }
++
++  return ret;
++}
++
++/****************************************************************************
++ * Name: a311y2_detach
++ ****************************************************************************/
++
++static void a311y2_detach(struct uart_dev_s *dev)
++{
++  struct a311y2_uart_s *priv = dev->priv;
++
++  up_disable_irq(priv->irq);
++  irq_detach(priv->irq);
++}
++
++/****************************************************************************
++ * Name: a311y2_ioctl
++ ****************************************************************************/
++
++static int a311y2_ioctl(struct file *filep, int cmd, unsigned long arg)
++{
++  /* TODO(M2)：termios 支持（改波特率与帧格式）。
++   * M1 阶段控制台参数固定，暂不需要。
++   */
++
++  UNUSED(filep);
++  UNUSED(cmd);
++  UNUSED(arg);
++  return -ENOTTY;
++}
++
++/****************************************************************************
++ * Name: a311y2_receive
++ ****************************************************************************/
++
++static int a311y2_receive(struct uart_dev_s *dev, unsigned int *status)
++{
++  struct a311y2_uart_s *priv = dev->priv;
++  uint32_t regval;
++
++  regval  = a311y2_getreg(priv, MESON_UART_STATUS);
++  *status = regval & UART_STAT_ERR_MASK;
++
++  return (int)(a311y2_getreg(priv, MESON_UART_RFIFO) & 0xff);
++}
++
++/****************************************************************************
++ * Name: a311y2_rxint
++ ****************************************************************************/
++
++static void a311y2_rxint(struct uart_dev_s *dev, bool enable)
++{
++  struct a311y2_uart_s *priv = dev->priv;
++
++  if (enable)
++    {
++      a311y2_modifyreg(priv, MESON_UART_CONTROL, 0, UART_CTRL_RX_INT_EN);
++    }
++  else
++    {
++      a311y2_modifyreg(priv, MESON_UART_CONTROL, UART_CTRL_RX_INT_EN, 0);
++    }
++}
++
++/****************************************************************************
++ * Name: a311y2_rxavailable
++ ****************************************************************************/
++
++static bool a311y2_rxavailable(struct uart_dev_s *dev)
++{
++  struct a311y2_uart_s *priv = dev->priv;
++
++  return (a311y2_getreg(priv, MESON_UART_STATUS) &
++          UART_STAT_RX_EMPTY) == 0;
++}
++
++/****************************************************************************
++ * Name: a311y2_send
++ ****************************************************************************/
++
++static void a311y2_send(struct uart_dev_s *dev, int ch)
++{
++  struct a311y2_uart_s *priv = dev->priv;
++
++  a311y2_putreg(priv, MESON_UART_WFIFO, (uint32_t)ch & 0xff);
++}
++
++/****************************************************************************
++ * Name: a311y2_txint
++ ****************************************************************************/
++
++static void a311y2_txint(struct uart_dev_s *dev, bool enable)
++{
++  struct a311y2_uart_s *priv = dev->priv;
++  irqstate_t flags;
++
++  if (enable)
++    {
++      flags = enter_critical_section();
++      a311y2_modifyreg(priv, MESON_UART_CONTROL, 0, UART_CTRL_TX_INT_EN);
++
++      /* 发送 FIFO 未满时立即触发一次，避免等不到边沿 */
++
++      uart_xmitchars(dev);
++      leave_critical_section(flags);
++    }
++  else
++    {
++      a311y2_modifyreg(priv, MESON_UART_CONTROL, UART_CTRL_TX_INT_EN, 0);
++    }
++}
++
++/****************************************************************************
++ * Name: a311y2_txready
++ ****************************************************************************/
++
++static bool a311y2_txready(struct uart_dev_s *dev)
++{
++  struct a311y2_uart_s *priv = dev->priv;
++
++  return (a311y2_getreg(priv, MESON_UART_STATUS) & UART_STAT_TX_FULL) == 0;
++}
++
++/****************************************************************************
++ * Name: a311y2_txempty
++ *
++ * Description:
++ *   发送是否真正完成。TX_EMPTY 置位仅表示 FIFO 空，最后一个字节可能仍在
++ *   移位寄存器中，故必须与 XMIT_BUSY 组合判断。
++ *
++ ****************************************************************************/
++
++static bool a311y2_txempty(struct uart_dev_s *dev)
++{
++  struct a311y2_uart_s *priv = dev->priv;
++  uint32_t regval = a311y2_getreg(priv, MESON_UART_STATUS);
++
++  return (regval & (UART_STAT_TX_EMPTY | UART_STAT_XMIT_BUSY)) ==
++         UART_STAT_TX_EMPTY;
++}
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: arm64_earlyserialinit
++ ****************************************************************************/
++
++void arm64_earlyserialinit(void)
++{
++  /* U-Boot 已完成串口配置，early 阶段无需重新初始化，
++   * 直接沿用即可打印。见 docs/meson-uart-spec.md 第 7 节。
++   */
++
++#ifdef CONSOLE_DEV
++  CONSOLE_DEV.isconsole = true;
++  a311y2_setup(&CONSOLE_DEV);
++#endif
++}
++
++/****************************************************************************
++ * Name: arm64_serialinit
++ ****************************************************************************/
++
++void arm64_serialinit(void)
++{
++  uart_register("/dev/console", &CONSOLE_DEV);
++  uart_register("/dev/ttyS0", &TTYS0_DEV);
++}
++
++/****************************************************************************
++ * Name: up_putc
++ ****************************************************************************/
++
++void up_putc(int ch)
++{
++  struct a311y2_uart_s *priv = g_uart_b_port.priv;
++
++  while ((a311y2_getreg(priv, MESON_UART_STATUS) & UART_STAT_TX_FULL) != 0);
++
++  a311y2_putreg(priv, MESON_UART_WFIFO, (uint32_t)ch & 0xff);
++}
++
++#endif /* USE_SERIALDRIVER */
+diff --git a/arch/arm64/src/a311y2/a311y2_serial.h b/arch/arm64/src/a311y2/a311y2_serial.h
+new file mode 100644
+index 00000000..f0c6fb19
+--- /dev/null
++++ b/arch/arm64/src/a311y2/a311y2_serial.h
+@@ -0,0 +1,33 @@
++/****************************************************************************
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_A311Y2_A311Y2_SERIAL_H
++#define __ARCH_ARM64_SRC_A311Y2_A311Y2_SERIAL_H
++
++#include <nuttx/config.h>
++#include <arch/irq.h>
++#include "hardware/a311y2_memorymap.h"
++#include "hardware/a311y2_uart.h"
++
++/* Amlogic Meson UART 驱动（compatible: amlogic,meson-s4-uart）。
++ * 寄存器规格见 docs/meson-uart-spec.md。
++ */
++
++#endif /* __ARCH_ARM64_SRC_A311Y2_A311Y2_SERIAL_H */
+diff --git a/arch/arm64/src/a311y2/chip.h b/arch/arm64/src/a311y2/chip.h
+new file mode 100644
+index 00000000..694e0237
+--- /dev/null
++++ b/arch/arm64/src/a311y2/chip.h
+@@ -0,0 +1,30 @@
++/****************************************************************************
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_A311Y2_CHIP_H
++#define __ARCH_ARM64_SRC_A311Y2_CHIP_H
++
++#include <nuttx/config.h>
++
++#ifndef __ASSEMBLY__
++#  include <nuttx/arch.h>
++#endif
++
++#endif /* __ARCH_ARM64_SRC_A311Y2_CHIP_H */
+diff --git a/arch/arm64/src/a311y2/hardware/a311y2_memorymap.h b/arch/arm64/src/a311y2/hardware/a311y2_memorymap.h
+new file mode 100644
+index 00000000..ad6a664b
+--- /dev/null
++++ b/arch/arm64/src/a311y2/hardware/a311y2_memorymap.h
+@@ -0,0 +1,56 @@
++/****************************************************************************
++ * arch/arm64/src/a311y2/hardware/a311y2_memorymap.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_A311Y2_HARDWARE_A311Y2_MEMORYMAP_H
++#define __ARCH_ARM64_SRC_A311Y2_HARDWARE_A311Y2_MEMORYMAP_H
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <arch/chip/chip.h>
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* 外设基址。来源：Linux 主线 amlogic-s6.dtsi 各节点的 reg 属性
++ * （GPL-2.0+ OR MIT，按 MIT 分支使用）。
++ *
++ * 全部落在 CONFIG_DEVICEIO_BASEADDR(0xfe000000) + 32MB 的映射范围内；
++ * 新增外设地址时先确认这一点，否则 MMU 不建映射，访问时直接异常。
++ */
++
++/* APB 总线基址。dtsi: apb: bus@fe000000，ranges 长度 0x480000 */
++
++#define A311Y2_APB_BASE        0xfe000000
++
++/* UART。dtsi: uart_b: serial@7a000（相对 apb），寄存器区长 0x18。
++ *
++ * uart_b 是板级 dts 中 serial0 的别名，为参考设计的调试控制台。
++ * TODO(M1)：LogicPi A1 实际引出的是否为 uart_b，需原理图或实机确认。
++ */
++
++#define A311Y2_UART_B_BASE     (A311Y2_APB_BASE + 0x7a000)   /* 0xfe07a000 */
++
++#endif /* __ARCH_ARM64_SRC_A311Y2_HARDWARE_A311Y2_MEMORYMAP_H */
+diff --git a/arch/arm64/src/a311y2/hardware/a311y2_uart.h b/arch/arm64/src/a311y2/hardware/a311y2_uart.h
+new file mode 100644
+index 00000000..a7689af7
+--- /dev/null
++++ b/arch/arm64/src/a311y2/hardware/a311y2_uart.h
+@@ -0,0 +1,130 @@
++/****************************************************************************
++ * arch/arm64/src/a311y2/hardware/a311y2_uart.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_A311Y2_HARDWARE_A311Y2_UART_H
++#define __ARCH_ARM64_SRC_A311Y2_HARDWARE_A311Y2_UART_H
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* Amlogic Meson UART（compatible: amlogic,meson-s4-uart）寄存器定义。
++ *
++ * 完整规格与出处见 docs/meson-uart-spec.md。该规格由阅读理解
++ * Linux 主线 drivers/tty/serial/meson_uart.c 所描述的硬件行为整理而成，
++ * 未复制其源代码；寄存器接口属硬件事实，不构成该驱动的著作权表达。
++ *
++ * 控制器共 6 个 32 位寄存器，寄存器区长度 0x18。
++ */
++
++/* Register offsets *********************************************************/
++
++#define MESON_UART_WFIFO          0x00      /* 发送数据（只写） */
++#define MESON_UART_RFIFO          0x04      /* 接收数据（只读） */
++#define MESON_UART_CONTROL        0x08      /* 使能/帧格式/复位/中断使能 */
++#define MESON_UART_STATUS         0x0c      /* 状态与错误标志 */
++#define MESON_UART_MISC           0x10      /* 收发中断的 FIFO 阈值 */
++#define MESON_UART_REG5           0x14      /* 波特率 */
++
++/* CONTROL register (0x08) **************************************************/
++
++#define UART_CTRL_TX_EN           (1 << 12) /* 发送使能 */
++#define UART_CTRL_RX_EN           (1 << 13) /* 接收使能 */
++#define UART_CTRL_TWO_WIRE_EN     (1 << 15) /* 两线模式（无流控） */
++
++#define UART_CTRL_STOP_SHIFT      16        /* 停止位长度 */
++#define UART_CTRL_STOP_MASK       (0x03 << UART_CTRL_STOP_SHIFT)
++#define UART_CTRL_STOP_1SB        (0x00 << UART_CTRL_STOP_SHIFT)
++#define UART_CTRL_STOP_2SB        (0x01 << UART_CTRL_STOP_SHIFT)
++
++#define UART_CTRL_PARITY_TYPE     (1 << 18) /* 0=偶校验 1=奇校验 */
++#define UART_CTRL_PARITY_EN       (1 << 19) /* 校验使能 */
++
++/* ★ 注意 DATA_LEN 的编码不是位宽数值本身：0 代表 8 位 */
++
++#define UART_CTRL_DATA_SHIFT      20
++#define UART_CTRL_DATA_MASK       (0x03 << UART_CTRL_DATA_SHIFT)
++#define UART_CTRL_DATA_8BIT       (0x00 << UART_CTRL_DATA_SHIFT)
++#define UART_CTRL_DATA_7BIT       (0x01 << UART_CTRL_DATA_SHIFT)
++#define UART_CTRL_DATA_6BIT       (0x02 << UART_CTRL_DATA_SHIFT)
++#define UART_CTRL_DATA_5BIT       (0x03 << UART_CTRL_DATA_SHIFT)
++
++#define UART_CTRL_TX_RST          (1 << 22) /* 发送通道复位 */
++#define UART_CTRL_RX_RST          (1 << 23) /* 接收通道复位 */
++#define UART_CTRL_CLEAR_ERR       (1 << 24) /* 清除错误标志 */
++#define UART_CTRL_RX_INT_EN       (1 << 27) /* 接收中断使能 */
++#define UART_CTRL_TX_INT_EN       (1 << 28) /* 发送中断使能 */
++
++/* STATUS register (0x0c) ***************************************************/
++
++#define UART_STAT_PARITY_ERR      (1 << 16) /* 校验错误 */
++#define UART_STAT_FRAME_ERR       (1 << 17) /* 帧错误 */
++#define UART_STAT_TX_FIFO_WERR    (1 << 18) /* 发送 FIFO 写错误 */
++#define UART_STAT_RX_EMPTY        (1 << 20) /* 接收 FIFO 空（0 才有数据） */
++#define UART_STAT_TX_FULL         (1 << 21) /* 发送 FIFO 满（0 才可写） */
++#define UART_STAT_TX_EMPTY        (1 << 22) /* 发送 FIFO 空 */
++#define UART_STAT_XMIT_BUSY       (1 << 25) /* 移位寄存器仍在发送 */
++
++#define UART_STAT_ERR_MASK        (UART_STAT_PARITY_ERR | \
++                                   UART_STAT_FRAME_ERR  | \
++                                   UART_STAT_TX_FIFO_WERR)
++
++/* MISC register (0x10) *****************************************************/
++
++#define UART_MISC_RECV_IRQ(c)     ((c) & 0xff)          /* 接收中断阈值 */
++#define UART_MISC_XMIT_IRQ(c)     (((c) & 0xff) << 8)   /* 发送中断阈值 */
++
++/* REG5 register (0x14) — 波特率 *******************************************/
++
++#define UART_BAUD_DIV_MASK        0x7fffff  /* 分频值 */
++#define UART_BAUD_USE             (1 << 23) /* 使用本寄存器设置（必须置 1） */
++#define UART_BAUD_XTAL            (1 << 24) /* 以 xtal 为时钟源 */
++#define UART_BAUD_XTAL_DIV2       (1 << 27) /* xtal 二分频 */
++
++/* 分频算法（xtal = 24MHz 时）
++ *
++ * ★★ xtal_div 取 2 还是 3 是分 SoC 的，取错波特率差 50%，输出全是乱码。
++ *    早期 Meson（g12a）取 3；meson-s4-uart 一系取 2 并须置 XTAL_DIV2。
++ *    本平台 compatible 为 "amlogic,s6-uart","amlogic,meson-s4-uart"，
++ *    回落到 s4 条目，故取 2。这是本驱动最容易出错的一处。
++ *
++ *   divisor = round(24000000 / 2 / baud) - 1
++ *   REG5    = divisor | UART_BAUD_USE | UART_BAUD_XTAL | UART_BAUD_XTAL_DIV2
++ *
++ * 参考值（24MHz / 2 = 12MHz 基准）：
++ *   115200  -> divisor 103, REG5 0x09800067  (误差 +0.16%)
++ *   1500000 -> divisor   7, REG5 0x09800007  (误差  0.00%)
++ */
++
++#define MESON_UART_XTAL_FREQ      24000000
++#define MESON_UART_XTAL_DIV       2
++
++#define MESON_UART_BAUD_DIV(clk, baud) \
++  ((((clk) / MESON_UART_XTAL_DIV + (baud) / 2) / (baud)) - 1)
++
++#endif /* __ARCH_ARM64_SRC_A311Y2_HARDWARE_A311Y2_UART_H */
+-- 
+2.43.0
+

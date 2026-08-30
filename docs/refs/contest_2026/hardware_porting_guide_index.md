@@ -1,0 +1,25 @@
+# 新硬件适配赛道教程导航
+
+> 本页面是 2026 首届 openvela AI 硬件开发者大赛「新硬件适配赛道」相关文档的总入口，帮助参赛者快速找到所需资料。
+
+## 文档列表
+
+| 文档                                                                                             | 说明                                                                                                     |
+| ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| [新硬件适配赛道详细指引](./hardware_porting_track_guide.md)                                      | 赛道概述、赛题要求、评分加分项、参考资源。                                                               |
+| [openvela AI 驱动开发技能集](../../../../../../.claude/blob/dev-ai-contest-2026/README_zh-cn.md) | AI 辅助驱动开发：`nuttx-driver-development` / `driver-code-reviewer` skill + `driver-workflow` agent。   |
+| [支持的硬件平台](./supported_hardware.md)                                                        | 大赛提供的开发板清单（已支持 + 待适配），含芯片特点、适用场景、开发指南链接。                            |
+| [最小可运行 NSH 系统 defconfig 参考](./defconfig_reference/minimum_nsh_baseline.md)              | L0 起步 defconfig：在新开发板上先启动到 NSH 命令行提示符，再按需逐步启用文件系统、网络、传感器等子系统。 |
+| [openvela 芯片移植指南](../../chip_porting/porting_guide.md)                                     | 从零完成 BSP 移植的完整流程。                                                                            |
+| [openvela 驱动开发指南](../../device_dev_guide/driver/driver_development.md)                     | UART/SPI/I2C 等各类驱动的适配与使用。                                                                    |
+| [参赛代码提交指南](../code_submission_guide.md)                                                  | 比赛期间如何获取仓库、提交代码、分赛道仓库说明（适用于所有赛道）。                                       |
+| [AI Coding 日志归集与提交手册](../ai_coding_log_guide.md)                                        | 如何安装日志工具、把与 AI 的对话导出并提交到比赛仓（适用于所有赛道）。                                   |
+
+## 如何开始
+
+1. **阅读赛道指引** → 明确赛题要求和评分加分项
+2. **选择目标硬件** → 参考 NuttX 已支持平台列表，挑选一块尚未适配 openvela 的板子
+3. **跟着芯片移植指南动手** → 完成 BSP 移植、驱动适配、系统启动
+4. **提交代码** → 在专属仓内开发，fork + PR + 自行合入（详见赛道指引「提交方式」）
+
+> 适配代码在你的专属仓 `contest2026_<编号>_<队伍名>` 内开发（板级代码按子目录组织，由 manifest 映射到 openvela 工程对应位置）；获奖后再 PR 至 openvela 上游对应 vendor 仓库的 `dev-ai-contest-2026` 分支。大赛仅在 GitHub 进行（不在 Gitee）。

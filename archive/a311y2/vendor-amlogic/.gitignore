@@ -1,0 +1,6 @@
+# 构建产物（openvela 在源码树内就地编译）
+*.o
+*.a
+*.d
+.depend
+Make.dep

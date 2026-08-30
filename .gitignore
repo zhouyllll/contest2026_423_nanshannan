@@ -1,0 +1,20 @@
+# 本仓库位于 openvela 工作区内（<工作区>/contest/），工作区本身由 repo 管理、
+# 不属于本仓库，无需在此忽略。
+
+# 日志工具的本地缓存（logs/ 本身要入库）
+logs/.last_push
+logs/.cache
+
+# 构建产物
+*.bin
+*.img
+*.elf
+*.hex
+
+# 厂商文档（含版权，不纳入版本控制）
+*.docx
+*.pdf
+*.zip
+
+# 厂商资料（含版权，仅本地参考，不纳入版本控制）
+docs/vendor/

@@ -1,0 +1,23 @@
+kickpi_k7_boardinit.o: kickpi_k7_boardinit.c \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/config.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/stdint.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/compiler.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/arch/types.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/arch/inttypes.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/limits.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/arch/limits.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/board.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/stdbool.h \
+ kickpi_k7.h
+kickpi_k7_appinit.o: kickpi_k7_appinit.c \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/config.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/sys/types.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/compiler.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/stdint.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/arch/types.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/arch/inttypes.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/limits.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/arch/limits.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/board.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/stdbool.h \
+ kickpi_k7.h
