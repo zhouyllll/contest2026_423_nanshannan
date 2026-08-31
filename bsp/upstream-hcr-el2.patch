@@ -1,0 +1,94 @@
+From 018c096b1b616a97cbeda9166d5b56c38a0d5ef5 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Mon, 31 Aug 2026 22:44:12 +0800
+Subject: [PATCH] arm64: drop bootloader-owned HCR_EL2 bits before entering EL1
+
+arm64_boot_el2_init() builds SCTLR_EL2 and CPTR_EL2 from scratch, but
+updates HCR_EL2 read-modify-write:
+
+    reg = read_sysreg(hcr_el2);
+    reg |= HCR_RW_BIT;
+    write_sysreg(reg, hcr_el2);
+
+Whatever a bootloader running at EL2 configured for its own use is
+therefore inherited by the OS.  Two of those bits make EL1 unusable:
+
+  TGE  The architecture forbids an eret to EL1 while TGE is set, so the
+       EL2 -> EL1 transition raises an Illegal Exception Return
+       (ESR EC=0xE) before any C code runs.
+
+  IMO  Physical IRQ stays routed to EL2 (likewise FMO/AMO for FIQ and
+       SError), so the first interrupt taken after the OS enables them
+       vectors into the bootloader's handlers, which are no longer
+       mapped.  The failure surfaces late - the OS initialises fully and
+       only dies once the idle loop lets the first timer tick in.
+
+Both were observed booting NuttX from U-Boot 2017.09 on a Rockchip
+RK3576 board, which runs at EL2 and legitimately sets these bits while
+it is in charge; they simply have to be handed back before the eret.
+
+Linux writes HCR_EL2 outright at the equivalent point rather than
+preserving the bootloader's value.  This patch keeps the existing
+read-modify-write but explicitly drops the four bits that must not
+cross into EL1.
+
+Clearing them cannot regress a platform that boots today: such a
+platform necessarily has these bits already clear, so the masking is a
+no-op there.
+
+HCR_TGE_BIT was not defined yet; add it next to the existing
+FMO/IMO/AMO definitions.
+---
+ arch/arm64/src/common/arm64_arch.h |  1 +
+ arch/arm64/src/common/arm64_boot.c | 23 +++++++++++++++++++++++
+ 2 files changed, 24 insertions(+)
+
+diff --git a/arch/arm64/src/common/arm64_arch.h b/arch/arm64/src/common/arm64_arch.h
+index 23d7d360..86b45c6c 100644
+--- a/arch/arm64/src/common/arm64_arch.h
++++ b/arch/arm64/src/common/arm64_arch.h
+@@ -253,6 +253,7 @@
+ #define HCR_FMO_BIT                 BIT(3)
+ #define HCR_IMO_BIT                 BIT(4)
+ #define HCR_AMO_BIT                 BIT(5)
++#define HCR_TGE_BIT                 BIT(27)
+ #define HCR_RW_BIT                  BIT(31)
+ #define HCR_ATA_BIT                 BIT(56)
+ 
+diff --git a/arch/arm64/src/common/arm64_boot.c b/arch/arm64/src/common/arm64_boot.c
+index b3b677b1..00fe1a12 100644
+--- a/arch/arm64/src/common/arm64_boot.c
++++ b/arch/arm64/src/common/arm64_boot.c
+@@ -148,6 +148,29 @@ void arm64_boot_el2_init(void)
+   reg |= HCR_ATA_BIT;
+ #endif
+ 
++  /* Drop the bits a bootloader running at EL2 may have left set.
++   *
++   * Unlike SCTLR_EL2 and CPTR_EL2 just above and below, HCR_EL2 is updated
++   * read-modify-write, so whatever the bootloader configured for its own
++   * use is inherited by the OS.  Two of those bits make EL1 unusable:
++   *
++   *   TGE  - the architecture forbids an eret to EL1 while TGE is set, so
++   *          the EL2 -> EL1 transition raises an Illegal Exception Return
++   *          (ESR EC=0xE) before any C code runs.
++   *   IMO  - physical IRQ (and FMO/AMO for FIQ/SError) stay routed to EL2,
++   *          so the first interrupt after the OS enables them vectors into
++   *          the bootloader's handlers, which are long gone by then.
++   *
++   * A bootloader running at EL2 legitimately sets these while it is in
++   * charge; they simply have to be handed back before entering EL1.
++   *
++   * Clearing them cannot regress a platform that boots today: such a
++   * platform necessarily has these bits already clear, so this is a no-op
++   * there.
++   */
++
++  reg &= ~(HCR_TGE_BIT | HCR_FMO_BIT | HCR_IMO_BIT | HCR_AMO_BIT);
++
+   write_sysreg(reg, hcr_el2);
+ 
+   reg = 0U;                   /* RES0 */
+-- 
+2.43.0
+
