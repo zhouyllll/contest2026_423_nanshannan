@@ -23,3 +23,7 @@ docs/vendor/
 *.o
 *.a
 *.d
+
+# AI Coding 日志：只提交白名单内的会话（见 scripts/collect-logs.sh）
+# 误跑 export-session.py --backfill 会导入全部个人项目会话，这里不做忽略，
+# 而是靠 collect-logs.sh 的白名单控制；提交前请 git status 确认文件数。
