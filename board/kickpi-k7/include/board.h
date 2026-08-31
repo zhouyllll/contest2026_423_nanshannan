@@ -96,7 +96,13 @@
  *   RTC      : HYM8563（同时为 SDIO WiFi 提供 32.768kHz 外部时钟）
  *   DDR blob : rk3576_ddr_lp4_1560MHz_lp5_2736MHz_v1.08.bin
  *
- * TODO：DRAM 实际容量待确认（当前保守取 512MB，偏小只是用不满，不影响启动）。
+ * DRAM：★ 已实测为 4 GB 版本。板上出厂 Android 的 /proc/meminfo 报
+ *   MemTotal: 3989804 kB（≈3.8 GiB，差额是固件保留区与内核自身占用）。
+ *   物理范围 0x40000000 .. 0x140000000。
+ *
+ *   端口当前取 CONFIG_RAMBANK1_ADDR=0x42000000 + 512MB，即映射
+ *   0x42000000..0x62000000，稳落在物理范围内。openvela 侧任务极少，
+ *   512MB 绰绰有余；保守取值同时也为将来 AMP 划分共享内存留出空间。
  */
 
 #endif /* __VENDOR_ROCKCHIP_BOARDS_RK3576_KICKPI_K7_INCLUDE_BOARD_H */

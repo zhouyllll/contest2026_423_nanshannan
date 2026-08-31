@@ -376,3 +376,158 @@ nsh> ps 正常列出 IDLE / hpwork / nsh_main
 在 `Kconfig` 里写 `comment "..."`，这行会原样出现在生成的 `.config`
 中（以 `#` 开头）。不是 bug，但 grep `.config` 时会混进来，
 `grep -E "^CONFIG_"` 可以过滤掉。
+
+---
+
+## 案例 3：U-Boot 遗留的 HCR_EL2.TGE 导致 EL2→EL1 的 eret 非法
+
+**平台**：KICKPI-K7 / RK3576，openvela 大赛分支
+**日期**：2026-08-31
+**性质**：`arch/arm64` 通用层的真 bug，不限于本平台
+
+### 现象
+
+U-Boot 的 `booti` 跳转成功，NuttX 早期打印正常，但随即崩溃：
+
+```
+Starting kernel ...
+- Ready to Boot Primary CPU
+- Boot from EL2
+Bad mode in "Synchronous Abort" handler, esr 0x3a000000
+* Reason: Exception from an Illegal execution state, or a PC or SP alignment fault
+* PC = ffffffff82a670ec
+```
+
+异常被 **U-Boot 的 EL2 向量**捕获（call trace 全在 `0x402xxxxx`，即 U-Boot 本体），
+说明故障发生在 NuttX 尚未接管异常向量的阶段。`ESR = 0x3a000000` → EC = `0xE`
+= **Illegal Execution State**。
+
+### 排查路径
+
+**① 先排除加载地址。** 崩溃寄存器里 `x25` 随链接地址变化（`0x404004c4` /
+`0x406804c4`），一度以为是 `booti` 按 Image header 的 `text_offset`
+（`arm64_head.S` 硬编码 `0x480000`）把镜像重定位到了别处。
+改链接地址到 `bi_dram[0].start + text_offset = 0x40680000` 后，早期打印变成乱码
+—— 反而证明**原来的 `0x40400000` 才是运行地址**：Rockchip 的 U-Boot 2017.09
+不做重定位，就在 `mmc read` 的落点原地执行。改回。
+
+**② 无栈单字符打点。** `arm64_lowputc` 不使用栈，可在启动任何阶段调用。
+定义宏在 EL 切换路径上逐步插桩：
+
+```asm
+#define MARK(ch)  mov x3, x30 ; mov w0, ch ; bl arm64_lowputc ; mov x30, x3
+```
+
+> ★ 必须用**单字符**。该板串口丢字节严重（Android 阶段可见
+> `** 215 console messages dropped **`），长字符串会被截断误导。
+> 第一轮就因 `- Boot fr` 的截断，误判为「崩在打印中途」。
+
+输出 `12E2- Boot from EL2 abcd` → 精确定位：`arm64_boot_el2_init()` 已返回、
+`spsr_el2`/`elr_el2` 均已写好，**崩在 `eret` 这一条指令上**。
+
+**③ 逐项排除 eret 的合法性前提。** 在 `eret` 前回读并打印：
+
+| 检查 | 结果 |
+|---|---|
+| `CurrentEL` | `2` —— 确实在 EL2 ✅ |
+| `HCR_EL2.RW`（bit 31） | `R` —— 已置位 ✅ |
+| `SPSR_EL2.M[3:0]` | `4` —— EL1t，合法 ✅ |
+
+常规原因全部排除后，只剩 ARM 手册里 Illegal Exception Return 的最后一条：
+**`HCR_EL2.TGE == 1` 时禁止 `eret` 到 EL1**。加打点确认，读到 `T`。
+
+### 根因
+
+Rockchip 的 U-Boot 2017.09 在 EL2 运行时置了 `HCR_EL2.TGE = 1`。
+
+而 `arch/arm64/src/common/arm64_boot.c` 的 `arm64_boot_el2_init()` 对
+`HCR_EL2` 用的是 **read-modify-write**：
+
+```c
+reg = read_sysreg(hcr_el2);
+reg |= HCR_RW_BIT;          /* 只补 RW，不清任何位 */
+write_sysreg(reg, hcr_el2);
+```
+
+只补 `RW`、不清 `TGE`，把 bootloader 的残留状态原样带进了 `eret`。
+
+对比 Linux 内核在同一位置是**覆盖写**：`msr hcr_el2, HCR_HOST_NVHE_FLAGS`，
+不保留 bootloader 状态。
+
+**这不是 RK3576 独有的问题——任何在 EL2 置了 TGE 的 bootloader 都会触发，
+是可以向上游提交的通用修复。**
+
+### 修复
+
+放在 SoC 层的 `arm64_el_init()` 里，**公共代码零改动**。
+`arm64_head.S` 中该 hook 的注释写着 *"Platform hook for highest EL"*，
+在 `switch_el` 之前、最高 EL 上执行，正是清理 bootloader 残留状态的位置。
+
+```c
+/* arch/arm64/src/rk3576/rk3576_boot.c */
+#define HCR_TGE_BIT  BIT(27)      /* 通用层 arm64_arch.h 未定义 */
+
+void arm64_el_init(void)
+{
+  uint64_t reg;
+
+  if (arm64_current_el() == MODE_EL2)
+    {
+      reg = read_sysreg(hcr_el2);
+      reg &= ~HCR_TGE_BIT;
+      write_sysreg(reg, hcr_el2);
+      UP_ISB();
+    }
+}
+```
+
+### 验证
+
+```
+- Ready to Boot Primary CPU
+- Boot from EL2
+- Boot from EL1                          <- eret 成功
+- Boot to C runtime for OS Initialize    <- 汇编阶段全线走通
+```
+
+### 附带教训：修好校验反而切断了调试通路
+
+本例中途曾把 boot.img header 的 SHA1 补正确（见案例 4），使 `boot_android`
+能自动加载镜像。结果 `bootdelay=0` 下，落回 U-Boot 命令行的唯一途径
+——「所有启动方式都失败」——也一并消失了，板子直奔我们的镜像然后 hang，
+**刷新镜像的通路被自己切断**。
+
+> **调试期应刻意保留一个「校验失败」的 boot 分区**，让每次上电都落到 `=>`，
+> 手动 `mmc read` + `booti` 加载待测镜像；等目标稳定、不再频繁改代码时，
+> 再刷正确校验的镜像做自动启动。顺序反了会给自己制造麻烦。
+
+---
+
+## 案例 4：Android boot.img 的 SHA1 校验
+
+**现象**：把 `nuttx.bin` 塞进 boot 分区的 kernel 段后，U-Boot 拒绝加载：
+
+```
+Hash from header:  0xe01dff745e6f727122a975e82893dbdcd8b47505
+Hash real:         0xaab106ef879a53165ac4be62b6317649faa882c1
+Failed to load android image
+AVB verify failed
+```
+
+**根因**：Android boot.img header 偏移 576 的 `id[8]` 字段存着各段内容的 SHA1，
+换了 kernel 必须重算。
+
+**算法**（拿原镜像反算可精确复现 header 中的值）：各段数据与其长度（4 字节
+小端）依次喂进 SHA1，段的顺序按 header 版本递增：
+
+```
+v0:  kernel, ramdisk, second
+v1:  + recovery_dtbo
+v2:  + dtb
+```
+
+已实现在 `scripts/repack-bootimg.py`。
+
+**顺带**：该校验失败时 U-Boot 会依次尝试 `boot_fit` → `bootrkp` →
+`distro_bootcmd`，全部落空后掉进 `=>` 命令行 —— 这正是案例 3 里被利用、
+后来又被自己切断的那条调试通路。

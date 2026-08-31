@@ -218,3 +218,32 @@ M1 需要的四类信息，三类已到手：
 
 **剩下的全是"参考值与实机是否一致"，和前身项目走到的位置相同 ——
 区别是这次官方把硬件资料链接直接给了。**
+
+
+---
+
+## 附：出厂 Android 的 bootargs（板上实测，2026-08-31）
+
+串口接通后从运行中的出厂系统读到（`cat /proc/device-tree/chosen/bootargs`），
+这是**第三份独立证据**，与主线 dtsi、厂商 U-Boot defconfig 三方互证。
+
+```
+earlycon=uart8250,mmio32,0x2ad40000
+androidboot.boot_devices=2a2d0000.ufs,2a330000.mmc,2a310000.mmc
+androidboot.fwver=ddr-v1.09-2f85f4b2d4,spl-v1.08,bl31-v1.20,bl32-v1.06,uboot-05/26/2026
+storagemedia=emmc  console=ttyFIQ0  androidboot.hardware=rk30board
+androidboot.selinux=permissive  kvm-arm.mode=none
+```
+
+| 信息 | 值 | 印证了什么 |
+|---|---|---|
+| 调试串口 | `uart8250, mmio32, 0x2ad40000` | UART0 基址、8250 兼容、**32 位访问**（对应 `CONFIG_16550_REGWIDTH=32`） |
+| eMMC | `0x2a330000` = 主线 `sdhci` | M4 存储适配的目标 |
+| SD 卡 | `0x2a310000` = 主线 `sdmmc` | 同上 |
+| UFS | `0x2a2d0000` = 主线 `ufshc` | 本板未用 |
+| 固件栈 | DDR v1.09 / SPL v1.08 / **BL31 v1.20（TF-A）** / **BL32 v1.06（OP-TEE）** / U-Boot 2026-05-26 | 确认 TF-A 在链路中，PSCI 可用 |
+| 控制台 | `console=ttyFIQ0` | Rockchip FIQ debugger 占用该串口，**这是串口偶尔丢字符的原因** |
+
+> ⚠️ `console=ttyFIQ0` 说明 Android 侧用的是 Rockchip 的 FIQ 调试器而非标准
+> 8250 驱动，两者共用同一个物理串口。这解释了厂商内核 dts 中
+> `/delete-node/ chosen;` 且 uart0 未出现在 `&uartN status okay` 列表里的原因。

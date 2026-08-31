@@ -26,7 +26,7 @@ fail=0
 a=$(grep -oP '^#define\s+CONFIG_LOAD_BASE\s+\K0x[0-9a-fA-F]+' "$CHIP")
 b=$(grep -oP '^CONFIG_RAM_START=\K0x[0-9a-fA-F]+' "$DEFC")
 c=$(grep -oP '^\s*\.\s*=\s*\K0x[0-9a-fA-F]+' "$LD" | head -1)
-echo "镜像加载地址（U-Boot kernel_addr_r，RK3576 主线 U-Boot 为 0x42000000）"
+echo "镜像加载地址（板上实测 kernel_addr_r = 0x40400000，非主线的 0x42000000）"
 printf '  %-44s %s\n' "chip.h CONFIG_LOAD_BASE"      "$(norm $a)"
 printf '  %-44s %s\n' "defconfig CONFIG_RAM_START"   "$(norm $b)"
 printf '  %-44s %s\n' "dramboot.ld 起始地址"          "$(norm $c)"

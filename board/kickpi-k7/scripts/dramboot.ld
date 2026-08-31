@@ -31,11 +31,12 @@ PHDRS
 
 SECTIONS
 {
-  /* 镜像加载地址 0x42000000。
+  /* 镜像加载地址 0x40400000。
    *
-   * 来源：U-Boot 主线 include/configs/rk3576_common.h（Rockchip 官方提交）
-   *   #define CFG_SYS_SDRAM_BASE   0x40000000
-   *   ENV_MEM_LAYOUT_SETTINGS: "kernel_addr_r=0x42000000"
+   * ★ 板上实测值（2026-08-31）：从 eMMC uboot 分区的明文环境变量读出
+   *     kernel_addr_r=0x40400000
+   *   U-Boot 主线 rk3576_common.h 写的是 0x42000000，板厂改过，以实测为准。
+   *   DRAM 基址仍为 0x40000000（CFG_SYS_SDRAM_BASE）
    *
    * ★★ 注意 RK3576 的 DRAM 从 0x40000000 起，与 RK3568（从 0 起，
    *    kernel_addr_r=0x02000000）和 RK3399（0x02080000）都不同。
@@ -59,7 +60,7 @@ SECTIONS
    * 跳到的位置根本不是你的代码。这正是 M1 阶段最难排查的一类问题，
    * 所以先用 U-Boot 的 md 命令确认镜像确实落在预期地址上再 booti。
    */
-  . = 0x42000000;  /* U-Boot loads NuttX at this address (kernel_addr_r) */
+  . = 0x40400000;  /* U-Boot 实测在此原地执行（不按 text_offset 重定位）*/
   _start = .;
   .text : {
         _stext = .;            /* Text section */

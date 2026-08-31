@@ -150,7 +150,20 @@ dtsi 只给了时钟句柄 `<&cru SCLK_UART0>`，**没有频率数值**（由 CR
 **不一致的表现同样是"没输出也不报错"**。
 `scripts/check-addr.sh` 就是为这个写的，已按 rk3576 改写并全部通过。
 
-**结论**：（待填）
+**结论：DRAM 容量已实测，加载地址待进 U-Boot 确认。**
+
+- **DRAM 4 GB**：板上出厂 Android `cat /proc/meminfo` 报
+  `MemTotal: 3989804 kB`。物理范围 `0x40000000 .. 0x140000000`。
+  当前 `CONFIG_RAMBANK1_ADDR=0x42000000 + 512MB` 稳落在范围内。
+- **`kernel_addr_r` 仍为推断值** `0x42000000`（来源：U-Boot 主线
+  `rk3576_common.h`；旁证：厂商 defconfig 有 `CONFIG_TARGET_EVB_RK3576=y`）。
+
+> ★ **该项的重要性可下调**：`booti` 可以显式传地址，不必依赖
+> `kernel_addr_r` 这个默认值 ——
+> `tftp 0x42000000 nuttx.bin` 后 `booti 0x42000000 - ${fdt_addr_r}` 即可。
+> 真正的要求只有两条：能进 U-Boot 命令行、且 `0x42000000` 是有效且未被占用的
+> DRAM。后者已由 DRAM 基址 `0x40000000` + 4GB 容量确认成立
+> （`0x42000000` = DRAM 基址 + 32MB，是 Rockchip 的标准布局）。
 
 ---
 
