@@ -31,36 +31,51 @@ PHDRS
 
 SECTIONS
 {
-  /* 镜像加载地址 0x40400000。
+  /* 链接地址 0x40480000 —— 必须等于 U-Boot 实际搬运后的执行地址。
    *
-   * ★ 板上实测值（2026-08-31）：从 eMMC uboot 分区的明文环境变量读出
-   *     kernel_addr_r=0x40400000
-   *   U-Boot 主线 rk3576_common.h 写的是 0x42000000，板厂改过，以实测为准。
-   *   DRAM 基址仍为 0x40000000（CFG_SYS_SDRAM_BASE）
+   * ★ 板上实测的完整加载链（2026-08-31）：
    *
-   * ★★ 注意 RK3576 的 DRAM 从 0x40000000 起，与 RK3568（从 0 起，
+   *     mmc read -> 0x40400000        (kernel_addr_r，eMMC uboot 分区
+   *                                    明文环境变量读出；主线
+   *                                    rk3576_common.h 写 0x42000000，
+   *                                    板厂改过，以实测为准)
+   *     U-Boot 按 ARM64 Linux Image 协议搬运：
+   *         DRAM 基址 0x40000000 + Image 头 text_offset 0x480000
+   *       = 0x40480000                ← CPU 真正开始取指的地址
+   *
+   *   串口原文：
+   *     == DO RELOCATE == Kernel from 0x40400000 to 0x40480000
+   *
+   *   text_offset 位于 Image 头偏移 8（8 字节小端），NuttX 在
+   *   arch/arm64/src/common/arm64_head.S 里硬编码为 0x480000。
+   *
+   * ★★ 曾经踩过的坑：一度以为「Rockchip U-Boot 2017.09 不搬运，
+   *    原地执行」，于是把链接地址填成 0x40400000。表面上能跑完
+   *    汇编启动和 arm64_chip_boot()，因为搬运后 0x40400000 上还残留
+   *    着一份内容完全相同的原始副本，所有 .data/.bss/向量表的绝对
+   *    引用都打在那份副本上，看起来一切正常。
+   *    真正的爆点在 nx_start()：堆从 _ebss（按 0x40400000 算，约
+   *    0x4044C000）起分配，而正在执行的代码就在 0x40480000 —— 堆一
+   *    扩张就把自己覆盖掉，表现为 C 运行时静默挂死、无任何异常报告。
+   *    结论：链接地址要填搬运后的地址，不是 mmc read 的地址。
+   *
+   * ★★★ RK3576 的 DRAM 从 0x40000000 起，与 RK3568（从 0 起，
    *    kernel_addr_r=0x02000000）和 RK3399（0x02080000）都不同。
-   *    RK3576 把外设放在了低位地址（0x22000000~0x2b060000），
+   *    RK3576 把外设放在低位地址（0x22000000~0x2b060000），
    *    照抄 RK3568 的 0x02000000 会落进外设区，表现是完全没有输出。
    *
-   * 加载模型（与 RK3399/RK3568 端口一致）：把 nuttx.bin 当作 Linux 的
-   * Image，由 U-Boot 的 booti 加载到 kernel_addr_r 运行。
+   *   BootROM -> TPL(ddr.bin) -> SPL -> U-Boot -> booti -> 搬运 -> 本镜像
    *
-   *   BootROM -> TPL(ddr.bin) -> SPL -> U-Boot -> booti ${kernel_addr_r}
-   *
-   * 板厂可能改过该环境变量，上板后用 printenv kernel_addr_r 复核一次
-   * （RECON B3）。
-   *
-   * ★ 本值必须与另外两处保持一致，改一处就要改三处：
+   * ★ 本值必须与另外两处保持一致，改一处就要改三处
+   *   （scripts/check-addr.sh 会校验）：
    *   - arch/arm64/include/rk3576/chip.h  的 CONFIG_LOAD_BASE
    *   - configs/nsh/defconfig             的 CONFIG_RAM_START
    *   - 本文件下面这一行
    *
-   * 地址填错的表现是串口完全没有输出，且没有任何报错 —— 因为 CPU
-   * 跳到的位置根本不是你的代码。这正是 M1 阶段最难排查的一类问题，
-   * 所以先用 U-Boot 的 md 命令确认镜像确实落在预期地址上再 booti。
+   * 地址填错的表现是串口完全没有输出且无任何报错 —— CPU 跳到的位置
+   * 根本不是你的代码。上板后先用 md 确认镜像落点再 booti。
    */
-  . = 0x40400000;  /* U-Boot 实测在此原地执行（不按 text_offset 重定位）*/
+  . = 0x40480000;
   _start = .;
   .text : {
         _stext = .;            /* Text section */

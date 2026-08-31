@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 1/2] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 1/3] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 2/2] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 2/3] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1356,6 +1356,133 @@ index 559489f6..d2fb5605 100644
     */
  }
  
+-- 
+2.43.0
+
+
+From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Mon, 31 Aug 2026 22:38:15 +0800
+Subject: [PATCH 3/3] arm64/rk3576: clear U-Boot's leftover
+ HCR_EL2.{IMO,FMO,AMO}; fix load address
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+上板调试到 nsh> 的过程中定位到两处 SoC 层问题：
+
+1. HCR_EL2.IMO/FMO/AMO
+   U-Boot 在 EL2 运行时置这三位以接管中断，交接给 OS 时未清除。
+   arch/arm64 通用层的 arm64_boot_el2_init() 对 HCR_EL2 用 read-modify-
+   write，只 |= RW|ATA，其余位原样继承 bootloader 状态，于是 NuttX 在
+   EL1 打开 IRQ 后，第一次 arch timer 中断被路由回 EL2，跳进 U-Boot 已
+   失效的 IRQ 路径，落到零内存后触发同步异常。
+
+   这与本分支此前修复的 HCR_EL2.TGE 是同一设计缺陷的两次发作（Linux 在
+   同一位置是覆盖写 HCR_EL2）。两者一并在 arm64_el_init() 中清除。
+
+   判据：VBAR_EL1 == _vector_table、CurrentEL == 1、DAIF.I == 0 三者
+   全部正常，异常却由 U-Boot 的 EL2 向量接住 —— 架构上只剩 IMO 一种解释。
+
+2. 链接地址 0x40400000 -> 0x40480000
+   U-Boot 按 ARM64 Linux Image 协议搬运：DRAM 基址 0x40000000 +
+   Image 头 text_offset 0x480000 = 0x40480000（串口日志 "DO RELOCATE
+   == Kernel from 0x40400000 to 0x40480000"）。kernel_addr_r 只是
+   mmc read 的落点，不是执行地址。
+
+   此前填 0x40400000 时，搬运后残留的原始副本让 .data/.bss/向量表的
+   绝对引用恰好仍然有效，掩盖了错误。
+
+现状：从上电到 NuttShell 交互全程跑通，uname/ls 等命令正常响应。
+---
+ arch/arm64/include/rk3576/chip.h    |  4 ++--
+ arch/arm64/src/rk3576/rk3576_boot.c | 29 +++++++++++++++++++++++++++--
+ 2 files changed, 29 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/include/rk3576/chip.h b/arch/arm64/include/rk3576/chip.h
+index 3a4ab88d..d816f03d 100644
+--- a/arch/arm64/include/rk3576/chip.h
++++ b/arch/arm64/include/rk3576/chip.h
+@@ -113,7 +113,7 @@
+  * 物理地址。
+  */
+ 
+-#define CONFIG_RAMBANK1_ADDR      0x40400000
++#define CONFIG_RAMBANK1_ADDR      0x40480000
+ #define CONFIG_RAMBANK1_SIZE      MB(64)
+ 
+ /* ⚠️ 不要把 RAMBANK1_SIZE 放大到跨过 0x48400000。
+@@ -172,7 +172,7 @@
+  *      的第一行 ". ="
+  */
+ 
+-#define CONFIG_LOAD_BASE          0x40400000
++#define CONFIG_LOAD_BASE          0x40480000
+ 
+ #define MPID_TO_CLUSTER_ID(mpid)  ((mpid) & ~0xff)
+ 
+diff --git a/arch/arm64/src/rk3576/rk3576_boot.c b/arch/arm64/src/rk3576/rk3576_boot.c
+index d2fb5605..128e8a22 100644
+--- a/arch/arm64/src/rk3576/rk3576_boot.c
++++ b/arch/arm64/src/rk3576/rk3576_boot.c
+@@ -106,7 +106,7 @@ const struct arm_mmu_config g_mmu_config =
+ 
+ void arm64_el_init(void)
+ {
+-  /* ★ 清除 U-Boot 遗留的 HCR_EL2.TGE。
++  /* ★ 清除 U-Boot 遗留的 HCR_EL2 残留位：TGE 与 FMO/IMO/AMO。
+    *
+    * 现象：从 U-Boot 的 booti 进入后，汇编启动到 EL2->EL1 的 eret 就崩，
+    *       U-Boot 的 EL2 向量报 esr 0x3a000000（EC=0xE，Illegal Execution
+@@ -128,6 +128,27 @@ void arm64_el_init(void)
+    *       "12E2- Boot from EL2 abcd2RT*4>e- Boot from EL1 fgh...i"，
+    *       其中 T 表示读到 TGE=1，* 之后 eret 立即成功。
+    *
++   * ★★ 第二个残留位：FMO/IMO/AMO（bit 3/4/5）—— 同源、同样致命。
++   *
++   * 现象：TGE 修好后 OS 能一路初始化完成（堆、GIC、arch timer、
++   *       nx_bringup 全过），进入空闲循环打印出第一个 '.'，
++   *       随即崩在 U-Boot 的 EL2 向量：
++   *
++   *           "Synchronous Abort" handler, esr 0x02000000
++   *           * PC = 0000000040200c98        （镜像范围之外的零内存）
++   *
++   * 定位：在进空闲循环前把三个系统寄存器打出来，全部正常 ——
++   *           VBAR_EL1  = 0x404a7000   （等于 _vector_table，向量表没问题）
++   *           CurrentEL = 1            （确实在 EL1）
++   *           DAIF      = 0x240        （D=1 F=1，但 I=0，IRQ 已打开）
++   *       向量表对、异常级对、IRQ 开着，异常却被 EL2 接走 ——
++   *       在架构上只有一种可能：HCR_EL2.IMO=1 把物理 IRQ 路由到了 EL2。
++   *       U-Boot 在 EL2 运行时置这几位以便自己接管中断，交接时没清。
++   *       第一次 arch timer 中断到达即跳进 U-Boot 已失效的 IRQ 路径，
++   *       落到一片零内存，再触发同步异常，于是打出上面那份转储。
++   *
++   * 通用层同样不管这三位（arm64_boot.c 只 |= RW/ATA），所以必须在这里清。
++   *
+    * 本函数是 arm64_head.S 里 "Platform hook for highest EL" 的回调，
+    * 在 switch_el 之前、最高 EL 上执行，正是清理 bootloader 残留的位置。
+    */
+@@ -137,7 +158,9 @@ void arm64_el_init(void)
+   if (arm64_current_el() == MODE_EL2)
+     {
+       reg = read_sysreg(hcr_el2);
+-      reg &= ~HCR_TGE_BIT;
++      reg &= ~(HCR_TGE_BIT |                    /* 允许 eret 到 EL1     */
++               HCR_FMO_BIT | HCR_IMO_BIT |      /* FIQ / IRQ 交回 EL1   */
++               HCR_AMO_BIT);                    /* SError 交回 EL1      */
+       write_sysreg(reg, hcr_el2);
+       UP_ISB();
+     }
+@@ -178,7 +201,9 @@ void arm64_chip_boot(void)
+    */
+ 
+   arm64_earlyserialinit();
++
+ #endif
++
+ }
+ 
+ #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 -- 
 2.43.0
 
