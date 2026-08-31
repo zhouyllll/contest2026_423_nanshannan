@@ -29,6 +29,7 @@
 #include <sys/mount.h>
 #include <debug.h>
 #include <errno.h>
+#include <syslog.h>
 #include <nuttx/board.h>
 #include "kickpi_k7.h"
 
@@ -48,9 +49,11 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#ifdef CONFIG_FS_PROCFS
+#if defined(CONFIG_FS_PROCFS) || defined(CONFIG_DEV_GPIO)
   int ret;
+#endif
 
+#ifdef CONFIG_FS_PROCFS
   /* 挂载 procfs。
    *
    * CONFIG_NSH_ARCHINIT=y 时 NSH 不会自己挂载 /proc，改由本函数负责
@@ -69,7 +72,19 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-  /* TODO(M3+)：GPIO、存储、网络等外设的注册点。 */
+#ifdef CONFIG_DEV_GPIO
+  /* 注册板上 GPIO 为 /dev/gpoutN。同样不作为致命错误 —— GPIO 不可用时
+   * 串口控制台仍应能进入，便于继续排查。
+   */
+
+  ret = kickpi_k7_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: GPIO 初始化失败: %d\n", ret);
+    }
+#endif
+
+  /* TODO(M3+)：存储、网络等外设的注册点。 */
 
   return OK;
 }

@@ -36,5 +36,17 @@
  * Public Functions Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_DEV_GPIO
+/****************************************************************************
+ * Name: kickpi_k7_gpio_initialize
+ *
+ * Description:
+ *   注册板上 GPIO 输出引脚为 /dev/gpioN。由 board_app_initialize() 调用。
+ *
+ ****************************************************************************/
+
+int kickpi_k7_gpio_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __VENDOR_ROCKCHIP_BOARDS_RK3576_KICKPI_K7_SRC_KICKPI_K7_H */
