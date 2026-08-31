@@ -29,4 +29,8 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += kickpi_k7_gpio.c
 endif
 
+ifeq ($(CONFIG_RK3576_I2C),y)
+CSRCS += kickpi_k7_i2c.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

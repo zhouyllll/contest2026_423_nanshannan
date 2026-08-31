@@ -48,5 +48,17 @@
 int kickpi_k7_gpio_initialize(void);
 #endif
 
+#ifdef CONFIG_RK3576_I2C
+/****************************************************************************
+ * Name: kickpi_k7_i2c_initialize
+ *
+ * Description:
+ *   初始化板上 I2C 总线并注册为 /dev/i2cN。由 board_app_initialize() 调用。
+ *
+ ****************************************************************************/
+
+int kickpi_k7_i2c_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __VENDOR_ROCKCHIP_BOARDS_RK3576_KICKPI_K7_SRC_KICKPI_K7_H */

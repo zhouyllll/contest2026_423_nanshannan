@@ -49,7 +49,8 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#if defined(CONFIG_FS_PROCFS) || defined(CONFIG_DEV_GPIO)
+#if defined(CONFIG_FS_PROCFS) || defined(CONFIG_DEV_GPIO) || \
+    defined(CONFIG_RK3576_I2C)
   int ret;
 #endif
 
@@ -81,6 +82,14 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: GPIO 初始化失败: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RK3576_I2C
+  ret = kickpi_k7_i2c_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: I2C 初始化失败: %d\n", ret);
     }
 #endif
 
