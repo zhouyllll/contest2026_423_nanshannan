@@ -39,6 +39,7 @@
 #include <nuttx/drivers/drivers.h>
 
 #include "rk3576_power.h"
+#include "rk3576_sai.h"
 #include "rk3576_sdhci.h"
 #include "kickpi_k7.h"
 
@@ -202,6 +203,26 @@ int board_app_initialize(uintptr_t arg)
                    ? "  ← 全 0/全 F，域未开或基址不对" : "  ← 域已就绪");
         }
     }
+
+#ifdef CONFIG_RK3576_SAI
+  /* 音频前置链路：PD_AUDIO 电源域 + 三路时钟 + 引脚复用，读版本自检。
+   * 传输逻辑（i2s_dev_s）与 ES8388 codec 接入在此之后。
+   */
+
+  ret = rk3576_sai_probe();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: SAI 探测失败: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_AUDIO_ES8388) && defined(CONFIG_RK3576_SAI)
+  ret = kickpi_k7_audio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 音频初始化失败: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_INPUT_GT9XX
   ret = kickpi_k7_touch_initialize();

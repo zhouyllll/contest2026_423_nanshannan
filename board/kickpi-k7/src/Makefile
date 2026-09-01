@@ -37,4 +37,8 @@ ifeq ($(CONFIG_INPUT_GT9XX),y)
 CSRCS += kickpi_k7_touch.c
 endif
 
+ifeq ($(CONFIG_AUDIO_ES8388),y)
+CSRCS += kickpi_k7_audio.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

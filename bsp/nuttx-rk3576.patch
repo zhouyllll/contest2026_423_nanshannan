@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 01/12] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 01/14] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 02/12] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 02/14] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1363,7 +1363,7 @@ index 559489f6..d2fb5605 100644
 From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:38:15 +0800
-Subject: [PATCH 03/12] arm64/rk3576: clear U-Boot's leftover
+Subject: [PATCH 03/14] arm64/rk3576: clear U-Boot's leftover
  HCR_EL2.{IMO,FMO,AMO}; fix load address
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1490,7 +1490,7 @@ index d2fb5605..128e8a22 100644
 From 1a226e049212fce50e0724ee37b6671ac0f23e23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:50:02 +0800
-Subject: [PATCH 04/12] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
+Subject: [PATCH 04/14] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
  =?UTF-8?q?=5FEL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
  =?UTF-8?q?=E4=B8=81=E7=9A=84=E5=85=B3=E7=B3=BB?=
 MIME-Version: 1.0
@@ -1535,7 +1535,7 @@ index 128e8a22..f76d45cb 100644
 From 509d2fa1a06f4560ce252d7cc6a4d507ea7bd6dc Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 23:18:55 +0800
-Subject: [PATCH 05/12] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
+Subject: [PATCH 05/14] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
  =?UTF-8?q?=20=E9=A9=B1=E5=8A=A8=EF=BC=88Rockchip=20GPIO=20v2=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1989,7 +1989,7 @@ index 00000000..2fe55c92
 From 895f1f4e4df1ffb6dc7c665adb230ea472f48600 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 00:43:14 +0800
-Subject: [PATCH 06/12] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
+Subject: [PATCH 06/14] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
  =?UTF-8?q?=E3=80=81=E5=BC=95=E8=84=9A=E5=A4=8D=E7=94=A8=E4=B8=8E=20I2C=20?=
  =?UTF-8?q?=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
@@ -3602,7 +3602,7 @@ index 00000000..8d4d6561
 From 0efe6a8352599f5b577eda2598ab46844332a791 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:24:26 +0800
-Subject: [PATCH 07/12] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
+Subject: [PATCH 07/14] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
  =?UTF-8?q?=20(dwcmshc/SDHCI)=20=E5=91=BD=E4=BB=A4=E9=80=9A=E8=B7=AF?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -4324,7 +4324,7 @@ index 00000000..971084de
 From 19f41551f493da28c0756c5e83a0850a0bcf9aae Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:29:46 +0800
-Subject: [PATCH 08/12] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
+Subject: [PATCH 08/14] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
  =?UTF-8?q?=E9=80=9A=E8=B7=AF=E6=89=93=E9=80=9A=EF=BC=88CMD9/CMD7/CMD17=20?=
  =?UTF-8?q?+=20PIO=20=E8=AF=BB=E5=9D=97=EF=BC=89?=
 MIME-Version: 1.0
@@ -4534,7 +4534,7 @@ index cd0d10dc..99c4ecc0 100644
 From 98b2a2df090330a6d91d6f52c098751b1697768a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 13:13:58 +0800
-Subject: [PATCH 09/12] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
+Subject: [PATCH 09/14] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
  =?UTF-8?q?=20sdio=5Fdev=5Fs=EF=BC=8C/dev/mmcsd0=20=E5=8F=AF=E7=94=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -5263,7 +5263,7 @@ index 971084de..c0f64978 100644
 From 3a65d6b63b5febca4827bd7fecd8d2145adb51a0 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:07:47 +0800
-Subject: [PATCH 10/12] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
+Subject: [PATCH 10/14] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
  =?UTF-8?q?=E5=A4=87=E8=AF=BB=E9=80=9A=EF=BC=881=20=E4=BD=8D=20@50MHz?=
  =?UTF-8?q?=EF=BC=89=EF=BC=8C4=20=E4=BD=8D=E5=BE=85=E4=BF=AE?=
 MIME-Version: 1.0
@@ -5486,7 +5486,7 @@ index a3b84e47..a2996f1a 100644
 From 84d0c755aa873b306fefd87a20e4c2e0abccf064 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:14:24 +0800
-Subject: [PATCH 11/12] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
+Subject: [PATCH 11/14] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
  =?UTF-8?q?=E6=80=BB=E7=BA=BF=E6=89=93=E9=80=9A=EF=BC=8850MHz=EF=BC=89?=
  =?UTF-8?q?=EF=BC=8C=E6=A0=B9=E5=9B=A0=E6=98=AF=E8=83=BD=E5=8A=9B=E5=A3=B0?=
  =?UTF-8?q?=E6=98=8E?=
@@ -5587,7 +5587,7 @@ index a2996f1a..2206c8ab 100644
 From 5250326bc4b5ede69c28dea6feaf51d0ae74e46a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:27:58 +0800
-Subject: [PATCH 12/12] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
+Subject: [PATCH 12/14] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F(PMU)=E4=B8=8E=20GPIO=20=E4=B8=AD?=
  =?UTF-8?q?=E6=96=AD=EF=BC=8C=E4=B8=BA=E6=98=BE=E7=A4=BA=E4=B8=8E=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E9=93=BA=E8=B7=AF?=
@@ -6287,6 +6287,913 @@ index 00000000..80545549
 +bool rk3576_power_is_on(int domain);
 +
 +#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_POWER_H */
+-- 
+2.43.0
+
+
+From 40634c8959141615d593598f97b5c70597d2039d Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 15:41:21 +0800
+Subject: [PATCH 13/14] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
+ =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F=E7=BC=96=E5=8F=B7=E4=B8=8E=E6=AF=8F?=
+ =?UTF-8?q?=E5=9F=9F=E7=9A=84=20req=20=E5=81=8F=E7=A7=BB?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+两处都是初版写错，尚未上板，故未产生实际故障。
+
+1) 电源域编号是外推的，不是查来的
+   初版按已知的 NVM=5、SDGMAC=6 往后顺推，得到 AUDIO=7、VOP=10、VO0=12。
+   而 include/dt-bindings/power/rockchip,rk3576-power.h 的实际值是
+   USB=7、AUDIO=10、VO0=16、VOP=18 —— 编号并非按语义分组连续排列。
+
+   硬件行为当时侥幸正确：表项与常量用了同一套错编号，且 masks 取自
+   pm-domains.c 的正确条目。直到要新增 PD_AUDIO 才因编号撞车暴露
+   （主线的 AUDIO=10 正是被误用给 VOP 的值）。
+
+   已逐个照抄主线头文件，并在注释中写明不可外推。
+
+2) 漏了每域各自的 req 寄存器偏移
+   Linux 是 pmu->info->req_offset + pd->info->req_offset，本实现只用了
+   前半截。req_offset 为 0 的域（VOP/VO0）恰好正确，而为 0x4 的域
+   （NVM/AUDIO）会把 idle 请求写到别的域的位上。
+   已在 pd_info 中补 req_offset 字段。
+
+顺带收录 PD_AUDIO 的参数，供 SAI 音频接口使用：
+  DOMAIN_RK3576("audio", 0x0, BIT(8), 0, BIT(8), 0x4, BIT(0), BIT(16), BIT(0))
+---
+ arch/arm64/src/rk3576/rk3576_power.c | 29 ++++++++++++++++-----
+ arch/arm64/src/rk3576/rk3576_power.h | 39 ++++++++++++++++++++--------
+ 2 files changed, 51 insertions(+), 17 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_power.c b/arch/arm64/src/rk3576/rk3576_power.c
+index e4a2ec13..6f8e5f23 100644
+--- a/arch/arm64/src/rk3576/rk3576_power.c
++++ b/arch/arm64/src/rk3576/rk3576_power.c
+@@ -92,6 +92,7 @@ struct rk3576_pd_info_s
+   const char *name;
+   uint32_t    pwr_mask;        /* PWR 寄存器里的位            */
+   uint32_t    repair_mask;     /* REPAIR_STATUS 里的位        */
++  uint32_t    req_offset;      /* ★ 每域各自的 req 寄存器偏移 */
+   uint32_t    req_mask;        /* idle 请求位                 */
+   uint32_t    idle_mask;       /* idle 应答/状态位            */
+   uint32_t    clk_ungate_mask; /* 握手期间要解除门控的时钟    */
+@@ -107,23 +108,34 @@ struct rk3576_pd_info_s
+ 
+ static const struct rk3576_pd_info_s g_pd_info[] =
+ {
++  /* 字段顺序：name, pwr, repair, req_offset, req, idle, clk_ungate
++   * 对应 DOMAIN_RK3576(name, p_offset, pwr, status, r_status,
++   *                    r_offset, req, idle, g_mask, wakeup)
++   */
++
+   [RK3576_PD_NVM] =
+   {
+     /* DOMAIN_RK3576("nvm", 0x0, BIT(6), 0, BIT(6), 0x4, BIT(2), BIT(18), BIT(2)) */
+ 
+-    "nvm", 1u << 6,  1u << 6,  1u << 2,  1u << 18, 1u << 2
++    "nvm",   1u << 6,  1u << 6,  0x4, 1u << 2,  1u << 18, 1u << 2
+   },
+-  [RK3576_PD_VOP] =
++  [RK3576_PD_AUDIO] =
+   {
+-    /* DOMAIN_RK3576("vop", 0x0, BIT(11), 0, BIT(11), 0x0, 0x6000, 0x6000, 0x6000) */
++    /* DOMAIN_RK3576("audio", 0x0, BIT(8), 0, BIT(8), 0x4, BIT(0), BIT(16), BIT(0)) */
+ 
+-    "vop", 1u << 11, 1u << 11, 0x6000,   0x6000,   0x6000
++    "audio", 1u << 8,  1u << 8,  0x4, 1u << 0,  1u << 16, 1u << 0
+   },
+   [RK3576_PD_VO0] =
+   {
+     /* DOMAIN_RK3576("vo0", 0x0, BIT(15), 0, BIT(15), 0x0, BIT(11), BIT(11), 0x6800) */
+ 
+-    "vo0", 1u << 15, 1u << 15, 1u << 11, 1u << 11, 0x6800
++    "vo0",   1u << 15, 1u << 15, 0x0, 1u << 11, 1u << 11, 0x6800
++  },
++  [RK3576_PD_VOP] =
++  {
++    /* DOMAIN_RK3576("vop", 0x0, BIT(11), 0, BIT(11), 0x0, 0x6000, 0x6000, 0x6000) */
++
++    "vop",   1u << 11, 1u << 11, 0x0, 0x6000,   0x6000,   0x6000
+   },
+ };
+ 
+@@ -177,7 +189,12 @@ static int pmu_set_idle_request(const struct rk3576_pd_info_s *pd, bool idle)
+       return OK;
+     }
+ 
+-  pmu_write_masked(PMU_REQ_OFFSET, pd->req_mask, idle);
++  /* ★ req 寄存器地址 = 全局 req_offset + 本域各自的偏移。
++   * 漏掉后半截时，req_offset 为 0 的域（VOP/VO0）恰好正确，
++   * 而 0x4 的域（NVM/AUDIO）会写到别的域的请求位上。
++   */
++
++  pmu_write_masked(PMU_REQ_OFFSET + pd->req_offset, pd->req_mask, idle);
+ 
+   target = idle ? pd->idle_mask : 0;
+   for (us = 0; us < PMU_POLL_TIMEOUT_US; us++)
+diff --git a/arch/arm64/src/rk3576/rk3576_power.h b/arch/arm64/src/rk3576/rk3576_power.h
+index 80545549..84de6b0f 100644
+--- a/arch/arm64/src/rk3576/rk3576_power.h
++++ b/arch/arm64/src/rk3576/rk3576_power.h
+@@ -26,18 +26,35 @@
+ #include <nuttx/config.h>
+ #include <stdbool.h>
+ 
+-/* 电源域编号，取自 include/dt-bindings/power/rockchip,rk3576-power.h */
++/* 电源域编号。
++ *
++ * ★ 必须逐个照抄 include/dt-bindings/power/rockchip,rk3576-power.h，
++ *   不能按已知的几个外推 —— 编号不是连续排列的语义分组。
++ *   本文件初版就是外推出来的，把 AUDIO 写成 7（实为 USB）、
++ *   VOP 写成 10（实为 AUDIO）、VO0 写成 12（实为 VEPU1）。
++ *   当时硬件行为侥幸正确（表项与常量用了同一套错编号），
++ *   直到要新增 PD_AUDIO 才因编号撞车暴露。
++ */
+ 
+-#define RK3576_PD_NPU       0
+-#define RK3576_PD_NVM       5    /* eMMC 所在域（U-Boot 已开）*/
+-#define RK3576_PD_SDGMAC    6
+-#define RK3576_PD_AUDIO     7
+-#define RK3576_PD_PHP       8
+-#define RK3576_PD_SUBPHP    9
+-#define RK3576_PD_VOP      10    /* 显示控制器 */
+-#define RK3576_PD_VO1      11
+-#define RK3576_PD_VO0      12    /* MIPI DSI 主机 */
+-#define RK3576_PD_USB      13
++#define RK3576_PD_NPU        0
++#define RK3576_PD_NPUTOP     1
++#define RK3576_PD_NPU0       2
++#define RK3576_PD_NPU1       3
++#define RK3576_PD_GPU        4
++#define RK3576_PD_NVM        5    /* eMMC（U-Boot 已开）      */
++#define RK3576_PD_SDGMAC     6
++#define RK3576_PD_USB        7
++#define RK3576_PD_PHP        8
++#define RK3576_PD_SUBPHP     9
++#define RK3576_PD_AUDIO     10    /* SAI 音频接口             */
++#define RK3576_PD_VEPU0     11
++#define RK3576_PD_VEPU1     12
++#define RK3576_PD_VPU       13
++#define RK3576_PD_VDEC      14
++#define RK3576_PD_VI        15
++#define RK3576_PD_VO0       16    /* MIPI DSI 主机            */
++#define RK3576_PD_VO1       17
++#define RK3576_PD_VOP       18    /* 显示控制器               */
+ 
+ /****************************************************************************
+  * Name: rk3576_power_on
+-- 
+2.43.0
+
+
+From d632b41753c213abee75ccaedbe6a88659d68b89 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 15:59:50 +0800
+Subject: [PATCH 14/14] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
+ =?UTF-8?q?=20=E9=9F=B3=E9=A2=91=E6=8E=A5=E5=8F=A3=E9=A9=B1=E5=8A=A8?=
+ =?UTF-8?q?=EF=BC=88PIO=20=E5=8F=91=E9=80=81=EF=BC=89?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+RK3576 的音频接口是 SAI（Serial Audio Interface），不是传统 I2S。
+寄存器定义取自 Linux sound/soc/rockchip/rockchip_sai.h；板上 ES8388
+codec 接在 SAI1（原厂 dtb 的 es8388-sound 节点 rockchip,cpu 指向
+sai@2a610000），codec 驱动用上游现成的 drivers/audio/es8388.c。
+
+分两部分
+  rk3576_sai_probe()       PD_AUDIO 电源域 + 三路时钟 + 引脚复用 + 版本自检
+  rk3576_sai_initialize()  i2s_dev_s 实现（12 个方法，比 sdio 的 28 个小）
+
+★ PIO 而非 DMA
+  SAI 的 DMA 走 ARM PL330，NuttX 没有该驱动。与 eMMC 同样的取舍：
+  先用 PIO 把通路走通、证明能出声，DMA 留到提性能时再补。
+
+★ 三路时钟都要开
+  MCLK_SRC / MCLK / HCLK 分别是 CLKGATE_CON(8) 的 bit4/5/6。
+  只开 HCLK 时寄存器读写正常但音频时钟不动 —— 与 I2C 当初
+  "PCLK 通而功能时钟没开"是同一类陷阱，自检读到版本号也不能
+  说明 MCLK 已就绪。
+
+★ 寄存器位定义初版写错，已按原文改正
+  XFER 的使能位不按 TX/RX/FS 的名字顺序排：
+    bit0=CLK 使能  bit1=FS 使能  bit2=TX 使能  bit3=RX 使能
+  初版把 TXS 写成 bit0（实为 CLK 使能）—— 又一次按直觉推而没照抄。
+
+配置项
+  ES8388_WORKER_STACKSIZE 由 Kconfig 默认的 2048 提到 8192。
+  2048 正是 ostest 的 FPU 线程栈溢出时用的值（DEBUG-CASES 案例记录），
+  arm64 栈帧更大，音频工作线程同样吃紧，先按 8192 给足。
+---
+ arch/arm64/src/rk3576/Kconfig                 |  13 +
+ arch/arm64/src/rk3576/Make.defs               |   4 +
+ .../src/rk3576/hardware/rk3576_memorymap.h    |   7 +
+ arch/arm64/src/rk3576/hardware/rk3576_sai.h   | 126 +++++
+ arch/arm64/src/rk3576/rk3576_sai.c            | 432 ++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_sai.h            |  63 +++
+ 6 files changed, 645 insertions(+)
+ create mode 100644 arch/arm64/src/rk3576/hardware/rk3576_sai.h
+ create mode 100644 arch/arm64/src/rk3576/rk3576_sai.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_sai.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index ccc5574c..dbaa1315 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -53,6 +53,19 @@ config RK3576_SDHCI
+ 		字段为 200MHz，与 dtsi 的 assigned-clock-rates 一致，说明
+ 		PD_NVM 电源域与五路时钟都已就绪。
+ 
++config RK3576_SAI
++	bool "SAI 音频接口"
++	default n
++	---help---
++		RK3576 的音频接口是 SAI（Serial Audio Interface），不是传统
++		I2S，寄存器布局取自 Linux sound/soc/rockchip/rockchip_sai.c。
++
++		板上 ES8388 codec 接在 SAI1（0x2a610000），codec 驱动用上游
++		现成的 drivers/audio/es8388.c。
++
++		当前只实现 rk3576_sai_probe()：打开 PD_AUDIO 电源域与三路时钟、
++		配置引脚复用，读版本寄存器自检。i2s_dev_s 与传输逻辑后续补。
++
+ endmenu # Rockchip RK3576 Peripheral Selection
+ 
+ endif # ARCH_CHIP_RK3576
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index f364fbf0..ef1a2f98 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -30,6 +30,10 @@ include common/Make.defs
+ CHIP_CSRCS  = rk3576_boot.c rk3576_serial.c rk3576_gpio.c
+ CHIP_CSRCS += rk3576_cru.c rk3576_pinmux.c rk3576_power.c
+ 
++ifeq ($(CONFIG_RK3576_SAI),y)
++CHIP_CSRCS += rk3576_sai.c
++endif
++
+ ifeq ($(CONFIG_RK3576_SDHCI),y)
+ CHIP_CSRCS += rk3576_sdhci.c
+ endif
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h b/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+index 771670c9..099f0351 100644
+--- a/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
++++ b/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+@@ -171,6 +171,13 @@
+ /* PMU / SRAM */
+ 
+ #define RK3576_PMU_ADDR        0x27380000
++
++/* SAI 音频接口。板上 ES8388 codec 接的是 SAI1（原厂 dtb 的
++ * es8388-sound 节点 rockchip,cpu 指向 sai@2a610000）。
++ */
++
++#define RK3576_SAI1_ADDR       0x2a610000
++#define RK3576_SAI1_IRQ        220   /* GIC_SPI 188 */
+ #define RK3576_SRAM_ADDR       0x3ff88000
+ 
+ #endif /* __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_MEMORYMAP_H */
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_sai.h b/arch/arm64/src/rk3576/hardware/rk3576_sai.h
+new file mode 100644
+index 00000000..4d45b3eb
+--- /dev/null
++++ b/arch/arm64/src/rk3576/hardware/rk3576_sai.h
+@@ -0,0 +1,126 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/hardware/rk3576_sai.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_SAI_H
++#define __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_SAI_H
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* RK3576 的音频接口是 SAI（Serial Audio Interface），不是传统 I2S。
++ *
++ * ★ 出处：主线 rk3576.dtsi
++ *     sai1: sai@2a610000 {
++ *         compatible = "rockchip,rk3576-sai";
++ *         clocks = <&cru MCLK_SAI1_8CH>, <&cru HCLK_SAI1_8CH>;
++ *         interrupts = <GIC_SPI 188 IRQ_TYPE_LEVEL_HIGH>;   → IRQ 220
++ *         power-domains = <&power RK3576_PD_AUDIO>;
++ *         dmas = <&dmac0 2>, <&dmac0 3>;   （PL330）
++ *     };
++ *   寄存器定义取自 Linux sound/soc/rockchip/rockchip_sai.h。
++ *
++ * ★ 板上连接（原厂 dtb 的 es8388-sound：rockchip,cpu = sai1）：
++ *     SAI1 ←→ ES8388 codec @I2C3:0x10
++ *     引脚 sai1m0：sclk=gpio4-3  lrck=gpio4-5  sdo0=gpio4-7  sdi0=gpio4-11
++ *          功能号均为 1
++ */
++
++#define RK3576_SAI_TXCR        0x0000  /* 发送控制           */
++#define RK3576_SAI_FSCR        0x0004  /* 帧同步             */
++#define RK3576_SAI_RXCR        0x0008  /* 接收控制           */
++#define RK3576_SAI_MONO_CR     0x000c
++#define RK3576_SAI_XFER        0x0010  /* 传输使能/状态      */
++#define RK3576_SAI_CLR         0x0014  /* 复位               */
++#define RK3576_SAI_CKR         0x0018  /* 时钟分频           */
++#define RK3576_SAI_TXFIFOLR    0x001c  /* 发送 FIFO 水位     */
++#define RK3576_SAI_RXFIFOLR    0x0020
++#define RK3576_SAI_DMACR       0x0024
++#define RK3576_SAI_INTCR       0x0028
++#define RK3576_SAI_INTSR       0x002c
++#define RK3576_SAI_TXDR        0x0030  /* 发送数据端口(PIO)  */
++#define RK3576_SAI_RXDR        0x0034
++#define RK3576_SAI_PATH_SEL    0x0038
++#define RK3576_SAI_TX_DATA_CNT 0x005c
++#define RK3576_SAI_RX_DATA_CNT 0x0060
++#define RK3576_SAI_STATUS      0x006c
++#define RK3576_SAI_VERSION     0x0070  /* 只读，版本号       */
++
++/* XFER —— 传输使能与空闲状态。
++ *
++ * ★ 使能位不是按 "TX/RX/FS" 的名字顺序排的，逐个照抄 Linux 的
++ *   sound/soc/rockchip/rockchip_sai.h，不要按直觉推：
++ *     bit0 = CLK 使能，bit1 = FS 使能，bit2 = TX 使能，bit3 = RX 使能
++ *   本文件初版把 TXS 写成了 bit0（实为 CLK 使能）。
++ */
++
++#define SAI_XFER_CLK_EN        (1 << 0)   /* 时钟输出使能       */
++#define SAI_XFER_FSS_EN        (1 << 1)   /* 帧同步使能         */
++#define SAI_XFER_TXS_EN        (1 << 2)   /* 发送使能           */
++#define SAI_XFER_RXS_EN        (1 << 3)   /* 接收使能           */
++#define SAI_XFER_TX_CNT_EN     (1 << 4)
++#define SAI_XFER_RX_CNT_EN     (1 << 5)
++#define SAI_XFER_FS_IDLE       (1 << 6)   /* 只读：帧同步空闲   */
++#define SAI_XFER_TX_IDLE       (1 << 7)   /* 只读：发送空闲     */
++#define SAI_XFER_RX_IDLE       (1 << 8)   /* 只读：接收空闲     */
++
++/* CLR —— 复位，写 1 后自清，需轮询归零 */
++
++#define SAI_CLR_TXC            (1 << 0)
++#define SAI_CLR_RXC            (1 << 1)
++#define SAI_CLR_FSC            (1 << 2)
++
++/* TXCR / RXCR 共用同一套位定义（原文前缀 SAI_XCR_，X = T 或 R）。
++ * 括号里的参数都是"实际值"，宏内部会减一。
++ */
++
++#define SAI_XCR_CSR(x)         (((x) - 1) << 20)  /* 通道段数 */
++#define SAI_XCR_SJM_L          (1 << 19)          /* 左对齐   */
++#define SAI_XCR_SJM_R          0                  /* 右对齐   */
++#define SAI_XCR_FBM_LSB        (1 << 18)
++#define SAI_XCR_FBM_MSB        0                  /* MSB 在先 */
++#define SAI_XCR_SNB(x)         (((x) - 1) << 11)  /* 每帧槽数 */
++#define SAI_XCR_VDJ_L          (1 << 10)
++#define SAI_XCR_VDJ_R          0
++#define SAI_XCR_SBW(x)         (((x) - 1) << 5)   /* 槽位宽   */
++#define SAI_XCR_VDW(x)         (((x) - 1) << 0)   /* 有效数据位宽 */
++
++/* FSCR —— 帧同步 */
++
++#define SAI_FSCR_EDGE_DUAL     (1 << 24)
++#define SAI_FSCR_EDGE_RISING   0
++#define SAI_FSCR_FPW(x)        (((x) - 1) << 12)  /* 帧脉冲宽 */
++#define SAI_FSCR_FW(x)         (((x) - 1) << 0)   /* 帧宽     */
++
++/* CKR —— 时钟生成 */
++
++#define SAI_CKR_MDIV(x)        (((x) - 1) << 3)   /* MCLK 分频 */
++#define SAI_CKR_MSS_SLAVE      (1 << 2)
++#define SAI_CKR_MSS_MASTER     0                  /* 主机模式  */
++#define SAI_CKR_CKP_INVERTED   (1 << 1)
++#define SAI_CKR_CKP_NORMAL     0
++#define SAI_CKR_FSP_INVERTED   (1 << 0)
++#define SAI_CKR_FSP_NORMAL     0
++
++#define RK3576_SAI_BASECLK_HZ  12288000   /* dtb 的 assigned-clock-rates */
++
++#endif /* __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_SAI_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_sai.c b/arch/arm64/src/rk3576/rk3576_sai.c
+new file mode 100644
+index 00000000..549190e9
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_sai.c
+@@ -0,0 +1,432 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_sai.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* RK3576 SAI（Serial Audio Interface）。
++ *
++ * 两部分：
++ *   rk3576_sai_probe()      前置链路（电源域 + 三路时钟 + 引脚复用）与自检
++ *   rk3576_sai_initialize() i2s_dev_s 实现，供 drivers/audio/es8388.c 使用
++ *
++ * ★ 当前是 PIO 发送，不用 DMA。
++ *
++ *   SAI 的 DMA 走 ARM PL330（dmas = <&dmac0 2>），而 NuttX 没有 PL330
++ *   驱动。与 eMMC 同样的取舍：先用 PIO 把通路走通、证明能出声，
++ *   DMA 留到需要提性能时再补。代价是发送期间占着 CPU。
++ *
++ *   PIO 发送在 i2s_send 里同步完成：把整个 apb 缓冲区灌进 FIFO 后
++ *   才回调。上层（audio 框架）本就允许 i2s_send 阻塞。
++ *
++ * ★ 只做发送（喇叭），不做接收（咪头）。
++ *   收发共用时钟与帧同步配置，接收路径补起来不难，但没有验证手段时
++ *   写了也是负担 —— 先让喇叭出声，有了可听的判据再加录音。
++ */
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <errno.h>
++#include <inttypes.h>
++#include <stdint.h>
++#include <syslog.h>
++#include <debug.h>
++
++#include <nuttx/arch.h>
++#include <nuttx/audio/audio.h>
++#include <nuttx/audio/i2s.h>
++#include <nuttx/mutex.h>
++
++#include "arm64_internal.h"
++#include "rk3576_sai.h"
++#include "rk3576_cru.h"
++#include "rk3576_pinmux.h"
++#include "rk3576_power.h"
++#include "hardware/rk3576_sai.h"
++#include "hardware/rk3576_memorymap.h"
++
++#ifdef CONFIG_RK3576_SAI
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++#define SAI1_BASE   RK3576_SAI1_ADDR
++
++/* 时钟。出处：Linux drivers/clk/rockchip/clk-rk3576.c
++ *   COMPOSITE(MCLK_SAI1_8CH_SRC, ... CLKGATE_CON(8), 4)
++ *   COMPOSITE_NODIV(MCLK_SAI1_8CH, ... CLKSEL_CON(46), 11, 1, ... CLKGATE_CON(8), 5)
++ *   GATE(HCLK_SAI1_8CH, "hclk_sai1_8ch", "hclk_audio_root", CLKGATE_CON(8), 6)
++ */
++
++#define SAI1_GATE_CON        8
++#define SAI1_GATE_MCLK_SRC   4
++#define SAI1_GATE_MCLK       5
++#define SAI1_GATE_HCLK       6
++
++/* 引脚复用 sai1m0，出处：原厂 dtb 的 pinctrl 节点，功能号均为 1 */
++
++#define SAI1_PIN_BANK        4
++#define SAI1_PIN_SCLK        3
++#define SAI1_PIN_LRCK        5
++#define SAI1_PIN_SDO0        7
++#define SAI1_PIN_SDI0       11
++#define SAI1_PIN_FUNC        1
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint32_t sai_getreg(uint32_t off)
++{
++  return getreg32(SAI1_BASE + off);
++}
++
++static inline void sai_putreg(uint32_t off, uint32_t val)
++{
++  putreg32(val, SAI1_BASE + off);
++}
++
++/****************************************************************************
++ * Name: sai_reset
++ *
++ * Description:
++ *   复位发送通道与帧同步。复位位写 1 后自清，要轮询等它归零 ——
++ *   不等就配置后续寄存器，配置会被复位过程冲掉。
++ *
++ ****************************************************************************/
++
++static void sai_reset(void)
++{
++  int us;
++
++  sai_putreg(RK3576_SAI_CLR, SAI_CLR_TXC | SAI_CLR_FSC);
++
++  for (us = 0; us < 10000; us++)
++    {
++      if ((sai_getreg(RK3576_SAI_CLR) & (SAI_CLR_TXC | SAI_CLR_FSC)) == 0)
++        {
++          return;
++        }
++
++      up_udelay(1);
++    }
++
++  syslog(LOG_ERR, "SAI: 复位超时 CLR=0x%08" PRIx32 "\n",
++         sai_getreg(RK3576_SAI_CLR));
++}
++
++/****************************************************************************
++ * i2s_dev_s 实现
++ ****************************************************************************/
++
++struct rk3576_sai_dev_s
++{
++  struct i2s_dev_s dev;          /* 必须是第一个成员 */
++  mutex_t          lock;
++  uint32_t         samplerate;
++  int              datawidth;
++  int              channels;
++};
++
++static struct rk3576_sai_dev_s g_sai1;
++
++/****************************************************************************
++ * Name: sai_configure
++ *
++ * Description:
++ *   按当前的采样率/位宽/声道数配置 SAI。
++ *
++ *   ★ 位宽相关的三个字段含义不同，容易混：
++ *       VDW  有效数据位宽 —— 实际样本多少位（16）
++ *       SBW  槽位宽       —— 一个时隙占多少位（这里同为 16）
++ *       SNB  每帧槽数     —— 立体声为 2
++ *     VDW < SBW 时用 VDJ 决定数据在槽内左对齐还是右对齐。
++ *
++ *   ★ 分频：SCLK = MCLK / MDIV，而一帧需要 SNB * SBW 个 SCLK。
++ *     故 MDIV = MCLK / (samplerate * SNB * SBW)。
++ *     MCLK 由 CRU 定为 12.288MHz（dtb 的 assigned-clock-rates），
++ *     48kHz 立体声 16 位时 MDIV = 12288000/(48000*2*16) = 8。
++ *
++ ****************************************************************************/
++
++static void sai_configure(struct rk3576_sai_dev_s *priv)
++{
++  uint32_t slots = priv->channels;
++  uint32_t sbw   = priv->datawidth;
++  uint32_t mdiv;
++  uint32_t txcr;
++
++  sai_reset();
++
++  /* I2S 标准格式：MSB 在先、右对齐、帧同步为低表示左声道 */
++
++  txcr = SAI_XCR_VDW(priv->datawidth) |
++         SAI_XCR_SBW(sbw) |
++         SAI_XCR_SNB(slots) |
++         SAI_XCR_CSR(1) |          /* 单条数据线 sdo0 */
++         SAI_XCR_FBM_MSB |
++         SAI_XCR_VDJ_R;
++  sai_putreg(RK3576_SAI_TXCR, txcr);
++
++  /* 帧宽 = 每帧总位数；脉冲宽取一半，即标准 I2S 的 50% 占空 */
++
++  sai_putreg(RK3576_SAI_FSCR,
++             SAI_FSCR_EDGE_RISING |
++             SAI_FSCR_FW(slots * sbw) |
++             SAI_FSCR_FPW(sbw));
++
++  mdiv = RK3576_SAI_BASECLK_HZ / (priv->samplerate * slots * sbw);
++  if (mdiv < 1)
++    {
++      mdiv = 1;
++    }
++
++  sai_putreg(RK3576_SAI_CKR,
++             SAI_CKR_MDIV(mdiv) |
++             SAI_CKR_MSS_MASTER |   /* SoC 出时钟，codec 作从机 */
++             SAI_CKR_CKP_NORMAL |
++             SAI_CKR_FSP_NORMAL);
++
++  audinfo("SAI: %" PRIu32 "Hz %dbit %dch mdiv=%" PRIu32 "\n",
++          priv->samplerate, priv->datawidth, priv->channels, mdiv);
++}
++
++static uint32_t rk3576_sai_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
++{
++  struct rk3576_sai_dev_s *priv = (struct rk3576_sai_dev_s *)dev;
++
++  priv->samplerate = rate;
++  return rate;
++}
++
++static uint32_t rk3576_sai_txdatawidth(struct i2s_dev_s *dev, int bits)
++{
++  struct rk3576_sai_dev_s *priv = (struct rk3576_sai_dev_s *)dev;
++
++  priv->datawidth = bits;
++  return bits;
++}
++
++static int rk3576_sai_txchannels(struct i2s_dev_s *dev, uint8_t channels)
++{
++  struct rk3576_sai_dev_s *priv = (struct rk3576_sai_dev_s *)dev;
++
++  priv->channels = channels;
++  return OK;
++}
++
++static uint32_t rk3576_sai_getmclk(struct i2s_dev_s *dev)
++{
++  UNUSED(dev);
++  return RK3576_SAI_BASECLK_HZ;
++}
++
++/****************************************************************************
++ * Name: rk3576_sai_send
++ *
++ * Description:
++ *   PIO 发送一个缓冲区。整块灌完才回调。
++ *
++ *   ★ 使能顺序：先开时钟与帧同步，再开发送。
++ *     反过来的话，发送通道会在时钟未起时就开始取数据，FIFO 被抽空，
++ *     表现为播放起始处有杂音。
++ *
++ ****************************************************************************/
++
++static int rk3576_sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
++                           i2s_callback_t callback, void *arg,
++                           uint32_t timeout)
++{
++  struct rk3576_sai_dev_s *priv = (struct rk3576_sai_dev_s *)dev;
++  const uint32_t *samples;
++  size_t nwords;
++  size_t i;
++  int us;
++  int ret;
++
++  UNUSED(timeout);
++
++  ret = nxmutex_lock(&priv->lock);
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  sai_configure(priv);
++
++  sai_putreg(RK3576_SAI_XFER, SAI_XFER_CLK_EN | SAI_XFER_FSS_EN);
++  sai_putreg(RK3576_SAI_XFER,
++             SAI_XFER_CLK_EN | SAI_XFER_FSS_EN | SAI_XFER_TXS_EN);
++
++  samples = (const uint32_t *)(apb->samp + apb->curbyte);
++  nwords  = (apb->nbytes - apb->curbyte) / 4;
++
++  for (i = 0; i < nwords; i++)
++    {
++      /* FIFO 满时等一等。SAI 的 TXFIFOLR 给出当前水位，
++       * 深度按 32 个字计（保守取值，宁可多等）。
++       */
++
++      for (us = 0; us < 100000; us++)
++        {
++          if ((sai_getreg(RK3576_SAI_TXFIFOLR) & 0x3f) < 30)
++            {
++              break;
++            }
++
++          up_udelay(1);
++        }
++
++      if (us >= 100000)
++        {
++          auderr("SAI: FIFO 满超时，已发 %zu/%zu 字\n", i, nwords);
++          ret = -ETIMEDOUT;
++          break;
++        }
++
++      sai_putreg(RK3576_SAI_TXDR, samples[i]);
++    }
++
++  /* 等 FIFO 排空再停，否则尾部样本会被截断 */
++
++  for (us = 0; us < 100000; us++)
++    {
++      if ((sai_getreg(RK3576_SAI_XFER) & SAI_XFER_TX_IDLE) != 0)
++        {
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  sai_putreg(RK3576_SAI_XFER, 0);
++  nxmutex_unlock(&priv->lock);
++
++  if (callback != NULL)
++    {
++      callback(dev, apb, arg, ret);
++    }
++
++  return ret;
++}
++
++static const struct i2s_ops_s g_sai_ops =
++{
++  .i2s_txchannels      = rk3576_sai_txchannels,
++  .i2s_txsamplerate    = rk3576_sai_txsamplerate,
++  .i2s_txdatawidth     = rk3576_sai_txdatawidth,
++  .i2s_send            = rk3576_sai_send,
++  .i2s_getmclkfrequency = rk3576_sai_getmclk,
++};
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_sai_initialize
++ *
++ * Description:
++ *   返回 i2s_dev_s 句柄，供 es8388_initialize() 使用。
++ *   调用前须先 rk3576_sai_probe() 成功。
++ *
++ ****************************************************************************/
++
++struct i2s_dev_s *rk3576_sai_initialize(int port)
++{
++  struct rk3576_sai_dev_s *priv = &g_sai1;
++
++  if (port != 1)
++    {
++      return NULL;      /* 板上只用 SAI1 */
++    }
++
++  priv->dev.ops    = &g_sai_ops;
++  priv->samplerate = 48000;
++  priv->datawidth  = 16;
++  priv->channels   = 2;
++  nxmutex_init(&priv->lock);
++
++  return &priv->dev;
++}
++
++int rk3576_sai_probe(void)
++{
++  uint32_t version;
++  int ret;
++
++  /* 1) 电源域。SAI 在 PD_AUDIO 里，U-Boot 不会开它 ——
++   *    引导阶段用不到音频。
++   */
++
++  ret = rk3576_power_on(RK3576_PD_AUDIO);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "SAI: PD_AUDIO 上电失败: %d\n", ret);
++      return ret;
++    }
++
++  /* 2) 时钟。三路都要开：源时钟、MCLK、以及供寄存器访问的 HCLK。
++   *
++   *    ★ 只开 HCLK 时寄存器能正常读写，但音频时钟不动 —— 这与 I2C
++   *      当初"PCLK 通而功能时钟没开"是同一类陷阱，自检读得到版本号
++   *      也不能说明 MCLK 已就绪。
++   */
++
++  rk3576_clk_gate(SAI1_GATE_CON, SAI1_GATE_HCLK, true);
++  rk3576_clk_gate(SAI1_GATE_CON, SAI1_GATE_MCLK_SRC, true);
++  rk3576_clk_gate(SAI1_GATE_CON, SAI1_GATE_MCLK, true);
++
++  /* 3) 引脚复用 */
++
++  rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_SCLK, SAI1_PIN_FUNC);
++  rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_LRCK, SAI1_PIN_FUNC);
++  rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_SDO0, SAI1_PIN_FUNC);
++  rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_SDI0, SAI1_PIN_FUNC);
++
++  /* 4) 自检：读版本寄存器。0 或 0xffffffff 说明电源域、HCLK 或
++   *    基址三者之一有问题。
++   */
++
++  version = sai_getreg(RK3576_SAI_VERSION);
++  if (version == 0 || version == 0xffffffff)
++    {
++      syslog(LOG_ERR,
++             "SAI: VERSION=0x%08" PRIx32 " —— 电源域/HCLK/基址有问题\n",
++             version);
++      return -ENODEV;
++    }
++
++  syslog(LOG_INFO,
++         "SAI1: VERSION=0x%08" PRIx32 " XFER=0x%08" PRIx32
++         " 复用 sclk=gpio%d-%d→%d lrck→%d sdo0→%d sdi0→%d\n",
++         version, sai_getreg(RK3576_SAI_XFER),
++         SAI1_PIN_BANK, SAI1_PIN_SCLK,
++         rk3576_pinmux_get(SAI1_PIN_BANK, SAI1_PIN_SCLK),
++         rk3576_pinmux_get(SAI1_PIN_BANK, SAI1_PIN_LRCK),
++         rk3576_pinmux_get(SAI1_PIN_BANK, SAI1_PIN_SDO0),
++         rk3576_pinmux_get(SAI1_PIN_BANK, SAI1_PIN_SDI0));
++  return OK;
++}
++
++#endif /* CONFIG_RK3576_SAI */
+diff --git a/arch/arm64/src/rk3576/rk3576_sai.h b/arch/arm64/src/rk3576/rk3576_sai.h
+new file mode 100644
+index 00000000..4c5ceb1c
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_sai.h
+@@ -0,0 +1,63 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_sai.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_SAI_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_SAI_H
++
++#include <nuttx/config.h>
++#include <stdint.h>
++
++struct i2s_dev_s;
++
++/****************************************************************************
++ * Name: rk3576_sai_probe
++ *
++ * Description:
++ *   打开 SAI1 所需的电源域与时钟、配置引脚复用，然后读版本寄存器自检。
++ *
++ *   与完整的 i2s_dev_s 实现分开，是为了先把"电源域 + 时钟 + 复用"这条
++ *   前置链路验证掉 —— 它们出错时的表现都是寄存器读全 0，与驱动逻辑
++ *   的错误无法区分。先确认能读到像样的版本号，后面写传输逻辑才有
++ *   可靠的地基。GPIO 的 VER_ID、eMMC 的 CAP0 用的是同一套思路。
++ *
++ * Returned Value:
++ *   OK；失败返回负的 errno。
++ *
++ ****************************************************************************/
++
++int rk3576_sai_probe(void);
++
++/****************************************************************************
++ * Name: rk3576_sai_initialize
++ *
++ * Description:
++ *   返回 i2s_dev_s 句柄，供 drivers/audio/es8388.c 使用。
++ *   调用前须先 rk3576_sai_probe() 成功。
++ *
++ * Input Parameters:
++ *   port - SAI 实例号。板上 ES8388 接的是 SAI1，只支持 1。
++ *
++ ****************************************************************************/
++
++struct i2s_dev_s *rk3576_sai_initialize(int port);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_SAI_H */
 -- 
 2.43.0
 

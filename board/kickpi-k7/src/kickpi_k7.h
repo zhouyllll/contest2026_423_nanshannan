@@ -72,5 +72,17 @@ int kickpi_k7_i2c_initialize(void);
 int kickpi_k7_touch_initialize(void);
 #endif
 
+#if defined(CONFIG_AUDIO_ES8388) && defined(CONFIG_RK3576_SAI)
+/****************************************************************************
+ * Name: kickpi_k7_audio_initialize
+ *
+ * Description:
+ *   ES8388 codec + SAI1，注册为 /dev/audio/pcm0。
+ *
+ ****************************************************************************/
+
+int kickpi_k7_audio_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __VENDOR_ROCKCHIP_BOARDS_RK3576_KICKPI_K7_SRC_KICKPI_K7_H */
