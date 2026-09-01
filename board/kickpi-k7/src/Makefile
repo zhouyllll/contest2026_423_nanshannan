@@ -33,4 +33,8 @@ ifeq ($(CONFIG_RK3576_I2C),y)
 CSRCS += kickpi_k7_i2c.c
 endif
 
+ifeq ($(CONFIG_INPUT_GT9XX),y)
+CSRCS += kickpi_k7_touch.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

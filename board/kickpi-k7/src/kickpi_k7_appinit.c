@@ -38,6 +38,7 @@
 #include <nuttx/mmcsd.h>
 #include <nuttx/drivers/drivers.h>
 
+#include "rk3576_power.h"
 #include "rk3576_sdhci.h"
 #include "kickpi_k7.h"
 
@@ -166,7 +167,51 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-  /* TODO(M3+)：存储、网络等外设的注册点。 */
+  /* ★ 显示链路第一步：打开 VOP 与 DSI 所在的电源域。
+   *
+   * 与 eMMC 不同，这两个域 U-Boot 不会留给我们 —— 原厂 dtb 里
+   * dsi@27d80000 是 disabled，引导阶段根本没用过 MIPI。
+   *
+   * 验证方式：上电后读 VOP 的寄存器。读到 0 或 0xffffffff 说明域没开
+   * 或基址不对；读到像样的值说明域确实活了。这是先前 GPIO(VER_ID)、
+   * eMMC(CAP0) 用过的同一套自检思路 —— 找一个能一次性证伪多个前提的读数。
+   */
+
+    {
+      int pd;
+
+      pd = rk3576_power_on(RK3576_PD_VOP);
+      if (pd == OK)
+        {
+          pd = rk3576_power_on(RK3576_PD_VO0);
+        }
+
+      if (pd < 0)
+        {
+          syslog(LOG_ERR, "ERROR: 显示电源域上电失败: %d\n", pd);
+        }
+      else
+        {
+          volatile uint32_t *vop = (volatile uint32_t *)0x27d00000ul;
+
+          syslog(LOG_INFO,
+                 "VOP 探测: [0x00]=0x%08" PRIx32 " [0x04]=0x%08" PRIx32
+                 " [0x08]=0x%08" PRIx32 " [0x0c]=0x%08" PRIx32 "%s\n",
+                 vop[0], vop[1], vop[2], vop[3],
+                 (vop[0] == 0 || vop[0] == 0xffffffff)
+                   ? "  ← 全 0/全 F，域未开或基址不对" : "  ← 域已就绪");
+        }
+    }
+
+#ifdef CONFIG_INPUT_GT9XX
+  ret = kickpi_k7_touch_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 触摸初始化失败: %d\n", ret);
+    }
+#endif
+
+  /* TODO(M3+)：网络等外设的注册点。 */
 
   return OK;
 }

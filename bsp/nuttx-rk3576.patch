@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 01/11] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 01/12] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 02/11] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 02/12] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1363,7 +1363,7 @@ index 559489f6..d2fb5605 100644
 From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:38:15 +0800
-Subject: [PATCH 03/11] arm64/rk3576: clear U-Boot's leftover
+Subject: [PATCH 03/12] arm64/rk3576: clear U-Boot's leftover
  HCR_EL2.{IMO,FMO,AMO}; fix load address
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1490,7 +1490,7 @@ index d2fb5605..128e8a22 100644
 From 1a226e049212fce50e0724ee37b6671ac0f23e23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:50:02 +0800
-Subject: [PATCH 04/11] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
+Subject: [PATCH 04/12] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
  =?UTF-8?q?=5FEL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
  =?UTF-8?q?=E4=B8=81=E7=9A=84=E5=85=B3=E7=B3=BB?=
 MIME-Version: 1.0
@@ -1535,7 +1535,7 @@ index 128e8a22..f76d45cb 100644
 From 509d2fa1a06f4560ce252d7cc6a4d507ea7bd6dc Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 23:18:55 +0800
-Subject: [PATCH 05/11] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
+Subject: [PATCH 05/12] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
  =?UTF-8?q?=20=E9=A9=B1=E5=8A=A8=EF=BC=88Rockchip=20GPIO=20v2=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1989,7 +1989,7 @@ index 00000000..2fe55c92
 From 895f1f4e4df1ffb6dc7c665adb230ea472f48600 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 00:43:14 +0800
-Subject: [PATCH 06/11] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
+Subject: [PATCH 06/12] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
  =?UTF-8?q?=E3=80=81=E5=BC=95=E8=84=9A=E5=A4=8D=E7=94=A8=E4=B8=8E=20I2C=20?=
  =?UTF-8?q?=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
@@ -3602,7 +3602,7 @@ index 00000000..8d4d6561
 From 0efe6a8352599f5b577eda2598ab46844332a791 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:24:26 +0800
-Subject: [PATCH 07/11] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
+Subject: [PATCH 07/12] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
  =?UTF-8?q?=20(dwcmshc/SDHCI)=20=E5=91=BD=E4=BB=A4=E9=80=9A=E8=B7=AF?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -4324,7 +4324,7 @@ index 00000000..971084de
 From 19f41551f493da28c0756c5e83a0850a0bcf9aae Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:29:46 +0800
-Subject: [PATCH 08/11] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
+Subject: [PATCH 08/12] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
  =?UTF-8?q?=E9=80=9A=E8=B7=AF=E6=89=93=E9=80=9A=EF=BC=88CMD9/CMD7/CMD17=20?=
  =?UTF-8?q?+=20PIO=20=E8=AF=BB=E5=9D=97=EF=BC=89?=
 MIME-Version: 1.0
@@ -4534,7 +4534,7 @@ index cd0d10dc..99c4ecc0 100644
 From 98b2a2df090330a6d91d6f52c098751b1697768a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 13:13:58 +0800
-Subject: [PATCH 09/11] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
+Subject: [PATCH 09/12] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
  =?UTF-8?q?=20sdio=5Fdev=5Fs=EF=BC=8C/dev/mmcsd0=20=E5=8F=AF=E7=94=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -5263,7 +5263,7 @@ index 971084de..c0f64978 100644
 From 3a65d6b63b5febca4827bd7fecd8d2145adb51a0 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:07:47 +0800
-Subject: [PATCH 10/11] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
+Subject: [PATCH 10/12] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
  =?UTF-8?q?=E5=A4=87=E8=AF=BB=E9=80=9A=EF=BC=881=20=E4=BD=8D=20@50MHz?=
  =?UTF-8?q?=EF=BC=89=EF=BC=8C4=20=E4=BD=8D=E5=BE=85=E4=BF=AE?=
 MIME-Version: 1.0
@@ -5486,7 +5486,7 @@ index a3b84e47..a2996f1a 100644
 From 84d0c755aa873b306fefd87a20e4c2e0abccf064 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:14:24 +0800
-Subject: [PATCH 11/11] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
+Subject: [PATCH 11/12] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
  =?UTF-8?q?=E6=80=BB=E7=BA=BF=E6=89=93=E9=80=9A=EF=BC=8850MHz=EF=BC=89?=
  =?UTF-8?q?=EF=BC=8C=E6=A0=B9=E5=9B=A0=E6=98=AF=E8=83=BD=E5=8A=9B=E5=A3=B0?=
  =?UTF-8?q?=E6=98=8E?=
@@ -5580,6 +5580,713 @@ index a2996f1a..2206c8ab 100644
  }
  
  static sdio_statset_t rk3576_sdio_status(struct sdio_dev_s *dev)
+-- 
+2.43.0
+
+
+From 5250326bc4b5ede69c28dea6feaf51d0ae74e46a Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 15:27:58 +0800
+Subject: [PATCH 12/12] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
+ =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F(PMU)=E4=B8=8E=20GPIO=20=E4=B8=AD?=
+ =?UTF-8?q?=E6=96=AD=EF=BC=8C=E4=B8=BA=E6=98=BE=E7=A4=BA=E4=B8=8E=E8=A7=A6?=
+ =?UTF-8?q?=E6=91=B8=E9=93=BA=E8=B7=AF?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+rk3576_power.c —— 电源域
+  只做上电与查询，不做掉电：本端口无休眠需求，而掉电握手更复杂
+  （要先让 NIU 进 idle、等应答，还要存取 QoS），实现了也无处验证。
+
+  上电顺序不能颠倒，否则总线会在无电时收到事务：
+    解除时钟门控 → 写电源位 → 等 repair_status → 撤销 idle 请求
+    → 等 idle_ack → 恢复门控
+
+  ★ 两处反直觉，看错会一直空等：
+      repair_status  1=已上电（正逻辑）
+      status         0=已上电（反逻辑）
+    RK3576 各域都提供 repair_status，本实现只用它。
+    电源位本身也是反逻辑：写 0 为上电。
+
+  数据出处：Linux drivers/pmdomain/rockchip/pm-domains.c 的
+  rk3576_pmu 与 rk3576_pm_domains[]；PMU 基址取自主线 rk3576.dtsi
+  的 power-management@27380000。
+
+rk3576_gpio.c —— GPIO 中断
+  ★ 五个 bank 每个只有一个 GIC 中断号（SPI 153/157/161/165/169
+    → IRQ 185/189/193/197/201），bank 内 32 个引脚共享。
+    因此维护每引脚回调表，由 bank 级 ISR 读 INT_STATUS 分发，
+    上层拿到的是"某个引脚的中断"。
+
+  两处时序细节：
+    EOI 必须在调用处理函数之后写 —— 电平触发下提前清除会在中断源
+    尚未消除时被重复触发；
+    使能前先清一次挂起状态 —— 否则一放开就进一次不属于本次的中断。
+
+为什么现在做这两项
+  显示链路的 VOP/DSI 分属 PD_VOP 与 PD_VO0，而原厂 dtb 里 dsi 是
+  disabled，U-Boot 从没用过 MIPI —— 这两个域不像 eMMC 的 PD_NVM
+  那样能捡现成，必须自己开。
+  触摸驱动 gt9xx 需要 irq_attach，依赖 GPIO 中断。
+---
+ arch/arm64/src/rk3576/Make.defs               |   2 +-
+ .../src/rk3576/hardware/rk3576_memorymap.h    |  10 +
+ arch/arm64/src/rk3576/rk3576_gpio.c           | 160 ++++++++++
+ arch/arm64/src/rk3576/rk3576_gpio.h           |  37 +++
+ arch/arm64/src/rk3576/rk3576_power.c          | 290 ++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_power.h          |  67 ++++
+ 6 files changed, 565 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm64/src/rk3576/rk3576_power.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_power.h
+
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index 788909b3..f364fbf0 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -28,7 +28,7 @@ include common/Make.defs
+ # 驱动本体在 drivers/serial/uart_16550.c，本文件只提供两个转发函数。
+ 
+ CHIP_CSRCS  = rk3576_boot.c rk3576_serial.c rk3576_gpio.c
+-CHIP_CSRCS += rk3576_cru.c rk3576_pinmux.c
++CHIP_CSRCS += rk3576_cru.c rk3576_pinmux.c rk3576_power.c
+ 
+ ifeq ($(CONFIG_RK3576_SDHCI),y)
+ CHIP_CSRCS += rk3576_sdhci.c
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h b/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+index 42a28b13..771670c9 100644
+--- a/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
++++ b/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+@@ -105,6 +105,16 @@
+ 
+ /* GPIO —— 注意 GPIO0 与 GPIO1-4 不在同一段地址 */
+ 
++/* 各 bank 的中断号。出处：主线 rk3576.dtsi 的 gpio@ 节点
++ * interrupts = <GIC_SPI n ...>，NuttX 的 IRQ 号 = n + 32。
++ */
++
++#define RK3576_GPIO0_IRQ       185   /* GIC_SPI 153 */
++#define RK3576_GPIO1_IRQ       189   /* GIC_SPI 157 */
++#define RK3576_GPIO2_IRQ       193   /* GIC_SPI 161 */
++#define RK3576_GPIO3_IRQ       197   /* GIC_SPI 165 */
++#define RK3576_GPIO4_IRQ       201   /* GIC_SPI 169 */
++
+ #define RK3576_GPIO0_ADDR      0x27320000
+ #define RK3576_GPIO1_ADDR      0x2ae10000
+ #define RK3576_GPIO2_ADDR      0x2ae20000
+diff --git a/arch/arm64/src/rk3576/rk3576_gpio.c b/arch/arm64/src/rk3576/rk3576_gpio.c
+index 78203169..0e970b29 100644
+--- a/arch/arm64/src/rk3576/rk3576_gpio.c
++++ b/arch/arm64/src/rk3576/rk3576_gpio.c
+@@ -48,6 +48,9 @@
+ #include <stdbool.h>
+ #include <stdint.h>
+ 
++#include <nuttx/irq.h>
++#include <nuttx/arch.h>
++
+ #include "arm64_internal.h"
+ #include "rk3576_gpio.h"
+ #include "hardware/rk3576_gpio.h"
+@@ -68,10 +71,80 @@ static const uintptr_t g_gpio_base[RK3576_GPIO_NBANKS] =
+   RK3576_GPIO4_ADDR       /* 0x2ae40000 */
+ };
+ 
++/* 前置声明：bank 级 ISR 在 rk3576_gpio_wr16 之前用到它 */
++
++static void rk3576_gpio_wr16(uintptr_t base, uint32_t offset_l,
++                             int pin, bool value);
++
++static const int g_gpio_irq[RK3576_GPIO_NBANKS] =
++{
++  RK3576_GPIO0_IRQ, RK3576_GPIO1_IRQ, RK3576_GPIO2_IRQ,
++  RK3576_GPIO3_IRQ, RK3576_GPIO4_IRQ
++};
++
++/* 每引脚的中断回调。
++ *
++ * ★ 五个 bank 每个只有一个 GIC 中断号，bank 内 32 个引脚共享它。
++ *   因此这里维护一张表，由 bank 级 ISR 读 INT_STATUS 后分发到具体引脚。
++ *   上层拿到的是"某个引脚的中断"，不必关心共享这件事。
++ */
++
++struct rk3576_gpio_isr_s
++{
++  xcpt_t    isr;
++  void     *arg;
++};
++
++static struct rk3576_gpio_isr_s
++  g_gpio_isr[RK3576_GPIO_NBANKS][RK3576_GPIO_NPINS];
++
+ /****************************************************************************
+  * Private Functions
+  ****************************************************************************/
+ 
++/****************************************************************************
++ * Name: rk3576_gpio_interrupt
++ *
++ * Description:
++ *   bank 级中断入口。读 INT_STATUS 找出是哪些引脚，逐个分发，
++ *   然后写 EOI 清除 —— 清除必须在调用处理函数之后，否则电平触发的
++ *   中断会在处理函数尚未消除中断源时被重复触发。
++ *
++ ****************************************************************************/
++
++static int rk3576_gpio_interrupt(int irq, void *context, void *arg)
++{
++  int bank = (int)(intptr_t)arg;
++  uintptr_t base;
++  uint32_t status;
++  int pin;
++
++  UNUSED(irq);
++
++  base   = g_gpio_base[bank];
++  status = getreg32(base + RK3576_GPIO_INT_STATUS);
++
++  for (pin = 0; pin < RK3576_GPIO_NPINS; pin++)
++    {
++      if ((status & (1u << pin)) == 0)
++        {
++          continue;
++        }
++
++      if (g_gpio_isr[bank][pin].isr != NULL)
++        {
++          g_gpio_isr[bank][pin].isr(irq, context,
++                                    g_gpio_isr[bank][pin].arg);
++        }
++
++      /* 写 1 清。EOI 也是 _L/_H 两个半寄存器，用同一套写使能掩码。 */
++
++      rk3576_gpio_wr16(base, RK3576_GPIO_PORT_EOI_L, pin, true);
++    }
++
++  return OK;
++}
++
+ /****************************************************************************
+  * Name: rk3576_gpio_wr16
+  *
+@@ -150,6 +223,93 @@ int rk3576_gpio_read(int bank, int pin)
+   return (regval >> pin) & 1;
+ }
+ 
++int rk3576_gpio_irq_config(int bank, int pin, bool rising, bool level)
++{
++  uintptr_t base;
++
++  if (bank < 0 || bank >= RK3576_GPIO_NBANKS ||
++      pin  < 0 || pin  >= RK3576_GPIO_NPINS)
++    {
++      return -EINVAL;
++    }
++
++  base = g_gpio_base[bank];
++
++  /* 中断引脚必须是输入 */
++
++  rk3576_gpio_wr16(base, RK3576_GPIO_SWPORT_DDR_L, pin, false);
++
++  /* INT_TYPE: 0=电平 1=边沿；INT_POLARITY: 0=低/下降 1=高/上升 */
++
++  rk3576_gpio_wr16(base, RK3576_GPIO_INT_TYPE_L, pin, !level);
++  rk3576_gpio_wr16(base, RK3576_GPIO_INT_POLARITY_L, pin, rising);
++  rk3576_gpio_wr16(base, RK3576_GPIO_INT_BOTHEDGE_L, pin, false);
++
++  /* 先屏蔽，等 attach 之后再放开 */
++
++  rk3576_gpio_wr16(base, RK3576_GPIO_INT_MASK_L, pin, true);
++  rk3576_gpio_wr16(base, RK3576_GPIO_INT_EN_L, pin, false);
++  return OK;
++}
++
++int rk3576_gpio_irq_attach(int bank, int pin, xcpt_t isr, void *arg)
++{
++  static bool attached[RK3576_GPIO_NBANKS];
++  int ret;
++
++  if (bank < 0 || bank >= RK3576_GPIO_NBANKS ||
++      pin  < 0 || pin  >= RK3576_GPIO_NPINS)
++    {
++      return -EINVAL;
++    }
++
++  g_gpio_isr[bank][pin].isr = isr;
++  g_gpio_isr[bank][pin].arg = arg;
++
++  /* bank 级中断只挂一次 */
++
++  if (!attached[bank])
++    {
++      ret = irq_attach(g_gpio_irq[bank], rk3576_gpio_interrupt,
++                       (void *)(intptr_t)bank);
++      if (ret < 0)
++        {
++          return ret;
++        }
++
++      up_enable_irq(g_gpio_irq[bank]);
++      attached[bank] = true;
++    }
++
++  return OK;
++}
++
++int rk3576_gpio_irq_enable(int bank, int pin, bool enable)
++{
++  uintptr_t base;
++
++  if (bank < 0 || bank >= RK3576_GPIO_NBANKS ||
++      pin  < 0 || pin  >= RK3576_GPIO_NPINS)
++    {
++      return -EINVAL;
++    }
++
++  base = g_gpio_base[bank];
++
++  /* 顺序有讲究：使能前先清掉可能残留的挂起状态，否则一放开就会
++   * 立刻进一次不属于本次的中断。
++   */
++
++  if (enable)
++    {
++      rk3576_gpio_wr16(base, RK3576_GPIO_PORT_EOI_L, pin, true);
++    }
++
++  rk3576_gpio_wr16(base, RK3576_GPIO_INT_EN_L, pin, enable);
++  rk3576_gpio_wr16(base, RK3576_GPIO_INT_MASK_L, pin, !enable);
++  return OK;
++}
++
+ uint32_t rk3576_gpio_verid(int bank)
+ {
+   if (bank < 0 || bank >= RK3576_GPIO_NBANKS)
+diff --git a/arch/arm64/src/rk3576/rk3576_gpio.h b/arch/arm64/src/rk3576/rk3576_gpio.h
+index 2fe55c92..c7d9fcd0 100644
+--- a/arch/arm64/src/rk3576/rk3576_gpio.h
++++ b/arch/arm64/src/rk3576/rk3576_gpio.h
+@@ -31,6 +31,8 @@
+ #include <stdbool.h>
+ #include <stdint.h>
+ 
++#include <nuttx/irq.h>
++
+ /****************************************************************************
+  * Public Function Prototypes
+  ****************************************************************************/
+@@ -103,6 +105,41 @@ int rk3576_gpio_read(int bank, int pin);
+ 
+ uint32_t rk3576_gpio_verid(int bank);
+ 
++/****************************************************************************
++ * Name: rk3576_gpio_irq_config
++ *
++ * Description:
++ *   把一个引脚配成中断源。引脚会被设为输入。
++ *
++ * Input Parameters:
++ *   bank, pin - 引脚
++ *   rising    - true 上升沿/高电平触发，false 下降沿/低电平
++ *   level     - true 电平触发，false 边沿触发
++ *
++ ****************************************************************************/
++
++int rk3576_gpio_irq_config(int bank, int pin, bool rising, bool level);
++
++/****************************************************************************
++ * Name: rk3576_gpio_irq_attach
++ *
++ * Description:
++ *   为一个引脚挂中断处理函数。
++ *
++ *   ★ 五个 bank 各共用一个 GIC 中断号（bank 内 32 个引脚共享），
++ *     因此本层维护一张每引脚的回调表，在 bank 级 ISR 里读 INT_STATUS
++ *     分发到具体引脚。调用方拿到的是"这个引脚的中断"，不必关心共享。
++ *
++ ****************************************************************************/
++
++int rk3576_gpio_irq_attach(int bank, int pin, xcpt_t isr, void *arg);
++
++/****************************************************************************
++ * Name: rk3576_gpio_irq_enable
++ ****************************************************************************/
++
++int rk3576_gpio_irq_enable(int bank, int pin, bool enable);
++
+ #undef EXTERN
+ #if defined(__cplusplus)
+ }
+diff --git a/arch/arm64/src/rk3576/rk3576_power.c b/arch/arm64/src/rk3576/rk3576_power.c
+new file mode 100644
+index 00000000..e4a2ec13
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_power.c
+@@ -0,0 +1,290 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_power.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* RK3576 电源域控制（PMU）。
++ *
++ * 只做"打开"和"查询"，不做掉电 —— 本端口没有休眠需求，而掉电的握手
++ * 更复杂（要先让 NIU 进 idle、等应答，还要保存/恢复 QoS），实现了也
++ * 无处验证，徒增出错面。
++ *
++ * ★ 数据出处：Linux drivers/pmdomain/rockchip/pm-domains.c
++ *
++ *     static const struct rockchip_pmu_info rk3576_pmu = {
++ *         .pwr_offset = 0x210,  .status_offset = 0x230,
++ *         .req_offset = 0x110,  .idle_offset   = 0x128,
++ *         .ack_offset = 0x120,  .repair_status_offset = 0x570,
++ *         .clk_ungate_offset = 0x140,
++ *     };
++ *
++ *     DOMAIN_RK3576(name, p_offset, pwr, status, r_status,
++ *                   r_offset, req, idle, g_mask, wakeup)
++ *
++ *   PMU 基址取自主线 rk3576.dtsi 的 pmu: power-management@27380000。
++ *
++ * ★ 状态判读的两个反直觉之处，看错就会一直等下去：
++ *
++ *   1. repair_status：1 = 已上电，0 = 已断电（正逻辑）
++ *   2. status：      0 = 已上电，1 = 已断电（反逻辑）
++ *
++ *   RK3576 的各域都给了 repair_status，因此本实现只用第 1 种。
++ *
++ * ★ 写寄存器一律带高 16 位写使能掩码，与 CRU/GPIO 同一套约定。
++ */
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <errno.h>
++#include <inttypes.h>
++#include <stdbool.h>
++#include <stdint.h>
++#include <syslog.h>
++
++#include <nuttx/arch.h>
++
++#include "arm64_internal.h"
++#include "rk3576_power.h"
++#include "hardware/rk3576_memorymap.h"
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++#define PMU_BASE                  RK3576_PMU_ADDR
++
++#define PMU_REQ_OFFSET            0x0110   /* idle 请求        */
++#define PMU_ACK_OFFSET            0x0120   /* idle 应答        */
++#define PMU_IDLE_OFFSET           0x0128   /* idle 状态        */
++#define PMU_CLK_UNGATE_OFFSET     0x0140   /* 时钟门控解除     */
++#define PMU_PWR_OFFSET            0x0210   /* 电源开关         */
++#define PMU_STATUS_OFFSET         0x0230
++#define PMU_REPAIR_STATUS_OFFSET  0x0570   /* 1=已上电         */
++
++#define PMU_POLL_TIMEOUT_US       10000
++
++/****************************************************************************
++ * Private Types
++ ****************************************************************************/
++
++struct rk3576_pd_info_s
++{
++  const char *name;
++  uint32_t    pwr_mask;        /* PWR 寄存器里的位            */
++  uint32_t    repair_mask;     /* REPAIR_STATUS 里的位        */
++  uint32_t    req_mask;        /* idle 请求位                 */
++  uint32_t    idle_mask;       /* idle 应答/状态位            */
++  uint32_t    clk_ungate_mask; /* 握手期间要解除门控的时钟    */
++};
++
++/****************************************************************************
++ * Private Data
++ ****************************************************************************/
++
++/* 逐项对应 pm-domains.c 的 rk3576_pm_domains[]。
++ * 只收录本端口会用到的域，用不到的留空以免误用未经验证的参数。
++ */
++
++static const struct rk3576_pd_info_s g_pd_info[] =
++{
++  [RK3576_PD_NVM] =
++  {
++    /* DOMAIN_RK3576("nvm", 0x0, BIT(6), 0, BIT(6), 0x4, BIT(2), BIT(18), BIT(2)) */
++
++    "nvm", 1u << 6,  1u << 6,  1u << 2,  1u << 18, 1u << 2
++  },
++  [RK3576_PD_VOP] =
++  {
++    /* DOMAIN_RK3576("vop", 0x0, BIT(11), 0, BIT(11), 0x0, 0x6000, 0x6000, 0x6000) */
++
++    "vop", 1u << 11, 1u << 11, 0x6000,   0x6000,   0x6000
++  },
++  [RK3576_PD_VO0] =
++  {
++    /* DOMAIN_RK3576("vo0", 0x0, BIT(15), 0, BIT(15), 0x0, BIT(11), BIT(11), 0x6800) */
++
++    "vo0", 1u << 15, 1u << 15, 1u << 11, 1u << 11, 0x6800
++  },
++};
++
++#define RK3576_PD_COUNT (sizeof(g_pd_info) / sizeof(g_pd_info[0]))
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint32_t pmu_getreg(uint32_t off)
++{
++  return getreg32(PMU_BASE + off);
++}
++
++static inline void pmu_putreg(uint32_t off, uint32_t val)
++{
++  putreg32(val, PMU_BASE + off);
++}
++
++/****************************************************************************
++ * Name: pmu_write_masked
++ *
++ * Description:
++ *   带写使能掩码的位写。set 为 true 时置位，false 时清位。
++ *
++ ****************************************************************************/
++
++static void pmu_write_masked(uint32_t off, uint32_t mask, bool set)
++{
++  pmu_putreg(off, (mask << 16) | (set ? mask : 0));
++}
++
++/****************************************************************************
++ * Name: pmu_set_idle_request
++ *
++ * Description:
++ *   向 NIU 发/撤 idle 请求，并等待应答到位。
++ *
++ *   上电流程里这一步是"撤销"（idle=false），必须在电源打开之后做；
++ *   顺序颠倒会让总线在无电时收到事务。
++ *
++ ****************************************************************************/
++
++static int pmu_set_idle_request(const struct rk3576_pd_info_s *pd, bool idle)
++{
++  uint32_t target;
++  int us;
++
++  if (pd->req_mask == 0)
++    {
++      return OK;
++    }
++
++  pmu_write_masked(PMU_REQ_OFFSET, pd->req_mask, idle);
++
++  target = idle ? pd->idle_mask : 0;
++  for (us = 0; us < PMU_POLL_TIMEOUT_US; us++)
++    {
++      if ((pmu_getreg(PMU_ACK_OFFSET) & pd->idle_mask) == target)
++        {
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  syslog(LOG_ERR, "PMU: %s idle%s 应答超时 ACK=0x%08" PRIx32 "\n",
++         pd->name, idle ? "请求" : "撤销", pmu_getreg(PMU_ACK_OFFSET));
++  return -ETIMEDOUT;
++}
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++bool rk3576_power_is_on(int domain)
++{
++  if (domain < 0 || domain >= RK3576_PD_COUNT ||
++      g_pd_info[domain].pwr_mask == 0)
++    {
++      return false;
++    }
++
++  /* repair_status 是正逻辑：1 = 已上电。
++   * 注意不要用 PMU_STATUS_OFFSET —— 那个是反逻辑（0 才是已上电），
++   * 两者搞混会得到完全相反的结论。
++   */
++
++  return (pmu_getreg(PMU_REPAIR_STATUS_OFFSET) &
++          g_pd_info[domain].repair_mask) != 0;
++}
++
++int rk3576_power_on(int domain)
++{
++  const struct rk3576_pd_info_s *pd;
++  int ret;
++  int us;
++
++  if (domain < 0 || domain >= RK3576_PD_COUNT ||
++      g_pd_info[domain].pwr_mask == 0)
++    {
++      syslog(LOG_ERR, "PMU: 电源域 %d 未收录\n", domain);
++      return -EINVAL;
++    }
++
++  pd = &g_pd_info[domain];
++
++  if (rk3576_power_is_on(domain))
++    {
++      syslog(LOG_INFO, "PMU: %s 已上电\n", pd->name);
++      return OK;
++    }
++
++  /* 1) 握手期间解除相关时钟的门控 —— NIU 要有时钟才能应答 */
++
++  if (pd->clk_ungate_mask != 0)
++    {
++      pmu_write_masked(PMU_CLK_UNGATE_OFFSET, pd->clk_ungate_mask, true);
++    }
++
++  /* 2) 开电。电源位是反逻辑：写 0 为上电。 */
++
++  pmu_write_masked(PMU_PWR_OFFSET, pd->pwr_mask, false);
++
++  /* 3) 等上电完成 */
++
++  ret = -ETIMEDOUT;
++  for (us = 0; us < PMU_POLL_TIMEOUT_US; us++)
++    {
++      if (rk3576_power_is_on(domain))
++        {
++          ret = OK;
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "PMU: %s 上电超时 REPAIR=0x%08" PRIx32 "\n",
++             pd->name, pmu_getreg(PMU_REPAIR_STATUS_OFFSET));
++    }
++  else
++    {
++      /* 4) 上电成功后才撤销 idle 请求，让总线开始接受事务 */
++
++      ret = pmu_set_idle_request(pd, false);
++    }
++
++  /* 5) 恢复时钟门控 */
++
++  if (pd->clk_ungate_mask != 0)
++    {
++      pmu_write_masked(PMU_CLK_UNGATE_OFFSET, pd->clk_ungate_mask, false);
++    }
++
++  if (ret == OK)
++    {
++      syslog(LOG_INFO, "PMU: %s 上电完成\n", pd->name);
++    }
++
++  return ret;
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_power.h b/arch/arm64/src/rk3576/rk3576_power.h
+new file mode 100644
+index 00000000..80545549
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_power.h
+@@ -0,0 +1,67 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_power.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_POWER_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_POWER_H
++
++#include <nuttx/config.h>
++#include <stdbool.h>
++
++/* 电源域编号，取自 include/dt-bindings/power/rockchip,rk3576-power.h */
++
++#define RK3576_PD_NPU       0
++#define RK3576_PD_NVM       5    /* eMMC 所在域（U-Boot 已开）*/
++#define RK3576_PD_SDGMAC    6
++#define RK3576_PD_AUDIO     7
++#define RK3576_PD_PHP       8
++#define RK3576_PD_SUBPHP    9
++#define RK3576_PD_VOP      10    /* 显示控制器 */
++#define RK3576_PD_VO1      11
++#define RK3576_PD_VO0      12    /* MIPI DSI 主机 */
++#define RK3576_PD_USB      13
++
++/****************************************************************************
++ * Name: rk3576_power_on
++ *
++ * Description:
++ *   打开一个电源域。已经打开时直接返回 OK。
++ *
++ *   ★ 上电有严格的握手顺序，顺序错会挂死总线：
++ *       解除时钟门控 → 写电源位 → 等 repair_status → 撤销 idle 请求
++ *       → 等 idle_ack 清零 → 重新门控时钟
++ *     其中"撤销 idle 请求"必须在上电**之后**，掉电时则相反 ——
++ *     要先请求 idle、等 NIU 应答，再断电，否则总线上会留下未完成的事务。
++ *
++ * Returned Value:
++ *   OK；域号非法返回 -EINVAL；握手超时返回 -ETIMEDOUT。
++ *
++ ****************************************************************************/
++
++int rk3576_power_on(int domain);
++
++/****************************************************************************
++ * Name: rk3576_power_is_on
++ ****************************************************************************/
++
++bool rk3576_power_is_on(int domain);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_POWER_H */
 -- 
 2.43.0
 

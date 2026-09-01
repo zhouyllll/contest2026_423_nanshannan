@@ -60,5 +60,17 @@ int kickpi_k7_gpio_initialize(void);
 int kickpi_k7_i2c_initialize(void);
 #endif
 
+#ifdef CONFIG_INPUT_GT9XX
+/****************************************************************************
+ * Name: kickpi_k7_touch_initialize
+ *
+ * Description:
+ *   注册 GT9xx 电容触摸为 /dev/input0。由 board_app_initialize() 调用。
+ *
+ ****************************************************************************/
+
+int kickpi_k7_touch_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __VENDOR_ROCKCHIP_BOARDS_RK3576_KICKPI_K7_SRC_KICKPI_K7_H */
