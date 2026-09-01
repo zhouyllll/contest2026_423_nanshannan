@@ -68,6 +68,7 @@ g_kickpi_i2c[] =
 {
   { 1, "PMIC RK806@0x23" },
   { 2, "RTC HYM8563@0x51、PD HUSB311@0x4e" },
+  { 3, "音频 codec ES8388@0x10" },
 };
 
 #define KICKPI_NI2C (sizeof(g_kickpi_i2c) / sizeof(g_kickpi_i2c[0]))

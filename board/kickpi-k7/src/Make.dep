@@ -23,11 +23,12 @@ kickpi_k7_appinit.o: kickpi_k7_appinit.c \
  /home/dministrator/openvela-amlogic/src/nuttx/include/stdbool.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/serial/tioctl.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/fcntl.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/sys/stat.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/time.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/debug.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/streams.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/stdio.h \
  /home/dministrator/openvela-amlogic/src/prebuilts/gcc/linux-x86_64/aarch64-none-elf/lib/gcc/aarch64-none-elf/13.4.0/include/stdarg.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/time.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/fs.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/uio.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/uio.h \
@@ -75,6 +76,16 @@ kickpi_k7_appinit.o: kickpi_k7_appinit.c \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wdog.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/list_type.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/board.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/sdio.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wqueue.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/mutex.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/execinfo.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/semaphore.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/init.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/mmcsd.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/drivers/drivers.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/memoryregion.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_sdhci.h \
  kickpi_k7.h
 kickpi_k7_gpio.o: kickpi_k7_gpio.c \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/config.h \

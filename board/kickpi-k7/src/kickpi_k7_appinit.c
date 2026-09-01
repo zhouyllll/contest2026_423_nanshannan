@@ -27,10 +27,18 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <sys/mount.h>
+#include <sys/stat.h>
 #include <debug.h>
 #include <errno.h>
 #include <syslog.h>
+#include <inttypes.h>
+#include <stdint.h>
 #include <nuttx/board.h>
+#include <nuttx/sdio.h>
+#include <nuttx/mmcsd.h>
+#include <nuttx/drivers/drivers.h>
+
+#include "rk3576_sdhci.h"
 #include "kickpi_k7.h"
 
 /****************************************************************************
@@ -90,6 +98,71 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: I2C 初始化失败: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RK3576_SDHCI
+  /* eMMC：拿到 sdio_dev_s 句柄，交给 mmcsd 上层注册 /dev/mmcsd0。
+   * 失败不阻断其余初始化 —— 没有存储时控制台仍应可用，便于继续排查。
+   */
+
+    {
+      struct sdio_dev_s *sdio = rk3576_sdhci_initialize(0);
+
+      if (sdio == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: eMMC 控制器初始化失败\n");
+        }
+      else
+        {
+          ret = mmcsd_slotinitialize(0, sdio);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "ERROR: mmcsd_slotinitialize 失败: %d\n", ret);
+            }
+          else
+            {
+              /* ★ 不能只看返回值。mmcsd_slotinitialize() 在卡未识别时
+               * 也返回 OK —— 它只把 -ENODEV 之外的错误当作失败，
+               * 而块设备注册发生在更里层的 mmcsd_probe()，条件是
+               * 分区块数非零。所以这里实际 stat 一下设备节点，
+               * 存在才算就绪。
+               */
+
+              struct stat st;
+
+              if (stat("/dev/mmcsd0", &st) == 0)
+                {
+                  syslog(LOG_INFO, "eMMC: /dev/mmcsd0 就绪\n");
+
+#ifdef CONFIG_BCH
+                  /* NuttX 的块设备不能直接被 open() 当文件读 ——
+                   * dd / hexdump 这类工具走的是字符设备接口。
+                   * BCH 把块设备包成字符设备，便于裸读验证与取分区表。
+                   * 只读注册，避免误写坏 eMMC 上原有的分区。
+                   */
+
+                  ret = bchdev_register("/dev/mmcsd0", "/dev/mmcsd0c", true);
+                  if (ret < 0)
+                    {
+                      syslog(LOG_ERR, "ERROR: 注册 /dev/mmcsd0c 失败: %d\n",
+                             ret);
+                    }
+                  else
+                    {
+                      syslog(LOG_INFO,
+                             "eMMC: /dev/mmcsd0c 就绪（只读字符视图）\n");
+                    }
+#endif
+                }
+              else
+                {
+                  syslog(LOG_ERR,
+                         "ERROR: mmcsd_slotinitialize 返回 OK 但 "
+                         "/dev/mmcsd0 不存在 —— 卡未被识别\n");
+                }
+            }
+        }
     }
 #endif
 

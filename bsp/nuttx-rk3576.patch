@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 1/6] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 01/11] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 2/6] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 02/11] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1363,7 +1363,7 @@ index 559489f6..d2fb5605 100644
 From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:38:15 +0800
-Subject: [PATCH 3/6] arm64/rk3576: clear U-Boot's leftover
+Subject: [PATCH 03/11] arm64/rk3576: clear U-Boot's leftover
  HCR_EL2.{IMO,FMO,AMO}; fix load address
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1490,8 +1490,8 @@ index d2fb5605..128e8a22 100644
 From 1a226e049212fce50e0724ee37b6671ac0f23e23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:50:02 +0800
-Subject: [PATCH 4/6] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR=5F?=
- =?UTF-8?q?EL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
+Subject: [PATCH 04/11] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
+ =?UTF-8?q?=5FEL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
  =?UTF-8?q?=E4=B8=81=E7=9A=84=E5=85=B3=E7=B3=BB?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1535,7 +1535,7 @@ index 128e8a22..f76d45cb 100644
 From 509d2fa1a06f4560ce252d7cc6a4d507ea7bd6dc Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 23:18:55 +0800
-Subject: [PATCH 5/6] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
+Subject: [PATCH 05/11] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
  =?UTF-8?q?=20=E9=A9=B1=E5=8A=A8=EF=BC=88Rockchip=20GPIO=20v2=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1989,7 +1989,7 @@ index 00000000..2fe55c92
 From 895f1f4e4df1ffb6dc7c665adb230ea472f48600 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 00:43:14 +0800
-Subject: [PATCH 6/6] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
+Subject: [PATCH 06/11] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
  =?UTF-8?q?=E3=80=81=E5=BC=95=E8=84=9A=E5=A4=8D=E7=94=A8=E4=B8=8E=20I2C=20?=
  =?UTF-8?q?=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
@@ -3595,6 +3595,1991 @@ index 00000000..8d4d6561
 +#endif
 +
 +#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_PINMUX_H */
+-- 
+2.43.0
+
+
+From 0efe6a8352599f5b577eda2598ab46844332a791 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 09:24:26 +0800
+Subject: [PATCH 07/11] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
+ =?UTF-8?q?=20(dwcmshc/SDHCI)=20=E5=91=BD=E4=BB=A4=E9=80=9A=E8=B7=AF?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+分步实现：sdio_dev_s 有 28 个方法，一次写完再上板出问题无从收敛。
+本次只做 rk3576_sdhci_probe()，走 eMMC 上电识别序列验证命令通路。
+四条命令覆盖了全部响应类型，一次验证所有关键路径：
+
+  CMD0 GO_IDLE          无响应     命令能否发出
+  CMD1 SEND_OP_COND     R3         短响应读取 + 忙等轮询
+  CMD2 ALL_SEND_CID     R2 136 位  四个响应寄存器 + CRC 校验
+  CMD3 SET_RELATIVE_ADDR R1        命令索引回读
+
+板上实测：
+  SDHCI: HOSTVER=0x0005 CAP0=0x3a6dc881
+  SDHCI: 卡时钟 400000Hz (div=250)
+  SDHCI: CMD1 OCR=0xc0ff8080 (扇区寻址)
+  SDHCI: CID = 00ec2900 41543353 46423034 0540b25c
+  SDHCI: CMD3 RCA=1 状态=0x00000500
+  CID 中 41 54 33 53 46 42 30 34 为 ASCII "AT3SFB04"，产品名字段可读，
+  确认是与真实器件通信而非读到随机值。
+
+★ 定位到的关键点：INTEN 与 SIGEN 作用不同，都不能省
+  SDHCI 规范里 INTSTAT 的位只有在 INTEN 对应位为 1 时才被硬件置位。
+  RESET_ALL 会把 INTEN 清零，此后轮询 INTSTAT 永远读到 0，
+  表现为每条命令都超时 —— 即使命令其实已经发出去了。
+  最初以为"轮询式驱动不需要中断寄存器"，把 INTEN 和 SIGEN 都留成 0。
+  实际上 INTEN 管"记不记"状态，SIGEN 管"报不报"中断线，
+  轮询式只能省掉后者。
+
+不配置电源域与时钟：探测显示 CAP0 基准时钟字段为 200MHz，与 dtsi 的
+assigned-clock-rates 一致，说明 U-Boot 配好的 PD_NVM 与五路时钟仍有效。
+（注意 RESET_ALL 会清掉厂商专有配置，若后续 DLL/PHY 相关功能异常，
+  应改为只复位 CMD/DATA 线路。）
+---
+ arch/arm64/src/rk3576/Kconfig                 |  15 +
+ arch/arm64/src/rk3576/Make.defs               |   4 +
+ arch/arm64/src/rk3576/hardware/rk3576_sdhci.h | 162 +++++++
+ arch/arm64/src/rk3576/rk3576_sdhci.c          | 408 ++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_sdhci.h          |  39 ++
+ 5 files changed, 628 insertions(+)
+ create mode 100644 arch/arm64/src/rk3576/hardware/rk3576_sdhci.h
+ create mode 100644 arch/arm64/src/rk3576/rk3576_sdhci.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_sdhci.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index 2ab67419..ccc5574c 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -38,6 +38,21 @@ config RK3576_I2C
+ 		板上 I2C2（0x2ac50000）挂有 RTC HYM8563 @0x51 与
+ 		Type-C PD HUSB311 @0x4e。
+ 
++config RK3576_SDHCI
++	bool "eMMC 主机控制器 (dwcmshc / SDHCI)"
++	default n
++	---help---
++		RK3576 的 eMMC 控制器（0x2a330000），DesignWare dwcmshc，
++		遵循 SD Host Controller 标准寄存器布局，与 RK3588 同款。
++
++		当前只实现 rk3576_sdhci_probe()：走 eMMC 上电识别序列
++		（CMD0/CMD1/CMD2/CMD3）验证命令通路。完整的 sdio_dev_s
++		实现（28 个方法）在此之后分步补。
++
++		不配置电源域与时钟：板上实测 U-Boot 交接后 CAP0 的基准时钟
++		字段为 200MHz，与 dtsi 的 assigned-clock-rates 一致，说明
++		PD_NVM 电源域与五路时钟都已就绪。
++
+ endmenu # Rockchip RK3576 Peripheral Selection
+ 
+ endif # ARCH_CHIP_RK3576
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index 5160fab1..788909b3 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -30,6 +30,10 @@ include common/Make.defs
+ CHIP_CSRCS  = rk3576_boot.c rk3576_serial.c rk3576_gpio.c
+ CHIP_CSRCS += rk3576_cru.c rk3576_pinmux.c
+ 
++ifeq ($(CONFIG_RK3576_SDHCI),y)
++CHIP_CSRCS += rk3576_sdhci.c
++endif
++
+ ifeq ($(CONFIG_RK3576_I2C),y)
+ CHIP_CSRCS += rk3576_i2c.c
+ endif
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_sdhci.h b/arch/arm64/src/rk3576/hardware/rk3576_sdhci.h
+new file mode 100644
+index 00000000..42ff7bea
+--- /dev/null
++++ b/arch/arm64/src/rk3576/hardware/rk3576_sdhci.h
+@@ -0,0 +1,162 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/hardware/rk3576_sdhci.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_SDHCI_H
++#define __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_SDHCI_H
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* RK3576 的 eMMC 控制器是 DesignWare "dwcmshc"，遵循 SD Host Controller
++ * 标准寄存器布局（与 RK3588 同款）。
++ *
++ * 出处：主线 rk3576.dtsi
++ *   sdhci: mmc@2a330000 {
++ *       compatible = "rockchip,rk3576-dwcmshc", "rockchip,rk3588-dwcmshc";
++ *       reg = <0x0 0x2a330000 0x0 0x10000>;
++ *       interrupts = <GIC_SPI 253 IRQ_TYPE_LEVEL_HIGH>;   → NuttX IRQ 285
++ *       bus-width = <8>; mmc-hs400-1_8v; supports-cqe;
++ *   };
++ *
++ * ★ 板上实测（U-Boot 交接后）：
++ *     HOSTVER = 0x0005          SDHCI 规范版本 4.20
++ *     CAP0    = 0x3a6dc881      基准时钟 200MHz、8 位总线、ADMA2、High Speed
++ *     CAP1    = 0x08000007      SDR50 / SDR104 / DDR50
++ *   基准时钟 200MHz 与 dtsi 的 assigned-clock-rates 一致，说明 U-Boot 已把
++ *   PD_NVM 电源域和五路时钟配置好并保留，本端口暂不需要自行配置。
++ */
++
++/* --- SD Host Controller 标准寄存器 --- */
++
++#define RK3576_SDHCI_DMAADDR        0x0000  /* SDMA 地址 / 参数2         */
++#define RK3576_SDHCI_BLKSIZE        0x0004  /* [11:0] 块大小 [31:16] 块数 */
++#define RK3576_SDHCI_ARG            0x0008  /* 命令参数                   */
++#define RK3576_SDHCI_XFERMODE       0x000c  /* [15:0] 传输模式 [31:16] 命令 */
++#define RK3576_SDHCI_RESP0          0x0010  /* 响应 0-3                   */
++#define RK3576_SDHCI_RESP1          0x0014
++#define RK3576_SDHCI_RESP2          0x0018
++#define RK3576_SDHCI_RESP3          0x001c
++#define RK3576_SDHCI_BUFDATA        0x0020  /* PIO 数据端口               */
++#define RK3576_SDHCI_PRESENT        0x0024  /* 当前状态                   */
++#define RK3576_SDHCI_HOSTCTRL1      0x0028  /* [7:0]主机控制 [15:8]电源   */
++#define RK3576_SDHCI_CLKCTRL        0x002c  /* [15:0]时钟 [23:16]超时     */
++#define RK3576_SDHCI_INTSTAT        0x0030  /* 中断状态，写 1 清          */
++#define RK3576_SDHCI_INTEN          0x0034  /* 中断状态使能               */
++#define RK3576_SDHCI_SIGEN          0x0038  /* 中断信号使能               */
++#define RK3576_SDHCI_ACMDERR        0x003c
++#define RK3576_SDHCI_HOSTCTRL2      0x003e  /* 16 位                      */
++#define RK3576_SDHCI_CAP0           0x0040
++#define RK3576_SDHCI_CAP1           0x0044
++#define RK3576_SDHCI_ADMAERR        0x0054
++#define RK3576_SDHCI_ADMAADDR       0x0058
++#define RK3576_SDHCI_HOSTVER        0x00fc  /* [31:16] 版本               */
++
++/* PRESENT（当前状态） */
++
++#define SDHCI_PRESENT_CMDINHIBIT    (1 << 0)   /* 命令线忙 */
++#define SDHCI_PRESENT_DATINHIBIT    (1 << 1)   /* 数据线忙 */
++#define SDHCI_PRESENT_DATACTIVE     (1 << 2)
++#define SDHCI_PRESENT_WRITEACTIVE   (1 << 8)
++#define SDHCI_PRESENT_READACTIVE    (1 << 9)
++#define SDHCI_PRESENT_BUFWRENABLE   (1 << 10)
++#define SDHCI_PRESENT_BUFRDENABLE   (1 << 11)
++#define SDHCI_PRESENT_CARDINSERTED  (1 << 16)
++
++/* CLKCTRL（时钟与超时） */
++
++#define SDHCI_CLK_INTCLKEN          (1 << 0)   /* 内部时钟使能   */
++#define SDHCI_CLK_INTCLKSTABLE      (1 << 1)   /* 内部时钟已稳定 */
++#define SDHCI_CLK_SDCLKEN           (1 << 2)   /* 卡时钟输出使能 */
++#define SDHCI_CLK_GENSEL_PROG       (1 << 5)   /* 可编程分频模式 */
++#define SDHCI_CLK_DIV_SHIFT         8          /* [15:8] 分频低 8 位  */
++#define SDHCI_CLK_DIVHI_SHIFT       6          /* [7:6]  分频高 2 位  */
++#define SDHCI_TIMEOUT_SHIFT         16         /* [19:16] 数据超时    */
++
++/* 软复位（CLKCTRL 的 [26:24]） */
++
++#define SDHCI_RESET_ALL             (1 << 24)
++#define SDHCI_RESET_CMD             (1 << 25)
++#define SDHCI_RESET_DATA            (1 << 26)
++
++/* HOSTCTRL1 */
++
++#define SDHCI_HOSTCTRL1_DTW4BIT     (1 << 1)
++#define SDHCI_HOSTCTRL1_HISPEED     (1 << 2)
++#define SDHCI_HOSTCTRL1_DTW8BIT     (1 << 5)
++#define SDHCI_PWR_ON                (1 << 8)   /* 总线电源开     */
++#define SDHCI_PWR_18V               (5 << 9)   /* 1.8V           */
++#define SDHCI_PWR_30V               (6 << 9)
++#define SDHCI_PWR_33V               (7 << 9)
++
++/* 中断状态 / 使能位 */
++
++#define SDHCI_INT_CMDCOMPLETE       (1 << 0)
++#define SDHCI_INT_XFERCOMPLETE      (1 << 1)
++#define SDHCI_INT_BLOCKGAP          (1 << 2)
++#define SDHCI_INT_DMA               (1 << 3)
++#define SDHCI_INT_BUFWRRDY          (1 << 4)
++#define SDHCI_INT_BUFRDRDY          (1 << 5)
++#define SDHCI_INT_CARDINSERT        (1 << 6)
++#define SDHCI_INT_CARDREMOVE        (1 << 7)
++#define SDHCI_INT_ERROR             (1 << 15)
++#define SDHCI_INT_CMDTIMEOUT        (1 << 16)
++#define SDHCI_INT_CMDCRC            (1 << 17)
++#define SDHCI_INT_CMDENDBIT         (1 << 18)
++#define SDHCI_INT_CMDINDEX          (1 << 19)
++#define SDHCI_INT_DATATIMEOUT       (1 << 20)
++#define SDHCI_INT_DATACRC           (1 << 21)
++#define SDHCI_INT_DATAENDBIT        (1 << 22)
++#define SDHCI_INT_CURRENTLIMIT      (1 << 23)
++#define SDHCI_INT_AUTOCMD           (1 << 24)
++#define SDHCI_INT_ADMA              (1 << 25)
++
++#define SDHCI_INT_CMDERRORS         (SDHCI_INT_CMDTIMEOUT | SDHCI_INT_CMDCRC | \
++                                     SDHCI_INT_CMDENDBIT | SDHCI_INT_CMDINDEX)
++#define SDHCI_INT_DATAERRORS        (SDHCI_INT_DATATIMEOUT | SDHCI_INT_DATACRC | \
++                                     SDHCI_INT_DATAENDBIT)
++#define SDHCI_INT_ALLERRORS         (SDHCI_INT_CMDERRORS | SDHCI_INT_DATAERRORS | \
++                                     SDHCI_INT_CURRENTLIMIT | SDHCI_INT_AUTOCMD | \
++                                     SDHCI_INT_ADMA)
++
++/* XFERMODE 的命令字段（写在 [31:16]） */
++
++#define SDHCI_CMD_RESP_NONE         (0 << 0)
++#define SDHCI_CMD_RESP_LEN136       (1 << 0)
++#define SDHCI_CMD_RESP_LEN48        (2 << 0)
++#define SDHCI_CMD_RESP_LEN48BUSY    (3 << 0)
++#define SDHCI_CMD_CRCCHECK          (1 << 3)
++#define SDHCI_CMD_INDEXCHECK        (1 << 4)
++#define SDHCI_CMD_DATAPRESENT       (1 << 5)
++#define SDHCI_CMD_INDEX_SHIFT       8
++
++/* 传输模式（XFERMODE 的 [15:0]） */
++
++#define SDHCI_XFER_DMAEN            (1 << 0)
++#define SDHCI_XFER_BLKCNTEN         (1 << 1)
++#define SDHCI_XFER_AUTOCMD12        (1 << 2)
++#define SDHCI_XFER_DATAREAD         (1 << 4)
++#define SDHCI_XFER_MULTIBLK         (1 << 5)
++
++#define RK3576_SDHCI_BASECLK_HZ     200000000  /* 由 CAP0[15:8] 实测确认 */
++
++#endif /* __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_SDHCI_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_sdhci.c b/arch/arm64/src/rk3576/rk3576_sdhci.c
+new file mode 100644
+index 00000000..cd0d10dc
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_sdhci.c
+@@ -0,0 +1,408 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_sdhci.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* RK3576 eMMC (dwcmshc / SD Host Controller 标准) —— 第一步：命令通路。
++ *
++ * 分步实现的理由：完整的 sdio_dev_s 有 28 个方法，一次写完再上板，
++ * 出问题时无从收敛。先把"能否跟卡对话"证明了，数据通路才有意义。
++ *
++ * 本文件当前只提供 rk3576_sdhci_probe()：复位控制器、设低速时钟、
++ * 走 eMMC 的上电识别序列（CMD0 → CMD1 → CMD2 → CMD3），把 OCR/CID/RCA
++ * 打出来。这几条命令覆盖了三种响应类型（无响应、R3、R2 长响应、R1），
++ * 足以验证命令通路的全部关键路径。
++ *
++ * ★ 不配置电源域与时钟：板上实测 U-Boot 交接后 CAP0 的基准时钟字段为
++ *   200MHz，与 dtsi 的 assigned-clock-rates 一致，说明 PD_NVM 与五路时钟
++ *   都是活的。与 GPIO/I2C 同样的取舍 —— 先用引导器留下的状态，
++ *   需要时再补。
++ */
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <errno.h>
++#include <inttypes.h>
++#include <stdbool.h>
++#include <stdint.h>
++#include <syslog.h>
++
++#include <nuttx/arch.h>
++
++#include "arm64_internal.h"
++#include "rk3576_sdhci.h"
++#include "hardware/rk3576_sdhci.h"
++#include "hardware/rk3576_memorymap.h"
++
++#ifdef CONFIG_RK3576_SDHCI
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++#define SDHCI_BASE          RK3576_SDHCI_ADDR
++#define SDHCI_CMD_TIMEOUT_US   100000
++#define SDHCI_RESET_TIMEOUT_US 100000
++
++/* 识别阶段的卡时钟。eMMC 规范要求上电识别期间不超过 400kHz。
++ * 分频值 = 基准时钟 / (2 * 目标频率)，写在 CLKCTRL 的 [15:8]+[7:6]。
++ */
++
++#define SDHCI_ID_CLOCK_HZ   400000
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint32_t sdhci_getreg(uint32_t off)
++{
++  return getreg32(SDHCI_BASE + off);
++}
++
++static inline void sdhci_putreg(uint32_t off, uint32_t val)
++{
++  putreg32(val, SDHCI_BASE + off);
++}
++
++/****************************************************************************
++ * Name: sdhci_reset
++ *
++ * Description:
++ *   软复位。复位位是自清的：写 1 后硬件在完成时清零，因此要轮询等它归零。
++ *
++ ****************************************************************************/
++
++static int sdhci_reset(uint32_t mask)
++{
++  uint32_t regval;
++  int us;
++
++  regval = sdhci_getreg(RK3576_SDHCI_CLKCTRL);
++  sdhci_putreg(RK3576_SDHCI_CLKCTRL, regval | mask);
++
++  for (us = 0; us < SDHCI_RESET_TIMEOUT_US; us++)
++    {
++      if ((sdhci_getreg(RK3576_SDHCI_CLKCTRL) & mask) == 0)
++        {
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  syslog(LOG_ERR, "SDHCI: 复位 0x%08" PRIx32 " 超时\n", mask);
++  return -ETIMEDOUT;
++}
++
++/****************************************************************************
++ * Name: sdhci_setclock
++ *
++ * Description:
++ *   设置卡时钟。顺序不能颠倒：先关 SDCLK，再改分频，等内部时钟稳定
++ *   （INTCLKSTABLE 置位）之后才能开 SDCLK —— 时钟未稳就放行会让卡收到
++ *   毛刺，表现为命令随机超时。
++ *
++ ****************************************************************************/
++
++static int sdhci_setclock(uint32_t freq_hz)
++{
++  uint32_t regval;
++  uint32_t div;
++  int us;
++
++  /* 关掉卡时钟再动分频 */
++
++  regval = sdhci_getreg(RK3576_SDHCI_CLKCTRL);
++  regval &= ~(SDHCI_CLK_SDCLKEN | SDHCI_CLK_INTCLKEN);
++  sdhci_putreg(RK3576_SDHCI_CLKCTRL, regval);
++
++  /* 10 位分频，实际分频比是 2*div（div=0 表示不分频）。
++   * 向上取整，保证实际频率不超过请求值。
++   */
++
++  div = 0;
++  if (freq_hz < RK3576_SDHCI_BASECLK_HZ)
++    {
++      div = (RK3576_SDHCI_BASECLK_HZ + (2 * freq_hz) - 1) / (2 * freq_hz);
++      if (div > 0x3ff)
++        {
++          div = 0x3ff;
++        }
++    }
++
++  regval = ((div & 0xff) << SDHCI_CLK_DIV_SHIFT) |
++           (((div >> 8) & 0x3) << SDHCI_CLK_DIVHI_SHIFT) |
++           (0xe << SDHCI_TIMEOUT_SHIFT) |      /* 数据超时取较大值 */
++           SDHCI_CLK_INTCLKEN;
++  sdhci_putreg(RK3576_SDHCI_CLKCTRL, regval);
++
++  for (us = 0; us < SDHCI_RESET_TIMEOUT_US; us++)
++    {
++      if ((sdhci_getreg(RK3576_SDHCI_CLKCTRL) & SDHCI_CLK_INTCLKSTABLE) != 0)
++        {
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  if (us >= SDHCI_RESET_TIMEOUT_US)
++    {
++      syslog(LOG_ERR, "SDHCI: 内部时钟未稳定\n");
++      return -ETIMEDOUT;
++    }
++
++  sdhci_putreg(RK3576_SDHCI_CLKCTRL, regval | SDHCI_CLK_SDCLKEN);
++
++  syslog(LOG_INFO, "SDHCI: 卡时钟 %" PRIu32 "Hz (div=%" PRIu32
++                   " 实际约 %" PRIu32 "Hz)\n",
++         freq_hz, div,
++         div ? RK3576_SDHCI_BASECLK_HZ / (2 * div) : RK3576_SDHCI_BASECLK_HZ);
++  return OK;
++}
++
++/****************************************************************************
++ * Name: sdhci_sendcmd
++ *
++ * Description:
++ *   发一条无数据的命令并等待完成。
++ *
++ * Input Parameters:
++ *   cmdidx  - 命令号
++ *   arg     - 参数
++ *   resptype- SDHCI_CMD_RESP_* 之一，可再或上 CRCCHECK/INDEXCHECK
++ *   resp    - 输出，至少 4 个 uint32_t；长响应(R2)写满 4 个
++ *
++ ****************************************************************************/
++
++static int sdhci_sendcmd(uint32_t cmdidx, uint32_t arg,
++                         uint32_t resptype, uint32_t *resp)
++{
++  uint32_t regval;
++  uint32_t status;
++  int us;
++
++  /* 命令线忙时不能下发新命令 */
++
++  for (us = 0; us < SDHCI_CMD_TIMEOUT_US; us++)
++    {
++      if ((sdhci_getreg(RK3576_SDHCI_PRESENT) &
++           SDHCI_PRESENT_CMDINHIBIT) == 0)
++        {
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  if (us >= SDHCI_CMD_TIMEOUT_US)
++    {
++      syslog(LOG_ERR, "SDHCI: CMD%" PRIu32 " 命令线一直忙\n", cmdidx);
++      return -EBUSY;
++    }
++
++  sdhci_putreg(RK3576_SDHCI_INTSTAT, 0xffffffff);   /* 写 1 清 */
++  sdhci_putreg(RK3576_SDHCI_ARG, arg);
++
++  regval = (cmdidx << SDHCI_CMD_INDEX_SHIFT) | resptype;
++  sdhci_putreg(RK3576_SDHCI_XFERMODE, regval << 16);
++
++  for (us = 0; us < SDHCI_CMD_TIMEOUT_US; us++)
++    {
++      status = sdhci_getreg(RK3576_SDHCI_INTSTAT);
++      if ((status & (SDHCI_INT_CMDCOMPLETE | SDHCI_INT_ALLERRORS)) != 0)
++        {
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  if (us >= SDHCI_CMD_TIMEOUT_US)
++    {
++      syslog(LOG_ERR,
++             "SDHCI: CMD%" PRIu32 " 超时 INTSTAT=0x%08" PRIx32
++             " PRESENT=0x%08" PRIx32 " CLK=0x%08" PRIx32
++             " HC1=0x%08" PRIx32 " INTEN=0x%08" PRIx32 "\n",
++             cmdidx, sdhci_getreg(RK3576_SDHCI_INTSTAT),
++             sdhci_getreg(RK3576_SDHCI_PRESENT),
++             sdhci_getreg(RK3576_SDHCI_CLKCTRL),
++             sdhci_getreg(RK3576_SDHCI_HOSTCTRL1),
++             sdhci_getreg(RK3576_SDHCI_INTEN));
++      return -ETIMEDOUT;
++    }
++
++  if ((status & SDHCI_INT_ALLERRORS) != 0)
++    {
++      /* CMD1 在卡未就绪时返回超时是正常的，由调用方决定是否报错。 */
++
++      sdhci_reset(SDHCI_RESET_CMD);
++      return -EIO;
++    }
++
++  if (resp != NULL)
++    {
++      resp[0] = sdhci_getreg(RK3576_SDHCI_RESP0);
++      if ((resptype & 0x3) == SDHCI_CMD_RESP_LEN136)
++        {
++          resp[1] = sdhci_getreg(RK3576_SDHCI_RESP1);
++          resp[2] = sdhci_getreg(RK3576_SDHCI_RESP2);
++          resp[3] = sdhci_getreg(RK3576_SDHCI_RESP3);
++        }
++    }
++
++  return OK;
++}
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_sdhci_probe
++ *
++ * Description:
++ *   走一遍 eMMC 上电识别序列，验证命令通路。
++ *   CMD0(无响应) → CMD1(R3) → CMD2(R2 长响应) → CMD3(R1)，
++ *   四条命令覆盖了全部响应类型。
++ *
++ ****************************************************************************/
++
++int rk3576_sdhci_probe(void)
++{
++  uint32_t resp[4];
++  uint32_t ocr = 0;
++  int ret;
++  int i;
++
++  syslog(LOG_INFO, "SDHCI: HOSTVER=0x%04" PRIx32 " CAP0=0x%08" PRIx32 "\n",
++         (sdhci_getreg(RK3576_SDHCI_HOSTVER) >> 16) & 0xffff,
++         sdhci_getreg(RK3576_SDHCI_CAP0));
++
++  ret = sdhci_reset(SDHCI_RESET_ALL);
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  /* 总线电源：eMMC 是 1.8V/3.3V 供电，这里按 3.3V 打开电源域使能位。
++   * 板子上 eMMC 的实际供电由 PMIC 提供，这一位只控制控制器内部的
++   * 电源使能逻辑。
++   */
++
++  sdhci_putreg(RK3576_SDHCI_HOSTCTRL1, SDHCI_PWR_33V | SDHCI_PWR_ON);
++
++  /* ★ 使能中断"状态记录"。
++   *
++   *   SDHCI 规范里 INTSTAT 的位只有在 INTEN 对应位为 1 时才会被硬件置位。
++   *   RESET_ALL 会把 INTEN 清零，此后轮询 INTSTAT 将永远读到 0 ——
++   *   表现为每条命令都超时，即使命令其实已经发出去了。
++   *
++   *   SIGEN 保持 0：那是"是否向 CPU 拉中断线"，本实现是轮询式，不需要。
++   *   两者容易混淆，但作用完全不同：INTEN 管"记不记"，SIGEN 管"报不报"。
++   */
++
++  sdhci_putreg(RK3576_SDHCI_INTEN, 0xffffffff);
++  sdhci_putreg(RK3576_SDHCI_SIGEN, 0);
++
++  ret = sdhci_setclock(SDHCI_ID_CLOCK_HZ);
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  up_udelay(2000);        /* 规范要求上电后等待至少 1ms 再发命令 */
++
++  /* CMD0 GO_IDLE_STATE —— 无响应 */
++
++  ret = sdhci_sendcmd(0, 0, SDHCI_CMD_RESP_NONE, NULL);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "SDHCI: CMD0 失败 %d\n", ret);
++      return ret;
++    }
++
++  up_udelay(2000);
++
++  /* CMD1 SEND_OP_COND —— R3。卡忙时 bit31=0，要反复问直到就绪。
++   * 参数 0x40ff8080：bit30 = 支持扇区寻址（>2GB 的 eMMC 必需），
++   * 电压窗口 2.7-3.6V。
++   */
++
++  for (i = 0; i < 1000; i++)
++    {
++      ret = sdhci_sendcmd(1, 0x40ff8080, SDHCI_CMD_RESP_LEN48, resp);
++      if (ret == OK)
++        {
++          ocr = resp[0];
++          if ((ocr & (1u << 31)) != 0)
++            {
++              break;                 /* 上电完成 */
++            }
++        }
++
++      up_udelay(1000);
++    }
++
++  if ((ocr & (1u << 31)) == 0)
++    {
++      syslog(LOG_ERR, "SDHCI: CMD1 卡未就绪，OCR=0x%08" PRIx32 "\n", ocr);
++      return -ETIMEDOUT;
++    }
++
++  syslog(LOG_INFO, "SDHCI: CMD1 OCR=0x%08" PRIx32 " (%s寻址)\n",
++         ocr, (ocr & (1u << 30)) ? "扇区" : "字节");
++
++  /* CMD2 ALL_SEND_CID —— R2 长响应，136 位 */
++
++  ret = sdhci_sendcmd(2, 0, SDHCI_CMD_RESP_LEN136 | SDHCI_CMD_CRCCHECK,
++                      resp);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "SDHCI: CMD2 失败 %d\n", ret);
++      return ret;
++    }
++
++  syslog(LOG_INFO, "SDHCI: CID = %08" PRIx32 " %08" PRIx32
++                   " %08" PRIx32 " %08" PRIx32 "\n",
++         resp[3], resp[2], resp[1], resp[0]);
++
++  /* CMD3 SET_RELATIVE_ADDR —— eMMC 由主机指定 RCA（SD 卡是卡自己给）。
++   * 取 1（0 保留给"取消选中"）。
++   */
++
++  ret = sdhci_sendcmd(3, 1 << 16,
++                      SDHCI_CMD_RESP_LEN48 | SDHCI_CMD_CRCCHECK |
++                      SDHCI_CMD_INDEXCHECK, resp);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "SDHCI: CMD3 失败 %d\n", ret);
++      return ret;
++    }
++
++  syslog(LOG_INFO, "SDHCI: CMD3 RCA=1 状态=0x%08" PRIx32 "\n", resp[0]);
++  syslog(LOG_INFO, "SDHCI: ★ 命令通路验证通过\n");
++  return OK;
++}
++
++#endif /* CONFIG_RK3576_SDHCI */
+diff --git a/arch/arm64/src/rk3576/rk3576_sdhci.h b/arch/arm64/src/rk3576/rk3576_sdhci.h
+new file mode 100644
+index 00000000..971084de
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_sdhci.h
+@@ -0,0 +1,39 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_sdhci.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_SDHCI_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_SDHCI_H
++
++#include <nuttx/config.h>
++
++/****************************************************************************
++ * Name: rk3576_sdhci_probe
++ *
++ * Description:
++ *   走 eMMC 上电识别序列（CMD0/CMD1/CMD2/CMD3）验证命令通路，
++ *   把 OCR、CID、RCA 打到 syslog。完整的 sdio_dev_s 实现在此之后补。
++ *
++ ****************************************************************************/
++
++int rk3576_sdhci_probe(void);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_SDHCI_H */
+-- 
+2.43.0
+
+
+From 19f41551f493da28c0756c5e83a0850a0bcf9aae Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 09:29:46 +0800
+Subject: [PATCH 08/11] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
+ =?UTF-8?q?=E9=80=9A=E8=B7=AF=E6=89=93=E9=80=9A=EF=BC=88CMD9/CMD7/CMD17=20?=
+ =?UTF-8?q?+=20PIO=20=E8=AF=BB=E5=9D=97=EF=BC=89?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+在命令通路之上补齐数据通路，三条命令各验证不同环节：
+
+  CMD9  SEND_CSD           又一条 R2 长响应，取容量参数
+  CMD7  SELECT_CARD        R1b 带忙等，把卡从 stby 带进 tran 状态
+  CMD17 READ_SINGLE_BLOCK  命令+数据复合事务、PIO 数据端口、结束握手
+
+先不上 DMA：DMA 要处理地址对齐、cache 一致性、描述符表，出错面大。
+PIO 慢但路径短，先证明通路可用，确认后再换 ADMA2 提速。
+
+板上实测：
+  SDHCI: CSD = 00d02f01 329f5903 ffffffff ef8e4000
+  SDHCI: CMD7 已选中，状态=0x00000700
+  SDHCI: 块0 前16字节 00 00 00 00 ...
+  SDHCI: 块0 末2字节 55 aa  ← MBR 签名
+
+判据选得可证伪：eMMC 上原本装着 Android，第 0 块必然是分区表，
+末两字节应为 0x55AA。这是磁盘上已有的已知内容，不是拿实测结果自证；
+若数据通路没通，读回的会是全 0 或全 F，签名对不上。
+前 16 字节为零也符合预期 —— GPT 保护性 MBR 的引导代码区本就是空的。
+---
+ arch/arm64/src/rk3576/rk3576_sdhci.c | 155 +++++++++++++++++++++++++++
+ 1 file changed, 155 insertions(+)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_sdhci.c b/arch/arm64/src/rk3576/rk3576_sdhci.c
+index cd0d10dc..99c4ecc0 100644
+--- a/arch/arm64/src/rk3576/rk3576_sdhci.c
++++ b/arch/arm64/src/rk3576/rk3576_sdhci.c
+@@ -274,6 +274,106 @@ static int sdhci_sendcmd(uint32_t cmdidx, uint32_t arg,
+   return OK;
+ }
+ 
++/****************************************************************************
++ * Name: sdhci_readblock
++ *
++ * Description:
++ *   用 PIO 读一个 512 字节块（CMD17 READ_SINGLE_BLOCK）。
++ *
++ *   先不上 DMA：DMA 要处理地址对齐、cache 一致性、描述符表，出错面大。
++ *   PIO 慢但路径短，用来证明数据通路是通的。
++ *
++ *   ★ 数据端口每次读出 4 字节，必须严格按 BUFRDRDY 的节奏读满一个块，
++ *     少读或多读都会让控制器状态机卡在 DATINHIBIT。
++ *
++ ****************************************************************************/
++
++static int sdhci_readblock(uint32_t blkaddr, uint8_t *buf)
++{
++  uint32_t status;
++  uint32_t word;
++  int us;
++  int i;
++
++  sdhci_putreg(RK3576_SDHCI_INTSTAT, 0xffffffff);
++  sdhci_putreg(RK3576_SDHCI_BLKSIZE, (1 << 16) | 512);
++  sdhci_putreg(RK3576_SDHCI_ARG, blkaddr);
++
++  /* 传输模式在低 16 位、命令在高 16 位，同一个 32 位寄存器一次写完。
++   * DMAEN 不置（PIO），BLKCNTEN + DATAREAD 表示"读 1 个块"。
++   */
++
++  sdhci_putreg(RK3576_SDHCI_XFERMODE,
++               ((17u << SDHCI_CMD_INDEX_SHIFT) | SDHCI_CMD_RESP_LEN48 |
++                SDHCI_CMD_CRCCHECK | SDHCI_CMD_INDEXCHECK |
++                SDHCI_CMD_DATAPRESENT) << 16 |
++               (SDHCI_XFER_BLKCNTEN | SDHCI_XFER_DATAREAD));
++
++  /* 等命令完成 */
++
++  for (us = 0; us < SDHCI_CMD_TIMEOUT_US; us++)
++    {
++      status = sdhci_getreg(RK3576_SDHCI_INTSTAT);
++      if ((status & (SDHCI_INT_CMDCOMPLETE | SDHCI_INT_ALLERRORS)) != 0)
++        {
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  if (us >= SDHCI_CMD_TIMEOUT_US || (status & SDHCI_INT_ALLERRORS) != 0)
++    {
++      syslog(LOG_ERR, "SDHCI: CMD17 失败 INTSTAT=0x%08" PRIx32 "\n", status);
++      return -EIO;
++    }
++
++  /* 等数据就绪，然后一次读满 512 字节 */
++
++  for (us = 0; us < SDHCI_CMD_TIMEOUT_US; us++)
++    {
++      status = sdhci_getreg(RK3576_SDHCI_INTSTAT);
++      if ((status & (SDHCI_INT_BUFRDRDY | SDHCI_INT_DATAERRORS)) != 0)
++        {
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  if ((status & SDHCI_INT_DATAERRORS) != 0 || us >= SDHCI_CMD_TIMEOUT_US)
++    {
++      syslog(LOG_ERR, "SDHCI: 数据相位失败 INTSTAT=0x%08" PRIx32 "\n",
++             status);
++      return -EIO;
++    }
++
++  for (i = 0; i < 512; i += 4)
++    {
++      word = sdhci_getreg(RK3576_SDHCI_BUFDATA);
++      buf[i]     = (uint8_t)word;
++      buf[i + 1] = (uint8_t)(word >> 8);
++      buf[i + 2] = (uint8_t)(word >> 16);
++      buf[i + 3] = (uint8_t)(word >> 24);
++    }
++
++  /* 等传输结束，否则下一条命令会撞上 DATINHIBIT */
++
++  for (us = 0; us < SDHCI_CMD_TIMEOUT_US; us++)
++    {
++      if ((sdhci_getreg(RK3576_SDHCI_INTSTAT) &
++           SDHCI_INT_XFERCOMPLETE) != 0)
++        {
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  syslog(LOG_ERR, "SDHCI: 传输未结束\n");
++  return -ETIMEDOUT;
++}
++
+ /****************************************************************************
+  * Public Functions
+  ****************************************************************************/
+@@ -402,6 +502,61 @@ int rk3576_sdhci_probe(void)
+ 
+   syslog(LOG_INFO, "SDHCI: CMD3 RCA=1 状态=0x%08" PRIx32 "\n", resp[0]);
+   syslog(LOG_INFO, "SDHCI: ★ 命令通路验证通过\n");
++
++  /* CMD9 SEND_CSD —— R2，取容量等参数。要在 stby 状态下发。 */
++
++  ret = sdhci_sendcmd(9, 1 << 16, SDHCI_CMD_RESP_LEN136 | SDHCI_CMD_CRCCHECK,
++                      resp);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "SDHCI: CMD9 失败 %d\n", ret);
++      return ret;
++    }
++
++  syslog(LOG_INFO, "SDHCI: CSD = %08" PRIx32 " %08" PRIx32
++                   " %08" PRIx32 " %08" PRIx32 "\n",
++         resp[3], resp[2], resp[1], resp[0]);
++
++  /* CMD7 SELECT_CARD —— R1b，把卡从 stby 带进 tran 状态才能传数据 */
++
++  ret = sdhci_sendcmd(7, 1 << 16,
++                      SDHCI_CMD_RESP_LEN48BUSY | SDHCI_CMD_CRCCHECK |
++                      SDHCI_CMD_INDEXCHECK, resp);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "SDHCI: CMD7 失败 %d\n", ret);
++      return ret;
++    }
++
++  syslog(LOG_INFO, "SDHCI: CMD7 已选中，状态=0x%08" PRIx32 "\n", resp[0]);
++
++  /* 读第 0 块。判据：eMMC 上原本装着 Android，块 0 应是分区表 ——
++   * 末尾两字节为 0x55 0xAA（MBR 签名），或起始为 "EFI PART"（GPT）。
++   * 读到这些说明数据通路真的通了，而不是读回一片零。
++   */
++
++    {
++      static uint8_t blk[512];
++
++      ret = sdhci_readblock(0, blk);
++      if (ret < 0)
++        {
++          return ret;
++        }
++
++      syslog(LOG_INFO,
++             "SDHCI: 块0 前16字节 %02x %02x %02x %02x %02x %02x %02x %02x "
++             "%02x %02x %02x %02x %02x %02x %02x %02x\n",
++             blk[0], blk[1], blk[2], blk[3], blk[4], blk[5], blk[6], blk[7],
++             blk[8], blk[9], blk[10], blk[11], blk[12], blk[13], blk[14],
++             blk[15]);
++
++      syslog(LOG_INFO, "SDHCI: 块0 末2字节 %02x %02x  %s\n",
++             blk[510], blk[511],
++             (blk[510] == 0x55 && blk[511] == 0xaa)
++               ? "← MBR 签名，数据通路验证通过" : "← 非 MBR，请核对内容");
++    }
++
+   return OK;
+ }
+ 
+-- 
+2.43.0
+
+
+From 98b2a2df090330a6d91d6f52c098751b1697768a Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 13:13:58 +0800
+Subject: [PATCH 09/11] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
+ =?UTF-8?q?=20sdio=5Fdev=5Fs=EF=BC=8C/dev/mmcsd0=20=E5=8F=AF=E7=94=A8?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+在已验证的命令/数据通路之上实现 drivers/mmcsd 需要的 sdio_dev_s 接口，
+由上层完成完整的 eMMC 识别并注册块设备。
+
+板上实测：
+  mmcsd_decode_cid: mid: ec  pnm: AT3SFB
+  Capacity: 30539776Kb  nblocks: 61079552  (约 29.1GiB，32GB eMMC)
+  SDHCI: 卡时钟 52000000Hz (div=2 实际约 50000000Hz)
+  /dev/mmcsd0 / mmcsd0boot0 / mmcsd0boot1 / mmcsd0rpmb 全部注册
+
+设计取舍
+--------
+轮询式：上层时序是 BLOCKSETUP→WAITENABLE→RECVSETUP→SENDCMD→RECVR1→
+EVENTWAIT。中断式实现里 EVENTWAIT 等信号量、由 ISR 搬数据；这里把数据
+搬运放在 EVENTWAIT 内同步完成，少一个中断挂接环节。PIO 而非 DMA 同理，
+提速留到后面换 ADMA2。
+
+时钟：识别阶段 400kHz，进传输模式切 52MHz High Speed。HS200/HS400 需要
+DLL 采样窗口整定，后续再做。
+
+★ 两个静默错误，都不报错但结果是错的
+-----------------------------------
+1. status() 返回 0 而非 SDIO_STATUS_PRESENT。
+   注释写着"eMMC 焊死恒为已插入"，代码却返回"无任何状态标志"。
+   上层判定插槽为空、不注册块设备，而 mmcsd_slotinitialize() 仍返回 OK
+   （它只把 -ENODEV 之外的错误当失败）。板级日志又只看返回值就打印
+   "就绪" —— 两个宽松判据叠加，形成"一切正常"的假象。
+   板级日志已改为实际 stat("/dev/mmcsd0") 确认节点存在才算就绪。
+
+2. recv_r2 漏了 8 位移位。
+   SDHCI 响应寄存器里放的是 R[127:8]，硬件去掉了 CRC7 与停止位，
+   整个 128 位内容右移了 8 位；上层期望原始布局。
+   除倒字序外还需 rlong[0] = (RESP3 << 8) | (RESP2 >> 24) 这样拼接。
+   漏掉时表现为 mid 解成 00、产品名为空 —— 且容量一度显示
+   17039360KB 看似正常，修正后变为 30539776KB，说明该值原本就是错的。
+   这类错误不报任何异常，只能靠打开上层调试日志看解码结果发现。
+---
+ arch/arm64/src/rk3576/rk3576_i2c.c   |  16 +
+ arch/arm64/src/rk3576/rk3576_sdhci.c | 583 ++++++++++++++++++++++++++-
+ arch/arm64/src/rk3576/rk3576_sdhci.h |  14 +
+ 3 files changed, 606 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_i2c.c b/arch/arm64/src/rk3576/rk3576_i2c.c
+index 77b7cd4d..f57a2bfa 100644
+--- a/arch/arm64/src/rk3576/rk3576_i2c.c
++++ b/arch/arm64/src/rk3576/rk3576_i2c.c
+@@ -197,6 +197,21 @@ static const struct rk3576_i2c_config_s g_i2c_config[] =
+     .scl_bank = 0, .scl_pin = 15, .sda_bank = 0, .sda_pin = 16,
+     .pin_func = 9,
+   },
++  {
++    /* I2C3 —— 音频 codec ES8388 @0x10（喇叭与咪头走它）。
++     * 时钟：clk-rk3576.c
++     *   GATE(PCLK_I2C3, ... CLKGATE_CON(12), 2)
++     *   COMPOSITE_NODIV(CLK_I2C3, ... CLKSEL_CON(57), 4, 2, ... CLKGATE_CON(12), 14)
++     * 引脚：原厂 dtb 的 i2c3m0-xfer = <4 13 11 ...>, <4 12 11 ...>
++     *   即 GPIO4_B5 / GPIO4_B4，功能号 11。
++     */
++
++    .port = 3, .base = RK3576_I2C3_ADDR,
++    .gate_con = 12, .gate_pclk = 2, .gate_clk = 14,
++    .sel_con = 57, .sel_shift = 4,
++    .scl_bank = 4, .scl_pin = 13, .sda_bank = 4, .sda_pin = 12,
++    .pin_func = 11,
++  },
+ };
+ 
+ #define RK3576_I2C_NBUSES (sizeof(g_i2c_config) / sizeof(g_i2c_config[0]))
+@@ -205,6 +220,7 @@ static struct rk3576_i2c_priv_s g_i2c_priv[RK3576_I2C_NBUSES] =
+ {
+   { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
+   { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
++  { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
+ };
+ 
+ 
+diff --git a/arch/arm64/src/rk3576/rk3576_sdhci.c b/arch/arm64/src/rk3576/rk3576_sdhci.c
+index 99c4ecc0..a3b84e47 100644
+--- a/arch/arm64/src/rk3576/rk3576_sdhci.c
++++ b/arch/arm64/src/rk3576/rk3576_sdhci.c
+@@ -20,15 +20,23 @@
+  *
+  ****************************************************************************/
+ 
+-/* RK3576 eMMC (dwcmshc / SD Host Controller 标准) —— 第一步：命令通路。
++/* RK3576 eMMC (dwcmshc / SD Host Controller 标准)。
+  *
+- * 分步实现的理由：完整的 sdio_dev_s 有 28 个方法，一次写完再上板，
+- * 出问题时无从收敛。先把"能否跟卡对话"证明了，数据通路才有意义。
++ * 分两层：
++ *   1. 底层寄存器操作 + rk3576_sdhci_probe()，先前已在板上验证过
++ *      命令通路（CMD0/1/2/3）与数据通路（CMD9/7/17，块0 读出 MBR 签名）。
++ *   2. sdio_dev_s 实现，交给 drivers/mmcsd 上层注册 /dev/mmcsd0。
+  *
+- * 本文件当前只提供 rk3576_sdhci_probe()：复位控制器、设低速时钟、
+- * 走 eMMC 的上电识别序列（CMD0 → CMD1 → CMD2 → CMD3），把 OCR/CID/RCA
+- * 打出来。这几条命令覆盖了三种响应类型（无响应、R3、R2 长响应、R1），
+- * 足以验证命令通路的全部关键路径。
++ * ★ 轮询式，不使用中断。
++ *
++ *   上层的调用时序是：
++ *       BLOCKSETUP → WAITENABLE → RECVSETUP → SENDCMD → RECVR1 → EVENTWAIT
++ *   中断式实现里 EVENTWAIT 等信号量、由 ISR 搬数据；这里把数据搬运放在
++ *   EVENTWAIT 内部同步完成，返回时事务已结束。少一个中断挂接环节，
++ *   出错面更小；代价是传输期间占着 CPU。
++ *
++ *   PIO 而非 DMA 也是同样的取舍：DMA 要处理地址对齐、cache 一致性和
++ *   描述符表。先把通路做对，提速留到后面换 ADMA2。
+  *
+  * ★ 不配置电源域与时钟：板上实测 U-Boot 交接后 CAP0 的基准时钟字段为
+  *   200MHz，与 dtsi 的 assigned-clock-rates 一致，说明 PD_NVM 与五路时钟
+@@ -47,7 +55,12 @@
+ #include <stdint.h>
+ #include <syslog.h>
+ 
++#include <string.h>
++
+ #include <nuttx/arch.h>
++#include <nuttx/sdio.h>
++#include <nuttx/mmcsd.h>
++#include <nuttx/wqueue.h>
+ 
+ #include "arm64_internal.h"
+ #include "rk3576_sdhci.h"
+@@ -378,6 +391,562 @@ static int sdhci_readblock(uint32_t blkaddr, uint8_t *buf)
+  * Public Functions
+  ****************************************************************************/
+ 
++/****************************************************************************
++ * sdio_dev_s 实现
++ ****************************************************************************/
++
++/* 上层通过这些回调驱动控制器。数据缓冲区在 RECVSETUP/SENDSETUP 时登记，
++ * 真正的搬运发生在 EVENTWAIT。
++ */
++
++struct rk3576_sdio_dev_s
++{
++  struct sdio_dev_s dev;              /* 必须是第一个成员 */
++  uint8_t          *buffer;           /* 当前事务的数据缓冲区 */
++  size_t            remaining;        /* 待传字节数 */
++  bool             is_write;          /* true 发送，false 接收 */
++  bool             xfer_armed;        /* 是否已登记数据传输 */
++  uint16_t         blocksize;
++  uint16_t         nblocks;
++  sdio_eventset_t  waitevents;
++  uint32_t         waittimeout_ms;
++  bool             widebus;
++};
++
++static struct rk3576_sdio_dev_s g_sdio_dev;
++
++/****************************************************************************
++ * Name: rk3576_sdio_lock / reset / capabilities / status
++ ****************************************************************************/
++
++#ifdef CONFIG_SDIO_MUXBUS
++static int rk3576_sdio_lock(struct sdio_dev_s *dev, bool lock)
++{
++  UNUSED(dev);
++  UNUSED(lock);
++  return OK;              /* 单一从设备，无需总线仲裁 */
++}
++#endif
++
++static void rk3576_sdio_reset(struct sdio_dev_s *dev)
++{
++  struct rk3576_sdio_dev_s *priv = (struct rk3576_sdio_dev_s *)dev;
++
++  sdhci_reset(SDHCI_RESET_CMD | SDHCI_RESET_DATA);
++  sdhci_putreg(RK3576_SDHCI_INTSTAT, 0xffffffff);
++  sdhci_putreg(RK3576_SDHCI_INTEN, 0xffffffff);
++  sdhci_putreg(RK3576_SDHCI_SIGEN, 0);
++  priv->xfer_armed = false;
++  priv->remaining  = 0;
++}
++
++static sdio_capset_t rk3576_sdio_capabilities(struct sdio_dev_s *dev)
++{
++  UNUSED(dev);
++
++  /* 只声明确实实现了的能力。CAP0 里虽然有 8 位总线和 ADMA2，
++   * 但驱动当前是 PIO，声明 DMA 会让上层走没实现的路径。
++   */
++
++  return 0;
++}
++
++static sdio_statset_t rk3576_sdio_status(struct sdio_dev_s *dev)
++{
++  UNUSED(dev);
++
++  /* eMMC 是板载焊死的，dtsi 里标了 non-removable，因此恒为"已插入"。
++   * 不去读 SDHCI PRESENT 寄存器的 CARDINSERTED —— 那一位是给可插拔
++   * 卡座用的，对焊死器件没有意义。
++   *
++   * ★ 这里必须返回 SDIO_STATUS_PRESENT。返回 0 表示"没有任何状态标志"，
++   *   上层会判定插槽为空，日志显示 "MMC/SD slot is empty"，
++   *   随后不注册块设备 —— 而 mmcsd_slotinitialize() 仍返回 OK
++   *   （它只把 -ENODEV 之外的错误当失败），因此调用方看不出异常。
++   */
++
++  return SDIO_STATUS_PRESENT;
++}
++
++static void rk3576_sdio_widebus(struct sdio_dev_s *dev, bool enable)
++{
++  struct rk3576_sdio_dev_s *priv = (struct rk3576_sdio_dev_s *)dev;
++  uint32_t regval;
++
++  regval = sdhci_getreg(RK3576_SDHCI_HOSTCTRL1);
++  regval &= ~(SDHCI_HOSTCTRL1_DTW4BIT | SDHCI_HOSTCTRL1_DTW8BIT);
++  if (enable)
++    {
++      regval |= SDHCI_HOSTCTRL1_DTW4BIT;
++    }
++
++  sdhci_putreg(RK3576_SDHCI_HOSTCTRL1, regval);
++  priv->widebus = enable;
++}
++
++static void rk3576_sdio_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
++{
++  UNUSED(dev);
++
++  switch (rate)
++    {
++      case CLOCK_SDIO_DISABLED:
++        sdhci_putreg(RK3576_SDHCI_CLKCTRL,
++                     sdhci_getreg(RK3576_SDHCI_CLKCTRL) &
++                     ~SDHCI_CLK_SDCLKEN);
++        break;
++
++      case CLOCK_IDMODE:
++        sdhci_setclock(SDHCI_ID_CLOCK_HZ);      /* 400kHz 识别用 */
++        break;
++
++      default:
++        /* MMC/SD 传输模式。先取 High Speed 的 52MHz —— HS200/HS400 需要
++         * DLL 采样窗口整定，留到后面做。
++         */
++
++        sdhci_setclock(52000000);
++        break;
++    }
++}
++
++static int rk3576_sdio_attach(struct sdio_dev_s *dev)
++{
++  UNUSED(dev);
++  return OK;              /* 轮询式，不挂中断 */
++}
++
++/****************************************************************************
++ * Name: rk3576_sdio_sendcmd
++ *
++ * Description:
++ *   把上层的命令编码翻译成 SDHCI 的 XFERMODE 写入。
++ *   若此前 RECVSETUP/SENDSETUP 登记过数据传输，这里补上数据相关位 ——
++ *   SDHCI 要求命令和传输模式在同一次 32 位写里完成。
++ *
++ ****************************************************************************/
++
++static int rk3576_sdio_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
++                               uint32_t arg)
++{
++  struct rk3576_sdio_dev_s *priv = (struct rk3576_sdio_dev_s *)dev;
++  uint32_t cmdidx = cmd & MMCSD_CMDIDX_MASK;
++  uint32_t cmdreg;
++  uint32_t xfer = 0;
++  int us;
++
++  for (us = 0; us < SDHCI_CMD_TIMEOUT_US; us++)
++    {
++      uint32_t busy = SDHCI_PRESENT_CMDINHIBIT;
++
++      if (priv->xfer_armed)
++        {
++          busy |= SDHCI_PRESENT_DATINHIBIT;
++        }
++
++      if ((sdhci_getreg(RK3576_SDHCI_PRESENT) & busy) == 0)
++        {
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  if (us >= SDHCI_CMD_TIMEOUT_US)
++    {
++      return -EBUSY;
++    }
++
++  switch (cmd & MMCSD_RESPONSE_MASK)
++    {
++      case MMCSD_NO_RESPONSE:
++        cmdreg = SDHCI_CMD_RESP_NONE;
++        break;
++
++      case MMCSD_R2_RESPONSE:
++        cmdreg = SDHCI_CMD_RESP_LEN136 | SDHCI_CMD_CRCCHECK;
++        break;
++
++      case MMCSD_R1B_RESPONSE:
++        cmdreg = SDHCI_CMD_RESP_LEN48BUSY | SDHCI_CMD_CRCCHECK |
++                 SDHCI_CMD_INDEXCHECK;
++        break;
++
++      case MMCSD_R3_RESPONSE:
++      case MMCSD_R4_RESPONSE:
++
++        /* R3/R4 无 CRC 且命令索引位是保留值，开校验会误报。 */
++
++        cmdreg = SDHCI_CMD_RESP_LEN48;
++        break;
++
++      default:
++        cmdreg = SDHCI_CMD_RESP_LEN48 | SDHCI_CMD_CRCCHECK |
++                 SDHCI_CMD_INDEXCHECK;
++        break;
++    }
++
++  if (priv->xfer_armed)
++    {
++      cmdreg |= SDHCI_CMD_DATAPRESENT;
++      xfer    = SDHCI_XFER_BLKCNTEN;
++
++      if (!priv->is_write)
++        {
++          xfer |= SDHCI_XFER_DATAREAD;
++        }
++
++      if (priv->nblocks > 1)
++        {
++          xfer |= SDHCI_XFER_MULTIBLK | SDHCI_XFER_AUTOCMD12;
++        }
++    }
++
++  sdhci_putreg(RK3576_SDHCI_INTSTAT, 0xffffffff);
++  sdhci_putreg(RK3576_SDHCI_ARG, arg);
++  sdhci_putreg(RK3576_SDHCI_XFERMODE,
++               ((cmdidx << SDHCI_CMD_INDEX_SHIFT) | cmdreg) << 16 | xfer);
++  return OK;
++}
++
++#ifdef CONFIG_SDIO_BLOCKSETUP
++static void rk3576_sdio_blocksetup(struct sdio_dev_s *dev,
++                                   unsigned int blocklen, unsigned int nblocks)
++{
++  struct rk3576_sdio_dev_s *priv = (struct rk3576_sdio_dev_s *)dev;
++
++  priv->blocksize = (uint16_t)blocklen;
++  priv->nblocks   = (uint16_t)nblocks;
++  sdhci_putreg(RK3576_SDHCI_BLKSIZE,
++               ((uint32_t)nblocks << 16) | (blocklen & 0xfff));
++}
++#endif
++
++static int rk3576_sdio_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
++                                 size_t nbytes)
++{
++  struct rk3576_sdio_dev_s *priv = (struct rk3576_sdio_dev_s *)dev;
++
++  priv->buffer     = buffer;
++  priv->remaining  = nbytes;
++  priv->is_write   = false;
++  priv->xfer_armed = true;
++  return OK;
++}
++
++static int rk3576_sdio_sendsetup(struct sdio_dev_s *dev,
++                                 const uint8_t *buffer, size_t nbytes)
++{
++  struct rk3576_sdio_dev_s *priv = (struct rk3576_sdio_dev_s *)dev;
++
++  priv->buffer     = (uint8_t *)buffer;
++  priv->remaining  = nbytes;
++  priv->is_write   = true;
++  priv->xfer_armed = true;
++  return OK;
++}
++
++static int rk3576_sdio_cancel(struct sdio_dev_s *dev)
++{
++  struct rk3576_sdio_dev_s *priv = (struct rk3576_sdio_dev_s *)dev;
++
++  priv->xfer_armed = false;
++  priv->remaining  = 0;
++  sdhci_reset(SDHCI_RESET_CMD | SDHCI_RESET_DATA);
++  return OK;
++}
++
++static int rk3576_sdio_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
++{
++  uint32_t status;
++  int us;
++
++  UNUSED(dev);
++
++  for (us = 0; us < SDHCI_CMD_TIMEOUT_US; us++)
++    {
++      status = sdhci_getreg(RK3576_SDHCI_INTSTAT);
++      if ((status & (SDHCI_INT_CMDCOMPLETE | SDHCI_INT_ALLERRORS)) != 0)
++        {
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  if (us >= SDHCI_CMD_TIMEOUT_US)
++    {
++      return -ETIMEDOUT;
++    }
++
++  if ((status & SDHCI_INT_CMDERRORS) != 0)
++    {
++      sdhci_reset(SDHCI_RESET_CMD);
++      return ((status & SDHCI_INT_CMDTIMEOUT) != 0) ? -ETIMEDOUT : -EIO;
++    }
++
++  return OK;
++}
++
++static int rk3576_sdio_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
++                                 uint32_t *rshort)
++{
++  UNUSED(dev);
++  UNUSED(cmd);
++
++  if (rshort != NULL)
++    {
++      *rshort = sdhci_getreg(RK3576_SDHCI_RESP0);
++    }
++
++  return OK;
++}
++
++static int rk3576_sdio_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
++                                uint32_t rlong[4])
++{
++  UNUSED(dev);
++  UNUSED(cmd);
++
++  if (rlong != NULL)
++    {
++      /* ★ 长响应要做两件事：倒字序，再整体左移 8 位。
++       *
++       *   字序：RESP0 存响应最低 32 位，而上层期望 rlong[0] 是最高那组。
++       *
++       *   移位：SDHCI 的响应寄存器里放的是 R[127:8] —— 硬件把 CRC7 和
++       *   停止位去掉了，于是整个 128 位内容右移了 8 位。上层
++       *   mmcsd_decode_cid/csd 期望的是原始的 128 位布局
++       *   （bit127 是 CID 的 MID 最高位）。
++       *
++       *   漏掉移位不会报错，只会解出错误的字段：本端口实测表现为
++       *   mid 解成 00、产品名为空（实际 MID 是 0xec、产品名是
++       *   可读 ASCII）。容量因为来自 EXT_CSD（走数据通路读的）
++       *   而不受影响，所以更容易漏掉。
++       */
++
++      uint32_t r0 = sdhci_getreg(RK3576_SDHCI_RESP0);
++      uint32_t r1 = sdhci_getreg(RK3576_SDHCI_RESP1);
++      uint32_t r2 = sdhci_getreg(RK3576_SDHCI_RESP2);
++      uint32_t r3 = sdhci_getreg(RK3576_SDHCI_RESP3);
++
++      rlong[0] = (r3 << 8) | (r2 >> 24);
++      rlong[1] = (r2 << 8) | (r1 >> 24);
++      rlong[2] = (r1 << 8) | (r0 >> 24);
++      rlong[3] = (r0 << 8);
++    }
++
++  return OK;
++}
++
++static void rk3576_sdio_waitenable(struct sdio_dev_s *dev,
++                                   sdio_eventset_t eventset,
++                                   uint32_t timeout)
++{
++  struct rk3576_sdio_dev_s *priv = (struct rk3576_sdio_dev_s *)dev;
++
++  priv->waitevents     = eventset;
++  priv->waittimeout_ms = timeout;
++}
++
++/****************************************************************************
++ * Name: rk3576_sdio_eventwait
++ *
++ * Description:
++ *   同步完成数据搬运并等待事务结束。
++ *
++ *   中断式实现里这里等信号量、由 ISR 搬数据；轮询式把搬运放在这里。
++ *   上层的时序保证了调用本函数时命令已经发出、响应已经读走。
++ *
++ ****************************************************************************/
++
++static sdio_eventset_t rk3576_sdio_eventwait(struct sdio_dev_s *dev)
++{
++  struct rk3576_sdio_dev_s *priv = (struct rk3576_sdio_dev_s *)dev;
++  uint32_t status;
++  uint32_t word;
++  uint32_t limit;
++  int us;
++  int i;
++
++  if (!priv->xfer_armed)
++    {
++      /* 没有数据相位（例如 CMD7 的 R1b 忙等），只需等事务结束。 */
++
++      return SDIOWAIT_TRANSFERDONE;
++    }
++
++  limit = priv->waittimeout_ms ? priv->waittimeout_ms * 1000
++                               : SDHCI_CMD_TIMEOUT_US;
++
++  while (priv->remaining > 0)
++    {
++      uint32_t rdy = priv->is_write ? SDHCI_INT_BUFWRRDY : SDHCI_INT_BUFRDRDY;
++
++      for (us = 0; us < limit; us++)
++        {
++          status = sdhci_getreg(RK3576_SDHCI_INTSTAT);
++          if ((status & (rdy | SDHCI_INT_DATAERRORS)) != 0)
++            {
++              break;
++            }
++
++          up_udelay(1);
++        }
++
++      if (us >= limit)
++        {
++          priv->xfer_armed = false;
++          return SDIOWAIT_TIMEOUT;
++        }
++
++      if ((status & SDHCI_INT_DATAERRORS) != 0)
++        {
++          priv->xfer_armed = false;
++          sdhci_reset(SDHCI_RESET_DATA);
++          return SDIOWAIT_ERROR;
++        }
++
++      sdhci_putreg(RK3576_SDHCI_INTSTAT, rdy);
++
++      /* 缓冲区就绪信号一次覆盖一个块，按块搬运。 */
++
++      for (i = 0; i < priv->blocksize && priv->remaining > 0; i += 4)
++        {
++          if (priv->is_write)
++            {
++              word = (uint32_t)priv->buffer[0]        |
++                     (uint32_t)priv->buffer[1] << 8   |
++                     (uint32_t)priv->buffer[2] << 16  |
++                     (uint32_t)priv->buffer[3] << 24;
++              sdhci_putreg(RK3576_SDHCI_BUFDATA, word);
++            }
++          else
++            {
++              word = sdhci_getreg(RK3576_SDHCI_BUFDATA);
++              priv->buffer[0] = (uint8_t)word;
++              priv->buffer[1] = (uint8_t)(word >> 8);
++              priv->buffer[2] = (uint8_t)(word >> 16);
++              priv->buffer[3] = (uint8_t)(word >> 24);
++            }
++
++          priv->buffer    += 4;
++          priv->remaining -= 4;
++        }
++    }
++
++  /* 等传输结束，否则下一条命令会撞上 DATINHIBIT。 */
++
++  for (us = 0; us < limit; us++)
++    {
++      status = sdhci_getreg(RK3576_SDHCI_INTSTAT);
++      if ((status & SDHCI_INT_XFERCOMPLETE) != 0)
++        {
++          priv->xfer_armed = false;
++          return SDIOWAIT_TRANSFERDONE;
++        }
++
++      if ((status & SDHCI_INT_DATAERRORS) != 0)
++        {
++          priv->xfer_armed = false;
++          sdhci_reset(SDHCI_RESET_DATA);
++          return SDIOWAIT_ERROR;
++        }
++
++      up_udelay(1);
++    }
++
++  priv->xfer_armed = false;
++  return SDIOWAIT_TIMEOUT;
++}
++
++static void rk3576_sdio_callbackenable(struct sdio_dev_s *dev,
++                                       sdio_eventset_t eventset)
++{
++  UNUSED(dev);
++  UNUSED(eventset);       /* eMMC 焊死，无插拔事件 */
++}
++
++#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_HPWORK)
++static int rk3576_sdio_registercallback(struct sdio_dev_s *dev,
++                                        worker_t callback, void *arg)
++{
++  UNUSED(dev);
++  UNUSED(callback);
++  UNUSED(arg);
++  return OK;
++}
++#endif
++
++/* 部分成员是条件编译的，这里的 #ifdef 必须与 include/nuttx/sdio.h 一致：
++ *   lock             ← CONFIG_SDIO_MUXBUS
++ *   blocksetup       ← CONFIG_SDIO_BLOCKSETUP
++ *   registercallback ← CONFIG_SCHED_WORKQUEUE && CONFIG_SCHED_HPWORK
++ */
++
++static const struct sdio_dev_s g_sdio_ops =
++{
++#ifdef CONFIG_SDIO_MUXBUS
++  .lock             = rk3576_sdio_lock,
++#endif
++  .reset            = rk3576_sdio_reset,
++  .capabilities     = rk3576_sdio_capabilities,
++  .status           = rk3576_sdio_status,
++  .widebus          = rk3576_sdio_widebus,
++  .clock            = rk3576_sdio_clock,
++  .attach           = rk3576_sdio_attach,
++  .sendcmd          = rk3576_sdio_sendcmd,
++#ifdef CONFIG_SDIO_BLOCKSETUP
++  .blocksetup       = rk3576_sdio_blocksetup,
++#endif
++  .recvsetup        = rk3576_sdio_recvsetup,
++  .sendsetup        = rk3576_sdio_sendsetup,
++  .cancel           = rk3576_sdio_cancel,
++  .waitresponse     = rk3576_sdio_waitresponse,
++  .recv_r1          = rk3576_sdio_recvshort,
++  .recv_r2          = rk3576_sdio_recvlong,
++  .recv_r3          = rk3576_sdio_recvshort,
++  .recv_r4          = rk3576_sdio_recvshort,
++  .recv_r5          = rk3576_sdio_recvshort,
++  .recv_r6          = rk3576_sdio_recvshort,
++  .recv_r7          = rk3576_sdio_recvshort,
++  .waitenable       = rk3576_sdio_waitenable,
++  .eventwait        = rk3576_sdio_eventwait,
++  .callbackenable   = rk3576_sdio_callbackenable,
++#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_HPWORK)
++  .registercallback = rk3576_sdio_registercallback,
++#endif
++};
++
++/****************************************************************************
++ * Name: rk3576_sdhci_initialize
++ *
++ * Description:
++ *   返回 sdio_dev_s 句柄，供 mmcsd_slotinitialize() 注册 /dev/mmcsdN。
++ *
++ ****************************************************************************/
++
++struct sdio_dev_s *rk3576_sdhci_initialize(int slotno)
++{
++  struct rk3576_sdio_dev_s *priv = &g_sdio_dev;
++
++  if (slotno != 0)
++    {
++      return NULL;
++    }
++
++  memcpy(&priv->dev, &g_sdio_ops, sizeof(struct sdio_dev_s));
++  priv->xfer_armed = false;
++
++  sdhci_reset(SDHCI_RESET_ALL);
++  sdhci_putreg(RK3576_SDHCI_HOSTCTRL1, SDHCI_PWR_33V | SDHCI_PWR_ON);
++  sdhci_putreg(RK3576_SDHCI_INTEN, 0xffffffff);
++  sdhci_putreg(RK3576_SDHCI_SIGEN, 0);
++  sdhci_setclock(SDHCI_ID_CLOCK_HZ);
++
++  return &priv->dev;
++}
++
+ /****************************************************************************
+  * Name: rk3576_sdhci_probe
+  *
+diff --git a/arch/arm64/src/rk3576/rk3576_sdhci.h b/arch/arm64/src/rk3576/rk3576_sdhci.h
+index 971084de..c0f64978 100644
+--- a/arch/arm64/src/rk3576/rk3576_sdhci.h
++++ b/arch/arm64/src/rk3576/rk3576_sdhci.h
+@@ -24,6 +24,7 @@
+ #define __ARCH_ARM64_SRC_RK3576_RK3576_SDHCI_H
+ 
+ #include <nuttx/config.h>
++#include <nuttx/sdio.h>
+ 
+ /****************************************************************************
+  * Name: rk3576_sdhci_probe
+@@ -36,4 +37,17 @@
+ 
+ int rk3576_sdhci_probe(void);
+ 
++/****************************************************************************
++ * Name: rk3576_sdhci_initialize
++ *
++ * Description:
++ *   返回 sdio_dev_s 句柄，供 mmcsd_slotinitialize() 注册 /dev/mmcsdN。
++ *
++ * Input Parameters:
++ *   slotno - 槽位号，本 SoC 只有一个 eMMC，取 0。
++ *
++ ****************************************************************************/
++
++struct sdio_dev_s *rk3576_sdhci_initialize(int slotno);
++
+ #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_SDHCI_H */
+-- 
+2.43.0
+
+
+From 3a65d6b63b5febca4827bd7fecd8d2145adb51a0 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 14:07:47 +0800
+Subject: [PATCH 10/11] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
+ =?UTF-8?q?=E5=A4=87=E8=AF=BB=E9=80=9A=EF=BC=881=20=E4=BD=8D=20@50MHz?=
+ =?UTF-8?q?=EF=BC=89=EF=BC=8C4=20=E4=BD=8D=E5=BE=85=E4=BF=AE?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+板上实测：
+  SDHCI: 卡时钟 52000000Hz (div=2 实际约 50000000Hz) HS=1
+  nsh> hexdump /dev/mmcsd0c count=512
+  0000: 00 00 ...                    （GPT 保护性 MBR 引导区）
+  01f0: ... 55 aa                    （MBR 签名，数据正确）
+
+本次修复
+--------
+1. 25MHz 以上必须置 HOSTCTRL1 的 High Speed 位
+   规范要求：清零时控制器按低速时序采样，高频会采错。
+   命令线速率低、余量大，先坏的总是数据线 —— 因此表现为"卡能识别、
+   CID/CSD 能读、块设备能注册，唯独读数据超时"。
+
+2. R1b 命令要等忙状态解除
+   R1b 无数据相位但用 DAT0 表示卡忙。原先 sendcmd 只在 xfer_armed 时
+   等 DATINHIBIT，会漏掉 R1b；waitresponse 也只等 CMDCOMPLETE。
+   于是可能在卡仍忙时下发下一条命令，打断尚未完成的操作。
+   现在两处都按规范处理（DATINHIBIT + XFERCOMPLETE）。
+
+3. BCH 注册 /dev/mmcsd0c
+   NuttX 块设备不能直接 open()，dd/hexdump 走字符设备接口。
+   只读注册，避免误写坏 eMMC 上原有分区。
+
+★ 已知限制：4 位总线不可用，当前声明 SDIO_CAPS_1BIT_ONLY
+------------------------------------------------------
+定位过程（三次单变量实验逐个排除）：
+  1 位 + 1MHz    读通，MBR 签名正确
+  4 位 + 1MHz    超时  → 与时钟频率无关，排除全部时序假设
+  4 位 + 50MHz   超时
+超时时刻的控制器状态：BLKSIZE/xfer 配置全对、命令完成、
+PRESENT 显示读传输进行中，但 BUFRDRDY 始终不置位、缓冲区无数据。
+
+两个待验证的方向，都有硬判据、无需推测：
+  a) 卡实际没切到 4 位 —— 切换后读回 EXT_CSD 的 BUS_WIDTH(183) 即可确认
+  b) 主机侧位宽字段位置不对 —— 对照 Linux sdhci-of-dwcmshc.c 核对
+
+1 位 @50MHz 约 6MB/s，先作为可用配置交付。
+
+过程记录：本次曾两度把"找到一个真实缺陷"误当成"找到本次故障的根因"
+（High Speed 位、R1b 忙等）。两者的区别在于修复后现象是否按预期方向
+改变 —— 行为有变化不等于接近了答案。
+---
+ arch/arm64/src/rk3576/rk3576_sdhci.c | 101 ++++++++++++++++++++++++---
+ 1 file changed, 93 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_sdhci.c b/arch/arm64/src/rk3576/rk3576_sdhci.c
+index a3b84e47..a2996f1a 100644
+--- a/arch/arm64/src/rk3576/rk3576_sdhci.c
++++ b/arch/arm64/src/rk3576/rk3576_sdhci.c
+@@ -143,6 +143,29 @@ static int sdhci_setclock(uint32_t freq_hz)
+   uint32_t div;
+   int us;
+ 
++  /* ★ 超过 25MHz 必须置 HOSTCTRL1 的 High Speed 位。
++   *
++   *   SDHCI 规范：High Speed 清零时控制器按"数据在 SDCLK 上升沿之后
++   *   保持"的低速时序采样，25MHz 以上会采错。置位后改用高速时序。
++   *
++   *   漏掉它的表现是命令全部正常、数据相位静默超时 —— 因为命令线
++   *   速率低、时序余量大，先坏的总是数据线。本端口实测：400kHz 下
++   *   自写的探测能正确读出块0 的 MBR 签名，一旦上层把时钟提到 50MHz
++   *   就 SDIOWAIT_TIMEOUT。
++   */
++
++  regval = sdhci_getreg(RK3576_SDHCI_HOSTCTRL1);
++  if (freq_hz > 25000000)
++    {
++      regval |= SDHCI_HOSTCTRL1_HISPEED;
++    }
++  else
++    {
++      regval &= ~SDHCI_HOSTCTRL1_HISPEED;
++    }
++
++  sdhci_putreg(RK3576_SDHCI_HOSTCTRL1, regval);
++
+   /* 关掉卡时钟再动分频 */
+ 
+   regval = sdhci_getreg(RK3576_SDHCI_CLKCTRL);
+@@ -188,9 +211,11 @@ static int sdhci_setclock(uint32_t freq_hz)
+   sdhci_putreg(RK3576_SDHCI_CLKCTRL, regval | SDHCI_CLK_SDCLKEN);
+ 
+   syslog(LOG_INFO, "SDHCI: 卡时钟 %" PRIu32 "Hz (div=%" PRIu32
+-                   " 实际约 %" PRIu32 "Hz)\n",
++                   " 实际约 %" PRIu32 "Hz) HS=%d\n",
+          freq_hz, div,
+-         div ? RK3576_SDHCI_BASECLK_HZ / (2 * div) : RK3576_SDHCI_BASECLK_HZ);
++         div ? RK3576_SDHCI_BASECLK_HZ / (2 * div) : RK3576_SDHCI_BASECLK_HZ,
++         (sdhci_getreg(RK3576_SDHCI_HOSTCTRL1) &
++          SDHCI_HOSTCTRL1_HISPEED) ? 1 : 0);
+   return OK;
+ }
+ 
+@@ -444,11 +469,23 @@ static sdio_capset_t rk3576_sdio_capabilities(struct sdio_dev_s *dev)
+ {
+   UNUSED(dev);
+ 
+-  /* 只声明确实实现了的能力。CAP0 里虽然有 8 位总线和 ADMA2，
+-   * 但驱动当前是 PIO，声明 DMA 会让上层走没实现的路径。
++  /* ★ 单变量实验：声明只支持 1 位总线。
++   *
++   *   自写探测在 1 位下能正确读出块0；上层接管后 mmcsd 把卡和主机
++   *   都切到了 4 位，此后数据相位永远等不到 BUFRDRDY。降到 1MHz 也
++   *   照样失败，已排除时序因素，剩下的差异就是总线宽度。
++   *
++   *   返回 SDIO_CAPS_1BIT_ONLY 会让 mmcsd 跳过 CMD6 的宽总线切换：
++   *     1 位能读通 → 确认问题出在 4 位数据路径
++   *     1 位仍失败 → 与总线宽度无关，回头查 eventwait 与控制器交互
++   *
++   *   确认后再决定 4 位怎么修，本行不是最终形态。
++   *
++   *   另：CAP0 里虽然有 ADMA2，但本驱动是 PIO，不声明 DMASUPPORTED，
++   *   否则上层会走没实现的 dmarecvsetup 路径。
+    */
+ 
+-  return 0;
++  return SDIO_CAPS_1BIT_ONLY;
+ }
+ 
+ static sdio_statset_t rk3576_sdio_status(struct sdio_dev_s *dev)
+@@ -501,8 +538,8 @@ static void rk3576_sdio_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
+         break;
+ 
+       default:
+-        /* MMC/SD 传输模式。先取 High Speed 的 52MHz —— HS200/HS400 需要
+-         * DLL 采样窗口整定，留到后面做。
++        /* MMC 传输模式，52MHz High Speed。
++         * HS200/HS400 需要 DLL 采样窗口整定，后续再做。
+          */
+ 
+         sdhci_setclock(52000000);
+@@ -539,7 +576,17 @@ static int rk3576_sdio_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
+     {
+       uint32_t busy = SDHCI_PRESENT_CMDINHIBIT;
+ 
+-      if (priv->xfer_armed)
++      /* ★ 带数据的命令要等 DAT 线，R1b 同样要等 —— 它虽然没有数据相位，
++       * 却会用 DAT0 表示"卡忙"。只按 xfer_armed 判断会漏掉 R1b，
++       * 于是在卡还忙时就下发下一条命令。
++       *
++       * 这一点很隐蔽：mmcsd 用 CMD6 SWITCH(R1b) 切换卡的总线宽度，
++       * 如果没等它真正完成就继续，切换可能未生效 —— 主机按 4 位收、
++       * 卡仍按 1 位发，后续读数据永远等不到 BUFRDRDY。
++       */
++
++      if (priv->xfer_armed ||
++          (cmd & MMCSD_RESPONSE_MASK) == MMCSD_R1B_RESPONSE)
+         {
+           busy |= SDHCI_PRESENT_DATINHIBIT;
+         }
+@@ -604,6 +651,7 @@ static int rk3576_sdio_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
+ 
+   sdhci_putreg(RK3576_SDHCI_INTSTAT, 0xffffffff);
+   sdhci_putreg(RK3576_SDHCI_ARG, arg);
++
+   sdhci_putreg(RK3576_SDHCI_XFERMODE,
+                ((cmdidx << SDHCI_CMD_INDEX_SHIFT) | cmdreg) << 16 | xfer);
+   return OK;
+@@ -685,6 +733,32 @@ static int rk3576_sdio_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
+       return ((status & SDHCI_INT_CMDTIMEOUT) != 0) ? -ETIMEDOUT : -EIO;
+     }
+ 
++  /* ★ R1b：命令完成不等于事务完成。卡会拉低 DAT0 表示"正在处理"，
++   * 控制器在忙状态解除时给出 XFERCOMPLETE。不等它就继续下发命令，
++   * 会打断尚未生效的操作（典型如 CMD6 SWITCH 改总线宽度）。
++   */
++
++  if ((cmd & MMCSD_RESPONSE_MASK) == MMCSD_R1B_RESPONSE)
++    {
++      for (us = 0; us < SDHCI_CMD_TIMEOUT_US; us++)
++        {
++          status = sdhci_getreg(RK3576_SDHCI_INTSTAT);
++          if ((status & SDHCI_INT_XFERCOMPLETE) != 0)
++            {
++              sdhci_putreg(RK3576_SDHCI_INTSTAT, SDHCI_INT_XFERCOMPLETE);
++              break;
++            }
++
++          if ((status & SDHCI_INT_DATAERRORS) != 0)
++            {
++              sdhci_reset(SDHCI_RESET_DATA);
++              return -EIO;
++            }
++
++          up_udelay(1);
++        }
++    }
++
+   return OK;
+ }
+ 
+@@ -796,6 +870,17 @@ static sdio_eventset_t rk3576_sdio_eventwait(struct sdio_dev_s *dev)
+ 
+       if (us >= limit)
+         {
++          syslog(LOG_ERR,
++                 "SDHCI 数据超时: INTSTAT=0x%08" PRIx32
++                 " PRESENT=0x%08" PRIx32 " BLKSIZE=0x%08" PRIx32
++                 " HC1=0x%08" PRIx32 " CLK=0x%08" PRIx32
++                 " 待传=%zu 写=%d\n",
++                 sdhci_getreg(RK3576_SDHCI_INTSTAT),
++                 sdhci_getreg(RK3576_SDHCI_PRESENT),
++                 sdhci_getreg(RK3576_SDHCI_BLKSIZE),
++                 sdhci_getreg(RK3576_SDHCI_HOSTCTRL1),
++                 sdhci_getreg(RK3576_SDHCI_CLKCTRL),
++                 priv->remaining, (int)priv->is_write);
+           priv->xfer_armed = false;
+           return SDIOWAIT_TIMEOUT;
+         }
+-- 
+2.43.0
+
+
+From 84d0c755aa873b306fefd87a20e4c2e0abccf064 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 14:14:24 +0800
+Subject: [PATCH 11/11] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
+ =?UTF-8?q?=E6=80=BB=E7=BA=BF=E6=89=93=E9=80=9A=EF=BC=8850MHz=EF=BC=89?=
+ =?UTF-8?q?=EF=BC=8C=E6=A0=B9=E5=9B=A0=E6=98=AF=E8=83=BD=E5=8A=9B=E5=A3=B0?=
+ =?UTF-8?q?=E6=98=8E?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+板上实测：
+  SDHCI: 卡时钟 52000000Hz (div=2 实际约 50000000Hz) HS=1
+  nsh> hexdump /dev/mmcsd0c count=512
+  01f0: ... 55 aa        MBR 签名正确
+
+根因：capabilities() 返回 0，导致卡与主机位宽不一致
+------------------------------------------------
+drivers/mmcsd/mmcsd_sdio.c 的 mmcsd_widebus() 里，两处判断条件不同：
+
+  用 CMD6 把【卡】切到 4 位   要求 priv->buswidth 带 4BIT 标志
+  用 SDIO_WIDEBUS 设【主机】  只要求 IS_MMC()
+
+而对 MMC 卡，priv->buswidth 的 4BIT 标志只在
+(caps & SDIO_CAPS_4BIT_ONLY) 成立时才被置上（约 3938 行）。
+
+于是 capabilities() 返回 0 时：CMD6 被跳过、卡仍是 1 位，而主机被设成
+4 位。命令线照常工作（命令走 CMD 线，与数据位宽无关），唯独数据相位
+永远等不到 BUFRDRDY。改为返回 SDIO_CAPS_4BIT_ONLY 后即通。
+
+定位过程
+--------
+三次单变量实验把范围逐层收敛，每次只改一个条件：
+  1 位 + 1MHz    读通    → 基准
+  4 位 + 1MHz    超时    → 与时钟频率无关，排除全部时序假设
+                            （High Speed 位、DLL 整定、PHY 参数）
+  4 位 + 50MHz   超时
+超时时刻的寄存器：BLKSIZE/xfer 配置全对、CMDCOMPLETE 已置、
+PRESENT 显示读传输进行中、BUFRDRDY 始终为 0。
+最后读 mmcsd_sdio.c 的上层逻辑找到条件不一致，而非继续试参数。
+
+★ 过程中两次误判，都记录在案
+  把 High Speed 位、R1b 忙等分别当成过本次故障的根因。两者都是真实
+  缺陷、按规范该修，但都不是本次的原因。判别方法：修复后现象是否按
+  预期方向改变 —— "行为有变化"不等于"接近了答案"。
+
+上游线索（待验证后再决定是否提 PR）
+  mmcsd_widebus() 的这处条件不对称，对同时支持 1 位与 4 位的 host
+  （绝大多数 SDHCI）意味着：对 MMC 卡永远不发 CMD6，却会把主机设成
+  4 位。只有声明"只支持 4 位"才能得到一致配置，语义是拧的。
+  提交前需先确认这不是本端口的用法问题。
+---
+ arch/arm64/src/rk3576/rk3576_sdhci.c | 25 ++++++++++++++-----------
+ 1 file changed, 14 insertions(+), 11 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_sdhci.c b/arch/arm64/src/rk3576/rk3576_sdhci.c
+index a2996f1a..2206c8ab 100644
+--- a/arch/arm64/src/rk3576/rk3576_sdhci.c
++++ b/arch/arm64/src/rk3576/rk3576_sdhci.c
+@@ -469,23 +469,26 @@ static sdio_capset_t rk3576_sdio_capabilities(struct sdio_dev_s *dev)
+ {
+   UNUSED(dev);
+ 
+-  /* ★ 单变量实验：声明只支持 1 位总线。
++  /* ★ 必须声明 SDIO_CAPS_4BIT_ONLY，否则卡和主机的位宽会不一致。
+    *
+-   *   自写探测在 1 位下能正确读出块0；上层接管后 mmcsd 把卡和主机
+-   *   都切到了 4 位，此后数据相位永远等不到 BUFRDRDY。降到 1MHz 也
+-   *   照样失败，已排除时序因素，剩下的差异就是总线宽度。
++   *   drivers/mmcsd/mmcsd_sdio.c 里两处判断条件不同：
+    *
+-   *   返回 SDIO_CAPS_1BIT_ONLY 会让 mmcsd 跳过 CMD6 的宽总线切换：
+-   *     1 位能读通 → 确认问题出在 4 位数据路径
+-   *     1 位仍失败 → 与总线宽度无关，回头查 eventwait 与控制器交互
++   *     用 CMD6 把【卡】切到 4 位 —— 要求 priv->buswidth 带 4BIT 标志
++   *     用 SDIO_WIDEBUS 把【主机】设成 4 位 —— 只要求 IS_MMC()
+    *
+-   *   确认后再决定 4 位怎么修，本行不是最终形态。
++   *   而对 MMC 卡，priv->buswidth 的 4BIT 标志只在
++   *   (caps & SDIO_CAPS_4BIT_ONLY) 成立时才被置上（mmcsd_sdio.c 约 3938 行）。
+    *
+-   *   另：CAP0 里虽然有 ADMA2，但本驱动是 PIO，不声明 DMASUPPORTED，
+-   *   否则上层会走没实现的 dmarecvsetup 路径。
++   *   所以 capabilities() 返回 0 时：CMD6 被跳过、卡仍是 1 位，
++   *   而主机被设成 4 位 —— 命令线照常工作（命令走 CMD 线，与位宽无关），
++   *   唯独数据相位永远等不到 BUFRDRDY。本端口实测就是这个现象，
++   *   且降到 1MHz 也不改善，因为它根本不是时序问题。
++   *
++   *   不声明 DMASUPPORTED：CAP0 里有 ADMA2，但本驱动是 PIO，
++   *   声明了会让上层走没实现的 dmarecvsetup 路径。
+    */
+ 
+-  return SDIO_CAPS_1BIT_ONLY;
++  return SDIO_CAPS_4BIT_ONLY;
+ }
+ 
+ static sdio_statset_t rk3576_sdio_status(struct sdio_dev_s *dev)
 -- 
 2.43.0
 
