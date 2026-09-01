@@ -40,6 +40,7 @@
 
 #include "rk3576_power.h"
 #include "rk3576_sai.h"
+#include "rk3576_vop2.h"
 #include "rk3576_sdhci.h"
 #include "kickpi_k7.h"
 
@@ -168,51 +169,47 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-  /* ★ 显示链路第一步：打开 VOP 与 DSI 所在的电源域。
+#ifdef CONFIG_RK3576_VOP2
+  /* 显示链路第一步：VOP2 自检 + 内置彩条。
    *
-   * 与 eMMC 不同，这两个域 U-Boot 不会留给我们 —— 原厂 dtb 里
-   * dsi@27d80000 是 disabled，引导阶段根本没用过 MIPI。
+   * ★ 彩条不经过帧缓冲与图层，只要 VOP 的时序发生器、像素时钟、
+   *   以及到 MIPI 接口的通路对了就会出现。把"VOP 配置"与
+   *   "图层/内存通路"两类问题分开验证。
    *
-   * 验证方式：上电后读 VOP 的寄存器。读到 0 或 0xffffffff 说明域没开
-   * 或基址不对；读到像样的值说明域确实活了。这是先前 GPIO(VER_ID)、
-   * eMMC(CAP0) 用过的同一套自检思路 —— 找一个能一次性证伪多个前提的读数。
+   *   注意此时 DSI 主机与 D-PHY 尚未实现，屏上不会有任何显示 ——
+   *   本步只验证 VOP 侧寄存器可写、时序算得对。屏幕点亮要等
+   *   DSI + D-PHY + 面板初始化都做完。
    */
 
     {
-      int pd;
+      /* 时序取自 docs/refs/panel/rk3308b-mipi-display-v11.dtsi 的
+       * 720x1280 5 寸屏（ST7703）。规格与本板 F050008M01 一致
+       * （4 lane RGB888、68x121mm），但那是另一块屏的数据 ——
+       * 见 docs/refs/panel/README.md 中标注的适用边界。
+       */
 
-      pd = rk3576_power_on(RK3576_PD_VOP);
-      if (pd == OK)
-        {
-          pd = rk3576_power_on(RK3576_PD_VO0);
-        }
+      static const struct rk3576_vop2_timing_s timing =
+      {
+        .pixclk_hz    = 65000000,
+        .hactive      = 720,
+        .hfront_porch = 48,
+        .hsync_len    = 8,
+        .hback_porch  = 52,
+        .vactive      = 1280,
+        .vfront_porch = 16,
+        .vsync_len    = 6,
+        .vback_porch  = 15,
+      };
 
-      if (pd < 0)
+      ret = rk3576_vop2_probe();
+      if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: 显示电源域上电失败: %d\n", pd);
+          syslog(LOG_ERR, "ERROR: VOP2 探测失败: %d\n", ret);
         }
       else
         {
-          volatile uint32_t *vop = (volatile uint32_t *)0x27d00000ul;
-
-          syslog(LOG_INFO,
-                 "VOP 探测: [0x00]=0x%08" PRIx32 " [0x04]=0x%08" PRIx32
-                 " [0x08]=0x%08" PRIx32 " [0x0c]=0x%08" PRIx32 "%s\n",
-                 vop[0], vop[1], vop[2], vop[3],
-                 (vop[0] == 0 || vop[0] == 0xffffffff)
-                   ? "  ← 全 0/全 F，域未开或基址不对" : "  ← 域已就绪");
+          rk3576_vop2_colorbar(&timing, true);
         }
-    }
-
-#ifdef CONFIG_RK3576_SAI
-  /* 音频前置链路：PD_AUDIO 电源域 + 三路时钟 + 引脚复用，读版本自检。
-   * 传输逻辑（i2s_dev_s）与 ES8388 codec 接入在此之后。
-   */
-
-  ret = rk3576_sai_probe();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: SAI 探测失败: %d\n", ret);
     }
 #endif
 
