@@ -44,13 +44,17 @@
 #include <nuttx/config.h>
 #include <debug.h>
 #include <errno.h>
+#include <stdint.h>
 #include <syslog.h>
 
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/input/gt9xx.h>
 
+#include "arm64_internal.h"
 #include "rk3576_gpio.h"
+#include "rk3576_pinmux.h"
 #include "rk3576_i2c.h"
+#include <arch/board/board.h>
 #include "kickpi_k7.h"
 
 #ifdef CONFIG_INPUT_GT9XX
@@ -59,45 +63,23 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* ★ 待实测：以下三项需上板确认后固定 */
-
-/* ★★ 板上实测结论（屏已物理接上）：I2C1~I2C9 全部扫描，
- *    未在任何总线上发现 GT9xx（0x5d 或 0x14）。
+/* 引脚与总线取自原理图 K7_V1.1 第 27 页 "Single-MIPI LCM"，
+ * 定义在 board.h（含出处与电源轨说明）。
  *
- *    已扫到的器件：I2C1 的 0x23(PMIC)、I2C2 的 0x4e(PD)+0x51(RTC)、
- *    I2C3 的 0x10(ES8388)；I2C4/5/7/8/9 为空；I2C6 起始条件即失败
- *    （fcnt=0，引脚复用存疑）。未扫 I2C0 —— 它在 PMU 域，时钟基址不同。
- *
- *    最可能的原因是**触摸未供电**：厂商面板节点有
- *    power-supply = <&vcc3v3_lcd_n>，而该 regulator 定义在 LCD overlay
- *    dtsi 里，基础 dtb 中并不存在（dsi 节点本身也是 disabled）。
- *    没供电时扫遍所有总线也找不到，这一点无法用软件区分。
- *
- *    四个缺失信息都在同一个文件里，需向 KICKPI 技术支持索取：
- *      rk3576-kickpi-k7-android-mipi-5-720-1280-F050008M01.dtsi
- *        触摸的 I2C 总线号、供电轨 GPIO、面板初始化序列、背光控制
- *
- *    下面的总线号保持 2 仅为占位，未经证实。
+ * 此前扫遍 I2C1~I2C9 找不到触摸，有两个叠加的原因，原理图把两个都
+ * 解释清楚了：
+ *   1) 触摸挂在 I2C0 上，而 I2C0 因时钟在 PMU 域被跳过了，从未扫过；
+ *   2) 触摸由 VCC3V3_LCD_S0 供电，该轨受 LCD_PWREN_H (GPIO0_C6)
+ *      控制，不拉高则芯片无电 —— 扫任何总线都不会有应答。
  */
 
-#define TOUCH_I2C_BUS      2      /* 未证实：全总线扫描未发现触摸  */
-#define TOUCH_I2C_ADDR     0x5d   /* GT9xx 默认；另一可能值为 0x14      */
-/* ★ 中断脚原取自 KICKPI 文档中另一块屏（1024x600）的示例 gpio3-3，
- *   现已证明该值错误：board.h 记载 gpio3-3 是 GMAC1 的 PHY 复位脚
- *   （出处为本板 dts）。两者冲突，会互相干扰。
- *
- *   本板 F050008M01 的触摸中断/复位脚尚无可靠出处，暂填 -1 表示未知：
- *   不配置中断，改由上层轮询。这样触摸仍可用，且不会误动别的引脚。
- *
- *   落实办法：向 KICKPI 索取
- *   rk3576-kickpi-k7-android-mipi-5-720-1280-F050008M01.dtsi，
- *   其中的 goodix_irq_gpio / goodix_rst_gpio 即为确定值。
- */
+#define TOUCH_I2C_BUS      BOARD_TP_I2C_BUS
+#define TOUCH_I2C_ADDR     0x5d   /* GT9xx 默认；复位时 INT 为高则是 0x14 */
 
-#define TOUCH_IRQ_BANK     (-1)
-#define TOUCH_IRQ_PIN      (-1)
-#define TOUCH_RST_BANK     (-1)
-#define TOUCH_RST_PIN      (-1)
+#define TOUCH_IRQ_BANK     BOARD_TP_INT_BANK
+#define TOUCH_IRQ_PIN      BOARD_TP_INT_PIN
+#define TOUCH_RST_BANK     BOARD_TP_RST_BANK
+#define TOUCH_RST_PIN      BOARD_TP_RST_PIN
 
 /****************************************************************************
  * Private Functions
@@ -131,21 +113,96 @@ static int kickpi_touch_set_power(const struct gt9xx_board_s *state, bool on)
 {
   UNUSED(state);
 
-  /* 触摸控制器与屏共用供电，这里只操作复位脚。
+  /* 触摸与屏共用 VCC3V3_LCD_S0，该轨由 kickpi_k7_lcd_power() 统一
+   * 管理（屏和触摸不能各自开关同一条轨）。这里只做复位脚。
    *
    * ★ 复位时序决定 I2C 地址：GT9xx 在复位释放的瞬间采样 INT 脚 ——
-   *   低电平选 0x5d，高电平选 0x14。本实现让 INT 保持输入（外部下拉），
-   *   因此期望地址是 0x5d；若上板扫到的是 0x14，说明该脚被外部拉高，
-   *   把 TOUCH_I2C_ADDR 改掉即可，不必改时序。
+   *   低电平选 0x5d，高电平选 0x14。原理图上 TP_INT_L 有 10K 上拉到
+   *   VCC_3V3_S3 (R5106)，若复位期间不主动拉低，采到的就是高电平，
+   *   地址会是 0x14。下面在释放复位前把 INT 驱动为低，锁定 0x5d。
    */
 
-  if (TOUCH_RST_BANK < 0)
+  if (!on)
     {
-      return OK;      /* 复位脚未知，不去误动别的引脚 */
+      rk3576_gpio_setdir(TOUCH_RST_BANK, TOUCH_RST_PIN, true);
+      rk3576_gpio_write(TOUCH_RST_BANK, TOUCH_RST_PIN, false);
+      return OK;
     }
 
+  /* 复位保持低，同时把 INT 驱动为低选地址 0x5d */
+
+  rk3576_pinmux_set(TOUCH_RST_BANK, TOUCH_RST_PIN, RK3576_PINMUX_GPIO);
+  rk3576_pinmux_set(TOUCH_IRQ_BANK, TOUCH_IRQ_PIN, RK3576_PINMUX_GPIO);
+
   rk3576_gpio_setdir(TOUCH_RST_BANK, TOUCH_RST_PIN, true);
-  rk3576_gpio_write(TOUCH_RST_BANK, TOUCH_RST_PIN, on);
+  rk3576_gpio_write(TOUCH_RST_BANK, TOUCH_RST_PIN, false);
+  rk3576_gpio_setdir(TOUCH_IRQ_BANK, TOUCH_IRQ_PIN, true);
+  rk3576_gpio_write(TOUCH_IRQ_BANK, TOUCH_IRQ_PIN, false);
+  up_mdelay(10);
+
+  /* 释放复位，INT 继续保持低 >50us 让芯片采样完成 */
+
+  rk3576_gpio_write(TOUCH_RST_BANK, TOUCH_RST_PIN, true);
+  up_udelay(200);
+
+  /* INT 交回输入，之后作为中断脚使用 */
+
+  rk3576_gpio_setdir(TOUCH_IRQ_BANK, TOUCH_IRQ_PIN, false);
+  up_mdelay(50);          /* GT9xx 上电到可通信约需 50ms */
+  return OK;
+}
+
+/****************************************************************************
+ * Name: kickpi_touch_probe
+ *
+ * Description:
+ *   读 GT9xx 的产品 ID 寄存器确认芯片确实在总线上应答。
+ *
+ *   ★ gt9xx_register() 只做注册，不访问器件 —— 注册成功不等于芯片存在。
+ *     这里补一次真实读取：0x8140 起 4 字节是 ASCII 产品号（如 "911"、
+ *     "1158"），0x8144 起 2 字节是固件版本。读不到就说明供电、地址或
+ *     总线仍有问题，此时注册出来的 /dev/input0 是个空壳。
+ *
+ *   GT9xx 用 16 位寄存器地址，高字节在前，因此要写 2 字节再重启读。
+ *
+ ****************************************************************************/
+
+static int kickpi_touch_probe(struct i2c_master_s *i2c, uint8_t addr)
+{
+  struct i2c_msg_s msg[2];
+  uint8_t regaddr[2];
+  uint8_t buf[6];
+  int ret;
+
+  regaddr[0] = 0x81;          /* 0x8140 高字节 */
+  regaddr[1] = 0x40;
+
+  msg[0].frequency = 400000;
+  msg[0].addr      = addr;
+  msg[0].flags     = 0;
+  msg[0].buffer    = regaddr;
+  msg[0].length    = 2;
+
+  msg[1].frequency = 400000;
+  msg[1].addr      = addr;
+  msg[1].flags     = I2C_M_READ;
+  msg[1].buffer    = buf;
+  msg[1].length    = sizeof(buf);
+
+  ret = I2C_TRANSFER(i2c, msg, 2);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* 产品号是不带结尾 0 的 ASCII，可能只有 3 位；末字节补 0 再打印。 */
+
+  buf[4] = '\0';
+  syslog(LOG_INFO,
+         "触摸: GT9xx 应答 产品号=\"%s\" 版本=0x%02x%02x "
+         "(原始 %02x %02x %02x %02x)\n",
+         (char *)buf, buf[5], buf[4],
+         buf[0], buf[1], buf[2], buf[3]);
   return OK;
 }
 
@@ -178,6 +235,30 @@ int kickpi_k7_touch_initialize(void)
     {
       syslog(LOG_ERR, "ERROR: 触摸所在 I2C%d 初始化失败\n", TOUCH_I2C_BUS);
       return -ENODEV;
+    }
+
+  /* 先跑一遍复位时序把芯片带出复位（顺带锁定 0x5d 地址），再探测。
+   * 电源轨已由 kickpi_k7_lcd_power() 在此之前打开。
+   */
+
+  kickpi_touch_set_power(&g_touch_board, true);
+
+  ret = kickpi_touch_probe(i2c, TOUCH_I2C_ADDR);
+  if (ret < 0)
+    {
+      /* 换另一个可能的地址再试一次 —— INT 采样时序若与预期不符，
+       * 芯片会落在 0x14 上。
+       */
+
+      syslog(LOG_WARNING, "触摸: 0x%02x 无应答(%d)，改试 0x14\n",
+             TOUCH_I2C_ADDR, ret);
+      ret = kickpi_touch_probe(i2c, 0x14);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: 触摸 0x5d 与 0x14 均无应答，不注册 /dev/input0\n");
+          return -ENODEV;
+        }
     }
 
   if (TOUCH_IRQ_BANK >= 0)

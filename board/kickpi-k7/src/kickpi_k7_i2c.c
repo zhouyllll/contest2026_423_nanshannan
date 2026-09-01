@@ -66,6 +66,7 @@ static const struct
 }
 g_kickpi_i2c[] =
 {
+  { 0, "触摸 GT9xx@0x5d（5 寸屏 FPC Pin23/24，时钟在 PMU 域）" },
   { 1, "PMIC RK806@0x23" },
   { 2, "RTC HYM8563@0x51、PD HUSB311@0x4e" },
   { 3, "音频 codec ES8388@0x10" },

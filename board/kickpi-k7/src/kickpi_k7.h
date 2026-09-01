@@ -70,6 +70,20 @@ int kickpi_k7_i2c_initialize(void);
  ****************************************************************************/
 
 int kickpi_k7_touch_initialize(void);
+
+/****************************************************************************
+ * Name: kickpi_k7_lcd_power
+ *
+ * Description:
+ *   开关 VCC3V3_LCD_S0 电源轨（LCD_PWREN_H / GPIO0_C6），并顺带处理屏的
+ *   复位脚。屏和触摸共用这条轨，必须由一处统一管理，任一方各自开关都会
+ *   把另一方带掉电。
+ *
+ *   on=true 时返回后电源已稳定、屏复位已释放，可以开始 I2C / DSI 通信。
+ *
+ ****************************************************************************/
+
+int kickpi_k7_lcd_power(bool on);
 #endif
 
 #if defined(CONFIG_AUDIO_ES8388) && defined(CONFIG_RK3576_SAI)

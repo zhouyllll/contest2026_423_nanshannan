@@ -80,6 +80,21 @@ int board_app_initialize(uintptr_t arg)
    * 照常工作，因此仅记录日志、继续初始化后面的外设。
    */
 
+#ifdef CONFIG_FS_TMPFS
+  /* xTS 的 cmocka 用例（syscall / fs / kv）都在
+   * CONFIG_TESTS_TESTSUITES_MOUNT_DIR 下建文件，缺这个目录会在第一个
+   * 用例就报 "Failed to switch the mount dir"。用 tmpfs 提供，不占用
+   * eMMC，也不依赖存储先就绪。
+   */
+
+  ret = mount(NULL, CONFIG_TESTS_TESTSUITES_MOUNT_DIR, "tmpfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 挂载 tmpfs 到 %s 失败: %d\n",
+             CONFIG_TESTS_TESTSUITES_MOUNT_DIR, ret);
+    }
+#endif
+
   ret = mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
@@ -253,6 +268,19 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: 音频初始化失败: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_INPUT_GT9XX) || defined(CONFIG_RK3576_VOP2)
+  /* 屏与触摸共用 VCC3V3_LCD_S0，必须先把这条轨打开。
+   * 触摸芯片没电时，扫遍任何 I2C 总线都不会应答 —— 这正是之前
+   * 找不到触摸的原因之一。
+   */
+
+  ret = kickpi_k7_lcd_power(true);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: LCD 电源轨打开失败: %d\n", ret);
     }
 #endif
 

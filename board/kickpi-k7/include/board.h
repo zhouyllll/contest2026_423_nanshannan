@@ -82,6 +82,54 @@
 #define BOARD_GMAC1_RST_BANK     3
 #define BOARD_GMAC1_RST_PIN      3            /* RK_PA3 = 0*8+3，低有效 */
 
+/* 5 寸 MIPI 屏 + 电容触摸（F050008M01，720x1280）
+ *
+ * ★ 出处：原理图 K7_V1.1_20241211_SCH.pdf 第 27 页 "Single-MIPI LCM"，
+ *   配合同一份 PDF 里的芯片引脚复用表。这是此前一直缺失的那份信息 ——
+ *   厂商的 LCD overlay dtsi 拿不到，但原理图给出了同样的答案。
+ *
+ * 30pin FPC (J5100) 关键脚：
+ *   Pin17 LCD_PWM_BL   <- LCD_BL_PWM1_CH1_M0  GPIO0_B5 (PWM1_CH1_M0)
+ *   Pin18 LCD_TE       ── 原理图上打叉，未连线（见下方说明）
+ *   Pin19 VCC3V3_LCD   <- VCC3V3_LCD_S0（受 LCD_PWREN 控制的电源轨）
+ *   Pin20 LCD_RST      <- LCD_RESET_L3 = LCD_RESET_L 经电平转换
+ *   Pin21 LCD_ID       -> SARADC_IN7（电阻分压识别屏型号，可选）
+ *   Pin22 LCD_PWREN    <- LCD_PWREN_H         GPIO0_C6
+ *   Pin23 TP_I2C_SCL   <- I2C0_SCL_M1_TP      GPIO0_C1 (func 9)
+ *   Pin24 TP_I2C_SDA   <- I2C0_SDA_M1_TP      GPIO0_C2 (func 9)
+ *   Pin25 TP_INT       <- TP_INT_L            GPIO0_C5
+ *   Pin26 TP_RST       <- TP_RST_L            GPIO0_D0
+ *   Pin28-30 5V0       <- VCC5V0_DEVICE_S0（常供，不受软件控制）
+ *
+ * ★ 电源轨：屏和触摸共用 VCC3V3_LCD_S0，由 LCD_PWREN_H 经
+ *   Q5002(S8050 NPN) -> Q5100(WPM2341 P-MOS) 开关。LCD_PWREN_H 拉高
+ *   才有 3.3V。此前扫遍 I2C 找不到触摸，根因就是这一条没拉高 ——
+ *   芯片没电，任何总线上都不会应答。
+ *
+ * ★ LCD_RESET_L 是 1.8V 域，经 Q5101 电平转换成 3.3V 的 LCD_RESET_L3
+ *   再送到 FPC。转换是非反相的，软件按低有效复位即可。
+ *
+ * ★ LCD_TE 未连线（原理图 Pin18 打叉）。没有 TE 信号，DSI 命令模式无法
+ *   与屏刷新同步，因此这块屏必须走**视频模式**。
+ */
+
+#define BOARD_LCD_PWREN_BANK     0            /* GPIO0_C6，高有效，屏 3V3 使能 */
+#define BOARD_LCD_PWREN_PIN      22           /* RK_PC6 = 2*8+6 */
+
+#define BOARD_LCD_RST_BANK       0            /* GPIO0_A2，低有效 */
+#define BOARD_LCD_RST_PIN        2            /* RK_PA2 = 0*8+2 */
+
+#define BOARD_LCD_BL_BANK        0            /* GPIO0_B5，PWM1_CH1_M0 */
+#define BOARD_LCD_BL_PIN         13           /* RK_PB5 = 1*8+5 */
+
+#define BOARD_TP_I2C_BUS         0            /* I2C0，M1 复用（时钟在 PMU 域） */
+
+#define BOARD_TP_INT_BANK        0            /* GPIO0_C5 */
+#define BOARD_TP_INT_PIN         21           /* RK_PC5 = 2*8+5 */
+
+#define BOARD_TP_RST_BANK        0            /* GPIO0_D0，低有效 */
+#define BOARD_TP_RST_PIN         24           /* RK_PD0 = 3*8+0 */
+
 /* 存储配置（供 M4 存储适配参考）
  *
  *   sdhci  : eMMC，8 位总线，HS400 1.8V + enhanced strobe，non-removable

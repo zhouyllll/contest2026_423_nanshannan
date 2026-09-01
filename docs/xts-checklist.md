@@ -17,13 +17,13 @@
 
 内核跑起来后基本能过，是"移植成功"的第一个客观信号。
 
-| # | 用例 | nsh 命令 |
-|---|---|---|
-| 1.1.1 | 系统内存管理 | `cmocka_mm_test` |
-| 1.1.2 | 系统调度 | `cmocka_sched_test` |
-| 1.1.3 | 系统调用 | `cmocka_syscall_test` |
-| 1.1.4 | Kernel-ostest | |
-| 1.1.5 | Kernel-getprime | |
+| # | 用例 | nsh 命令 | 板上结果 |
+|---|---|---|---|
+| 1.1.1 | 系统内存管理 | `cmocka_mm_test` | ✅ 8/8 |
+| 1.1.2 | 系统调度 | `cmocka_sched_test` | ✅ 16/16（9 pthread + 7 task） |
+| 1.1.3 | 系统调用 | `cmocka_syscall_test` | 74 个用例，需 tmpfs 挂到 `/data`（已加，待复测） |
+| 1.1.4 | Kernel-ostest | `ostest` | ✅ 24 个套件 |
+| 1.1.5 | Kernel-getprime | `getprime` | ✅ |
 | 1.1.6 | Kernel-mm 内存 | |
 | 1.1.7 | Kernel-scanftest | |
 | 1.1.8 | Kernel-C | |
@@ -45,6 +45,26 @@ CONFIG_SCHED_HAVE_PARENT=y
 CONFIG_SCHED_LPWORK=y
 ```
 各用例再加各自的 `CONFIG_CM_*_TEST=y`。
+
+实际打开时还踩到的坑（都属于"Kconfig 有 default、`.config` 里却没有，
+代码走 `#ifndef` 兜底或直接编不过"这一类，用 `scripts/check-config.py` 查）：
+
+- `TESTING_CMOCKA` 依赖 `LIBC_EXECFUNCS` 和 `LIBC_REGEX`，两者都要显式开
+- cmocka 自身要 `TESTING_CMOCKA_PROGNAME/PRIORITY/STACKSIZE`
+- `TESTS_TESTSUITES_PRIORITY` 不给会让生成的 `builtin_list.h` 里优先级
+  字段为空，报 `expected expression before ','`
+- `SCHED_LPWORK` 要连带 `SCHED_LPNTHREADS/LPWORKPRIORITY/LPWORKPRIOMAX/
+  LPWORKSTACKSIZE/LPWORKSTACKSECTION`
+- `CM_SYSCALL_TEST` 硬依赖 `PIPES && FS_TMPFS && FS_LINKS`（`PIPES` 又要
+  `DEV_PIPE_*` 五项，`FS_TMPFS` 要四个 GUARD 值）
+- 用例会 `chdir` 到 `CONFIG_TESTS_TESTSUITES_MOUNT_DIR`，该目录必须先挂上，
+  否则第一个用例就报 `Failed to switch the mount dir`
+
+另有一个公共仓缺陷：`tests` 仓与 `apps/testing/testsuites` **抢同一批
+`CONFIG_CM_*_TEST` 符号**，但 `tests` 仓只发布了 dfx/kv 两个用例目录，
+Makefile 里却仍留着 sched/syscall/time/pthread/mutex 的分支，开启后
+make 会去找不存在的 `cmocka_sched_test.c`。已给这 8 个分支补上
+"主源文件存在"的条件，作为补丁归档。
 
 ## 二、驱动 BSP（15 项）—— 这是主战场
 
