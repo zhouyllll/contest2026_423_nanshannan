@@ -40,6 +40,7 @@
 
 #include "rk3576_power.h"
 #include "rk3576_sai.h"
+#include "rk3576_gmac.h"
 #include "rk3576_vop2.h"
 #include "rk3576_sdhci.h"
 #include "kickpi_k7.h"
@@ -229,7 +230,23 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-  /* TODO(M3+)：网络等外设的注册点。 */
+#ifdef CONFIG_RK3576_GMAC
+  /* 以太网前置链路：PD_SDGMAC + 时钟 + DMA 复位 + MDIO 读 PHY ID。
+   *
+   * ★ 两层判据强弱不同：MAC_VERSION 只证明寄存器块活着；
+   *   PHY ID 才证明 MDIO 时序、PHY 供电与连线都对。
+   *   前者正常而后者读回 0xffff，说明问题在板级而非 SoC 侧。
+   *
+   * 板上有两路千兆网口，先探 GMAC0。
+   */
+
+  ret = rk3576_gmac_probe(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: GMAC0 探测失败: %d\n", ret);
+    }
+#endif
+
 
   return OK;
 }

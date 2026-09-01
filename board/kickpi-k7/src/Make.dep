@@ -87,6 +87,7 @@ kickpi_k7_appinit.o: kickpi_k7_appinit.c \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/memoryregion.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_power.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_sai.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_vop2.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_sdhci.h \
  kickpi_k7.h
 kickpi_k7_gpio.o: kickpi_k7_gpio.c \

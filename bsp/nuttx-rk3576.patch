@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 01/15] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 01/18] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 02/15] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 02/18] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1363,7 +1363,7 @@ index 559489f6..d2fb5605 100644
 From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:38:15 +0800
-Subject: [PATCH 03/15] arm64/rk3576: clear U-Boot's leftover
+Subject: [PATCH 03/18] arm64/rk3576: clear U-Boot's leftover
  HCR_EL2.{IMO,FMO,AMO}; fix load address
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1490,7 +1490,7 @@ index d2fb5605..128e8a22 100644
 From 1a226e049212fce50e0724ee37b6671ac0f23e23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:50:02 +0800
-Subject: [PATCH 04/15] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
+Subject: [PATCH 04/18] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
  =?UTF-8?q?=5FEL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
  =?UTF-8?q?=E4=B8=81=E7=9A=84=E5=85=B3=E7=B3=BB?=
 MIME-Version: 1.0
@@ -1535,7 +1535,7 @@ index 128e8a22..f76d45cb 100644
 From 509d2fa1a06f4560ce252d7cc6a4d507ea7bd6dc Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 23:18:55 +0800
-Subject: [PATCH 05/15] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
+Subject: [PATCH 05/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
  =?UTF-8?q?=20=E9=A9=B1=E5=8A=A8=EF=BC=88Rockchip=20GPIO=20v2=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1989,7 +1989,7 @@ index 00000000..2fe55c92
 From 895f1f4e4df1ffb6dc7c665adb230ea472f48600 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 00:43:14 +0800
-Subject: [PATCH 06/15] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
+Subject: [PATCH 06/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
  =?UTF-8?q?=E3=80=81=E5=BC=95=E8=84=9A=E5=A4=8D=E7=94=A8=E4=B8=8E=20I2C=20?=
  =?UTF-8?q?=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
@@ -3602,7 +3602,7 @@ index 00000000..8d4d6561
 From 0efe6a8352599f5b577eda2598ab46844332a791 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:24:26 +0800
-Subject: [PATCH 07/15] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
+Subject: [PATCH 07/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
  =?UTF-8?q?=20(dwcmshc/SDHCI)=20=E5=91=BD=E4=BB=A4=E9=80=9A=E8=B7=AF?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -4324,7 +4324,7 @@ index 00000000..971084de
 From 19f41551f493da28c0756c5e83a0850a0bcf9aae Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:29:46 +0800
-Subject: [PATCH 08/15] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
+Subject: [PATCH 08/18] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
  =?UTF-8?q?=E9=80=9A=E8=B7=AF=E6=89=93=E9=80=9A=EF=BC=88CMD9/CMD7/CMD17=20?=
  =?UTF-8?q?+=20PIO=20=E8=AF=BB=E5=9D=97=EF=BC=89?=
 MIME-Version: 1.0
@@ -4534,7 +4534,7 @@ index cd0d10dc..99c4ecc0 100644
 From 98b2a2df090330a6d91d6f52c098751b1697768a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 13:13:58 +0800
-Subject: [PATCH 09/15] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
+Subject: [PATCH 09/18] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
  =?UTF-8?q?=20sdio=5Fdev=5Fs=EF=BC=8C/dev/mmcsd0=20=E5=8F=AF=E7=94=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -5263,7 +5263,7 @@ index 971084de..c0f64978 100644
 From 3a65d6b63b5febca4827bd7fecd8d2145adb51a0 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:07:47 +0800
-Subject: [PATCH 10/15] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
+Subject: [PATCH 10/18] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
  =?UTF-8?q?=E5=A4=87=E8=AF=BB=E9=80=9A=EF=BC=881=20=E4=BD=8D=20@50MHz?=
  =?UTF-8?q?=EF=BC=89=EF=BC=8C4=20=E4=BD=8D=E5=BE=85=E4=BF=AE?=
 MIME-Version: 1.0
@@ -5486,7 +5486,7 @@ index a3b84e47..a2996f1a 100644
 From 84d0c755aa873b306fefd87a20e4c2e0abccf064 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:14:24 +0800
-Subject: [PATCH 11/15] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
+Subject: [PATCH 11/18] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
  =?UTF-8?q?=E6=80=BB=E7=BA=BF=E6=89=93=E9=80=9A=EF=BC=8850MHz=EF=BC=89?=
  =?UTF-8?q?=EF=BC=8C=E6=A0=B9=E5=9B=A0=E6=98=AF=E8=83=BD=E5=8A=9B=E5=A3=B0?=
  =?UTF-8?q?=E6=98=8E?=
@@ -5587,7 +5587,7 @@ index a2996f1a..2206c8ab 100644
 From 5250326bc4b5ede69c28dea6feaf51d0ae74e46a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:27:58 +0800
-Subject: [PATCH 12/15] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
+Subject: [PATCH 12/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F(PMU)=E4=B8=8E=20GPIO=20=E4=B8=AD?=
  =?UTF-8?q?=E6=96=AD=EF=BC=8C=E4=B8=BA=E6=98=BE=E7=A4=BA=E4=B8=8E=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E9=93=BA=E8=B7=AF?=
@@ -6294,7 +6294,7 @@ index 00000000..80545549
 From 40634c8959141615d593598f97b5c70597d2039d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:41:21 +0800
-Subject: [PATCH 13/15] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
+Subject: [PATCH 13/18] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F=E7=BC=96=E5=8F=B7=E4=B8=8E=E6=AF=8F?=
  =?UTF-8?q?=E5=9F=9F=E7=9A=84=20req=20=E5=81=8F=E7=A7=BB?=
 MIME-Version: 1.0
@@ -6451,7 +6451,7 @@ index 80545549..84de6b0f 100644
 From d632b41753c213abee75ccaedbe6a88659d68b89 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:59:50 +0800
-Subject: [PATCH 14/15] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
+Subject: [PATCH 14/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
  =?UTF-8?q?=20=E9=9F=B3=E9=A2=91=E6=8E=A5=E5=8F=A3=E9=A9=B1=E5=8A=A8?=
  =?UTF-8?q?=EF=BC=88PIO=20=E5=8F=91=E9=80=81=EF=BC=89?=
 MIME-Version: 1.0
@@ -7201,7 +7201,7 @@ index 00000000..4c5ceb1c
 From 945dc74f703bb97d7c2331a2eb40df1bc888eb23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:26:44 +0800
-Subject: [PATCH 15/15] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
+Subject: [PATCH 15/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
  =?UTF-8?q?=20=E6=98=BE=E7=A4=BA=E6=8E=A7=E5=88=B6=E5=99=A8=EF=BC=88?=
  =?UTF-8?q?=E8=87=AA=E6=A3=80=20+=20=E5=86=85=E7=BD=AE=E5=BD=A9=E6=9D=A1?=
  =?UTF-8?q?=EF=BC=89?=
@@ -7737,6 +7737,1576 @@ index 00000000..d59f5f55
 +                         bool enable);
 +
 +#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_VOP2_H */
+-- 
+2.43.0
+
+
+From e19fbf3e1dcfc9bd8c9cac919da3591de3b6bdb5 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 16:38:18 +0800
+Subject: [PATCH 16/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+ =?UTF-8?q?=20DSI2=20=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Synopsys MIPI DSI 2.0 主机（0x27d80000，电源域 PD_VO0）。
+
+★ 是 DSI 2.0 不是 1.x —— 这一条最容易踩
+  网上多数 Rockchip MIPI 资料讲的是 dw-mipi-dsi 1.x（RK3399/RK3568
+  那代），寄存器名高度相似但偏移不同。照 1.x 写不会报任何错，
+  只是配置全部落空、屏保持黑屏，且无从判断错在哪里。
+  本文件寄存器逐条取自 Linux
+  drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi2.c。
+
+实现
+  probe()          PD_VO0 + 两路时钟 + 寄存器可访问性自检
+  configure()      PHY 通道数/时钟模式、IPI 视频时序、像素格式
+  send_cmd()       命令模式下发送 DSI 命令（面板初始化序列用）
+  set_video_mode() 切视频模式，开始接收 VOP 的像素流
+
+★ 自检手段与前几个外设不同
+  DSI2 没有版本寄存器，改用"写一个可写位再读回"：SOFT_RESET 的三个
+  复位位可读可写，先写 0 验证读回 0、再写全 1 验证读回一致。
+  两次方向相反的写入才能排除"读到的是总线残值"这种情况。
+
+★ 两处顺序不能颠倒，写在注释里
+  1) 配置必须在 PWR_UP 之前 —— 上电后多数配置寄存器写不进去；
+  2) 长命令必须先写负载 FIFO 再写包头 —— 先写包头会让控制器在
+     负载就位前就开始发送。
+
+★ 命令模式 vs 视频模式
+  面板初始化序列必须在命令模式下经 CRI 接口发送，发完再切视频模式。
+  顺序反了初始化命令进不去，屏保持黑屏。
+---
+ arch/arm64/src/rk3576/Kconfig                |  15 +
+ arch/arm64/src/rk3576/Make.defs              |   4 +
+ arch/arm64/src/rk3576/hardware/rk3576_dsi2.h | 112 +++++++
+ arch/arm64/src/rk3576/rk3576_dsi2.c          | 290 +++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_dsi2.h          | 103 +++++++
+ 5 files changed, 524 insertions(+)
+ create mode 100644 arch/arm64/src/rk3576/hardware/rk3576_dsi2.h
+ create mode 100644 arch/arm64/src/rk3576/rk3576_dsi2.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_dsi2.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index 9706bbbf..ae017a5c 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -81,6 +81,21 @@ config RK3576_VOP2
+ 		当前实现电源域/时钟自检与内置彩条输出。彩条不经过帧缓冲与
+ 		图层，可把"VOP 时序配置"与"图层/内存通路"两类问题分开验证。
+ 
++config RK3576_DSI2
++	bool "MIPI DSI2 主机"
++	default n
++	select RK3576_VOP2
++	---help---
++		Synopsys MIPI DSI 2.0 主机（0x27d80000，电源域 PD_VO0）。
++
++		★ 是 DSI 2.0 不是 1.x。网上多数 Rockchip MIPI 资料讲的是
++		  dw-mipi-dsi 1.x（RK3399/RK3568 那代），寄存器名相似但偏移
++		  不同，照 1.x 写不会报错、只是配置全部落空。
++		  寄存器取自 Linux drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi2.c。
++
++		提供命令模式发送（面板初始化序列）与视频模式切换。
++		D-PHY 的 PLL 配置在 rk3576_dcphy.c，没有它链路不会真正工作。
++
+ endmenu # Rockchip RK3576 Peripheral Selection
+ 
+ endif # ARCH_CHIP_RK3576
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index 44444a64..f142363c 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -30,6 +30,10 @@ include common/Make.defs
+ CHIP_CSRCS  = rk3576_boot.c rk3576_serial.c rk3576_gpio.c
+ CHIP_CSRCS += rk3576_cru.c rk3576_pinmux.c rk3576_power.c
+ 
++ifeq ($(CONFIG_RK3576_DSI2),y)
++CHIP_CSRCS += rk3576_dsi2.c
++endif
++
+ ifeq ($(CONFIG_RK3576_VOP2),y)
+ CHIP_CSRCS += rk3576_vop2.c
+ endif
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_dsi2.h b/arch/arm64/src/rk3576/hardware/rk3576_dsi2.h
+new file mode 100644
+index 00000000..94331013
+--- /dev/null
++++ b/arch/arm64/src/rk3576/hardware/rk3576_dsi2.h
+@@ -0,0 +1,112 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/hardware/rk3576_dsi2.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_DSI2_H
++#define __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_DSI2_H
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* Synopsys MIPI DSI 2.0 主机（"DSI2"）。
++ *
++ * ★ 出处：Linux drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi2.c
++ *   基址取自主线 rk3576.dtsi 的 dsi@27d80000
++ *   （compatible = "rockchip,rk3576-mipi-dsi2"，电源域 PD_VO0）。
++ *
++ * ★★ 这是 DSI **2.0** 主机，与老的 dw-mipi-dsi（1.x）寄存器布局完全
++ *    不同。网上大量 Rockchip MIPI 资料讲的是 1.x（RK3399/RK3568 那代），
++ *    寄存器名相似但偏移不同 —— 照着 1.x 写不会报错，只是配置全部落空。
++ *    RK3576 用的是 2.0。
++ */
++
++#define RK3576_DSI2_PWR_UP            0x000c
++#define RK3576_DSI2_SOFT_RESET        0x0010
++#define RK3576_DSI2_INT_ST_MAIN       0x0014
++#define RK3576_DSI2_MODE_CTRL         0x0018
++#define RK3576_DSI2_MODE_STATUS       0x001c
++#define RK3576_DSI2_CORE_STATUS       0x0020
++#define RK3576_DSI2_PHY_MODE_CFG      0x0100
++#define RK3576_DSI2_PHY_CLK_CFG       0x0104
++#define RK3576_DSI2_PHY_LP2HS_MAN_CFG 0x010c
++#define RK3576_DSI2_PHY_HS2LP_MAN_CFG 0x0114
++#define RK3576_DSI2_PHY_IPI_RATIO_MAN_CFG 0x0134
++#define RK3576_DSI2_PHY_SYS_RATIO_MAN_CFG 0x013c
++#define RK3576_DSI2_DSI_GENERAL_CFG   0x0200
++#define RK3576_DSI2_DSI_VCID_CFG      0x0204
++#define RK3576_DSI2_DSI_VID_TX_CFG    0x020c
++#define RK3576_DSI2_CRI_TX_HDR        0x02c0   /* 命令发送：包头 */
++#define RK3576_DSI2_CRI_TX_PLD        0x02c4   /* 命令发送：负载 */
++#define RK3576_DSI2_CRI_RX_HDR        0x02c8
++#define RK3576_DSI2_CRI_RX_PLD        0x02cc
++#define RK3576_DSI2_IPI_COLOR_MAN_CFG 0x0300
++#define RK3576_DSI2_IPI_VID_HSA_MAN_CFG   0x0304
++#define RK3576_DSI2_IPI_VID_HBP_MAN_CFG   0x030c
++#define RK3576_DSI2_IPI_VID_HACT_MAN_CFG  0x0314
++#define RK3576_DSI2_IPI_VID_HLINE_MAN_CFG 0x031c
++#define RK3576_DSI2_IPI_VID_VSA_MAN_CFG   0x0324
++#define RK3576_DSI2_IPI_PIX_PKT_CFG   0x0344
++#define RK3576_DSI2_INT_ST_PHY        0x0400
++#define RK3576_DSI2_INT_MASK_PHY      0x0404
++#define RK3576_DSI2_INT_ST_CRI        0x0460
++#define RK3576_DSI2_INT_MASK_CRI      0x0464
++
++/* PWR_UP */
++
++#define DSI2_POWER_UP                 (1 << 0)
++#define DSI2_RESET                    0
++
++/* SOFT_RESET —— 三个复位位，全部置 1 才是"释放复位" */
++
++#define DSI2_SYS_RSTN                 (1 << 2)
++#define DSI2_PHY_RSTN                 (1 << 1)
++#define DSI2_IPI_RSTN                 (1 << 0)
++
++/* PHY_MODE_CFG */
++
++#define DSI2_PHY_LANES(x)             (((x) - 1) << 4)
++#define DSI2_PPI_WIDTH(x)             ((x) << 8)
++#define DSI2_PHY_TYPE_DPHY            0
++#define DSI2_PHY_TYPE_CPHY            1
++
++/* PHY_CLK_CFG */
++
++#define DSI2_PHY_LPTX_CLK_DIV(x)      ((x) << 8)
++#define DSI2_NON_CONTINUOUS_CLK       (1 << 0)
++#define DSI2_CONTINUOUS_CLK           0
++
++/* MODE_CTRL：0 = 命令模式，1 = 视频模式 */
++
++#define DSI2_MODE_CMD                 0
++#define DSI2_MODE_VIDEO               1
++
++/* CORE_STATUS */
++
++#define DSI2_CRI_BUSY                 (1 << 16)
++#define DSI2_CRI_RD_DATA_AVAIL        (1 << 18)
++
++/* DSI_GENERAL_CFG */
++
++#define DSI2_EOTP_TX_EN               (1 << 0)
++#define DSI2_BTA_EN                   (1 << 1)
++
++#endif /* __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_DSI2_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_dsi2.c b/arch/arm64/src/rk3576/rk3576_dsi2.c
+new file mode 100644
+index 00000000..dce17eb2
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_dsi2.c
+@@ -0,0 +1,290 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_dsi2.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* RK3576 MIPI DSI2 主机（Synopsys DSI 2.0）。
++ *
++ * ★ 是 DSI 2.0，不是 1.x
++ *
++ *   网上多数 Rockchip MIPI 资料讲的是 dw-mipi-dsi 1.x（RK3399/RK3568
++ *   那代），寄存器名相似但偏移不同。照 1.x 写不会报错，只是配置全部
++ *   落空、屏不亮。本文件寄存器取自 Linux
++ *   drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi2.c。
++ *
++ * ★ 命令模式与视频模式
++ *
++ *   面板初始化序列必须在**命令模式**下发送（走 CRI 接口）；发完再切到
++ *   视频模式，DSI 才开始接收 VOP 送来的像素流。顺序反了的话初始化
++ *   命令进不去，屏保持黑屏。
++ *
++ * ★ 尚未实现 D-PHY
++ *
++ *   本文件只管 DSI 主机侧。PHY 的 PLL 配置在 rk3576_dcphy.c，没有它
++ *   链路不会真正工作 —— 本文件的自检只能验证寄存器可访问。
++ */
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <errno.h>
++#include <inttypes.h>
++#include <stdint.h>
++#include <string.h>
++#include <syslog.h>
++
++#include <nuttx/arch.h>
++
++#include "arm64_internal.h"
++#include "rk3576_dsi2.h"
++#include "rk3576_cru.h"
++#include "rk3576_power.h"
++#include "hardware/rk3576_dsi2.h"
++#include "hardware/rk3576_memorymap.h"
++
++#ifdef CONFIG_RK3576_DSI2
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++#define DSI_BASE   RK3576_DSI0_ADDR
++
++/* 时钟。出处：clk-rk3576.c
++ *   GATE(PCLK_DSIHOST0, ... CLKGATE_CON(64), 5)
++ *   COMPOSITE(CLK_DSIHOST0, ... CLKGATE_CON(64), 6)
++ */
++
++#define DSI_GATE_CON    64
++#define DSI_GATE_PCLK   5
++#define DSI_GATE_CLK    6
++
++#define DSI_CMD_TIMEOUT_US  50000
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint32_t dsi_getreg(uint32_t off)
++{
++  return getreg32(DSI_BASE + off);
++}
++
++static inline void dsi_putreg(uint32_t off, uint32_t val)
++{
++  putreg32(val, DSI_BASE + off);
++}
++
++/****************************************************************************
++ * Name: dsi_wait_cri_idle
++ *
++ * Description:
++ *   等命令接口空闲。上一条命令还在发时下发新命令会丢包。
++ *
++ ****************************************************************************/
++
++static int dsi_wait_cri_idle(void)
++{
++  int us;
++
++  for (us = 0; us < DSI_CMD_TIMEOUT_US; us++)
++    {
++      if ((dsi_getreg(RK3576_DSI2_CORE_STATUS) & DSI2_CRI_BUSY) == 0)
++        {
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  syslog(LOG_ERR, "DSI2: 命令接口忙超时 STATUS=0x%08" PRIx32 "\n",
++         dsi_getreg(RK3576_DSI2_CORE_STATUS));
++  return -ETIMEDOUT;
++}
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++int rk3576_dsi2_probe(void)
++{
++  uint32_t status;
++  int ret;
++
++  ret = rk3576_power_on(RK3576_PD_VO0);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "DSI2: PD_VO0 上电失败: %d\n", ret);
++      return ret;
++    }
++
++  rk3576_clk_gate(DSI_GATE_CON, DSI_GATE_PCLK, true);
++  rk3576_clk_gate(DSI_GATE_CON, DSI_GATE_CLK, true);
++
++  /* 自检：DSI2 没有版本寄存器，改用"写一个可写位再读回"。
++   * SOFT_RESET 的三个复位位可读可写，适合做这个判断。
++   */
++
++  dsi_putreg(RK3576_DSI2_SOFT_RESET, 0);
++  if (dsi_getreg(RK3576_DSI2_SOFT_RESET) != 0)
++    {
++      syslog(LOG_ERR, "DSI2: SOFT_RESET 写 0 读回 0x%08" PRIx32
++                      " —— 电源域/时钟/基址有问题\n",
++             dsi_getreg(RK3576_DSI2_SOFT_RESET));
++      return -ENODEV;
++    }
++
++  dsi_putreg(RK3576_DSI2_SOFT_RESET,
++             DSI2_SYS_RSTN | DSI2_PHY_RSTN | DSI2_IPI_RSTN);
++  status = dsi_getreg(RK3576_DSI2_SOFT_RESET);
++
++  if (status != (DSI2_SYS_RSTN | DSI2_PHY_RSTN | DSI2_IPI_RSTN))
++    {
++      syslog(LOG_ERR, "DSI2: SOFT_RESET 回读 0x%08" PRIx32 " 与写入不符\n",
++             status);
++      return -ENODEV;
++    }
++
++  syslog(LOG_INFO, "DSI2: 寄存器可访问，SOFT_RESET=0x%08" PRIx32
++                   " CORE_STATUS=0x%08" PRIx32 "\n",
++         status, dsi_getreg(RK3576_DSI2_CORE_STATUS));
++  return OK;
++}
++
++int rk3576_dsi2_configure(const struct rk3576_vop2_timing_s *t, int lanes)
++{
++  if (t == NULL || lanes < 1 || lanes > 4)
++    {
++      return -EINVAL;
++    }
++
++  /* 先断电再配置，最后上电 —— PWR_UP 置位后多数配置寄存器写不进去 */
++
++  dsi_putreg(RK3576_DSI2_PWR_UP, DSI2_RESET);
++
++  dsi_putreg(RK3576_DSI2_SOFT_RESET,
++             DSI2_SYS_RSTN | DSI2_PHY_RSTN | DSI2_IPI_RSTN);
++
++  /* PHY：D-PHY、指定通道数、连续时钟。
++   * PPI_WIDTH 取 1（16 位），与 RK3576 的 D-PHY 匹配。
++   */
++
++  dsi_putreg(RK3576_DSI2_PHY_MODE_CFG,
++             DSI2_PHY_TYPE_DPHY | DSI2_PHY_LANES(lanes) | DSI2_PPI_WIDTH(1));
++  dsi_putreg(RK3576_DSI2_PHY_CLK_CFG,
++             DSI2_CONTINUOUS_CLK | DSI2_PHY_LPTX_CLK_DIV(8));
++
++  /* 视频时序送给 IPI（像素接口）。单位是像素。 */
++
++  dsi_putreg(RK3576_DSI2_IPI_VID_HSA_MAN_CFG, t->hsync_len);
++  dsi_putreg(RK3576_DSI2_IPI_VID_HBP_MAN_CFG, t->hback_porch);
++  dsi_putreg(RK3576_DSI2_IPI_VID_HACT_MAN_CFG, t->hactive);
++  dsi_putreg(RK3576_DSI2_IPI_VID_HLINE_MAN_CFG,
++             t->hactive + t->hfront_porch + t->hsync_len + t->hback_porch);
++  dsi_putreg(RK3576_DSI2_IPI_VID_VSA_MAN_CFG, t->vsync_len);
++
++  /* 像素格式 RGB888 = 每分量 8 位 */
++
++  dsi_putreg(RK3576_DSI2_IPI_COLOR_MAN_CFG, (5 << 4) | 0);
++
++  /* 关掉 EOTP 与 BTA：面板 dtsi 的 flags 里带 NO_EOT_PACKET，
++   * 且初始化阶段不需要读回。
++   */
++
++  dsi_putreg(RK3576_DSI2_DSI_GENERAL_CFG, 0);
++  dsi_putreg(RK3576_DSI2_DSI_VCID_CFG, 0);
++
++  /* 先进命令模式，供发送面板初始化序列 */
++
++  dsi_putreg(RK3576_DSI2_MODE_CTRL, DSI2_MODE_CMD);
++
++  dsi_putreg(RK3576_DSI2_PWR_UP, DSI2_POWER_UP);
++
++  syslog(LOG_INFO, "DSI2: 已配置 %ux%u %d lane，当前为命令模式\n",
++         t->hactive, t->vactive, lanes);
++  return OK;
++}
++
++int rk3576_dsi2_send_cmd(uint8_t dtype, const uint8_t *data, size_t len)
++{
++  uint32_t hdr;
++  uint32_t word;
++  size_t i;
++  int ret;
++
++  ret = dsi_wait_cri_idle();
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  if (len <= 2)
++    {
++      /* 短命令：数据直接放在包头的两个字节里，没有负载 */
++
++      hdr = dtype;
++      if (len >= 1)
++        {
++          hdr |= (uint32_t)data[0] << 8;
++        }
++
++      if (len >= 2)
++        {
++          hdr |= (uint32_t)data[1] << 16;
++        }
++    }
++  else
++    {
++      /* 长命令：先把负载按 4 字节一组写进 PLD，再写包头触发发送。
++       * ★ 顺序不能反 —— 先写包头会让控制器在负载就位前就开始发。
++       */
++
++      for (i = 0; i < len; i += 4)
++        {
++          size_t n = (len - i) > 4 ? 4 : (len - i);
++
++          word = 0;
++          memcpy(&word, data + i, n);
++          dsi_putreg(RK3576_DSI2_CRI_TX_PLD, word);
++        }
++
++      hdr = dtype | ((uint32_t)(len & 0xff) << 8) |
++            ((uint32_t)((len >> 8) & 0xff) << 16);
++    }
++
++  /* bit24 = 低功耗模式发送。面板初始化序列按规范应走 LP 模式。 */
++
++  dsi_putreg(RK3576_DSI2_CRI_TX_HDR, hdr | (1u << 24));
++  return dsi_wait_cri_idle();
++}
++
++int rk3576_dsi2_set_video_mode(void)
++{
++  dsi_putreg(RK3576_DSI2_MODE_CTRL, DSI2_MODE_VIDEO);
++  up_udelay(1000);
++
++  syslog(LOG_INFO, "DSI2: 已切到视频模式 MODE_STATUS=0x%08" PRIx32 "\n",
++         dsi_getreg(RK3576_DSI2_MODE_STATUS));
++  return OK;
++}
++
++#endif /* CONFIG_RK3576_DSI2 */
+diff --git a/arch/arm64/src/rk3576/rk3576_dsi2.h b/arch/arm64/src/rk3576/rk3576_dsi2.h
+new file mode 100644
+index 00000000..b4cf8682
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_dsi2.h
+@@ -0,0 +1,103 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_dsi2.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_DSI2_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_DSI2_H
++
++#include <nuttx/config.h>
++#include <stdint.h>
++
++#include "rk3576_vop2.h"
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* MIPI DSI 数据类型（DCS / Generic 写命令）。
++ * 与设备树 panel-init-sequence 每条命令的第一个字节一致 ——
++ * 那份数据可以逐条喂给 rk3576_dsi2_send_cmd()。
++ */
++
++#define MIPI_DSI_DCS_SHORT_WRITE        0x05
++#define MIPI_DSI_DCS_SHORT_WRITE_PARAM  0x15
++#define MIPI_DSI_DCS_LONG_WRITE         0x39
++#define MIPI_DSI_GENERIC_SHORT_WRITE_0  0x03
++#define MIPI_DSI_GENERIC_SHORT_WRITE_1  0x13
++#define MIPI_DSI_GENERIC_SHORT_WRITE_2  0x23
++#define MIPI_DSI_GENERIC_LONG_WRITE     0x29
++
++/****************************************************************************
++ * Public Function Prototypes
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_dsi2_probe
++ *
++ * Description:
++ *   打开 PD_VO0 电源域与 DSI 时钟，读寄存器自检。
++ *
++ ****************************************************************************/
++
++int rk3576_dsi2_probe(void);
++
++/****************************************************************************
++ * Name: rk3576_dsi2_configure
++ *
++ * Description:
++ *   按时序与通道数配置 DSI2 主机，进入命令模式（可发面板初始化序列）。
++ *
++ * Input Parameters:
++ *   timing - 显示时序，与 VOP2 用同一份
++ *   lanes  - 数据通道数（本板面板为 4）
++ *
++ ****************************************************************************/
++
++int rk3576_dsi2_configure(const struct rk3576_vop2_timing_s *timing,
++                          int lanes);
++
++/****************************************************************************
++ * Name: rk3576_dsi2_send_cmd
++ *
++ * Description:
++ *   发一条 DSI 命令。用于面板初始化序列。
++ *
++ * Input Parameters:
++ *   dtype - MIPI_DSI_* 数据类型
++ *   data  - 负载
++ *   len   - 负载长度。短命令 0-2 字节走包头，长命令走负载 FIFO。
++ *
++ ****************************************************************************/
++
++int rk3576_dsi2_send_cmd(uint8_t dtype, const uint8_t *data, size_t len);
++
++/****************************************************************************
++ * Name: rk3576_dsi2_set_video_mode
++ *
++ * Description:
++ *   切到视频模式，开始接收 VOP 送来的像素流。
++ *   面板初始化序列发完之后才能调用。
++ *
++ ****************************************************************************/
++
++int rk3576_dsi2_set_video_mode(void);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_DSI2_H */
+-- 
+2.43.0
+
+
+From 506a2907cd27c7244a478ced9cc2e03e3e02ff77 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 16:44:28 +0800
+Subject: [PATCH 17/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+ =?UTF-8?q?=20D/C-PHY=20=E9=A9=B1=E5=8A=A8=EF=BC=88D-PHY=20PLL=EF=BC=89?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Samsung IP 的 combo PHY（0x2b020000），DSI 与 CSI 共用。本实现只做
+D-PHY —— C-PHY 显示用不到，实现了也无从验证。
+出处：Linux drivers/phy/rockchip/phy-rockchip-samsung-dcphy.c。
+
+★ PLL_LOCK 是整条显示链路上第一个真正的硬件反馈
+  VOP 与 DSI 的配置写下去只能"回读一致"，而写错寄存器一样能读回，
+  证明不了配置正确。PLL 锁不锁由硬件决定：锁上了说明分频参数与参考
+  时钟都对。因此这是显示调试第一个可信的里程碑 —— 锁不上就不必
+  往下查 VOP/DSI。
+
+PLL 分频：Fout = (M + K/65536) * 2 * Fin / (P * 2^S)
+  约束 Fvco 2.6~6.6GHz、Fin/P 6~30MHz，参考时钟 24MHz。
+
+★ K 取 0，不用小数分频
+  显示码率允许千分之几偏差，整数分频足够；省掉负 DSM 要按 16 位
+  补码写入的换算逻辑 —— 那段容易写错且难以验证。
+
+离线验算（720x1280@60 RGB888 4 lane，时序取自 docs/refs/panel/）：
+  htotal=828 vtotal=1317 → 刷新率 59.6Hz，与屏标称 60Hz 吻合
+  每通道码率 390Mbps
+  解得 P=1 M=65 S=3 → 390000kbps，误差 0
+  Fvco=3120MHz、Fref=24MHz，两个约束均满足
+这一步不需要上板即可验证分频算法与整数分频取舍是否成立。
+---
+ arch/arm64/src/rk3576/Kconfig                 |  14 +
+ arch/arm64/src/rk3576/Make.defs               |   4 +
+ .../src/rk3576/hardware/rk3576_memorymap.h    |   6 +
+ arch/arm64/src/rk3576/rk3576_dcphy.c          | 276 ++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_dcphy.h          |  62 ++++
+ 5 files changed, 362 insertions(+)
+ create mode 100644 arch/arm64/src/rk3576/rk3576_dcphy.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_dcphy.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index ae017a5c..15b8c0cd 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -96,6 +96,20 @@ config RK3576_DSI2
+ 		提供命令模式发送（面板初始化序列）与视频模式切换。
+ 		D-PHY 的 PLL 配置在 rk3576_dcphy.c，没有它链路不会真正工作。
+ 
++config RK3576_DCPHY
++	bool "MIPI D/C-PHY"
++	default n
++	---help---
++		Samsung IP 的 MIPI combo PHY（0x2b020000），DSI 与 CSI 共用。
++		本实现只做 D-PHY（显示用），不做 C-PHY。
++
++		PLL 为 P/M/S 分频：Fout = (M * 2 * Fin) / (P * 2^S)，
++		约束 Fvco 在 2.6~6.6GHz、Fin/P 在 6~30MHz。
++
++		★ PLL_LOCK 是整条显示链路上第一个真正的硬件反馈。VOP 与 DSI
++		  的配置只能"回读一致"，证明不了对错；PLL 锁定与否由硬件决定。
++		  锁不上就不必往下查 VOP/DSI。
++
+ endmenu # Rockchip RK3576 Peripheral Selection
+ 
+ endif # ARCH_CHIP_RK3576
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index f142363c..56ba6578 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -30,6 +30,10 @@ include common/Make.defs
+ CHIP_CSRCS  = rk3576_boot.c rk3576_serial.c rk3576_gpio.c
+ CHIP_CSRCS += rk3576_cru.c rk3576_pinmux.c rk3576_power.c
+ 
++ifeq ($(CONFIG_RK3576_DCPHY),y)
++CHIP_CSRCS += rk3576_dcphy.c
++endif
++
+ ifeq ($(CONFIG_RK3576_DSI2),y)
+ CHIP_CSRCS += rk3576_dsi2.c
+ endif
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h b/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+index 784ad665..f9b08881 100644
+--- a/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
++++ b/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+@@ -185,6 +185,12 @@
+ #define RK3576_VOP2_IRQ        374   /* GIC_SPI 342 */
+ #define RK3576_DSI0_ADDR       0x27d80000
+ 
++/* MIPI D/C-PHY（combo，DSI 与 CSI 共用）。
++ * 出处：主线 rk3576.dtsi 的 mipidcphy@2b020000。
++ */
++
++#define RK3576_DCPHY_ADDR      0x2b020000
++
+ #define RK3576_SAI1_ADDR       0x2a610000
+ #define RK3576_SAI1_IRQ        220   /* GIC_SPI 188 */
+ #define RK3576_SRAM_ADDR       0x3ff88000
+diff --git a/arch/arm64/src/rk3576/rk3576_dcphy.c b/arch/arm64/src/rk3576/rk3576_dcphy.c
+new file mode 100644
+index 00000000..b319d2bb
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_dcphy.c
+@@ -0,0 +1,276 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_dcphy.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* RK3576 MIPI D/C-PHY（Samsung IP）。
++ *
++ * ★ 出处：Linux drivers/phy/rockchip/phy-rockchip-samsung-dcphy.c
++ *   基址取自主线 rk3576.dtsi 的 mipidcphy@2b020000
++ *   （compatible = "rockchip,rk3576-mipi-dcphy"）。
++ *
++ * ★ 本文件只做 D-PHY，不做 C-PHY。
++ *   这是一颗 combo PHY，两种模式共用寄存器块但配置完全不同。
++ *   MIPI 显示屏用 D-PHY；C-PHY 用不到，实现了也无从验证。
++ *
++ * ★ PLL_LOCK 是整条显示链路上第一个真正的硬件反馈
++ *
++ *   VOP 与 DSI 的配置写下去只能"回读一致"，证明不了配置是对的 ——
++ *   写错寄存器一样能读回。而 PLL 锁定与否由硬件决定：锁上了说明
++ *   分频参数和参考时钟都对。因此这是显示调试中第一个可信的里程碑，
++ *   锁不上就不必往下查 VOP/DSI。
++ */
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <errno.h>
++#include <inttypes.h>
++#include <stdint.h>
++#include <syslog.h>
++
++#include <nuttx/arch.h>
++
++#include "arm64_internal.h"
++#include "rk3576_dcphy.h"
++#include "rk3576_cru.h"
++#include "hardware/rk3576_memorymap.h"
++
++#ifdef CONFIG_RK3576_DCPHY
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++#define DCPHY_BASE          RK3576_DCPHY_ADDR
++
++/* PLL 寄存器。出处：phy-rockchip-samsung-dcphy.c */
++
++#define DCPHY_PLL_CON0      0x0100
++#define DCPHY_PLL_CON1      0x0104   /* DSM 小数部分 K */
++#define DCPHY_PLL_CON2      0x0108
++#define DCPHY_PLL_CON5      0x0114
++#define DCPHY_PLL_CON7      0x011c
++#define DCPHY_PLL_CON8      0x0120
++#define DCPHY_PLL_STAT0     0x0140
++
++#define PLL_EN              (1u << 12)
++#define PLL_S_SHIFT         8            /* CON0 [10:8]  */
++#define PLL_S_MASK          (0x7u << 8)
++#define PLL_P_SHIFT         0            /* CON0 [5:0]   */
++#define PLL_P_MASK          0x3fu
++#define PLL_M_MASK          0x3ffu       /* CON2 [9:0]   */
++#define PLL_RESET_N_SEL     (1u << 10)
++#define PLL_ENABLE_SEL      (1u << 8)
++#define PLL_LOCK            (1u << 0)
++
++/* 参考时钟。RK3576 的 D-PHY 参考时钟为 24MHz 晶振。 */
++
++#define DCPHY_REF_CLK_KHZ   24000
++
++/* PLL 约束，出处同上：
++ *   2600MHz <= Fvco <= 6600MHz
++ *   6MHz    <= Fin/P <= 30MHz
++ */
++
++#define PLL_FVCO_MIN_KHZ    2600000
++#define PLL_FVCO_MAX_KHZ    6600000
++#define PLL_FREF_MIN_KHZ    6000
++#define PLL_FREF_MAX_KHZ    30000
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint32_t phy_getreg(uint32_t off)
++{
++  return getreg32(DCPHY_BASE + off);
++}
++
++static inline void phy_putreg(uint32_t off, uint32_t val)
++{
++  putreg32(val, DCPHY_BASE + off);
++}
++
++static inline void phy_modreg(uint32_t off, uint32_t mask, uint32_t val)
++{
++  phy_putreg(off, (phy_getreg(off) & ~mask) | (val & mask));
++}
++
++/****************************************************************************
++ * Name: dcphy_pll_calc
++ *
++ * Description:
++ *   为目标输出频率求分频参数。
++ *
++ *     Fvco = (M + K/65536) * 2 * Fin / P
++ *     Fout = Fvco / 2^S
++ *
++ *   遍历 S 与 P，取使 Fout 最接近目标的一组。K 取 0（不用小数分频）：
++ *   显示的码率允许有千分之几的偏差，整数分频足够，省掉一整块
++ *   补码换算逻辑（负 DSM 要按 16 位补码写入，容易写错且难验证）。
++ *
++ * Returned Value:
++ *   OK 并填回 p/m/s；找不到可行解返回 -ERANGE。
++ *
++ ****************************************************************************/
++
++static int dcphy_pll_calc(uint32_t fout_khz, uint32_t *p, uint32_t *m,
++                          uint32_t *s)
++{
++  uint32_t best_delta = UINT32_MAX;
++  uint32_t fin = DCPHY_REF_CLK_KHZ;
++  uint32_t _s;
++
++  for (_s = 0; _s < 7; _s++)
++    {
++      uint64_t fvco = (uint64_t)fout_khz << _s;
++      uint32_t _p;
++
++      if (fvco < PLL_FVCO_MIN_KHZ || fvco > PLL_FVCO_MAX_KHZ)
++        {
++          continue;
++        }
++
++      for (_p = 1; _p <= PLL_P_MASK; _p++)
++        {
++          uint32_t fref = fin / _p;
++          uint64_t _m;
++          uint64_t got;
++          uint32_t delta;
++
++          if (fref < PLL_FREF_MIN_KHZ || fref > PLL_FREF_MAX_KHZ)
++            {
++              continue;
++            }
++
++          /* M = Fvco * P / (2 * Fin)，四舍五入 */
++
++          _m = (fvco * _p + fin) / (2 * (uint64_t)fin);
++          if (_m < 64 || _m > PLL_M_MASK)
++            {
++              continue;
++            }
++
++          got   = (_m * 2 * fin / _p) >> _s;
++          delta = (got > fout_khz) ? (uint32_t)(got - fout_khz)
++                                   : (uint32_t)(fout_khz - got);
++
++          if (delta < best_delta)
++            {
++              best_delta = delta;
++              *p = _p;
++              *m = (uint32_t)_m;
++              *s = _s;
++            }
++        }
++    }
++
++  return (best_delta == UINT32_MAX) ? -ERANGE : OK;
++}
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++int rk3576_dcphy_probe(void)
++{
++  uint32_t before;
++  uint32_t after;
++
++  /* 自检：PLL_CON7 是可读可写的锁定计数器，写两个不同值验证。
++   * D-PHY 没有版本寄存器，与 DSI2 同样用"写回读"判断寄存器块是否活着。
++   */
++
++  phy_putreg(DCPHY_PLL_CON7, 0x1234);
++  before = phy_getreg(DCPHY_PLL_CON7) & 0xffff;
++  phy_putreg(DCPHY_PLL_CON7, 0x5678);
++  after = phy_getreg(DCPHY_PLL_CON7) & 0xffff;
++
++  if (before != 0x1234 || after != 0x5678)
++    {
++      syslog(LOG_ERR,
++             "DCPHY: 写回读失败（0x1234→0x%04" PRIx32
++             " 0x5678→0x%04" PRIx32 "）—— 时钟或基址有问题\n",
++             before, after);
++      return -ENODEV;
++    }
++
++  syslog(LOG_INFO, "DCPHY: 寄存器可访问 PLL_STAT0=0x%08" PRIx32 "\n",
++         phy_getreg(DCPHY_PLL_STAT0));
++  return OK;
++}
++
++int rk3576_dcphy_enable(uint32_t bitrate_kbps, int lanes)
++{
++  uint32_t p = 0;
++  uint32_t m = 0;
++  uint32_t s = 0;
++  uint32_t got;
++  int ret;
++  int us;
++
++  UNUSED(lanes);
++
++  ret = dcphy_pll_calc(bitrate_kbps, &p, &m, &s);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "DCPHY: %" PRIu32 "kbps 无可行分频\n", bitrate_kbps);
++      return ret;
++    }
++
++  got = (m * 2 * DCPHY_REF_CLK_KHZ / p) >> s;
++
++  /* 先写分频参数，最后才置 PLL_EN —— 使能后改分频会让 PLL 失锁 */
++
++  phy_modreg(DCPHY_PLL_CON0, PLL_S_MASK | PLL_P_MASK,
++             (s << PLL_S_SHIFT) | (p << PLL_P_SHIFT));
++  phy_putreg(DCPHY_PLL_CON1, 0);            /* K = 0，不用小数分频 */
++  phy_modreg(DCPHY_PLL_CON2, PLL_M_MASK, m);
++  phy_putreg(DCPHY_PLL_CON5, PLL_RESET_N_SEL | PLL_ENABLE_SEL);
++  phy_putreg(DCPHY_PLL_CON7, 0xf000);       /* 锁定计数 */
++  phy_putreg(DCPHY_PLL_CON8, 0xf000);       /* 稳定计数 */
++
++  phy_modreg(DCPHY_PLL_CON0, PLL_EN, PLL_EN);
++
++  for (us = 0; us < 20000; us++)
++    {
++      if ((phy_getreg(DCPHY_PLL_STAT0) & PLL_LOCK) != 0)
++        {
++          syslog(LOG_INFO,
++                 "DCPHY: PLL 已锁定 目标 %" PRIu32 "kbps 实际 %" PRIu32
++                 "kbps (P=%" PRIu32 " M=%" PRIu32 " S=%" PRIu32 ")\n",
++                 bitrate_kbps, got, p, m, s);
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  syslog(LOG_ERR,
++         "DCPHY: PLL 未锁定 STAT0=0x%08" PRIx32
++         " (P=%" PRIu32 " M=%" PRIu32 " S=%" PRIu32 ")\n",
++         phy_getreg(DCPHY_PLL_STAT0), p, m, s);
++  return -ETIMEDOUT;
++}
++
++#endif /* CONFIG_RK3576_DCPHY */
+diff --git a/arch/arm64/src/rk3576/rk3576_dcphy.h b/arch/arm64/src/rk3576/rk3576_dcphy.h
+new file mode 100644
+index 00000000..6183bd51
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_dcphy.h
+@@ -0,0 +1,62 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_dcphy.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_DCPHY_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_DCPHY_H
++
++#include <nuttx/config.h>
++#include <stdint.h>
++
++/****************************************************************************
++ * Name: rk3576_dcphy_probe
++ *
++ * Description:
++ *   打开 D-PHY 的时钟并做寄存器可访问性自检。
++ *
++ ****************************************************************************/
++
++int rk3576_dcphy_probe(void);
++
++/****************************************************************************
++ * Name: rk3576_dcphy_enable
++ *
++ * Description:
++ *   按目标每通道码率配置 PLL 并使能 D-PHY。
++ *
++ * Input Parameters:
++ *   bitrate_kbps - 每条数据通道的码率（kbps）。
++ *                  由像素时钟算得：pixclk * bpp / lanes。
++ *                  720x1280@60 RGB888 4 lane 时约 390000。
++ *   lanes        - 数据通道数
++ *
++ * Returned Value:
++ *   OK；PLL 未锁定返回 -ETIMEDOUT。
++ *
++ *   ★ PLL_LOCK 是整条显示链路上第一个真正的硬件反馈 —— 在它之前
++ *     所有配置都只是"写进去了"，没有任何东西能证明配置是对的。
++ *     锁定失败说明分频参数算错或参考时钟不对，与 VOP/DSI 无关。
++ *
++ ****************************************************************************/
++
++int rk3576_dcphy_enable(uint32_t bitrate_kbps, int lanes);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_DCPHY_H */
+-- 
+2.43.0
+
+
+From 67474c8ffe832b715faa83734a71a32b80b33da6 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 16:54:26 +0800
+Subject: [PATCH 18/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
+ =?UTF-8?q?=20=E5=89=8D=E7=BD=AE=E9=93=BE=E8=B7=AF=E4=B8=8E=20MDIO?=
+ =?UTF-8?q?=EF=BC=88DWMAC=204.20a=EF=BC=89?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Synopsys DesignWare MAC 4.20a（stmmac 系）。两路 GMAC 同属 PD_SDGMAC。
+
+★ NuttX 里已有同 IP 家族的成熟实现可参照
+  arch/arm/src/stm32h7/stm32_ethernet.c（4267 行）。STM32H7 用
+  DWC_ether_qos，已核对三处标志性偏移与 4.20a 一致：
+  MACCR=0x0000、MTL=0x0C00、DMA=0x1000。
+  后续的描述符环、收发路径、中断处理照它的结构来，不必从零设计。
+
+★ 判据分两层，强弱不同 —— 这个区分能省掉大量排查时间
+  MAC_VERSION  只证明寄存器块活着（电源域、时钟、基址对）
+  PHY 厂商 ID  才证明 MDIO 时序正确、PHY 有供电、连线通
+
+  前者正常而后者读回 0xffff，说明 SoC 侧没问题、问题在板级
+  （PHY 复位脚、供电、或 MDIO 引脚复用），不必回头查 MAC 配置。
+
+★ MDIO 分频要让 MDC 低于 2.5MHz（IEEE 802.3）
+  取 CR=4（÷102），CSR 按 100MHz 算得 MDC≈1MHz。
+  分频太快时读回 0xffff —— 与"PHY 不存在"表现完全一样，
+  因此读不到 PHY 时应先怀疑分频，再怀疑硬件。
+
+DMA 软复位是自清位，必须等它归零再配 MDIO，否则配置被复位冲掉。
+---
+ arch/arm64/src/rk3576/Kconfig                |  15 ++
+ arch/arm64/src/rk3576/Make.defs              |   4 +
+ arch/arm64/src/rk3576/hardware/rk3576_gmac.h | 103 ++++++++
+ arch/arm64/src/rk3576/rk3576_gmac.c          | 241 +++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_gmac.h          |  52 ++++
+ 5 files changed, 415 insertions(+)
+ create mode 100644 arch/arm64/src/rk3576/hardware/rk3576_gmac.h
+ create mode 100644 arch/arm64/src/rk3576/rk3576_gmac.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_gmac.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index 15b8c0cd..274b22e7 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -110,6 +110,21 @@ config RK3576_DCPHY
+ 		  的配置只能"回读一致"，证明不了对错；PLL 锁定与否由硬件决定。
+ 		  锁不上就不必往下查 VOP/DSI。
+ 
++config RK3576_GMAC
++	bool "以太网 GMAC"
++	default n
++	---help---
++		Synopsys DesignWare MAC 4.20a（stmmac 系）。两路：
++		GMAC0 0x2a220000、GMAC1 0x2a230000，同属电源域 PD_SDGMAC。
++
++		★ NuttX 里已有同 IP 家族的成熟实现可参照：
++		  arch/arm/src/stm32h7/stm32_ethernet.c（4267 行）。
++		  已核对 MACCR=0x0000、MTL=0x0C00、DMA=0x1000 三处标志性偏移
++		  与 4.20a 一致。
++
++		当前实现前置链路与 MDIO：读 IP 版本证明寄存器块活着，
++		读 PHY 厂商 ID 证明 MDIO 时序与板级连线正确。收发路径后续补。
++
+ endmenu # Rockchip RK3576 Peripheral Selection
+ 
+ endif # ARCH_CHIP_RK3576
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index 56ba6578..a48110f2 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -30,6 +30,10 @@ include common/Make.defs
+ CHIP_CSRCS  = rk3576_boot.c rk3576_serial.c rk3576_gpio.c
+ CHIP_CSRCS += rk3576_cru.c rk3576_pinmux.c rk3576_power.c
+ 
++ifeq ($(CONFIG_RK3576_GMAC),y)
++CHIP_CSRCS += rk3576_gmac.c
++endif
++
+ ifeq ($(CONFIG_RK3576_DCPHY),y)
+ CHIP_CSRCS += rk3576_dcphy.c
+ endif
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_gmac.h b/arch/arm64/src/rk3576/hardware/rk3576_gmac.h
+new file mode 100644
+index 00000000..1ecc3f94
+--- /dev/null
++++ b/arch/arm64/src/rk3576/hardware/rk3576_gmac.h
+@@ -0,0 +1,103 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/hardware/rk3576_gmac.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_GMAC_H
++#define __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_GMAC_H
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* RK3576 的以太网控制器是 Synopsys DesignWare MAC 4.20a
++ * （dtsi: compatible = "rockchip,rk3576-gmac", "snps,dwmac-4.20a"），
++ * 即 Linux 里 stmmac 驱动那一系。
++ *
++ * ★ NuttX 里已有同 IP 家族的成熟实现可参照：
++ *     arch/arm/src/stm32h7/stm32_ethernet.c（4267 行）
++ *   STM32H7 用的是 DWC_ether_qos，寄存器布局与 4.20a 一致 ——
++ *   已核对三处标志性偏移：MACCR=0x0000、MTL=0x0C00、DMA=0x1000。
++ *   描述符结构、MDIO 时序、中断处理都可以照它的结构来。
++ *
++ * ★ 板上连接（原厂 dtb）：
++ *     GMAC0 0x2a220000  GIC_SPI 293 → IRQ 325
++ *     GMAC1 0x2a230000  GIC_SPI 301 → IRQ 333
++ *     PHY 挂在各自的 MDIO 上，地址 0，c22 兼容
++ *     两者同属电源域 PD_SDGMAC
++ */
++
++/* MAC 寄存器块 */
++
++#define RK3576_GMAC_MAC_CONFIG        0x0000
++#define RK3576_GMAC_MAC_PKT_FILTER    0x0008
++#define RK3576_GMAC_MAC_HW_FEATURE0   0x011c   /* 只读，硬件能力     */
++#define RK3576_GMAC_MAC_HW_FEATURE1   0x0120
++#define RK3576_GMAC_MAC_VERSION       0x0110   /* 只读，IP 版本      */
++#define RK3576_GMAC_MAC_MDIO_ADDR     0x0200
++#define RK3576_GMAC_MAC_MDIO_DATA     0x0204
++#define RK3576_GMAC_MAC_ADDR0_HIGH    0x0300
++#define RK3576_GMAC_MAC_ADDR0_LOW     0x0304
++
++/* MTL（队列层） */
++
++#define RK3576_GMAC_MTL_OPMODE        0x0c00
++#define RK3576_GMAC_MTL_TXQ0_OPMODE   0x0d00
++#define RK3576_GMAC_MTL_RXQ0_OPMODE   0x0d30
++
++/* DMA */
++
++#define RK3576_GMAC_DMA_MODE          0x1000
++#define RK3576_GMAC_DMA_SYSBUS_MODE   0x1004
++#define RK3576_GMAC_DMA_CH0_CTRL      0x1100
++#define RK3576_GMAC_DMA_CH0_TX_CTRL   0x1104
++#define RK3576_GMAC_DMA_CH0_RX_CTRL   0x1108
++#define RK3576_GMAC_DMA_CH0_TXDESC_LA 0x1114   /* 发送描述符表基址   */
++#define RK3576_GMAC_DMA_CH0_RXDESC_LA 0x111c
++#define RK3576_GMAC_DMA_CH0_TXDESC_TP 0x1120   /* 发送尾指针         */
++#define RK3576_GMAC_DMA_CH0_RXDESC_TP 0x1128
++#define RK3576_GMAC_DMA_CH0_TXDESC_RL 0x112c   /* 描述符环长度       */
++#define RK3576_GMAC_DMA_CH0_RXDESC_RL 0x1130
++#define RK3576_GMAC_DMA_CH0_IE        0x1134
++#define RK3576_GMAC_DMA_CH0_STATUS    0x1160
++
++/* MAC_CONFIG */
++
++#define GMAC_MAC_CONFIG_RE            (1 << 0)   /* 接收使能  */
++#define GMAC_MAC_CONFIG_TE            (1 << 1)   /* 发送使能  */
++#define GMAC_MAC_CONFIG_DM            (1 << 13)  /* 全双工    */
++#define GMAC_MAC_CONFIG_FES           (1 << 14)  /* 100Mbps   */
++#define GMAC_MAC_CONFIG_PS            (1 << 15)  /* 端口选择：MII/RMII */
++
++/* DMA_MODE */
++
++#define GMAC_DMA_MODE_SWR             (1 << 0)   /* 软复位，自清 */
++
++/* MDIO_ADDR */
++
++#define GMAC_MDIO_ADDR_GB             (1 << 0)   /* 忙标志       */
++#define GMAC_MDIO_ADDR_C45E           (1 << 1)
++#define GMAC_MDIO_ADDR_GOC_READ       (3 << 2)
++#define GMAC_MDIO_ADDR_GOC_WRITE      (1 << 2)
++#define GMAC_MDIO_ADDR_CR_SHIFT       8           /* 时钟分频     */
++#define GMAC_MDIO_ADDR_RDA_SHIFT      16          /* 寄存器地址   */
++#define GMAC_MDIO_ADDR_PA_SHIFT       21          /* PHY 地址     */
++
++#endif /* __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_GMAC_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_gmac.c b/arch/arm64/src/rk3576/rk3576_gmac.c
+new file mode 100644
+index 00000000..310db5ef
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_gmac.c
+@@ -0,0 +1,241 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_gmac.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* RK3576 GMAC（Synopsys DWMAC 4.20a）—— 第一步：前置链路 + MDIO。
++ *
++ * ★ NuttX 里有同 IP 家族的成熟实现：arch/arm/src/stm32h7/stm32_ethernet.c
++ *   STM32H7 用 DWC_ether_qos，寄存器布局与 4.20a 一致（已核对
++ *   MACCR=0x0000、MTL=0x0C00、DMA=0x1000 三处标志性偏移）。
++ *   后续的描述符环、收发路径、中断处理都照它的结构来。
++ *
++ * ★ 本文件先只做到"能读出 PHY ID"。
++ *
++ *   理由与 eMMC/SAI 相同：电源域、时钟、引脚复用任一没配好，表现都是
++ *   寄存器读全 0 或 MDIO 超时，与收发逻辑写错无法区分。先把这条链路
++ *   验证掉，写描述符环才有可靠的地基。
++ */
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <errno.h>
++#include <inttypes.h>
++#include <stdint.h>
++#include <syslog.h>
++
++#include <nuttx/arch.h>
++
++#include "arm64_internal.h"
++#include "rk3576_gmac.h"
++#include "rk3576_cru.h"
++#include "rk3576_power.h"
++#include "hardware/rk3576_gmac.h"
++#include "hardware/rk3576_memorymap.h"
++
++#ifdef CONFIG_RK3576_GMAC
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* 时钟。出处：clk-rk3576.c
++ *   GATE(ACLK_GMAC0, ... CLKGATE_CON(42), 7)
++ *   GATE(PCLK_GMAC0, ... CLKGATE_CON(42), 9)
++ *   GMAC1 在同一寄存器的相邻位
++ */
++
++#define GMAC_GATE_CON        42
++#define GMAC0_GATE_ACLK      7
++#define GMAC0_GATE_PCLK      9
++#define GMAC1_GATE_ACLK      8
++#define GMAC1_GATE_PCLK      10
++
++#define GMAC_PHY_ADDR        0      /* dtb: mdio/phy@1 的 reg = <0> */
++#define GMAC_MDIO_TIMEOUT_US 100000
++
++/****************************************************************************
++ * Private Data
++ ****************************************************************************/
++
++static const uintptr_t g_gmac_base[2] =
++{
++  RK3576_GMAC0_ADDR, RK3576_GMAC1_ADDR
++};
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint32_t gmac_getreg(int port, uint32_t off)
++{
++  return getreg32(g_gmac_base[port] + off);
++}
++
++static inline void gmac_putreg(int port, uint32_t off, uint32_t val)
++{
++  putreg32(val, g_gmac_base[port] + off);
++}
++
++/****************************************************************************
++ * Name: gmac_mdio_read
++ *
++ * Description:
++ *   通过 MDIO 读 PHY 的一个寄存器。
++ *
++ *   ★ CR 分频必须让 MDC 落在 2.5MHz 以下（IEEE 802.3 规定）。
++ *     这里取 CR=4（÷102），CSR 时钟按 100MHz 算得 MDC≈1MHz。
++ *     分频太快时表现为读回 0xffff —— 与"PHY 不存在"完全一样，
++ *     所以读不到 PHY 时要先怀疑分频，再怀疑硬件。
++ *
++ ****************************************************************************/
++
++static int gmac_mdio_read(int port, uint8_t phyaddr, uint8_t regaddr,
++                          uint16_t *value)
++{
++  uint32_t addr;
++  int us;
++
++  /* 等上一次操作结束 */
++
++  for (us = 0; us < GMAC_MDIO_TIMEOUT_US; us++)
++    {
++      if ((gmac_getreg(port, RK3576_GMAC_MAC_MDIO_ADDR) &
++           GMAC_MDIO_ADDR_GB) == 0)
++        {
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  if (us >= GMAC_MDIO_TIMEOUT_US)
++    {
++      return -EBUSY;
++    }
++
++  addr = ((uint32_t)phyaddr << GMAC_MDIO_ADDR_PA_SHIFT) |
++         ((uint32_t)regaddr << GMAC_MDIO_ADDR_RDA_SHIFT) |
++         (4u << GMAC_MDIO_ADDR_CR_SHIFT) |
++         GMAC_MDIO_ADDR_GOC_READ |
++         GMAC_MDIO_ADDR_GB;
++
++  gmac_putreg(port, RK3576_GMAC_MAC_MDIO_ADDR, addr);
++
++  for (us = 0; us < GMAC_MDIO_TIMEOUT_US; us++)
++    {
++      if ((gmac_getreg(port, RK3576_GMAC_MAC_MDIO_ADDR) &
++           GMAC_MDIO_ADDR_GB) == 0)
++        {
++          *value = (uint16_t)gmac_getreg(port, RK3576_GMAC_MAC_MDIO_DATA);
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  return -ETIMEDOUT;
++}
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++int rk3576_gmac_probe(int port)
++{
++  uint32_t version;
++  uint16_t id1 = 0xffff;
++  uint16_t id2 = 0xffff;
++  int ret;
++  int us;
++
++  if (port < 0 || port > 1)
++    {
++      return -EINVAL;
++    }
++
++  /* 两个 GMAC 同属 PD_SDGMAC */
++
++  ret = rk3576_power_on(RK3576_PD_SDGMAC);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "GMAC%d: PD_SDGMAC 上电失败: %d\n", port, ret);
++      return ret;
++    }
++
++  rk3576_clk_gate(GMAC_GATE_CON,
++                  port ? GMAC1_GATE_ACLK : GMAC0_GATE_ACLK, true);
++  rk3576_clk_gate(GMAC_GATE_CON,
++                  port ? GMAC1_GATE_PCLK : GMAC0_GATE_PCLK, true);
++
++  /* 第一层判据：IP 版本。只能证明寄存器块活着。 */
++
++  version = gmac_getreg(port, RK3576_GMAC_MAC_VERSION);
++  if (version == 0 || version == 0xffffffff)
++    {
++      syslog(LOG_ERR,
++             "GMAC%d: MAC_VERSION=0x%08" PRIx32
++             " —— 电源域/时钟/基址有问题\n", port, version);
++      return -ENODEV;
++    }
++
++  /* DMA 软复位。自清位，要等它归零；不等就配 MDIO 会被复位冲掉。 */
++
++  gmac_putreg(port, RK3576_GMAC_DMA_MODE, GMAC_DMA_MODE_SWR);
++  for (us = 0; us < 100000; us++)
++    {
++      if ((gmac_getreg(port, RK3576_GMAC_DMA_MODE) &
++           GMAC_DMA_MODE_SWR) == 0)
++        {
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  if (us >= 100000)
++    {
++      syslog(LOG_ERR, "GMAC%d: DMA 软复位超时\n", port);
++      return -ETIMEDOUT;
++    }
++
++  /* 第二层判据：PHY 厂商 ID。这一步才证明 MDIO 时序、PHY 供电、
++   * 连线都对。
++   */
++
++  gmac_mdio_read(port, GMAC_PHY_ADDR, 2, &id1);   /* PHYSID1 */
++  gmac_mdio_read(port, GMAC_PHY_ADDR, 3, &id2);   /* PHYSID2 */
++
++  syslog(LOG_INFO,
++         "GMAC%d: MAC_VERSION=0x%02" PRIx32 " HW_FEATURE0=0x%08" PRIx32
++         " PHY@%d ID=%04x:%04x%s\n",
++         port, version & 0xff,
++         gmac_getreg(port, RK3576_GMAC_MAC_HW_FEATURE0),
++         GMAC_PHY_ADDR, id1, id2,
++         (id1 == 0xffff && id2 == 0xffff)
++           ? "  ← 读不到 PHY（分频/复位/供电/引脚复用）" : "  ← PHY 已应答");
++
++  return OK;
++}
++
++#endif /* CONFIG_RK3576_GMAC */
+diff --git a/arch/arm64/src/rk3576/rk3576_gmac.h b/arch/arm64/src/rk3576/rk3576_gmac.h
+new file mode 100644
+index 00000000..92991a43
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_gmac.h
+@@ -0,0 +1,52 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_gmac.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_GMAC_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_GMAC_H
++
++#include <nuttx/config.h>
++#include <stdint.h>
++
++/****************************************************************************
++ * Name: rk3576_gmac_probe
++ *
++ * Description:
++ *   打开 PD_SDGMAC 电源域与 GMAC 时钟，复位 DMA，读 IP 版本，
++ *   再通过 MDIO 读 PHY 的厂商 ID。
++ *
++ *   ★ 判据分两层，强弱不同：
++ *
++ *     MAC_VERSION 只能证明"寄存器块活着"（电源域、时钟、基址对）；
++ *     PHY ID 才证明"MDIO 时序正确、PHY 有供电、连线通"。
++ *
++ *   前者读到合理值而后者读到 0xffff，说明 SoC 侧没问题、问题在板级
++ *   （PHY 复位脚、供电、或 MDIO 引脚复用）—— 这个区分能省掉大量
++ *   在 MAC 配置里瞎找的时间。
++ *
++ * Input Parameters:
++ *   port - 0 或 1
++ *
++ ****************************************************************************/
++
++int rk3576_gmac_probe(int port);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_GMAC_H */
 -- 
 2.43.0
 
