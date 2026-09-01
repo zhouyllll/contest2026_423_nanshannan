@@ -69,6 +69,17 @@ g_kickpi_i2c[] =
   { 1, "PMIC RK806@0x23" },
   { 2, "RTC HYM8563@0x51、PD HUSB311@0x4e" },
   { 3, "音频 codec ES8388@0x10" },
+
+  /* 以下四条加入是为了定位触摸控制器：屏接上后 I2C1/2/3 均未扫到
+   * GT9xx（0x5d 或 0x14）。原厂 dtb 中这四条状态为 okay。
+   */
+
+  { 4, "（探测用）dtb 记载 imx415_0@0x37" },
+  { 5, "（探测用）dtb 记载 imx415_1@0x37" },
+  { 7, "（探测用）" },
+  { 6, "（探测用）dtb 标 disabled" },
+  { 8, "（探测用）dtb 记载 imx415_3@0x37" },
+  { 9, "（探测用）dtb 标 disabled" },
 };
 
 #define KICKPI_NI2C (sizeof(g_kickpi_i2c) / sizeof(g_kickpi_i2c[0]))

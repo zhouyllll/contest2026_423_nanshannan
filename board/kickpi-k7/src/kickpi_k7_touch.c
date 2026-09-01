@@ -61,12 +61,43 @@
 
 /* ★ 待实测：以下三项需上板确认后固定 */
 
-#define TOUCH_I2C_BUS      2      /* 待实测：屏排线的触摸 I2C 接在哪条  */
+/* ★★ 板上实测结论（屏已物理接上）：I2C1~I2C9 全部扫描，
+ *    未在任何总线上发现 GT9xx（0x5d 或 0x14）。
+ *
+ *    已扫到的器件：I2C1 的 0x23(PMIC)、I2C2 的 0x4e(PD)+0x51(RTC)、
+ *    I2C3 的 0x10(ES8388)；I2C4/5/7/8/9 为空；I2C6 起始条件即失败
+ *    （fcnt=0，引脚复用存疑）。未扫 I2C0 —— 它在 PMU 域，时钟基址不同。
+ *
+ *    最可能的原因是**触摸未供电**：厂商面板节点有
+ *    power-supply = <&vcc3v3_lcd_n>，而该 regulator 定义在 LCD overlay
+ *    dtsi 里，基础 dtb 中并不存在（dsi 节点本身也是 disabled）。
+ *    没供电时扫遍所有总线也找不到，这一点无法用软件区分。
+ *
+ *    四个缺失信息都在同一个文件里，需向 KICKPI 技术支持索取：
+ *      rk3576-kickpi-k7-android-mipi-5-720-1280-F050008M01.dtsi
+ *        触摸的 I2C 总线号、供电轨 GPIO、面板初始化序列、背光控制
+ *
+ *    下面的总线号保持 2 仅为占位，未经证实。
+ */
+
+#define TOUCH_I2C_BUS      2      /* 未证实：全总线扫描未发现触摸  */
 #define TOUCH_I2C_ADDR     0x5d   /* GT9xx 默认；另一可能值为 0x14      */
-#define TOUCH_IRQ_BANK     3      /* 待实测：文档示例为 gpio3 RK_PA3    */
-#define TOUCH_IRQ_PIN      3
-#define TOUCH_RST_BANK     0      /* 待实测：文档示例为 gpio0 RK_PB6    */
-#define TOUCH_RST_PIN      14
+/* ★ 中断脚原取自 KICKPI 文档中另一块屏（1024x600）的示例 gpio3-3，
+ *   现已证明该值错误：board.h 记载 gpio3-3 是 GMAC1 的 PHY 复位脚
+ *   （出处为本板 dts）。两者冲突，会互相干扰。
+ *
+ *   本板 F050008M01 的触摸中断/复位脚尚无可靠出处，暂填 -1 表示未知：
+ *   不配置中断，改由上层轮询。这样触摸仍可用，且不会误动别的引脚。
+ *
+ *   落实办法：向 KICKPI 索取
+ *   rk3576-kickpi-k7-android-mipi-5-720-1280-F050008M01.dtsi，
+ *   其中的 goodix_irq_gpio / goodix_rst_gpio 即为确定值。
+ */
+
+#define TOUCH_IRQ_BANK     (-1)
+#define TOUCH_IRQ_PIN      (-1)
+#define TOUCH_RST_BANK     (-1)
+#define TOUCH_RST_PIN      (-1)
 
 /****************************************************************************
  * Private Functions
@@ -76,6 +107,12 @@ static int kickpi_touch_irq_attach(const struct gt9xx_board_s *state,
                                    xcpt_t isr, FAR void *arg)
 {
   UNUSED(state);
+
+  if (TOUCH_IRQ_BANK < 0)
+    {
+      return OK;      /* 中断脚未知，上层退化为轮询 */
+    }
+
   return rk3576_gpio_irq_attach(TOUCH_IRQ_BANK, TOUCH_IRQ_PIN, isr, arg);
 }
 
@@ -83,7 +120,11 @@ static void kickpi_touch_irq_enable(const struct gt9xx_board_s *state,
                                     bool enable)
 {
   UNUSED(state);
-  rk3576_gpio_irq_enable(TOUCH_IRQ_BANK, TOUCH_IRQ_PIN, enable);
+
+  if (TOUCH_IRQ_BANK >= 0)
+    {
+      rk3576_gpio_irq_enable(TOUCH_IRQ_BANK, TOUCH_IRQ_PIN, enable);
+    }
 }
 
 static int kickpi_touch_set_power(const struct gt9xx_board_s *state, bool on)
@@ -97,6 +138,11 @@ static int kickpi_touch_set_power(const struct gt9xx_board_s *state, bool on)
    *   因此期望地址是 0x5d；若上板扫到的是 0x14，说明该脚被外部拉高，
    *   把 TOUCH_I2C_ADDR 改掉即可，不必改时序。
    */
+
+  if (TOUCH_RST_BANK < 0)
+    {
+      return OK;      /* 复位脚未知，不去误动别的引脚 */
+    }
 
   rk3576_gpio_setdir(TOUCH_RST_BANK, TOUCH_RST_PIN, true);
   rk3576_gpio_write(TOUCH_RST_BANK, TOUCH_RST_PIN, on);
@@ -134,12 +180,15 @@ int kickpi_k7_touch_initialize(void)
       return -ENODEV;
     }
 
-  ret = rk3576_gpio_irq_config(TOUCH_IRQ_BANK, TOUCH_IRQ_PIN,
-                               false, false);   /* 下降沿触发 */
-  if (ret < 0)
+  if (TOUCH_IRQ_BANK >= 0)
     {
-      syslog(LOG_ERR, "ERROR: 触摸中断脚配置失败: %d\n", ret);
-      return ret;
+      ret = rk3576_gpio_irq_config(TOUCH_IRQ_BANK, TOUCH_IRQ_PIN,
+                                   false, false);   /* 下降沿触发 */
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: 触摸中断脚配置失败: %d\n", ret);
+          return ret;
+        }
     }
 
   ret = gt9xx_register("/dev/input0", i2c, TOUCH_I2C_ADDR, &g_touch_board);
@@ -149,9 +198,9 @@ int kickpi_k7_touch_initialize(void)
       return ret;
     }
 
-  syslog(LOG_INFO,
-         "触摸: /dev/input0 就绪（GT9xx @I2C%d:0x%02x, IRQ gpio%d-%d）\n",
-         TOUCH_I2C_BUS, TOUCH_I2C_ADDR, TOUCH_IRQ_BANK, TOUCH_IRQ_PIN);
+  syslog(LOG_INFO, "触摸: /dev/input0 就绪（GT9xx @I2C%d:0x%02x, %s）\n",
+         TOUCH_I2C_BUS, TOUCH_I2C_ADDR,
+         TOUCH_IRQ_BANK < 0 ? "中断脚未知，轮询模式" : "中断模式");
   return OK;
 }
 

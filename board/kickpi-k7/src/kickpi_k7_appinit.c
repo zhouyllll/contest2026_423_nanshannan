@@ -37,9 +37,12 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/drivers/drivers.h>
+#include <arch/board/board.h>
 
 #include "rk3576_power.h"
 #include "rk3576_sai.h"
+#include "rk3576_dcphy.h"
+#include "rk3576_dsi2.h"
 #include "rk3576_gmac.h"
 #include "rk3576_vop2.h"
 #include "rk3576_sdhci.h"
@@ -211,6 +214,37 @@ int board_app_initialize(uintptr_t arg)
         {
           rk3576_vop2_colorbar(&timing, true);
         }
+
+#ifdef CONFIG_RK3576_DCPHY
+      /* D-PHY：PLL 锁定是整条显示链路第一个真正的硬件反馈。
+       * 码率 = 像素时钟 * 每像素位数 / 通道数 = 65MHz * 24 / 4。
+       */
+
+      if (rk3576_dcphy_probe() == OK)
+        {
+          rk3576_dcphy_enable(timing.pixclk_hz / 1000 * 24 / 4, 4);
+        }
+#endif
+
+#ifdef CONFIG_RK3576_DSI2
+      if (rk3576_dsi2_probe() == OK)
+        {
+          rk3576_dsi2_configure(&timing, 4);
+        }
+#endif
+    }
+#endif
+
+#ifdef CONFIG_RK3576_SAI
+  /* 音频前置链路：PD_AUDIO + 三路时钟 + 引脚复用 + 版本自检。
+   * 必须在 kickpi_k7_audio_initialize() 之前 —— 后者依赖这里
+   * 打开的电源域与时钟。
+   */
+
+  ret = rk3576_sai_probe();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: SAI 探测失败: %d\n", ret);
     }
 #endif
 
@@ -239,6 +273,13 @@ int board_app_initialize(uintptr_t arg)
    *
    * 板上有两路千兆网口，先探 GMAC0。
    */
+
+  /* ★ 必须先释放 PHY 复位。DWMAC 的 DMA 软复位需要 PHY 提供的接收
+   * 时钟才能完成；PHY 被摁着时 SWR 位永不自清，表现为软复位超时，
+   * 而 SoC 侧的寄存器读写一切正常。本端口为此误查过时钟与模块复位两轮。
+   */
+
+  rk3576_gmac_phy_reset(BOARD_GMAC0_RST_BANK, BOARD_GMAC0_RST_PIN, true);
 
   ret = rk3576_gmac_probe(0);
   if (ret < 0)
