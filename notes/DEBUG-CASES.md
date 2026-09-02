@@ -1308,3 +1308,81 @@ FPC 座里面"，早期版本的触摸走独立的 J2(10pin) / J6(6pin) 座子�
   本轮的 MIPI 路由和 DSI 时钟分频都属于这一类。
 - 现象不变时，值得回头问：这一轮的改动**本应**带来什么可观测的变化？
   `MODE_STATUS` 由 1 变 0 就是这样一个本不该被忽略的信号。
+
+## 案例 13：SD 卡写不进去 —— 两个字节计数器把三种可能分开
+
+### 背景
+
+SD 卡（DesignWare MSHC，与 eMMC 的 SDHCI 不是同一种 IP）识别已经通过，
+`/dev/mmcsd1` 就绪，读也正常，唯独写不进去：
+
+    ERROR: DWMMC 等 DATA_OVER 超时
+    mmcsd_writesingle: ERROR: CMD24 transfer failed: -5
+
+### 关键：先造出能区分的观测
+
+"等 DATA_OVER 超时"这一句现象，背后至少有三种完全不同的原因：
+
+  1. 我根本没把数据推进 FIFO
+  2. 推进去了，但 FIFO 没有往卡里排
+  3. 都到了卡上，只是卡没给出结束信号
+
+三者的修法毫不相干，靠猜要试很多轮。控制器正好有两个独立的字节计数器
+可以把它们分开：
+
+    TBBCNT (0x60)  主机 <-> FIFO 已传字节数
+    TCBCNT (0x5c)  FIFO <-> 卡   已传字节数
+
+把这两个数和 RINTSTS/STATUS 一起打进超时日志，一次读数就能定位。
+
+### 三个真缺陷，依次被读数指出来
+
+**其一：写命令的调用顺序（判据 BLKSIZ=0 BYTCNT=0）**
+
+NuttX 写单块的默认顺序是
+
+    CMD24 -> BLOCKSETUP -> WAITENABLE -> SENDSETUP
+
+而 DW 控制器要求**发命令之前** BLKSIZ/BYTCNT 已经写好。按默认顺序，
+sendcmd 执行时缓冲区还没挂上，长度寄存器是 0，命令就不带数据阶段。
+
+NuttX 本来就为这种控制器留了开关：capabilities 报
+`SDIO_CAPS_DMABEFOREWRITE`，mmcsd 就改成先 setup 再发命令。
+★ 这个标志名字里带 DMA，实际控制的只是**调用顺序**，与用不用 DMA 无关，
+仅看名字会以为不适用。
+
+**其二：FIFO 地址算错（判据 TBBCNT=0）**
+
+改对顺序后 BLKSIZ/BYTCNT 正常了，RINTSTS 出现 TXDR（控制器在要数据），
+但 TBBCNT 仍然是 0 —— 数据一个字节也没进 FIFO。
+
+我按**数据总线宽度**选的 FIFO 偏移（32 位 0x100 / 64 位 0x200）。
+实际规则是按 **IP 版本**：
+
+    dw_mmc.c:
+      else if (host->verid < DW_MMC_240A)
+              host->fifo_reg = host->regs + DATA_OFFSET;       // 0x100
+      else    host->fifo_reg = host->regs + DATA_240A_OFFSET;  // 0x200
+
+本板 VERID=0x5342270a，版本号取低 16 位 = 0x270a >= 0x240A，应该用 0x200。
+
+同一份代码里还有一句注释点破了后果：240A 之后 0x100 变成了 CDTHRCTL
+寄存器（"that register offset is in the FIFO region"）。也就是说，
+我一直在把像素……不，把块数据写进 CDTHRCTL —— 不报错，但一个字节也
+到不了卡上。
+
+**其三：FIFO 深度取自 dtb 而非硬件**
+
+水位设得超过实际深度，FIFO 永远达不到阈值。改用 FIFOTH 复位值反推的
+实测值（复位时 RX 水位是 depth/2-1）。
+
+### 教训
+
+- **现象唯一、原因多样时，先造判据再动手改。** 这一轮三个缺陷都是靠
+  一次读数定位的，没有一次是猜中的；对比 GMAC 那次（没有能区分的
+  观测）来回猜了四轮仍未解决。
+- **不要按"看起来合理"的规则去推寄存器布局。** FIFO 偏移按数据宽度
+  分是个很自然的猜想，而且 0x100/0x200 这两个值恰好都存在，猜错了
+  也不会报错。规则必须抄来源。
+- **标志名会误导。** `SDIO_CAPS_DMABEFOREWRITE` 管的是顺序不是 DMA。
+  拿不准时看它在框架里的**使用处**，比看名字可靠。

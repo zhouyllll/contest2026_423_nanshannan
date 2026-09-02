@@ -130,6 +130,21 @@
 #define BOARD_TP_RST_BANK        0            /* GPIO0_D0，低有效 */
 #define BOARD_TP_RST_PIN         24           /* RK_PD0 = 3*8+0 */
 
+/* MIPI CSI 摄像头（Sony IMX415，cam0）
+ *
+ * 出处：厂商 Armbian 源码
+ *   patch/kernel/rk35xx-vendor-6.1/dt/rk3576-kickpi-k7-cam0.dtsi
+ *
+ *   imx415_0@37   I2C4（i2c4m3_xfer = GPIO3_B0/GPIO3_A7 功能 11）
+ *   xvclk         板上 37.125MHz 固定晶振，非 SoC 提供
+ *   avdd          vcc_mipidcphy0，GPIO0_D2 高有效
+ *   data-lanes    4
+ *   通路          imx415 -> csi2_dcphy0 -> mipi0_csi2 -> rkcif -> rkisp
+ */
+
+#define BOARD_CAM_PWR_BANK       0            /* GPIO0_D2，高有效 */
+#define BOARD_CAM_PWR_PIN        26           /* RK_PD2 = 3*8+2 */
+
 /* 存储配置（供 M4 存储适配参考）
  *
  *   sdhci  : eMMC，8 位总线，HS400 1.8V + enhanced strobe，non-removable

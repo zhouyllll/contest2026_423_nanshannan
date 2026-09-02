@@ -33,6 +33,7 @@
 #include <syslog.h>
 #include <inttypes.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/video/fb.h>
 #include <stdint.h>
 #include <nuttx/board.h>
 #include <nuttx/sdio.h>
@@ -45,6 +46,7 @@
 #include "rk3576_sai.h"
 #include "rk3576_dcphy.h"
 #include "rk3576_dsi2.h"
+#include "rk3576_dwmmc.h"
 #include "rk3576_gmac.h"
 #include "rk3576_vop2.h"
 #include "rk3576_sdhci.h"
@@ -264,71 +266,22 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #if KEEP_UBOOT_DISPLAY
-      /* 接管而不是重建：只把图层的帧缓冲地址换成我们自己的缓冲区，
-       * 其余（时序、DSI、D-PHY、面板初始化的效果）全部沿用 U-Boot。
-       *
-       * 这一步同时是决定性实验 —— 屏幕内容若随之改变，VOP2、DSI、
-       * D-PHY、面板就一次性全部得到证实。
+      /* 接管而不是重建。U-Boot 已经把这块屏点亮（面板初始化序列在拿不到
+       * 的厂商 dtsi 里，复位就回不来），所以只把图层扩到全屏、指向我们
+       * 自己的帧缓冲，其余一律不碰。
        */
 
-      {
-        uint32_t fbw;
-        uint32_t fbh;
-        uint32_t stride;
-        uint32_t bpp;
-        void    *fb;
-        size_t   fbsize;
-
-        /* 先只查询（buffer 传 0 时不写寄存器），拿到尺寸再分配。 */
-
-        fbw = 0;
-        if (rk3576_vop2_takeover(0, &fbw, &fbh, &stride, &bpp) == OK &&
-            fbw != 0 && stride != 0)
-          {
-            fbsize = (size_t)stride * fbh;
-            fb = kmm_memalign(256, fbsize);
-
-            if (fb == NULL)
-              {
-                syslog(LOG_ERR,
-                       "ERROR: 帧缓冲分配失败 %zu 字节\n", fbsize);
-              }
-            else
-              {
-                uint32_t *p = (uint32_t *)fb;
-                uint32_t  x;
-                uint32_t  y;
-
-                /* 四条横带：红 绿 蓝 白。任何一条出现在屏上，
-                 * 就说明地址、跨距、格式三者同时对上了。
-                 */
-
-                static const uint32_t bands[4] =
-                {
-                  0xffff0000, 0xff00ff00, 0xff0000ff, 0xffffffff
-                };
-
-                for (y = 0; y < fbh; y++)
-                  {
-                    uint32_t c = bands[(y * 4) / fbh];
-
-                    for (x = 0; x < fbw; x++)
-                      {
-                        p[y * (stride / 4) + x] = c;
-                      }
-                  }
-
-                up_flush_dcache((uintptr_t)fb, (uintptr_t)fb + fbsize);
-
-                rk3576_vop2_takeover((uintptr_t)fb, NULL, NULL, NULL, NULL);
-
-                syslog(LOG_INFO,
-                       "显示: 测试图案已写入 %" PRIu32 "x%" PRIu32
-                       " @0x%08lx（红/绿/蓝/白四条横带）\n",
-                       fbw, fbh, (unsigned long)fb);
-              }
-          }
-      }
+#ifdef CONFIG_RK3576_FB
+      ret = fb_register(0, 0);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: 注册 /dev/fb0 失败: %d\n", ret);
+        }
+      else
+        {
+          syslog(LOG_INFO, "显示: /dev/fb0 就绪\n");
+        }
+#endif
 #else
       ret = rk3576_vop2_probe();
       if (ret < 0)
@@ -431,6 +384,66 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: 触摸初始化失败: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RK3576_DWMMC
+  /* SD 卡（TF）控制器。与 eMMC 是两种不同的 IP，各走各的驱动。 */
+
+  ret = rk3576_dwmmc_probe();
+  if (ret < 0)
+    {
+      /* -ENODEV 是"卡不在位"，不是故障 —— SD 卡本来就是可插拔的，
+       * 这里分开说，免得把"没插卡"记成"驱动坏了"。
+       */
+
+      syslog(ret == -ENODEV ? LOG_INFO : LOG_ERR,
+             "SD 卡: %s (%d)\n",
+             ret == -ENODEV ? "未插卡，跳过" : "控制器探测失败", ret);
+    }
+  else
+    {
+      struct sdio_dev_s *sd = rk3576_dwmmc_initialize();
+
+      if (sd == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: SD 卡 sdio_dev 初始化失败\n");
+        }
+      else
+        {
+          ret = mmcsd_slotinitialize(1, sd);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR,
+                     "ERROR: SD 卡 mmcsd_slotinitialize 失败: %d\n", ret);
+            }
+          else
+            {
+              /* 同 eMMC：返回值不足为凭，实际 stat 节点才算数。 */
+
+              struct stat sdst;
+
+              if (stat("/dev/mmcsd1", &sdst) == 0)
+                {
+                  syslog(LOG_INFO, "SD 卡: /dev/mmcsd1 就绪\n");
+                }
+              else
+                {
+                  syslog(LOG_ERR,
+                         "ERROR: SD 卡未被识别，/dev/mmcsd1 不存在\n");
+                }
+            }
+        }
+    }
+#endif
+
+#ifdef CONFIG_RK3576_I2C
+  /* 摄像头传感器探测（不建立取图通路，见 kickpi_k7_camera.c 说明） */
+
+  ret = kickpi_k7_camera_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 摄像头探测失败: %d\n", ret);
     }
 #endif
 

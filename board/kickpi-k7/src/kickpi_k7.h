@@ -87,6 +87,17 @@ int kickpi_k7_touch_initialize(void);
 
 int kickpi_k7_lcd_power(bool on);
 
+/****************************************************************************
+ * Name: kickpi_k7_camera_initialize
+ *
+ * Description:
+ *   给 IMX415 供电、唤醒并读型号寄存器确认在位。只做传感器探测，
+ *   不建立取图通路（CSI2/CIF/ISP 尚未实现）。
+ *
+ ****************************************************************************/
+
+int kickpi_k7_camera_initialize(void);
+
 #if defined(CONFIG_AUDIO_ES8388) && defined(CONFIG_RK3576_SAI)
 /****************************************************************************
  * Name: kickpi_k7_audio_initialize
