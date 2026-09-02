@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 01/18] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 01/21] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 02/18] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 02/21] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1363,7 +1363,7 @@ index 559489f6..d2fb5605 100644
 From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:38:15 +0800
-Subject: [PATCH 03/18] arm64/rk3576: clear U-Boot's leftover
+Subject: [PATCH 03/21] arm64/rk3576: clear U-Boot's leftover
  HCR_EL2.{IMO,FMO,AMO}; fix load address
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1490,7 +1490,7 @@ index d2fb5605..128e8a22 100644
 From 1a226e049212fce50e0724ee37b6671ac0f23e23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:50:02 +0800
-Subject: [PATCH 04/18] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
+Subject: [PATCH 04/21] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
  =?UTF-8?q?=5FEL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
  =?UTF-8?q?=E4=B8=81=E7=9A=84=E5=85=B3=E7=B3=BB?=
 MIME-Version: 1.0
@@ -1535,7 +1535,7 @@ index 128e8a22..f76d45cb 100644
 From 509d2fa1a06f4560ce252d7cc6a4d507ea7bd6dc Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 23:18:55 +0800
-Subject: [PATCH 05/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
+Subject: [PATCH 05/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
  =?UTF-8?q?=20=E9=A9=B1=E5=8A=A8=EF=BC=88Rockchip=20GPIO=20v2=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1989,7 +1989,7 @@ index 00000000..2fe55c92
 From 895f1f4e4df1ffb6dc7c665adb230ea472f48600 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 00:43:14 +0800
-Subject: [PATCH 06/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
+Subject: [PATCH 06/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
  =?UTF-8?q?=E3=80=81=E5=BC=95=E8=84=9A=E5=A4=8D=E7=94=A8=E4=B8=8E=20I2C=20?=
  =?UTF-8?q?=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
@@ -3602,7 +3602,7 @@ index 00000000..8d4d6561
 From 0efe6a8352599f5b577eda2598ab46844332a791 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:24:26 +0800
-Subject: [PATCH 07/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
+Subject: [PATCH 07/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
  =?UTF-8?q?=20(dwcmshc/SDHCI)=20=E5=91=BD=E4=BB=A4=E9=80=9A=E8=B7=AF?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -4324,7 +4324,7 @@ index 00000000..971084de
 From 19f41551f493da28c0756c5e83a0850a0bcf9aae Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:29:46 +0800
-Subject: [PATCH 08/18] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
+Subject: [PATCH 08/21] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
  =?UTF-8?q?=E9=80=9A=E8=B7=AF=E6=89=93=E9=80=9A=EF=BC=88CMD9/CMD7/CMD17=20?=
  =?UTF-8?q?+=20PIO=20=E8=AF=BB=E5=9D=97=EF=BC=89?=
 MIME-Version: 1.0
@@ -4534,7 +4534,7 @@ index cd0d10dc..99c4ecc0 100644
 From 98b2a2df090330a6d91d6f52c098751b1697768a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 13:13:58 +0800
-Subject: [PATCH 09/18] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
+Subject: [PATCH 09/21] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
  =?UTF-8?q?=20sdio=5Fdev=5Fs=EF=BC=8C/dev/mmcsd0=20=E5=8F=AF=E7=94=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -5263,7 +5263,7 @@ index 971084de..c0f64978 100644
 From 3a65d6b63b5febca4827bd7fecd8d2145adb51a0 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:07:47 +0800
-Subject: [PATCH 10/18] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
+Subject: [PATCH 10/21] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
  =?UTF-8?q?=E5=A4=87=E8=AF=BB=E9=80=9A=EF=BC=881=20=E4=BD=8D=20@50MHz?=
  =?UTF-8?q?=EF=BC=89=EF=BC=8C4=20=E4=BD=8D=E5=BE=85=E4=BF=AE?=
 MIME-Version: 1.0
@@ -5486,7 +5486,7 @@ index a3b84e47..a2996f1a 100644
 From 84d0c755aa873b306fefd87a20e4c2e0abccf064 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:14:24 +0800
-Subject: [PATCH 11/18] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
+Subject: [PATCH 11/21] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
  =?UTF-8?q?=E6=80=BB=E7=BA=BF=E6=89=93=E9=80=9A=EF=BC=8850MHz=EF=BC=89?=
  =?UTF-8?q?=EF=BC=8C=E6=A0=B9=E5=9B=A0=E6=98=AF=E8=83=BD=E5=8A=9B=E5=A3=B0?=
  =?UTF-8?q?=E6=98=8E?=
@@ -5587,7 +5587,7 @@ index a2996f1a..2206c8ab 100644
 From 5250326bc4b5ede69c28dea6feaf51d0ae74e46a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:27:58 +0800
-Subject: [PATCH 12/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
+Subject: [PATCH 12/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F(PMU)=E4=B8=8E=20GPIO=20=E4=B8=AD?=
  =?UTF-8?q?=E6=96=AD=EF=BC=8C=E4=B8=BA=E6=98=BE=E7=A4=BA=E4=B8=8E=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E9=93=BA=E8=B7=AF?=
@@ -6294,7 +6294,7 @@ index 00000000..80545549
 From 40634c8959141615d593598f97b5c70597d2039d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:41:21 +0800
-Subject: [PATCH 13/18] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
+Subject: [PATCH 13/21] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F=E7=BC=96=E5=8F=B7=E4=B8=8E=E6=AF=8F?=
  =?UTF-8?q?=E5=9F=9F=E7=9A=84=20req=20=E5=81=8F=E7=A7=BB?=
 MIME-Version: 1.0
@@ -6451,7 +6451,7 @@ index 80545549..84de6b0f 100644
 From d632b41753c213abee75ccaedbe6a88659d68b89 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:59:50 +0800
-Subject: [PATCH 14/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
+Subject: [PATCH 14/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
  =?UTF-8?q?=20=E9=9F=B3=E9=A2=91=E6=8E=A5=E5=8F=A3=E9=A9=B1=E5=8A=A8?=
  =?UTF-8?q?=EF=BC=88PIO=20=E5=8F=91=E9=80=81=EF=BC=89?=
 MIME-Version: 1.0
@@ -7201,7 +7201,7 @@ index 00000000..4c5ceb1c
 From 945dc74f703bb97d7c2331a2eb40df1bc888eb23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:26:44 +0800
-Subject: [PATCH 15/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
+Subject: [PATCH 15/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
  =?UTF-8?q?=20=E6=98=BE=E7=A4=BA=E6=8E=A7=E5=88=B6=E5=99=A8=EF=BC=88?=
  =?UTF-8?q?=E8=87=AA=E6=A3=80=20+=20=E5=86=85=E7=BD=AE=E5=BD=A9=E6=9D=A1?=
  =?UTF-8?q?=EF=BC=89?=
@@ -7744,7 +7744,7 @@ index 00000000..d59f5f55
 From e19fbf3e1dcfc9bd8c9cac919da3591de3b6bdb5 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:38:18 +0800
-Subject: [PATCH 16/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 16/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20DSI2=20=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8360,7 +8360,7 @@ index 00000000..b4cf8682
 From 506a2907cd27c7244a478ced9cc2e03e3e02ff77 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:44:28 +0800
-Subject: [PATCH 17/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 17/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20D/C-PHY=20=E9=A9=B1=E5=8A=A8=EF=BC=88D-PHY=20PLL=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8813,7 +8813,7 @@ index 00000000..6183bd51
 From 67474c8ffe832b715faa83734a71a32b80b33da6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:54:26 +0800
-Subject: [PATCH 18/18] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
+Subject: [PATCH 18/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
  =?UTF-8?q?=20=E5=89=8D=E7=BD=AE=E9=93=BE=E8=B7=AF=E4=B8=8E=20MDIO?=
  =?UTF-8?q?=EF=BC=88DWMAC=204.20a=EF=BC=89?=
 MIME-Version: 1.0
@@ -9307,6 +9307,1529 @@ index 00000000..92991a43
 +int rk3576_gmac_probe(int port);
 +
 +#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_GMAC_H */
+-- 
+2.43.0
+
+
+From 474c4a000e75319ecee875dffde4a0e7342ba12d Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 23:07:45 +0800
+Subject: [PATCH 19/21] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
+ =?UTF-8?q?=E9=93=BE=E8=B7=AF=E5=85=AD=E9=A1=B9=E9=85=8D=E9=BD=90=EF=BC=8C?=
+ =?UTF-8?q?DMA=20=E8=BD=AF=E5=A4=8D=E4=BD=8D=E4=BB=8D=E6=9C=AA=E5=AE=8C?=
+ =?UTF-8?q?=E6=88=90?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+按 dtsi 逐条核对并全部实现：电源域、五路时钟（含 125M 的 5 位分频）、
+模块软复位撤销、PHY 硬件复位释放、SDGMAC_GRF 接口与时钟选择、
+RGMII 14 脚复用。
+
+板上实测仍为 DMA_MODE.SWR 不自清（上电即 0x1，从未复位成功），
+而 MAC 块与 DMA 块的纯数据寄存器均可写（DMA_CH0_TXDESC_RL 写 0x3f
+读回一致、MAC_ADDR0_HIGH 写 0x1234 读回一致），说明模块本身是活的。
+
+下一步应实测 PHY 是否在输出 RX 时钟（把 RXCLK 脚切回 GPIO 读电平），
+以区分 SoC 侧还缺配置 与 PHY 侧没起来。
+
+暂缓该模块：网络在 xTS 中属选测项，而触摸实际地址、音频出声、
+显示点亮三项投入产出比更高。已查清的全部参数与排查过程完整保留，
+见文件头说明与 notes/DEBUG-CASES.md 案例 10。
+---
+ arch/arm64/src/rk3576/rk3576_cru.c   |  14 ++
+ arch/arm64/src/rk3576/rk3576_cru.h   |  25 +++
+ arch/arm64/src/rk3576/rk3576_dcphy.c |  26 +++
+ arch/arm64/src/rk3576/rk3576_gmac.c  | 293 ++++++++++++++++++++++++++-
+ arch/arm64/src/rk3576/rk3576_gmac.h  |  22 ++
+ arch/arm64/src/rk3576/rk3576_power.c |   6 +
+ 6 files changed, 384 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_cru.c b/arch/arm64/src/rk3576/rk3576_cru.c
+index 54c14454..3e373650 100644
+--- a/arch/arm64/src/rk3576/rk3576_cru.c
++++ b/arch/arm64/src/rk3576/rk3576_cru.c
+@@ -74,6 +74,20 @@ void rk3576_clk_setmux(unsigned int con, unsigned int shift,
+   putreg32(regval, RK3576_CRU_ADDR + RK3576_CRU_CLKSEL_CON(con));
+ }
+ 
++void rk3576_reset(unsigned int id, bool assert)
++{
++  /* 每个 SOFTRST_CON 寄存器装 16 个复位位，编号线性铺开。
++   * 与门控寄存器一样带高 16 位写使能掩码。
++   */
++
++  unsigned int con = id / 16;
++  unsigned int bit = id % 16;
++  uint32_t regval;
++
++  regval = (1u << (bit + 16)) | ((assert ? 1u : 0u) << bit);
++  putreg32(regval, RK3576_CRU_ADDR + RK3576_CRU_SOFTRST_CON(con));
++}
++
+ unsigned int rk3576_clk_getmux(unsigned int con, unsigned int shift,
+                                unsigned int width)
+ {
+diff --git a/arch/arm64/src/rk3576/rk3576_cru.h b/arch/arm64/src/rk3576/rk3576_cru.h
+index 8c8d28ec..ac06fec8 100644
+--- a/arch/arm64/src/rk3576/rk3576_cru.h
++++ b/arch/arm64/src/rk3576/rk3576_cru.h
+@@ -28,6 +28,7 @@
+  ****************************************************************************/
+ 
+ #include <nuttx/config.h>
++#include <stdbool.h>
+ #include <stdint.h>
+ 
+ /****************************************************************************
+@@ -111,6 +112,30 @@ void rk3576_clk_setmux(unsigned int con, unsigned int shift,
+ unsigned int rk3576_clk_getmux(unsigned int con, unsigned int shift,
+                                unsigned int width);
+ 
++/****************************************************************************
++ * Name: rk3576_reset
++ *
++ * Description:
++ *   置位/撤销一个模块的软复位。
++ *
++ *   ★ 复位号是跨寄存器的线性编号，映射规则为每个 SOFTRST_CON 装 16 个：
++ *       寄存器 = SOFTRST_CON 基址 + (id / 16) * 4
++ *       位     = id % 16
++ *     编号取自 include/dt-bindings/reset/rockchip,rk3576-cru.h。
++ *
++ *   ★ 引导器没用过的模块，其复位很可能仍是置位状态。此时寄存器读写
++ *     一切正常、版本号也读得到，但状态机不工作 —— 本端口的 GMAC
++ *     就是这样：四路时钟都开了，DMA 软复位的自清位仍然不归零。
++ *     与"功能时钟没开"表现相同，需要分别排查。
++ *
++ * Input Parameters:
++ *   id     - dt-bindings 里的 SRST_* 值
++ *   assert - true 置位复位，false 撤销
++ *
++ ****************************************************************************/
++
++void rk3576_reset(unsigned int id, bool assert);
++
+ #undef EXTERN
+ #if defined(__cplusplus)
+ }
+diff --git a/arch/arm64/src/rk3576/rk3576_dcphy.c b/arch/arm64/src/rk3576/rk3576_dcphy.c
+index b319d2bb..19a3d07d 100644
+--- a/arch/arm64/src/rk3576/rk3576_dcphy.c
++++ b/arch/arm64/src/rk3576/rk3576_dcphy.c
+@@ -240,6 +240,32 @@ int rk3576_dcphy_enable(uint32_t bitrate_kbps, int lanes)
+ 
+   got = (m * 2 * DCPHY_REF_CLK_KHZ / p) >> s;
+ 
++  /* ★ 先关掉 PLL 并确认 LOCK 位归零，再配置、使能、等锁定。
++   *
++   *   只检查"最终 LOCK 为 1"是不够的：本端口实测 probe 时
++   *   PLL_STAT0 就已经是 0x1，若直接使能再读，读到的 1 可能是
++   *   原有状态而非本次配置的结果 —— 那样即使分频算错也会报"已锁定"。
++   *   先让它掉锁、再看它重新锁上，才能证明配置真的生效。
++   */
++
++  phy_modreg(DCPHY_PLL_CON0, PLL_EN, 0);
++
++  for (us = 0; us < 1000; us++)
++    {
++      if ((phy_getreg(DCPHY_PLL_STAT0) & PLL_LOCK) == 0)
++        {
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  if ((phy_getreg(DCPHY_PLL_STAT0) & PLL_LOCK) != 0)
++    {
++      syslog(LOG_WARNING,
++             "DCPHY: 关闭 PLL 后 LOCK 仍为 1，后续的锁定判断不可信\n");
++    }
++
+   /* 先写分频参数，最后才置 PLL_EN —— 使能后改分频会让 PLL 失锁 */
+ 
+   phy_modreg(DCPHY_PLL_CON0, PLL_S_MASK | PLL_P_MASK,
+diff --git a/arch/arm64/src/rk3576/rk3576_gmac.c b/arch/arm64/src/rk3576/rk3576_gmac.c
+index 310db5ef..9ccc73f8 100644
+--- a/arch/arm64/src/rk3576/rk3576_gmac.c
++++ b/arch/arm64/src/rk3576/rk3576_gmac.c
+@@ -20,7 +20,33 @@
+  *
+  ****************************************************************************/
+ 
+-/* RK3576 GMAC（Synopsys DWMAC 4.20a）—— 第一步：前置链路 + MDIO。
++/* RK3576 GMAC（Synopsys DWMAC 4.20a）—— 前置链路 + MDIO。
++ *
++ * ★★ 当前状态：DMA 软复位不完成，功能未打通。
++ *
++ *   现象：写 DMA_MODE.SWR 后该位永不自清（板上实测 DMA_MODE 上电即为
++ *   0x1，即从未复位成功）。而 MAC_VERSION=0x3051、HW_FEATURE0=0x1a1173f7
++ *   均可读，MAC 块与 DMA 块的纯数据寄存器均可写（已用
++ *   DMA_CH0_TXDESC_RL 与 MAC_ADDR0_HIGH 写回读验证）。
++ *
++ *   已按 dtsi 逐条核对并全部配齐的六项前置条件：
++ *     1. 电源域 PD_SDGMAC
++ *     2. 五路时钟：125M_SRC（含 5 位分频，cpll/8=125MHz）、RMII_CRU、
++ *        PCLK、ACLK、PTP_REF
++ *     3. 模块软复位 SRST_A_GMAC0 / SRST_P_GMAC0 撤销
++ *     4. PHY 硬件复位释放（板级 gpio2-13，低有效）
++ *     5. SDGMAC_GRF 接口模式（RGMII）与 gmii_clk_sel（DIV1_125M）
++ *     6. RGMII 引脚复用 14 脚（含 RXCLK g3-25 / TXCLK g3-14）
++ *
++ *   六项配齐后仍不通，说明还缺一项尚未识别的条件。Synopsys 手册指出
++ *   软复位需要**所有时钟域**就绪，其中 RX 时钟由 PHY 提供 —— 下一步
++ *   应实测 PHY 是否真的在输出时钟（把 RXCLK 脚切回 GPIO 读电平，
++ *   或用示波器），以区分"SoC 侧还缺配置"与"PHY 侧没起来"。
++ *
++ *   排查全过程见 notes/DEBUG-CASES.md 案例 10。
++ *
++ * 已完成且可复用的部分：全部寄存器定义、六项前置条件的配置代码、
++ * MDIO 读时序。收发路径可参照 arch/arm/src/stm32h7/stm32_ethernet.c。
+  *
+  * ★ NuttX 里有同 IP 家族的成熟实现：arch/arm/src/stm32h7/stm32_ethernet.c
+  *   STM32H7 用 DWC_ether_qos，寄存器布局与 4.20a 一致（已核对
+@@ -49,6 +75,8 @@
+ #include "arm64_internal.h"
+ #include "rk3576_gmac.h"
+ #include "rk3576_cru.h"
++#include "rk3576_gpio.h"
++#include "rk3576_pinmux.h"
+ #include "rk3576_power.h"
+ #include "hardware/rk3576_gmac.h"
+ #include "hardware/rk3576_memorymap.h"
+@@ -65,12 +93,128 @@
+  *   GMAC1 在同一寄存器的相邻位
+  */
+ 
++/* ★ 四路时钟都要开，缺一路 DMA 就不动。
++ *
++ *   ACLK/PCLK 只管总线与寄存器访问；真正驱动 MAC 状态机的是
++ *   CLK_GMACn_125M_SRC（dtsi 里名为 "stmmaceth"）。缺它时寄存器
++ *   读写完全正常、MAC_VERSION 也读得到，但 DMA 软复位的自清位
++ *   永远不归零 —— 本端口实测就是这个现象。
++ *
++ *   与 I2C 的"PCLK 通而功能时钟没开"、SAI 的"三路时钟都要开"
++ *   是同一类陷阱：寄存器能访问不代表外设能工作。
++ */
++
+ #define GMAC_GATE_CON        42
+ #define GMAC0_GATE_ACLK      7
+ #define GMAC0_GATE_PCLK      9
+ #define GMAC1_GATE_ACLK      8
+ #define GMAC1_GATE_PCLK      10
+ 
++/* CLKGATE_CON(3)：CLK_GMACn_125M_SRC，MAC 主应用时钟 */
++
++#define GMAC_GATE_CON_125M   3
++#define GMAC0_GATE_125M      6
++#define GMAC1_GATE_125M      7
++
++/* CLKGATE_CON(5)：CLK_GMACn_RMII_CRU */
++
++#define GMAC_GATE_CON_RMII   5
++#define GMAC0_GATE_RMII      13
++#define GMAC1_GATE_RMII      14
++
++/* PTP 参考时钟。dtsi 的 clocks 共五路，此前只开了四路。
++ *   GATE(CLK_GMAC1_PTP_REF, ... CLKGATE_CON(42), 13)
++ *   CLK_GMAC0_PTP_REF_SRC    ... CLKGATE_CON(43), 0
++ */
++
++#define GMAC0_GATE_PTP_CON   43
++#define GMAC0_GATE_PTP       0
++#define GMAC1_GATE_PTP_CON   42
++#define GMAC1_GATE_PTP       13
++
++/* 复位号。出处：include/dt-bindings/reset/rockchip,rk3576-cru.h
++ *   SRST_A_GMAC0 = 264   SRST_A_GMAC1 = 265
++ *   SRST_P_GMAC0 = 266   SRST_P_GMAC1 = 267
++ */
++
++#define SRST_A_GMAC0         264
++#define SRST_A_GMAC1         265
++#define SRST_P_GMAC0         266
++#define SRST_P_GMAC1         267
++
++/* ★ SDGMAC_GRF —— SoC 层的接口与时钟选择，不配的话 MAC 拿不到有效
++ *   的 TX/RX 时钟，DMA 软复位的 SWR 位永不自清。
++ *
++ *   出处：Linux drivers/net/ethernet/stmicro/stmmac/dwmac-rk.c 的
++ *   rk3576_ops / rk3576_init()：
++ *       RK3576_GRF_GMAC_CON0 = 0x0020   （GMAC0）
++ *       RK3576_GRF_GMAC_CON1 = 0x0024   （GMAC1）
++ *       gmac_rmii_mode_mask     = BIT(3)      清零选 RGMII
++ *       clock.io_clksel_io_mask = BIT(7)
++ *       clock.gmii_clk_sel_mask = GENMASK(6,5)
++ *   GRF 基址取自主线 rk3576.dtsi 的 sdgmac_grf: syscon@26038000。
++ *
++ *   GRF 寄存器同样是高 16 位写使能掩码。
++ */
++
++/* ★ CLK_GMACn_125M_SRC 带分频器，只开门控不设分频得不到 125MHz。
++ *
++ *   COMPOSITE_NOMUX(CLK_GMAC0_125M_SRC, "clk_gmac0_125m_src", "cpll", 0,
++ *                   RK3576_CLKSEL_CON(30), 10, 5, DFLAGS,
++ *                   RK3576_CLKGATE_CON(3), 6, GFLAGS)
++ *
++ *   父时钟 cpll = 1000MHz（dtsi 的 assigned-clock-rates），
++ *   1000/125 = 8，寄存器写 8-1 = 7。
++ *
++ *   GMAC1 在 CLKSEL_CON(30) 的相邻位域。
++ */
++
++#define GMAC0_CLKSEL_125M_CON   30
++#define GMAC0_CLKSEL_125M_SHIFT 10
++#define GMAC0_CLKSEL_125M_WIDTH 5
++#define GMAC_125M_DIV_VALUE     (8 - 1)
++
++#define SDGMAC_GRF_ADDR      0x26038000
++#define GRF_GMAC_CON0        0x0020
++#define GRF_GMAC_CON1        0x0024
++
++#define GRF_RMII_MODE        (1u << 3)    /* 1=RMII 0=RGMII */
++#define GRF_IO_CLKSEL_IO     (1u << 7)
++#define GRF_GMII_CLK_SEL_MASK (3u << 5)
++
++/* gmii_clk_sel 的取值，出处 dwmac-rk.c */
++
++#define GMAC_CLK_DIV1_125M    0u    /* 1000Mbps */
++#define GMAC_CLK_DIV5_25M     1u    /*  100Mbps */
++#define GMAC_CLK_DIV50_2_5M   2u    /*   10Mbps */
++
++/* ★ RGMII 引脚复用。
++ *
++ *   出处：原厂 dtb 的 ethernet@2a220000 的 pinctrl-0，五组共 14 个引脚，
++ *   功能号均为 3：
++ *       eth0m0-miim        g3-6  g3-5              MDC / MDIO
++ *       eth0m0-rx_bus2     g3-7  g3-10 g3-9        RXD0/1 RXDV
++ *       eth0m0-tx_bus2     g3-11 g3-13 g3-12       TXD0/1 TXEN
++ *       eth0m0-rgmii_clk   g3-25 g3-14             RXCLK / TXCLK
++ *       eth0m0-rgmii_bus   g3-27 g3-26 g3-19 g3-18 RXD2/3 TXD2/3
++ *
++ *   不配复用时 MAC 的时钟脚没接到 PHY，收不到 RX 时钟，DMA 软复位的
++ *   SWR 位永不自清 —— 与"功能时钟没开""模块复位没撤""PHY 被摁着"
++ *   "GRF 没配"表现完全一致。本端口在这五者之间排除了五轮。
++ */
++
++static const uint8_t g_gmac0_pins[] =
++{
++  6, 5,                    /* miim       */
++  7, 10, 9,                /* rx_bus2    */
++  11, 13, 12,              /* tx_bus2    */
++  25, 14,                  /* rgmii_clk  */
++  27, 26, 19, 18           /* rgmii_bus  */
++};
++
++#define GMAC0_PIN_BANK       3
++#define GMAC0_PIN_FUNC       3
++
+ #define GMAC_PHY_ADDR        0      /* dtb: mdio/phy@1 的 reg = <0> */
+ #define GMAC_MDIO_TIMEOUT_US 100000
+ 
+@@ -161,6 +305,19 @@ static int gmac_mdio_read(int port, uint8_t phyaddr, uint8_t regaddr,
+  * Public Functions
+  ****************************************************************************/
+ 
++void rk3576_gmac_phy_reset(int bank, int pin, bool active_low)
++{
++  /* 拉住复位至少 10ms，释放后再等 30ms 让 PHY 起振并开始出时钟。
++   * RTL8211F 手册要求复位脉冲不短于 10ms、释放后 30ms 内不访问 MDIO。
++   */
++
++  rk3576_gpio_setdir(bank, pin, true);
++  rk3576_gpio_write(bank, pin, active_low ? false : true);
++  up_mdelay(10);
++  rk3576_gpio_write(bank, pin, active_low ? true : false);
++  up_mdelay(30);
++}
++
+ int rk3576_gmac_probe(int port)
+ {
+   uint32_t version;
+@@ -187,6 +344,91 @@ int rk3576_gmac_probe(int port)
+                   port ? GMAC1_GATE_ACLK : GMAC0_GATE_ACLK, true);
+   rk3576_clk_gate(GMAC_GATE_CON,
+                   port ? GMAC1_GATE_PCLK : GMAC0_GATE_PCLK, true);
++  rk3576_clk_gate(GMAC_GATE_CON_125M,
++                  port ? GMAC1_GATE_125M : GMAC0_GATE_125M, true);
++  rk3576_clk_gate(GMAC_GATE_CON_RMII,
++                  port ? GMAC1_GATE_RMII : GMAC0_GATE_RMII, true);
++  rk3576_clk_gate(port ? GMAC1_GATE_PTP_CON : GMAC0_GATE_PTP_CON,
++                  port ? GMAC1_GATE_PTP : GMAC0_GATE_PTP, true);
++
++  /* ★ 设 125M 分频。只开门控不设分频，输出不是 125MHz。 */
++
++  if (port == 0)
++    {
++      rk3576_clk_setmux(GMAC0_CLKSEL_125M_CON, GMAC0_CLKSEL_125M_SHIFT,
++                        GMAC0_CLKSEL_125M_WIDTH, GMAC_125M_DIV_VALUE);
++      syslog(LOG_INFO, "GMAC0: 125M 分频 CLKSEL_CON(%d)[%d:%d]=%u（回读 %u）\n",
++             GMAC0_CLKSEL_125M_CON,
++             GMAC0_CLKSEL_125M_SHIFT + GMAC0_CLKSEL_125M_WIDTH - 1,
++             GMAC0_CLKSEL_125M_SHIFT, GMAC_125M_DIV_VALUE,
++             rk3576_clk_getmux(GMAC0_CLKSEL_125M_CON,
++                               GMAC0_CLKSEL_125M_SHIFT,
++                               GMAC0_CLKSEL_125M_WIDTH));
++    }
++
++  /* ★ 引脚复用。必须在 GRF 与复位之前 —— 时钟线没接出去时，
++   * 后面无论怎么配都收不到 RX 时钟。
++   */
++
++  if (port == 0)
++    {
++      int i;
++
++      for (i = 0; i < sizeof(g_gmac0_pins); i++)
++        {
++          rk3576_pinmux_set(GMAC0_PIN_BANK, g_gmac0_pins[i],
++                            GMAC0_PIN_FUNC);
++        }
++
++      syslog(LOG_INFO,
++             "GMAC0: 复用 14 脚 bank%d 功能%d（抽查 rxclk g%d-25→%d）\n",
++             GMAC0_PIN_BANK, GMAC0_PIN_FUNC, GMAC0_PIN_BANK,
++             rk3576_pinmux_get(GMAC0_PIN_BANK, 25));
++    }
++
++  /* ★ GRF：选 RGMII 模式并接通时钟。
++   *
++   *   这一步不做的话，MAC 侧拿不到有效的 TX/RX 时钟，DMA 软复位
++   *   永远完不成 —— 而寄存器读写、MAC_VERSION、HW_FEATURE 全都正常，
++   *   现象与"功能时钟没开"、"模块复位没撤"、"PHY 被摁着"完全一致。
++   *   本端口在这四者之间逐个排除了四轮。
++   */
++
++    {
++      uint32_t grf_off = port ? GRF_GMAC_CON1 : GRF_GMAC_CON0;
++      uint32_t val;
++
++      /* 清 RMII_MODE 选 RGMII；io_clksel 用 CRU 出时钟；
++       * gmii_clk_sel 按千兆选 DIV1_125M。
++       *
++       * ★ 该字段是按速率选 TX 时钟分频的，不能一律清零 ——
++       *   出处：dwmac-rk.c 的 rk_gmac_rgmii_clk_div()
++       *     SPEED_1000 → GMAC_CLK_DIV1_125M
++       *     SPEED_100  → GMAC_CLK_DIV5_25M
++       *     SPEED_10   → GMAC_CLK_DIV50_2_5M
++       */
++
++      val = ((GRF_RMII_MODE | GRF_IO_CLKSEL_IO | GRF_GMII_CLK_SEL_MASK) << 16)
++            | (GMAC_CLK_DIV1_125M << 5);
++      putreg32(val, SDGMAC_GRF_ADDR + grf_off);
++
++      syslog(LOG_INFO, "GMAC%d: GRF[0x%02" PRIx32 "]=0x%08" PRIx32 "\n",
++             port, grf_off, getreg32(SDGMAC_GRF_ADDR + grf_off));
++    }
++
++  up_udelay(100);
++
++  /* ★ 撤销模块复位。
++   *
++   *   引导器没用过 GMAC，其复位仍是置位状态。此时寄存器读写正常、
++   *   MAC_VERSION 也读得到，但状态机不工作 —— 表现为 DMA 软复位的
++   *   自清位永远不归零，与"功能时钟没开"完全一样。
++   *   本端口实测：补齐四路时钟后仍超时，撤销复位才通。
++   */
++
++  rk3576_reset(port ? SRST_A_GMAC1 : SRST_A_GMAC0, false);
++  rk3576_reset(port ? SRST_P_GMAC1 : SRST_P_GMAC0, false);
++  up_udelay(100);
+ 
+   /* 第一层判据：IP 版本。只能证明寄存器块活着。 */
+ 
+@@ -201,7 +443,45 @@ int rk3576_gmac_probe(int port)
+ 
+   /* DMA 软复位。自清位，要等它归零；不等就配 MDIO 会被复位冲掉。 */
+ 
++  /* ★ 结构性问题先于细节：DMA 寄存器块本身能写吗？
++   *
++   *   前几轮都假定"SWR 卡住 = 缺某个前置条件"，却从未验证过 DMA 块
++   *   是否可写。用一个纯数据寄存器（TXDESC 环长度，无副作用）做
++   *   写回读：
++   *     能写 → DMA 块活着，SWR 卡住是真的缺前置条件
++   *     不能写 → 整块处于复位/无时钟，再补前置条件也没用
++   */
++
++    {
++      uint32_t rl_before = gmac_getreg(port, RK3576_GMAC_DMA_CH0_TXDESC_RL);
++      uint32_t rl_back;
++
++      gmac_putreg(port, RK3576_GMAC_DMA_CH0_TXDESC_RL, 0x0000003f);
++      rl_back = gmac_getreg(port, RK3576_GMAC_DMA_CH0_TXDESC_RL);
++
++      syslog(LOG_INFO,
++             "GMAC%d: DMA 块写测试 TXDESC_RL 原值=0x%08" PRIx32
++             " 写 0x3f 读回=0x%08" PRIx32 " → %s\n",
++             port, rl_before, rl_back,
++             (rl_back & 0x3f) == 0x3f ? "可写" : "★不可写（整块无时钟/在复位）");
++
++      /* MAC 块对照：MAC_ADDR0_HIGH 同样是纯数据寄存器 */
++
++      gmac_putreg(port, RK3576_GMAC_MAC_ADDR0_HIGH, 0x00001234);
++      syslog(LOG_INFO,
++             "GMAC%d: MAC 块写测试 ADDR0_HIGH 写 0x1234 读回=0x%08" PRIx32
++             "\n", port,
++             gmac_getreg(port, RK3576_GMAC_MAC_ADDR0_HIGH) & 0xffff);
++    }
++
++  syslog(LOG_INFO,
++         "GMAC%d: 复位前 DMA_MODE=0x%08" PRIx32 " MAC_VERSION=0x%08" PRIx32
++         "\n", port, gmac_getreg(port, RK3576_GMAC_DMA_MODE), version);
++
+   gmac_putreg(port, RK3576_GMAC_DMA_MODE, GMAC_DMA_MODE_SWR);
++
++  syslog(LOG_INFO, "GMAC%d: 写 SWR 后立刻回读 DMA_MODE=0x%08" PRIx32 "\n",
++         port, gmac_getreg(port, RK3576_GMAC_DMA_MODE));
+   for (us = 0; us < 100000; us++)
+     {
+       if ((gmac_getreg(port, RK3576_GMAC_DMA_MODE) &
+@@ -215,7 +495,16 @@ int rk3576_gmac_probe(int port)
+ 
+   if (us >= 100000)
+     {
+-      syslog(LOG_ERR, "GMAC%d: DMA 软复位超时\n", port);
++      syslog(LOG_ERR,
++             "GMAC%d: DMA 软复位超时 DMA_MODE=0x%08" PRIx32
++             " SYSBUS=0x%08" PRIx32 " MAC_CFG=0x%08" PRIx32
++             " HW_FEAT0=0x%08" PRIx32 " CH0_STAT=0x%08" PRIx32 "\n",
++             port,
++             gmac_getreg(port, RK3576_GMAC_DMA_MODE),
++             gmac_getreg(port, RK3576_GMAC_DMA_SYSBUS_MODE),
++             gmac_getreg(port, RK3576_GMAC_MAC_CONFIG),
++             gmac_getreg(port, RK3576_GMAC_MAC_HW_FEATURE0),
++             gmac_getreg(port, RK3576_GMAC_DMA_CH0_STATUS));
+       return -ETIMEDOUT;
+     }
+ 
+diff --git a/arch/arm64/src/rk3576/rk3576_gmac.h b/arch/arm64/src/rk3576/rk3576_gmac.h
+index 92991a43..aa2918ec 100644
+--- a/arch/arm64/src/rk3576/rk3576_gmac.h
++++ b/arch/arm64/src/rk3576/rk3576_gmac.h
+@@ -24,6 +24,7 @@
+ #define __ARCH_ARM64_SRC_RK3576_RK3576_GMAC_H
+ 
+ #include <nuttx/config.h>
++#include <stdbool.h>
+ #include <stdint.h>
+ 
+ /****************************************************************************
+@@ -47,6 +48,27 @@
+  *
+  ****************************************************************************/
+ 
++/****************************************************************************
++ * Name: rk3576_gmac_phy_reset
++ *
++ * Description:
++ *   释放 PHY 的硬件复位。必须在 rk3576_gmac_probe() 之前调用。
++ *
++ *   ★ DWMAC 的 DMA 软复位需要**所有时钟域**都已就绪，其中包括来自
++ *     PHY 的接收时钟（Synopsys 手册明确要求）。PHY 被摁在复位里时
++ *     不出时钟，SWR 位就永远不自清 —— 表现为"DMA 软复位超时"，
++ *     而寄存器读写一切正常，极易误判成 SoC 侧的时钟或复位问题。
++ *
++ *   复位脚在板级，因此由板级代码调用本接口传入。
++ *
++ * Input Parameters:
++ *   bank, pin  - 复位脚
++ *   active_low - true 表示低电平有效
++ *
++ ****************************************************************************/
++
++void rk3576_gmac_phy_reset(int bank, int pin, bool active_low);
++
+ int rk3576_gmac_probe(int port);
+ 
+ #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_GMAC_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_power.c b/arch/arm64/src/rk3576/rk3576_power.c
+index 6f8e5f23..5afaf918 100644
+--- a/arch/arm64/src/rk3576/rk3576_power.c
++++ b/arch/arm64/src/rk3576/rk3576_power.c
+@@ -119,6 +119,12 @@ static const struct rk3576_pd_info_s g_pd_info[] =
+ 
+     "nvm",   1u << 6,  1u << 6,  0x4, 1u << 2,  1u << 18, 1u << 2
+   },
++  [RK3576_PD_SDGMAC] =
++  {
++    /* DOMAIN_RK3576("sdgmac", 0x0, BIT(7), 0, BIT(7), 0x4, BIT(1), BIT(17), 0x6) */
++
++    "sdgmac", 1u << 7, 1u << 7, 0x4, 1u << 1,  1u << 17, 0x6
++  },
+   [RK3576_PD_AUDIO] =
+   {
+     /* DOMAIN_RK3576("audio", 0x0, BIT(8), 0, BIT(8), 0x4, BIT(0), BIT(16), BIT(0)) */
+-- 
+2.43.0
+
+
+From 51d98edc4f4ae78ed5d33d08d8b5fdf85719c59b Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Tue, 1 Sep 2026 23:24:18 +0800
+Subject: [PATCH 20/21] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
+ =?UTF-8?q?=E5=88=B0=E4=B8=83=E6=9D=A1=E6=80=BB=E7=BA=BF=EF=BC=88=E8=A7=A6?=
+ =?UTF-8?q?=E6=91=B8=E5=AE=9A=E4=BD=8D=E7=94=A8=EF=BC=89?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+新增 I2C4/5/6/7/8/9 的配置（时钟门控、选源、引脚复用），参数均取自
+clk-rk3576.c 与原厂 dtb。
+
+用途是定位触摸控制器：屏物理接上后，I2C1~I2C9 全部扫描均未发现
+GT9xx（0x5d 或 0x14）。结论与后续方向见 board 侧 kickpi_k7_touch.c
+的文件头说明。
+---
+ arch/arm64/src/rk3576/rk3576_i2c.c | 65 ++++++++++++++++++++++++++++++
+ 1 file changed, 65 insertions(+)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_i2c.c b/arch/arm64/src/rk3576/rk3576_i2c.c
+index f57a2bfa..43f2313e 100644
+--- a/arch/arm64/src/rk3576/rk3576_i2c.c
++++ b/arch/arm64/src/rk3576/rk3576_i2c.c
+@@ -212,6 +212,65 @@ static const struct rk3576_i2c_config_s g_i2c_config[] =
+     .scl_bank = 4, .scl_pin = 13, .sda_bank = 4, .sda_pin = 12,
+     .pin_func = 11,
+   },
++  /* I2C4/5/7/8 —— 加入是为了找触摸控制器。
++   *
++   * 屏接上后扫描 I2C1/2/3 均未发现 GT9xx（0x5d 或 0x14），说明触摸
++   * 挂在别的总线上。原厂 dtb 里这四条状态为 okay，逐条扫排除。
++   *
++   * 时钟位延续同一规律（clk-rk3576.c）：
++   *   PCLK_I2Cn = CLKGATE_CON(12) 的 bit (n-1)
++   *   CLK_I2C1..4 = CON(12) bit 12..15；CLK_I2C5..9 = CON(13) bit 0..4
++   *   选源 CLKSEL_CON(57) 的 bit[2n-1:2n-2]，I2C9 在 CON(58)
++   * 引脚取自原厂 dtb 的 i2cNmX-xfer。
++   */
++
++  {
++    .port = 4, .base = RK3576_I2C4_ADDR,
++    .gate_con = 12, .gate_pclk = 3, .gate_clk = 15,
++    .sel_con = 57, .sel_shift = 6,
++    .scl_bank = 3, .scl_pin = 16, .sda_bank = 3, .sda_pin = 15,
++    .pin_func = 11,
++  },
++  {
++    .port = 5, .base = RK3576_I2C5_ADDR,
++    .gate_con = 13, .gate_pclk = 4, .gate_clk = 0,
++    .sel_con = 57, .sel_shift = 8,
++    .scl_bank = 3, .scl_pin = 20, .sda_bank = 3, .sda_pin = 17,
++    .pin_func = 11,
++  },
++  {
++    .port = 7, .base = RK3576_I2C7_ADDR,
++    .gate_con = 13, .gate_pclk = 6, .gate_clk = 2,
++    .sel_con = 57, .sel_shift = 12,
++    .scl_bank = 3, .scl_pin = 0, .sda_bank = 3, .sda_pin = 1,
++    .pin_func = 11,
++  },
++  /* I2C6/I2C9 —— 原厂 dtb 里状态为 disabled，但触摸所在的总线本就
++   * 应由 LCD overlay 启用，因此 disabled 不代表物理上没有器件。
++   * 加入继续排除。（I2C0 在 PMU 域，时钟基址不同，暂不加。）
++   */
++
++  {
++    .port = 6, .base = RK3576_I2C6_ADDR,
++    .gate_con = 13, .gate_pclk = 5, .gate_clk = 1,
++    .sel_con = 57, .sel_shift = 10,
++    .scl_bank = 0, .scl_pin = 2, .sda_bank = 0, .sda_pin = 5,
++    .pin_func = 11,
++  },
++  {
++    .port = 9, .base = RK3576_I2C9_ADDR,
++    .gate_con = 13, .gate_pclk = 8, .gate_clk = 4,
++    .sel_con = 58, .sel_shift = 0,
++    .scl_bank = 1, .scl_pin = 5, .sda_bank = 1, .sda_pin = 6,
++    .pin_func = 10,
++  },
++  {
++    .port = 8, .base = RK3576_I2C8_ADDR,
++    .gate_con = 13, .gate_pclk = 7, .gate_clk = 3,
++    .sel_con = 57, .sel_shift = 14,
++    .scl_bank = 2, .scl_pin = 14, .sda_bank = 2, .sda_pin = 15,
++    .pin_func = 11,
++  },
+ };
+ 
+ #define RK3576_I2C_NBUSES (sizeof(g_i2c_config) / sizeof(g_i2c_config[0]))
+@@ -221,6 +280,12 @@ static struct rk3576_i2c_priv_s g_i2c_priv[RK3576_I2C_NBUSES] =
+   { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
+   { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
+   { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
++  { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
++  { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
++  { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
++  { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
++  { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
++  { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
+ };
+ 
+ 
+-- 
+2.43.0
+
+
+From 7a968bf8c6c3d85daf2dc81619a2800cf4bf89c4 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Wed, 2 Sep 2026 11:12:37 +0800
+Subject: [PATCH 21/21] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
+ =?UTF-8?q?=E8=B7=AF=E4=BF=AE=E6=AD=A3=20+=20I2C0(PMU=20=E5=9F=9F)=20+=20?=
+ =?UTF-8?q?=E5=BC=95=E8=84=9A=E4=B8=8A=E4=B8=8B=E6=8B=89=20API?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+显示：
+- VOP2 显式配置 SYS_CTRL_MIPI0_INFACE_CTRL，把 MIPI 接口接到 VP0。
+  引导器留下的 port_sel=01 指向 VP1，导致像素送不进 DSI。
+- 新增 rk3576_vop2_check_scanning()，用帧起始中断原始状态判断 VP
+  是否真的在扫描，而非只看寄存器写回。
+- DSI2 模式枚举修正为 IDLE/AUTOCALC/COMMAND/VIDEO=0/1/2/3。
+- DSI2 补齐视频时序：水平方向换算到 PHY 高速时钟域的定点时间、
+  垂直方向补 VBP/VACT/VFP、开 MANUAL_MODE、写 VID_TX_CFG 与
+  IPI_PIX_PKT_CFG、写 PHY_IPI_RATIO/PHY_SYS_RATIO/LP2HS/HS2LP。
+- DSI2 显式设置 CLK_DSIHOST0 的选源与分频（spll/3 = 234MHz）。
+- 切视频模式改为轮询 MODE_STATUS。
+
+I2C：
+- 新增 I2C0。它在 PMU 域，时钟归 PMU CRU（主 CRU + 0x20000）管，
+  为此新增 rk3576_pmu_clk_gate()/rk3576_pmu_clk_getmux()。
+  5 寸屏的触摸就挂在这条总线上。
+
+引脚：
+- 新增 rk3576_pinmux_setpull()。做外部上拉在位判断前必须关掉内部拉，
+  否则读数恒为 1，判据无效。
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FBQkQQFX3kTDP3AzvLzDGx
+---
+ arch/arm64/src/rk3576/hardware/rk3576_dsi2.h |  41 +++-
+ arch/arm64/src/rk3576/hardware/rk3576_vop2.h |  36 +++
+ arch/arm64/src/rk3576/rk3576_cru.c           |  18 ++
+ arch/arm64/src/rk3576/rk3576_cru.h           |  29 +++
+ arch/arm64/src/rk3576/rk3576_dsi2.c          | 238 +++++++++++++++++--
+ arch/arm64/src/rk3576/rk3576_dsi2.h          |   2 +-
+ arch/arm64/src/rk3576/rk3576_i2c.c           |  53 ++++-
+ arch/arm64/src/rk3576/rk3576_pinmux.c        |  62 +++++
+ arch/arm64/src/rk3576/rk3576_pinmux.h        |  18 ++
+ arch/arm64/src/rk3576/rk3576_vop2.c          |  78 ++++++
+ arch/arm64/src/rk3576/rk3576_vop2.h          |  11 +
+ 11 files changed, 563 insertions(+), 23 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_dsi2.h b/arch/arm64/src/rk3576/hardware/rk3576_dsi2.h
+index 94331013..3c41d2b6 100644
+--- a/arch/arm64/src/rk3576/hardware/rk3576_dsi2.h
++++ b/arch/arm64/src/rk3576/hardware/rk3576_dsi2.h
+@@ -64,6 +64,32 @@
+ #define RK3576_DSI2_IPI_VID_HACT_MAN_CFG  0x0314
+ #define RK3576_DSI2_IPI_VID_HLINE_MAN_CFG 0x031c
+ #define RK3576_DSI2_IPI_VID_VSA_MAN_CFG   0x0324
++#define RK3576_DSI2_IPI_VID_VBP_MAN_CFG   0x032c
++#define RK3576_DSI2_IPI_VID_VACT_MAN_CFG  0x0334
++#define RK3576_DSI2_IPI_VID_VFP_MAN_CFG   0x033c
++#define RK3576_DSI2_IPI_PIX_PKT_CFG       0x0344
++#define RK3576_DSI2_MANUAL_MODE_CFG       0x0024
++#define RK3576_DSI2_PHY_LP2HS_MAN_CFG     0x010c
++#define RK3576_DSI2_PHY_HS2LP_MAN_CFG     0x0114
++#define RK3576_DSI2_PHY_IPI_RATIO_MAN_CFG 0x0134
++#define RK3576_DSI2_PHY_SYS_RATIO_MAN_CFG 0x013c
++
++#define DSI2_MANUAL_MODE_EN               (1u << 0)
++
++/* DSI_VID_TX_CFG (0x020c) —— 视频模式类型与消隐段是否走高速 */
++
++#define DSI2_VID_MODE_NON_BURST_SYNC_PULSES 0
++#define DSI2_VID_MODE_NON_BURST_SYNC_EVENTS 1
++#define DSI2_VID_MODE_BURST                 2
++#define DSI2_BLK_HSA_HS_EN                (1u << 4)
++#define DSI2_BLK_HBP_HS_EN                (1u << 5)
++#define DSI2_BLK_HFP_HS_EN                (1u << 6)
++
++/* IPI_COLOR_MAN_CFG 的位域 */
++
++#define DSI2_IPI_DEPTH_8_BITS             5
++#define DSI2_IPI_DEPTH_SHIFT              4
++#define DSI2_IPI_FORMAT_RGB               0
+ #define RK3576_DSI2_IPI_PIX_PKT_CFG   0x0344
+ #define RK3576_DSI2_INT_ST_PHY        0x0400
+ #define RK3576_DSI2_INT_MASK_PHY      0x0404
+@@ -96,8 +122,19 @@
+ 
+ /* MODE_CTRL：0 = 命令模式，1 = 视频模式 */
+ 
+-#define DSI2_MODE_CMD                 0
+-#define DSI2_MODE_VIDEO               1
++/* MODE_CTRL / MODE_STATUS 的取值。
++ *
++ * ★ 出处 drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi2.c 的 enum mode_ctrl。
++ *   此前这里错写成 CMD=0、VIDEO=1 —— 那其实是 IDLE 和 AUTOCALC，
++ *   DSI 从来没进过视频模式。而 MODE_STATUS 读回 1 看着像"成功"，
++ *   实际是 AUTOCALC 的编号。枚举值一定要抄来源，不能按顺序猜。
++ */
++
++#define DSI2_MODE_IDLE                0
++#define DSI2_MODE_AUTOCALC            1
++#define DSI2_MODE_CMD                 2
++#define DSI2_MODE_VIDEO               3
++#define DSI2_MODE_DATA_STREAM         4
+ 
+ /* CORE_STATUS */
+ 
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_vop2.h b/arch/arm64/src/rk3576/hardware/rk3576_vop2.h
+index ec46e529..7684105e 100644
+--- a/arch/arm64/src/rk3576/hardware/rk3576_vop2.h
++++ b/arch/arm64/src/rk3576/hardware/rk3576_vop2.h
+@@ -50,6 +50,27 @@
+ #define RK3576_VOP2_SYS_MMU_CTRL_IMD 0x0020
+ #define RK3576_VOP2_SYS_PORT_CTRL_IMD 0x0028
+ #define RK3576_VOP2_MIPI0_IF_CTRL    0x0180  /* ★ RK3576 专属       */
++
++/* SYS_CTRL_MIPI0_INFACE_CTRL 的字段（TRM Part2 第 11 章，复位值 0x80000030）
++ *
++ * ★ 其中 mipi_port_sel 决定 MIPI 接口从哪个视频端口取像素。引导器留下的
++ *   值是 0x80100037 —— port_sel = 01 = VP1。若驱动在 VP0 上出图，两边
++ *   对不上，VP0 扫描一切正常但像素进不了 DSI，现象就是背光亮、无显示。
++ *   这个寄存器必须显式写，不能沿用引导器的。
++ */
++
++#define RK3576_MIPI_IF_REGDONE_IMD   (1u << 31)
++#define RK3576_MIPI_IF_DCLK_OUT      (1u << 21)  /* 0=Dclk core 1=Dclk out */
++#define RK3576_MIPI_IF_PIXCLK_DIV4   (1u << 20)  /* 0=Div2 1=Div4          */
++#define RK3576_MIPI_IF_CMD_MODE      (1u << 11)  /* 0=视频模式 1=命令模式  */
++#define RK3576_MIPI_IF_DATA1_SEL     (1u << 9)
++#define RK3576_MIPI_IF_SPLIT_EN      (1u << 8)
++#define RK3576_MIPI_IF_VSYNC_POS     (1u << 5)
++#define RK3576_MIPI_IF_HSYNC_POS     (1u << 4)
++#define RK3576_MIPI_IF_PORT_SEL_SHIFT 2          /* 00=VP0 01=VP1 1x=VP2   */
++#define RK3576_MIPI_IF_PORT_SEL_MASK (3u << 2)
++#define RK3576_MIPI_IF_CLK_OUT_EN    (1u << 1)
++#define RK3576_MIPI_IF_OUT_EN        (1u << 0)
+ #define RK3576_VOP2_HDMI0_IF_CTRL    0x0184
+ #define RK3576_VOP2_EDP0_IF_CTRL     0x0188
+ #define RK3576_VOP2_DP0_IF_CTRL      0x018c
+@@ -58,6 +79,21 @@
+ 
+ /* 视频端口。VP0 支持到 4096x2304，接 MIPI DSI 足够。 */
+ 
++/* 视频端口的中断寄存器在全局空间，不在 VPn_BASE 内。
++ * 偏移沿用 RK3568 的排布（drivers/gpu/drm/rockchip/rockchip_drm_vop2.h）。
++ * 用途不是接中断，而是做"VP 到底有没有在扫描"的判据：清掉原始状态，
++ * 等一帧以上再读，帧起始位置起来才说明像素真的在往外送。
++ */
++
++#define RK3576_VOP2_VP_INT_EN(vp)    (0x00a0 + (vp) * 0x10)
++#define RK3576_VOP2_VP_INT_CLR(vp)   (0x00a4 + (vp) * 0x10)
++#define RK3576_VOP2_VP_INT_STATUS(vp) (0x00a8 + (vp) * 0x10)
++#define RK3576_VOP2_VP_INT_RAW(vp)   (0x00ac + (vp) * 0x10)
++
++#define RK3576_VP_INT_FS             (1u << 0)   /* 帧起始           */
++#define RK3576_VP_INT_FS_FIELD       (1u << 5)   /* 场起始           */
++#define RK3576_VP_INT_POST_BUF_EMPTY (1u << 4)   /* 后级缓冲欠载     */
++
+ #define RK3576_VOP2_VP0_BASE         0x0c00
+ #define RK3576_VOP2_VP1_BASE         0x0d00
+ #define RK3576_VOP2_VP2_BASE         0x0e00
+diff --git a/arch/arm64/src/rk3576/rk3576_cru.c b/arch/arm64/src/rk3576/rk3576_cru.c
+index 3e373650..940de607 100644
+--- a/arch/arm64/src/rk3576/rk3576_cru.c
++++ b/arch/arm64/src/rk3576/rk3576_cru.c
+@@ -97,3 +97,21 @@ unsigned int rk3576_clk_getmux(unsigned int con, unsigned int shift,
+   regval = getreg32(RK3576_CRU_ADDR + RK3576_CRU_CLKSEL_CON(con));
+   return (regval >> shift) & mask;
+ }
++
++void rk3576_pmu_clk_gate(unsigned int con, unsigned int bit, bool enable)
++{
++  uint32_t regval;
++
++  regval = (1u << (bit + 16)) | ((enable ? 0u : 1u) << bit);
++  putreg32(regval, RK3576_CRU_ADDR + RK3576_PMUCRU_CLKGATE_CON(con));
++}
++
++unsigned int rk3576_pmu_clk_getmux(unsigned int con, unsigned int shift,
++                                   unsigned int width)
++{
++  uint32_t mask = (1u << width) - 1;
++  uint32_t regval;
++
++  regval = getreg32(RK3576_CRU_ADDR + RK3576_PMUCRU_CLKSEL_CON(con));
++  return (regval >> shift) & mask;
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_cru.h b/arch/arm64/src/rk3576/rk3576_cru.h
+index ac06fec8..c4b31900 100644
+--- a/arch/arm64/src/rk3576/rk3576_cru.h
++++ b/arch/arm64/src/rk3576/rk3576_cru.h
+@@ -46,6 +46,21 @@
+ #define RK3576_CRU_CLKGATE_CON(x)  ((x) * 4 + 0x800)
+ #define RK3576_CRU_SOFTRST_CON(x)  ((x) * 4 + 0xa00)
+ 
++/* PMU 域（常开域）另有一套 CRU，寄存器排布与主 CRU 相同，只是整体
++ * 偏移 0x20000。I2C0、UART1 这类常开外设的门控在这里，用主 CRU 的
++ * 偏移去开会写到别的寄存器上，静默无效。
++ *
++ *   drivers/clk/rockchip/clk.h:
++ *     #define RK3576_PMU_CRU_BASE       0x20000
++ *     #define RK3576_PMU_CLKSEL_CON(x)  ((x)*0x4 + RK3576_PMU_CRU_BASE + 0x300)
++ *     #define RK3576_PMU_CLKGATE_CON(x) ((x)*0x4 + RK3576_PMU_CRU_BASE + 0x800)
++ */
++
++#define RK3576_PMUCRU_OFFSET         0x20000
++#define RK3576_PMUCRU_CLKSEL_CON(x)  ((x) * 4 + RK3576_PMUCRU_OFFSET + 0x300)
++#define RK3576_PMUCRU_CLKGATE_CON(x) ((x) * 4 + RK3576_PMUCRU_OFFSET + 0x800)
++#define RK3576_PMUCRU_SOFTRST_CON(x) ((x) * 4 + RK3576_PMUCRU_OFFSET + 0xa00)
++
+ /* CLK_I2Cn 的时钟源选择（mux_200m_100m_50m_24m_p） */
+ 
+ #define RK3576_CLKSEL_I2C_200M     0
+@@ -112,6 +127,20 @@ void rk3576_clk_setmux(unsigned int con, unsigned int shift,
+ unsigned int rk3576_clk_getmux(unsigned int con, unsigned int shift,
+                                unsigned int width);
+ 
++/****************************************************************************
++ * Name: rk3576_pmu_clk_gate / rk3576_pmu_clk_getmux
++ *
++ * Description:
++ *   同名函数的 PMU 域版本，con 取 clk-rk3576.c 里
++ *   RK3576_PMU_CLKGATE_CON(n) / RK3576_PMU_CLKSEL_CON(n) 的 n。
++ *
++ ****************************************************************************/
++
++void rk3576_pmu_clk_gate(unsigned int con, unsigned int bit, bool enable);
++
++unsigned int rk3576_pmu_clk_getmux(unsigned int con, unsigned int shift,
++                                   unsigned int width);
++
+ /****************************************************************************
+  * Name: rk3576_reset
+  *
+diff --git a/arch/arm64/src/rk3576/rk3576_dsi2.c b/arch/arm64/src/rk3576/rk3576_dsi2.c
+index dce17eb2..11d22f2c 100644
+--- a/arch/arm64/src/rk3576/rk3576_dsi2.c
++++ b/arch/arm64/src/rk3576/rk3576_dsi2.c
+@@ -74,6 +74,22 @@
+  *   COMPOSITE(CLK_DSIHOST0, ... CLKGATE_CON(64), 6)
+  */
+ 
++/* CLK_DSIHOST0 的选源与分频（clk-rk3576.c）：
++ *   COMPOSITE(CLK_DSIHOST0, "clk_dsihost0",
++ *             gpll_cpll_spll_vpll_bpll_lpll_p,
++ *             RK3576_CLKSEL_CON(151), 7, 3, MFLAGS,   选源 bit[9:7]
++ *                                     0, 7, DFLAGS,   分频 bit[6:0]
++ *             RK3576_CLKGATE_CON(64), 6, GFLAGS)
++ * 父时钟表索引 2 = spll，固定 702MHz（rk3576.dtsi 的 clock-spll）。
++ */
++
++#define DSI_SEL_CON        151
++#define DSI_SEL_MUX_SHIFT  7
++#define DSI_SEL_MUX_SPLL   2
++#define DSI_SPLL_HZ        702000000u
++#define DSI_SYS_CLK_DIV    3
++#define DSI_SYS_CLK_HZ     (DSI_SPLL_HZ / DSI_SYS_CLK_DIV)
++
+ #define DSI_GATE_CON    64
+ #define DSI_GATE_PCLK   5
+ #define DSI_GATE_CLK    6
+@@ -140,6 +156,35 @@ int rk3576_dsi2_probe(void)
+   rk3576_clk_gate(DSI_GATE_CON, DSI_GATE_PCLK, true);
+   rk3576_clk_gate(DSI_GATE_CON, DSI_GATE_CLK, true);
+ 
++  /* ★ CLK_DSIHOST0 是带分频器的 COMPOSITE，不是单纯的门控：
++   *     COMPOSITE(CLK_DSIHOST0, ... gpll_cpll_spll_vpll_bpll_lpll_p,
++   *               RK3576_CLKSEL_CON(151), 7, 3, MFLAGS,  <- 选源
++   *                                       0, 7, DFLAGS,  <- 分频
++   *               RK3576_CLKGATE_CON(64), 6, GFLAGS)
++   *
++   * 只开门控、不管选源与分频，是本端口在别的外设上已经踩过的坑。
++   * 这条时钟同时是 DSI 的 sys_clk —— PHY_SYS_RATIO 要用它的真实频率。
++   * 这里先把当前值读出来，有了实测再谈配置，不猜。
++   */
++
++  /* 明确设成 spll(702MHz) / 3 = 234MHz。实测引导器留下的正是这个值，
++   * 但写死一遍才能保证 PHY_SYS_RATIO 用的频率与实际一致 —— 依赖
++   * 引导器留下的配置，等于把一个不受控的量代进了公式。
++   */
++
++  rk3576_clk_setmux(DSI_SEL_CON, DSI_SEL_MUX_SHIFT, 3, DSI_SEL_MUX_SPLL);
++  rk3576_clk_setmux(DSI_SEL_CON, 0, 7, DSI_SYS_CLK_DIV - 1);
++
++  {
++    uint32_t sel = getreg32(RK3576_CRU_ADDR + RK3576_CRU_CLKSEL_CON(151));
++
++    syslog(LOG_INFO,
++           "DSI2: CLKSEL_CON(151)=0x%08" PRIx32 " 选源=%" PRIu32
++           " 分频=%" PRIu32 " -> sys_clk=%" PRIu32 "Hz\n",
++           sel, (sel >> 7) & 0x7, (sel & 0x7f) + 1,
++           (uint32_t)DSI_SYS_CLK_HZ);
++  }
++
+   /* 自检：DSI2 没有版本寄存器，改用"写一个可写位再读回"。
+    * SOFT_RESET 的三个复位位可读可写，适合做这个判断。
+    */
+@@ -170,9 +215,10 @@ int rk3576_dsi2_probe(void)
+   return OK;
+ }
+ 
+-int rk3576_dsi2_configure(const struct rk3576_vop2_timing_s *t, int lanes)
++int rk3576_dsi2_configure(const struct rk3576_vop2_timing_s *t, int lanes,
++                          uint32_t lane_mbps)
+ {
+-  if (t == NULL || lanes < 1 || lanes > 4)
++  if (t == NULL || lanes < 1 || lanes > 4 || lane_mbps == 0)
+     {
+       return -EINVAL;
+     }
+@@ -193,18 +239,125 @@ int rk3576_dsi2_configure(const struct rk3576_vop2_timing_s *t, int lanes)
+   dsi_putreg(RK3576_DSI2_PHY_CLK_CFG,
+              DSI2_CONTINUOUS_CLK | DSI2_PHY_LPTX_CLK_DIV(8));
+ 
+-  /* 视频时序送给 IPI（像素接口）。单位是像素。 */
++  /* 手动时序模式。名字带 _MAN_ 的那批寄存器只有在这个模式下才生效，
++   * 不开的话下面写的时序全部被忽略。
++   */
++
++  dsi_putreg(RK3576_DSI2_MANUAL_MODE_CFG, DSI2_MANUAL_MODE_EN);
++
++  /* 每包最大像素数 = 一行的有效像素 */
+ 
+-  dsi_putreg(RK3576_DSI2_IPI_VID_HSA_MAN_CFG, t->hsync_len);
+-  dsi_putreg(RK3576_DSI2_IPI_VID_HBP_MAN_CFG, t->hback_porch);
+-  dsi_putreg(RK3576_DSI2_IPI_VID_HACT_MAN_CFG, t->hactive);
+-  dsi_putreg(RK3576_DSI2_IPI_VID_HLINE_MAN_CFG,
+-             t->hactive + t->hfront_porch + t->hsync_len + t->hback_porch);
+-  dsi_putreg(RK3576_DSI2_IPI_VID_VSA_MAN_CFG, t->vsync_len);
++  dsi_putreg(RK3576_DSI2_IPI_PIX_PKT_CFG, t->hactive & 0xffff);
+ 
+   /* 像素格式 RGB888 = 每分量 8 位 */
+ 
+-  dsi_putreg(RK3576_DSI2_IPI_COLOR_MAN_CFG, (5 << 4) | 0);
++  dsi_putreg(RK3576_DSI2_IPI_COLOR_MAN_CFG,
++             (DSI2_IPI_DEPTH_8_BITS << DSI2_IPI_DEPTH_SHIFT) |
++             DSI2_IPI_FORMAT_RGB);
++
++  /* ★ 水平时序的单位不是像素，是 PHY 高速时钟域的时间（16 位定点）。
++   *
++   *   phy_hs_clk = lane_mbps * 1e6 / 16
++   *   H*_TIME    = H* 像素数 * phy_hs_clk * 65536 / pixel_clk
++   *
++   * 出处 drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi2.c 的
++   * dw_mipi_dsi2_ipi_set()。此前这里直接写了像素数 —— 数值差了几个
++   * 数量级，DSI 拼不出合法的视频包，现象就是背光亮、无图像。
++   *
++   * 用 64 位算：hline(828) * phy_hs_clk(24.375e6) << 16 会溢出 32 位。
++   */
++
++  {
++    uint64_t phy_hs_clk = ((uint64_t)lane_mbps * 1000000ull + 8) / 16;
++    uint64_t pixel_clk  = t->pixclk_hz;
++    uint32_t hline      = t->hactive + t->hfront_porch +
++                          t->hsync_len + t->hback_porch;
++
++    dsi_putreg(RK3576_DSI2_IPI_VID_HSA_MAN_CFG,
++               (uint32_t)(((uint64_t)t->hsync_len * phy_hs_clk << 16) /
++                          pixel_clk) & 0x3fffffff);
++    dsi_putreg(RK3576_DSI2_IPI_VID_HBP_MAN_CFG,
++               (uint32_t)(((uint64_t)t->hback_porch * phy_hs_clk << 16) /
++                          pixel_clk) & 0x3fffffff);
++    dsi_putreg(RK3576_DSI2_IPI_VID_HACT_MAN_CFG,
++               (uint32_t)(((uint64_t)t->hactive * phy_hs_clk << 16) /
++                          pixel_clk) & 0x3fffffff);
++    dsi_putreg(RK3576_DSI2_IPI_VID_HLINE_MAN_CFG,
++               (uint32_t)(((uint64_t)hline * phy_hs_clk << 16) /
++                          pixel_clk) & 0x3fffffff);
++  }
++
++  /* 垂直时序的单位是行，直接写。
++   * ★ 此前只写了 VSA，缺 VBP/VACT/VFP —— DSI 不知道一帧有多少行。
++   */
++
++  dsi_putreg(RK3576_DSI2_IPI_VID_VSA_MAN_CFG,  t->vsync_len   & 0x3ff);
++  dsi_putreg(RK3576_DSI2_IPI_VID_VBP_MAN_CFG,  t->vback_porch & 0x3ff);
++  dsi_putreg(RK3576_DSI2_IPI_VID_VACT_MAN_CFG, t->vactive     & 0x3fff);
++  dsi_putreg(RK3576_DSI2_IPI_VID_VFP_MAN_CFG,  t->vfront_porch & 0x3ff);
++
++  /* ★ 三个时钟域的比值。此前完全没写过。
++   *
++   * DSI 内部有三个时钟域：PHY 高速发送时钟、IPI 像素时钟、系统时钟。
++   * 这两个寄存器告诉控制器它们的比值（16 位定点），控制器据此把进来的
++   * 像素流与出去的高速通道对齐速率。缺了它们，其余配置全对也出不来
++   * 有效画面 —— 与"背光亮、VP 在扫描、DSI 已进视频模式却仍无显示"
++   * 的现象完全吻合。
++   *
++   *   PHY_IPI_RATIO = phy_hs_clk / (pixel_clk / 4) << 16
++   *   PHY_SYS_RATIO = phy_hs_clk / sys_clk        << 16
++   *
++   * 出处 dw_mipi_dsi2_phy_ratio_cfg()。
++   */
++
++  {
++    uint64_t phy_hs_clk = ((uint64_t)lane_mbps * 1000000ull + 8) / 16;
++    uint64_t ipi_clk    = (uint64_t)t->pixclk_hz / 4;
++    uint32_t ipi_ratio;
++    uint32_t sys_ratio;
++
++    ipi_ratio = (uint32_t)((phy_hs_clk << 16) / ipi_clk) & 0x3fffff;
++    sys_ratio = (uint32_t)((phy_hs_clk << 16) / DSI_SYS_CLK_HZ) & 0x1ffff;
++
++    dsi_putreg(RK3576_DSI2_PHY_IPI_RATIO_MAN_CFG, ipi_ratio);
++    dsi_putreg(RK3576_DSI2_PHY_SYS_RATIO_MAN_CFG, sys_ratio);
++
++    /* LP<->HS 转换时间，单位同样是 PHY 高速时钟周期的 16 位定点。
++     * 括号里是 MIPI D-PHY 规范的默认参数（单位 ps，UI = 1e12/lane_bps）：
++     *   LP2HS = TLPX + THS_PREPARE + THS_ZERO
++     *         = 50000 + (40000 + 4*UI) + (105000 + 6*UI)
++     *   HS2LP = THS_TRAIL + THS_EXIT
++     *         = max(8*UI, 60000 + 4*UI) + 100000
++     */
++
++    {
++      uint64_t ui_ps   = 1000000000000ull / ((uint64_t)lane_mbps * 1000000ull);
++      uint64_t tick_ps = 1000000000000ull / phy_hs_clk;
++      uint64_t lp2hs   = 50000 + (40000 + 4 * ui_ps) + (105000 + 6 * ui_ps);
++      uint64_t trail   = 8 * ui_ps;
++      uint64_t hs2lp;
++
++      if (trail < 60000 + 4 * ui_ps)
++        {
++          trail = 60000 + 4 * ui_ps;
++        }
++
++      hs2lp = trail + 100000;
++
++      dsi_putreg(RK3576_DSI2_PHY_LP2HS_MAN_CFG,
++                 (uint32_t)((lp2hs << 16) / tick_ps) & 0x1fffffff);
++      dsi_putreg(RK3576_DSI2_PHY_HS2LP_MAN_CFG,
++                 (uint32_t)((hs2lp << 16) / tick_ps) & 0x1fffffff);
++    }
++  }
++
++  /* 视频模式类型。非突发 + 同步事件是最通用的一档；消隐段走高速
++   * （BLK_*_HS_EN）以避免每行都进出低功耗态。
++   */
++
++  dsi_putreg(RK3576_DSI2_DSI_VID_TX_CFG,
++             DSI2_VID_MODE_NON_BURST_SYNC_EVENTS |
++             DSI2_BLK_HSA_HS_EN | DSI2_BLK_HBP_HS_EN | DSI2_BLK_HFP_HS_EN);
+ 
+   /* 关掉 EOTP 与 BTA：面板 dtsi 的 flags 里带 NO_EOT_PACKET，
+    * 且初始化阶段不需要读回。
+@@ -219,8 +372,41 @@ int rk3576_dsi2_configure(const struct rk3576_vop2_timing_s *t, int lanes)
+ 
+   dsi_putreg(RK3576_DSI2_PWR_UP, DSI2_POWER_UP);
+ 
+-  syslog(LOG_INFO, "DSI2: 已配置 %ux%u %d lane，当前为命令模式\n",
+-         t->hactive, t->vactive, lanes);
++  syslog(LOG_INFO,
++         "DSI2: 已配置 %ux%u %d lane @%" PRIu32 "Mbps，当前为命令模式\n",
++         t->hactive, t->vactive, lanes, lane_mbps);
++
++  /* 回读这批时序寄存器。它们是本轮修正的重点，而且只在 MANUAL 模式下
++   * 生效 —— 回读为 0 就说明手动模式没开或写入被忽略，光看"写过了"
++   * 分辨不出来。
++   */
++
++  syslog(LOG_INFO,
++         "DSI2: 回读 MANUAL=%" PRIu32 " HSA=%" PRIu32 " HBP=%" PRIu32
++         " HACT=%" PRIu32 " HLINE=%" PRIu32 "\n",
++         dsi_getreg(RK3576_DSI2_MANUAL_MODE_CFG),
++         dsi_getreg(RK3576_DSI2_IPI_VID_HSA_MAN_CFG),
++         dsi_getreg(RK3576_DSI2_IPI_VID_HBP_MAN_CFG),
++         dsi_getreg(RK3576_DSI2_IPI_VID_HACT_MAN_CFG),
++         dsi_getreg(RK3576_DSI2_IPI_VID_HLINE_MAN_CFG));
++
++  syslog(LOG_INFO,
++         "DSI2: 回读 VSA=%" PRIu32 " VBP=%" PRIu32 " VACT=%" PRIu32
++         " VFP=%" PRIu32 " PIXPKT=%" PRIu32 " VIDTX=0x%08" PRIx32 "\n",
++         dsi_getreg(RK3576_DSI2_IPI_VID_VSA_MAN_CFG),
++         dsi_getreg(RK3576_DSI2_IPI_VID_VBP_MAN_CFG),
++         dsi_getreg(RK3576_DSI2_IPI_VID_VACT_MAN_CFG),
++         dsi_getreg(RK3576_DSI2_IPI_VID_VFP_MAN_CFG),
++         dsi_getreg(RK3576_DSI2_IPI_PIX_PKT_CFG),
++         dsi_getreg(RK3576_DSI2_DSI_VID_TX_CFG));
++
++  syslog(LOG_INFO,
++         "DSI2: 回读 IPI_RATIO=%" PRIu32 " SYS_RATIO=%" PRIu32
++         " LP2HS=%" PRIu32 " HS2LP=%" PRIu32 "\n",
++         dsi_getreg(RK3576_DSI2_PHY_IPI_RATIO_MAN_CFG),
++         dsi_getreg(RK3576_DSI2_PHY_SYS_RATIO_MAN_CFG),
++         dsi_getreg(RK3576_DSI2_PHY_LP2HS_MAN_CFG),
++         dsi_getreg(RK3576_DSI2_PHY_HS2LP_MAN_CFG));
+   return OK;
+ }
+ 
+@@ -279,12 +465,32 @@ int rk3576_dsi2_send_cmd(uint8_t dtype, const uint8_t *data, size_t len)
+ 
+ int rk3576_dsi2_set_video_mode(void)
+ {
++  uint32_t status = 0;
++  int us;
++
+   dsi_putreg(RK3576_DSI2_MODE_CTRL, DSI2_MODE_VIDEO);
+-  up_udelay(1000);
+ 
+-  syslog(LOG_INFO, "DSI2: 已切到视频模式 MODE_STATUS=0x%08" PRIx32 "\n",
+-         dsi_getreg(RK3576_DSI2_MODE_STATUS));
+-  return OK;
++  /* 轮询到状态真的变成 VIDEO 为止，不靠固定延时后读一次。
++   * 参考驱动的超时是 10ms。
++   */
++
++  for (us = 0; us < 10000; us++)
++    {
++      status = dsi_getreg(RK3576_DSI2_MODE_STATUS);
++      if (status == DSI2_MODE_VIDEO)
++        {
++          syslog(LOG_INFO,
++                 "DSI2: 已进入视频模式（等待 %d us）\n", us);
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  syslog(LOG_ERR,
++         "DSI2: 切视频模式超时 MODE_STATUS=0x%08" PRIx32
++         "（期望 %d）\n", status, DSI2_MODE_VIDEO);
++  return -ETIMEDOUT;
+ }
+ 
+ #endif /* CONFIG_RK3576_DSI2 */
+diff --git a/arch/arm64/src/rk3576/rk3576_dsi2.h b/arch/arm64/src/rk3576/rk3576_dsi2.h
+index b4cf8682..fefd241f 100644
+--- a/arch/arm64/src/rk3576/rk3576_dsi2.h
++++ b/arch/arm64/src/rk3576/rk3576_dsi2.h
+@@ -72,7 +72,7 @@ int rk3576_dsi2_probe(void);
+  ****************************************************************************/
+ 
+ int rk3576_dsi2_configure(const struct rk3576_vop2_timing_s *timing,
+-                          int lanes);
++                          int lanes, uint32_t lane_mbps);
+ 
+ /****************************************************************************
+  * Name: rk3576_dsi2_send_cmd
+diff --git a/arch/arm64/src/rk3576/rk3576_i2c.c b/arch/arm64/src/rk3576/rk3576_i2c.c
+index 43f2313e..37294b91 100644
+--- a/arch/arm64/src/rk3576/rk3576_i2c.c
++++ b/arch/arm64/src/rk3576/rk3576_i2c.c
+@@ -120,6 +120,7 @@ struct rk3576_i2c_config_s
+   int8_t    sda_bank;
+   int8_t    sda_pin;
+   uint8_t   pin_func;      /* 两个引脚的复用功能号相同 */
++  bool      pmu;           /* true = 时钟在 PMU 域 CRU（仅 I2C0） */
+ };
+ 
+ struct rk3576_i2c_priv_s
+@@ -166,6 +167,35 @@ static const struct i2c_ops_s g_rk3576_i2c_ops =
+ 
+ static const struct rk3576_i2c_config_s g_i2c_config[] =
+ {
++  {
++    /* I2C0 —— 5 寸 MIPI 屏（F050008M01）转接板上的触摸控制器。
++     *
++     * 出处是原理图 K7_V1.1 第 27 页 "Single-MIPI LCM"：30pin FPC 的
++     * Pin23/24 是 TP_I2C_SCL/SDA，对应网络 I2C0_SCL_M1_TP /
++     * I2C0_SDA_M1_TP。此前扫遍 I2C1~I2C9 都没找到触摸，就是因为它在
++     * I2C0 上，而 I2C0 被跳过了 —— 它的时钟不在主 CRU。
++     *
++     * ★ I2C0 基址 0x27300000 落在常开域，时钟归 PMU CRU 管：
++     *     GATE(PCLK_I2C0, ... RK3576_PMU_CLKGATE_CON(5), 1)
++     *     COMPOSITE_NODIV(CLK_I2C0, ... RK3576_PMU_CLKSEL_CON(6), 7, 2,
++     *                                  RK3576_PMU_CLKGATE_CON(5), 2)
++     *   用主 CRU 的偏移去开会写到别的寄存器，不报错但总线不动。
++     *   选源父时钟表与主域相同：{200M, 100M, 50M, 24M}。
++     *
++     * 引脚：原厂 dtb 的 i2c0m1-xfer = <0 17 9 ...>, <0 18 9 ...>
++     *   即 GPIO0_C1 / GPIO0_C2，功能号 9（与原理图一致）。
++     *
++     * ★ 触摸芯片由 VCC3V3_LCD_S0 供电，而该电源轨受 LCD_PWREN_H
++     *   (GPIO0_C6) 控制。不先把它拉高，扫描必然全空 —— 芯片没电。
++     */
++
++    .port = 0, .base = RK3576_I2C0_ADDR,
++    .gate_con = 5, .gate_pclk = 1, .gate_clk = 2,
++    .sel_con = 6, .sel_shift = 7,
++    .scl_bank = 0, .scl_pin = 17, .sda_bank = 0, .sda_pin = 18,
++    .pin_func = 9,
++    .pmu = true,
++  },
+   {
+     /* I2C1 —— PMIC RK806。U-Boot 启动时必然访问过，用作对照组。
+      * 时钟：clk-rk3576.c
+@@ -247,7 +277,7 @@ static const struct rk3576_i2c_config_s g_i2c_config[] =
+   },
+   /* I2C6/I2C9 —— 原厂 dtb 里状态为 disabled，但触摸所在的总线本就
+    * 应由 LCD overlay 启用，因此 disabled 不代表物理上没有器件。
+-   * 加入继续排除。（I2C0 在 PMU 域，时钟基址不同，暂不加。）
++   * 加入继续排除。
+    */
+ 
+   {
+@@ -275,6 +305,10 @@ static const struct rk3576_i2c_config_s g_i2c_config[] =
+ 
+ #define RK3576_I2C_NBUSES (sizeof(g_i2c_config) / sizeof(g_i2c_config[0]))
+ 
++/* ★ 这里的行数必须与 g_i2c_config 的条目数一致。C 不会为多出来的元素
++ * 补 .ops，漏一行的表现是最后一条总线的 ops 为 NULL，调用即崩。
++ */
++
+ static struct rk3576_i2c_priv_s g_i2c_priv[RK3576_I2C_NBUSES] =
+ {
+   { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
+@@ -286,6 +320,7 @@ static struct rk3576_i2c_priv_s g_i2c_priv[RK3576_I2C_NBUSES] =
+   { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
+   { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
+   { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
++  { .ops = &g_rk3576_i2c_ops, .lock = NXMUTEX_INITIALIZER },
+ };
+ 
+ 
+@@ -760,8 +795,16 @@ struct i2c_master_s *rk3576_i2cbus_initialize(int port)
+    *    只开 PCLK 的话寄存器读写正常但总线不动，这正是本端口踩过的坑。
+    */
+ 
+-  rk3576_clk_gate(cfg->gate_con, cfg->gate_pclk, true);
+-  rk3576_clk_gate(cfg->gate_con, cfg->gate_clk, true);
++  if (cfg->pmu)
++    {
++      rk3576_pmu_clk_gate(cfg->gate_con, cfg->gate_pclk, true);
++      rk3576_pmu_clk_gate(cfg->gate_con, cfg->gate_clk, true);
++    }
++  else
++    {
++      rk3576_clk_gate(cfg->gate_con, cfg->gate_pclk, true);
++      rk3576_clk_gate(cfg->gate_con, cfg->gate_clk, true);
++    }
+ 
+   /* 2) 配引脚复用。cfg 里填 -1 表示沿用引导器留下的配置。 */
+ 
+@@ -794,7 +837,9 @@ struct i2c_master_s *rk3576_i2cbus_initialize(int port)
+    *    SCL = src / (8 * (divl + 1 + divh + 1))，取 divl = divh。
+    */
+ 
+-  sel = rk3576_clk_getmux(cfg->sel_con, cfg->sel_shift, 2);
++  sel = cfg->pmu ?
++        rk3576_pmu_clk_getmux(cfg->sel_con, cfg->sel_shift, 2) :
++        rk3576_clk_getmux(cfg->sel_con, cfg->sel_shift, 2);
+   priv->src_hz = g_i2c_src_hz[sel];
+ 
+   div_half = priv->src_hz / (8 * I2C_TARGET_SCL_HZ) / 2;
+diff --git a/arch/arm64/src/rk3576/rk3576_pinmux.c b/arch/arm64/src/rk3576/rk3576_pinmux.c
+index 06897060..76297d2f 100644
+--- a/arch/arm64/src/rk3576/rk3576_pinmux.c
++++ b/arch/arm64/src/rk3576/rk3576_pinmux.c
+@@ -157,3 +157,65 @@ int rk3576_pinmux_get(int bank, int pin)
+   addr = rk3576_pinmux_reg(bank, pin, &shift);
+   return (getreg32(addr) >> shift) & 0xf;
+ }
++
++/****************************************************************************
++ * Name: rk3576_pinmux_setpull
++ *
++ * Description:
++ *   配置引脚的内部上下拉。
++ *
++ *   为什么需要它：判断"外部上拉是否存在"这类板级问题时，SoC 内部上拉
++ *   会把外部的变化整个盖住 —— 引脚无论如何都读到 1，观测失去区分力。
++ *   要让这类判据成立，必须先把内部拉关掉。
++ *
++ *   寄存器排布出处 drivers/pinctrl/pinctrl-rockchip.c
++ *   rk3576_calc_pull_reg_and_bit()：每引脚 2 位，每寄存器 8 个引脚，
++ *   bank0 以 pin12 为界分成两段（与 iomux 的分段是两码事，偏移也不同）。
++ *   编码（PULL_TYPE_IO_DEFAULT）：0=关 1=上拉 2=下拉 3=保持。
++ *
++ ****************************************************************************/
++
++int rk3576_pinmux_setpull(int bank, int pin, unsigned int pull)
++{
++  uint32_t off;
++  int shift;
++
++  if (bank < 0 || bank >= RK3576_PINMUX_NBANKS ||
++      pin  < 0 || pin  >= RK3576_PINMUX_NPINS  || pull > 3)
++    {
++      return -EINVAL;
++    }
++
++  switch (bank)
++    {
++      case 0:
++        off = (pin < 12) ? 0x20 : (0x2028 - 0x4);
++        break;
++
++      case 1:
++        off = 0x6110;
++        break;
++
++      case 2:
++        off = 0x6120;
++        break;
++
++      case 3:
++        off = 0x6130;
++        break;
++
++      default:  /* bank 4 也分三段 */
++        off = (pin < 16) ? 0x6140 :
++              (pin < 24) ? (0xa148 - 0x8) : (0xb14c - 0xc);
++        break;
++    }
++
++  off  += (pin / 8) * 4;
++  shift = (pin % 8) * 2;
++
++  /* 高 16 位写使能掩码，单次写即原子。 */
++
++  putreg32((0x3u << (shift + 16)) | ((pull & 0x3) << shift),
++           RK3576_IOC_GRF_ADDR + off);
++  return OK;
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_pinmux.h b/arch/arm64/src/rk3576/rk3576_pinmux.h
+index 8d4d6561..4cb456f9 100644
+--- a/arch/arm64/src/rk3576/rk3576_pinmux.h
++++ b/arch/arm64/src/rk3576/rk3576_pinmux.h
+@@ -73,6 +73,24 @@ extern "C"
+ 
+ int rk3576_pinmux_set(int bank, int pin, unsigned int func);
+ 
++/* 内部上下拉的取值（PULL_TYPE_IO_DEFAULT 编码） */
++
++#define RK3576_PULL_NONE     0
++#define RK3576_PULL_UP       1
++#define RK3576_PULL_DOWN     2
++#define RK3576_PULL_HOLD     3
++
++/****************************************************************************
++ * Name: rk3576_pinmux_setpull
++ *
++ * Description:
++ *   配置引脚内部上下拉。做外部上拉在位判断前必须先关掉内部拉，
++ *   否则读数恒为 1，判据无效。
++ *
++ ****************************************************************************/
++
++int rk3576_pinmux_setpull(int bank, int pin, unsigned int pull);
++
+ /****************************************************************************
+  * Name: rk3576_pinmux_get
+  *
+diff --git a/arch/arm64/src/rk3576/rk3576_vop2.c b/arch/arm64/src/rk3576/rk3576_vop2.c
+index a4c4367e..34ed6b49 100644
+--- a/arch/arm64/src/rk3576/rk3576_vop2.c
++++ b/arch/arm64/src/rk3576/rk3576_vop2.c
+@@ -198,6 +198,25 @@ int rk3576_vop2_colorbar(const struct rk3576_vop2_timing_s *t, bool enable)
+   vop_putreg(VP0(RK3576_VP_POST_DSP_VACT_INFO),
+              (vact_st << 16) | (vact_st + t->vactive));
+ 
++  /* ★ 把 MIPI 接口接到 VP0。
++   *
++   * 引导器留下的是 0x80100037，其中 port_sel=01 指向 VP1 —— 而上面这
++   * 一大段配的全是 VP0。不改这一位的话，VP0 扫描、时序、DSI 全部正常，
++   * 像素却送不进 DSI，现象是背光亮但无显示，且链路上每一处自检都通过。
++   *
++   * 像素时钟保持 Div4：DSI 的 PHY_IPI_RATIO 就是按 pixclk/4 算的，
++   * 两处必须一致。
++   */
++
++  vop_putreg(RK3576_VOP2_MIPI0_IF_CTRL,
++             RK3576_MIPI_IF_REGDONE_IMD |
++             RK3576_MIPI_IF_PIXCLK_DIV4 |
++             RK3576_MIPI_IF_VSYNC_POS |
++             RK3576_MIPI_IF_HSYNC_POS |
++             (0u << RK3576_MIPI_IF_PORT_SEL_SHIFT) |   /* VP0 */
++             RK3576_MIPI_IF_CLK_OUT_EN |
++             RK3576_MIPI_IF_OUT_EN);
++
+   /* 输出格式 RGB888，撤掉 standby 让端口开始扫描 */
+ 
+   vop_putreg(VP0(RK3576_VP_DSP_CTRL), RK3576_VP_DSP_CTRL_OUT_MODE_RGB888);
+@@ -218,7 +237,66 @@ int rk3576_vop2_colorbar(const struct rk3576_vop2_timing_s *t, bool enable)
+          "VOP2: 彩条已开 %ux%u htotal=%" PRIu32 " vtotal=%" PRIu32
+          " pixclk=%" PRIu32 "Hz\n",
+          t->hactive, t->vactive, htotal, vtotal, t->pixclk_hz);
++
++  /* 回读接口路由，确认 port_sel 真的落到了 VP0（bit[3:2] 应为 0）。 */
++
++  {
++    uint32_t iface = vop_getreg(RK3576_VOP2_MIPI0_IF_CTRL);
++
++    syslog(LOG_INFO,
++           "VOP2: MIPI0 接口 0x%08" PRIx32 " 取自 VP%" PRIu32
++           " out_en=%" PRIu32 " clk_out_en=%" PRIu32 "\n",
++           iface, (iface >> RK3576_MIPI_IF_PORT_SEL_SHIFT) & 3,
++           iface & RK3576_MIPI_IF_OUT_EN ? 1 : 0,
++           (iface & RK3576_MIPI_IF_CLK_OUT_EN) ? 1 : 0);
++  }
++
+   return OK;
+ }
+ 
+ #endif /* CONFIG_RK3576_VOP2 */
++
++/****************************************************************************
++ * Name: rk3576_vop2_check_scanning
++ *
++ * Description:
++ *   判断视频端口是否真的在扫描输出。
++ *
++ *   寄存器读回一致只能证明"写进去了"，证明不了像素在动。这里清掉帧起始
++ *   的原始中断状态，等一帧以上再读 —— 位起来了才说明 VP 确实在按时序
++ *   往外送像素。这是整条显示链路上第一个能区分"配置对了"和"真的在跑"
++ *   的观测。
++ *
++ *   POST_BUF_EMPTY 一并打出来：它置位说明 VP 在扫描但取不到数据
++ *   （图层没使能、帧缓冲地址错、AXI 带宽不够），与"完全没扫描"是
++ *   两种不同的故障。
++ *
++ ****************************************************************************/
++
++int rk3576_vop2_check_scanning(int vp)
++{
++  uint32_t raw;
++  uint32_t frame_us;
++
++  /* 清原始状态。这些中断寄存器同样是高 16 位写使能掩码。 */
++
++  putreg32(0xffffu << 16 | 0xffffu,
++           RK3576_VOP2_ADDR + RK3576_VOP2_VP_INT_CLR(vp));
++
++  /* 等两帧。720x1280@65MHz、htotal 828 vtotal 1317 -> 约 16.8ms/帧。 */
++
++  frame_us = 40000;
++  up_udelay(frame_us);
++
++  raw = getreg32(RK3576_VOP2_ADDR + RK3576_VOP2_VP_INT_RAW(vp));
++
++  syslog(LOG_INFO,
++         "VOP2: VP%d 扫描判据 RAW=0x%08" PRIx32 " —— %s%s\n",
++         vp, raw,
++         (raw & RK3576_VP_INT_FS) ? "有帧起始，VP 正在扫描" :
++                                    "无帧起始，VP 没有输出",
++         (raw & RK3576_VP_INT_POST_BUF_EMPTY) ?
++           "；且后级缓冲欠载（在扫描但取不到像素）" : "");
++
++  return (raw & RK3576_VP_INT_FS) ? OK : -EIO;
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_vop2.h b/arch/arm64/src/rk3576/rk3576_vop2.h
+index d59f5f55..8c0f10a3 100644
+--- a/arch/arm64/src/rk3576/rk3576_vop2.h
++++ b/arch/arm64/src/rk3576/rk3576_vop2.h
+@@ -78,4 +78,15 @@ int rk3576_vop2_probe(void);
+ int rk3576_vop2_colorbar(const struct rk3576_vop2_timing_s *timing,
+                          bool enable);
+ 
++/****************************************************************************
++ * Name: rk3576_vop2_check_scanning
++ *
++ * Description:
++ *   用帧起始中断的原始状态判断 VP 是否真的在扫描输出，而不只是
++ *   寄存器写对了。返回 OK 表示观测到帧起始。
++ *
++ ****************************************************************************/
++
++int rk3576_vop2_check_scanning(int vp);
++
+ #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_VOP2_H */
 -- 
 2.43.0
 

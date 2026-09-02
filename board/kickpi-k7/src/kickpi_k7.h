@@ -60,7 +60,7 @@ int kickpi_k7_gpio_initialize(void);
 int kickpi_k7_i2c_initialize(void);
 #endif
 
-#ifdef CONFIG_INPUT_GT9XX
+#ifdef CONFIG_INPUT_FT5X06
 /****************************************************************************
  * Name: kickpi_k7_touch_initialize
  *
@@ -70,6 +70,8 @@ int kickpi_k7_i2c_initialize(void);
  ****************************************************************************/
 
 int kickpi_k7_touch_initialize(void);
+#endif
+
 
 /****************************************************************************
  * Name: kickpi_k7_lcd_power
@@ -84,7 +86,6 @@ int kickpi_k7_touch_initialize(void);
  ****************************************************************************/
 
 int kickpi_k7_lcd_power(bool on);
-#endif
 
 #if defined(CONFIG_AUDIO_ES8388) && defined(CONFIG_RK3576_SAI)
 /****************************************************************************

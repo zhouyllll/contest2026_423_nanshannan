@@ -34,11 +34,11 @@ CSRCS += kickpi_k7_i2c.c
 endif
 
 # 屏与触摸共用同一条电源轨，任一方启用就需要这个文件
-ifneq ($(CONFIG_INPUT_GT9XX)$(CONFIG_RK3576_VOP2),)
+ifneq ($(CONFIG_INPUT_FT5X06)$(CONFIG_RK3576_VOP2),)
 CSRCS += kickpi_k7_lcd.c
 endif
 
-ifeq ($(CONFIG_INPUT_GT9XX),y)
+ifeq ($(CONFIG_INPUT_FT5X06),y)
 CSRCS += kickpi_k7_touch.c
 endif
 

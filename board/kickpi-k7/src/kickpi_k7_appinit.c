@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <syslog.h>
 #include <inttypes.h>
+#include <nuttx/kmalloc.h>
 #include <stdint.h>
 #include <nuttx/board.h>
 #include <nuttx/sdio.h>
@@ -201,7 +202,7 @@ int board_app_initialize(uintptr_t arg)
    *   DSI + D-PHY + 面板初始化都做完。
    */
 
-#if defined(CONFIG_INPUT_GT9XX) || defined(CONFIG_RK3576_VOP2)
+#if defined(CONFIG_INPUT_FT5X06) || defined(CONFIG_RK3576_VOP2)
   /* ★ 必须排在显示链路之前。屏与触摸共用 VCC3V3_LCD_S0，面板要先上电、
    * 复位释放，之后配 D-PHY / DSI 才有意义；顺序反了的话 DSI 是对着一块
    * 没电的屏在配置。触摸同理 —— 没电时扫任何总线都不会应答。
@@ -241,6 +242,94 @@ int board_app_initialize(uintptr_t arg)
 
       const uint32_t lane_kbps = timing.pixclk_hz / 1000 * 24 / 4;
 
+      UNUSED(lane_kbps);
+
+      /* ★ 先读后写。
+       *
+       * 这块板的出厂固件能在这块屏上显示 Rockchip logo，说明 U-Boot
+       * 已经完整跑通过面板初始化 + VOP2 + DSI + D-PHY。它留在寄存器里
+       * 的是一份针对这块屏的已知可用配置 —— 包括我们拿不到的面板初始化
+       * 序列所产生的效果。先把它原样读出来。
+       *
+       * KEEP_UBOOT_DISPLAY 为 1 时完全不碰显示，用来判断：不去动它的话
+       * logo 是不是还在。这一个观测能区分「U-Boot 根本没点屏」和
+       * 「U-Boot 点了、被我们改配置改灭了」，而这两种情况此前无法区分。
+       */
+
+#define KEEP_UBOOT_DISPLAY 1
+
+      rk3576_vop2_dump_uboot_state();
+#ifdef CONFIG_RK3576_DSI2
+      rk3576_dsi2_dump_uboot_state();
+#endif
+
+#if KEEP_UBOOT_DISPLAY
+      /* 接管而不是重建：只把图层的帧缓冲地址换成我们自己的缓冲区，
+       * 其余（时序、DSI、D-PHY、面板初始化的效果）全部沿用 U-Boot。
+       *
+       * 这一步同时是决定性实验 —— 屏幕内容若随之改变，VOP2、DSI、
+       * D-PHY、面板就一次性全部得到证实。
+       */
+
+      {
+        uint32_t fbw;
+        uint32_t fbh;
+        uint32_t stride;
+        uint32_t bpp;
+        void    *fb;
+        size_t   fbsize;
+
+        /* 先只查询（buffer 传 0 时不写寄存器），拿到尺寸再分配。 */
+
+        fbw = 0;
+        if (rk3576_vop2_takeover(0, &fbw, &fbh, &stride, &bpp) == OK &&
+            fbw != 0 && stride != 0)
+          {
+            fbsize = (size_t)stride * fbh;
+            fb = kmm_memalign(256, fbsize);
+
+            if (fb == NULL)
+              {
+                syslog(LOG_ERR,
+                       "ERROR: 帧缓冲分配失败 %zu 字节\n", fbsize);
+              }
+            else
+              {
+                uint32_t *p = (uint32_t *)fb;
+                uint32_t  x;
+                uint32_t  y;
+
+                /* 四条横带：红 绿 蓝 白。任何一条出现在屏上，
+                 * 就说明地址、跨距、格式三者同时对上了。
+                 */
+
+                static const uint32_t bands[4] =
+                {
+                  0xffff0000, 0xff00ff00, 0xff0000ff, 0xffffffff
+                };
+
+                for (y = 0; y < fbh; y++)
+                  {
+                    uint32_t c = bands[(y * 4) / fbh];
+
+                    for (x = 0; x < fbw; x++)
+                      {
+                        p[y * (stride / 4) + x] = c;
+                      }
+                  }
+
+                up_flush_dcache((uintptr_t)fb, (uintptr_t)fb + fbsize);
+
+                rk3576_vop2_takeover((uintptr_t)fb, NULL, NULL, NULL, NULL);
+
+                syslog(LOG_INFO,
+                       "显示: 测试图案已写入 %" PRIu32 "x%" PRIu32
+                       " @0x%08lx（红/绿/蓝/白四条横带）\n",
+                       fbw, fbh, (unsigned long)fb);
+              }
+          }
+      }
+#else
       ret = rk3576_vop2_probe();
       if (ret < 0)
         {
@@ -312,6 +401,7 @@ int board_app_initialize(uintptr_t arg)
        */
 
       rk3576_vop2_check_scanning(0);
+#endif  /* KEEP_UBOOT_DISPLAY */
     }
 #endif
 
@@ -336,7 +426,7 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_INPUT_GT9XX
+#ifdef CONFIG_INPUT_FT5X06
   ret = kickpi_k7_touch_initialize();
   if (ret < 0)
     {
