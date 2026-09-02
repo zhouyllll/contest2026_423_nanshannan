@@ -86,6 +86,15 @@ kickpi_k7_appinit.o: kickpi_k7_appinit.c \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/drivers/drivers.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/memoryregion.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/board/board.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/common/arm64_internal.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/arch.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/cache.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/syscall.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/sys/syscall.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/common/arm64_arch.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/nuttx.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/sys/param.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/bits.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_power.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_sai.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_dcphy.h \

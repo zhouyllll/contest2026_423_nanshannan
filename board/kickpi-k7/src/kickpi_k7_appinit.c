@@ -39,6 +39,7 @@
 #include <nuttx/drivers/drivers.h>
 #include <arch/board/board.h>
 
+#include "arm64_internal.h"
 #include "rk3576_power.h"
 #include "rk3576_sai.h"
 #include "rk3576_dcphy.h"
@@ -200,6 +201,19 @@ int board_app_initialize(uintptr_t arg)
    *   DSI + D-PHY + 面板初始化都做完。
    */
 
+#if defined(CONFIG_INPUT_GT9XX) || defined(CONFIG_RK3576_VOP2)
+  /* ★ 必须排在显示链路之前。屏与触摸共用 VCC3V3_LCD_S0，面板要先上电、
+   * 复位释放，之后配 D-PHY / DSI 才有意义；顺序反了的话 DSI 是对着一块
+   * 没电的屏在配置。触摸同理 —— 没电时扫任何总线都不会应答。
+   */
+
+  ret = kickpi_k7_lcd_power(true);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: LCD 电源轨打开失败: %d\n", ret);
+    }
+#endif
+
     {
       /* 时序取自 docs/refs/panel/rk3308b-mipi-display-v11.dtsi 的
        * 720x1280 5 寸屏（ST7703）。规格与本板 F050008M01 一致
@@ -220,6 +234,13 @@ int board_app_initialize(uintptr_t arg)
         .vback_porch  = 15,
       };
 
+      /* 每通道码率 = 像素时钟 * 每像素位数 / 通道数，单位 kbps。
+       * D-PHY 与 DSI 的时序换算都要用它，只算一次，避免两处各算一遍
+       * 后悄悄不一致。
+       */
+
+      const uint32_t lane_kbps = timing.pixclk_hz / 1000 * 24 / 4;
+
       ret = rk3576_vop2_probe();
       if (ret < 0)
         {
@@ -237,16 +258,60 @@ int board_app_initialize(uintptr_t arg)
 
       if (rk3576_dcphy_probe() == OK)
         {
-          rk3576_dcphy_enable(timing.pixclk_hz / 1000 * 24 / 4, 4);
+          rk3576_dcphy_enable(lane_kbps, 4);
         }
 #endif
 
 #ifdef CONFIG_RK3576_DSI2
       if (rk3576_dsi2_probe() == OK)
         {
-          rk3576_dsi2_configure(&timing, 4);
+          rk3576_dsi2_configure(&timing, 4, lane_kbps / 1000);   /* 换成 Mbps */
+
+          /* 面板唤醒。厂商的完整初始化序列拿不到，但这两条是
+           * MIPI DCS 标准命令、与具体面板无关，且几乎所有 MIPI 屏
+           * 上电后都停在睡眠态 —— 不发这两条就是背光亮、无图像。
+           *
+           *   0x11 exit_sleep_mode   之后须等 >120ms
+           *   0x29 set_display_on
+           *
+           * dtype 0x05 = DCS short write, no parameter。
+           */
+
+          {
+            static const uint8_t dcs_sleep_out = 0x11;
+            static const uint8_t dcs_display_on = 0x29;
+            int r1;
+            int r2;
+
+            r1 = rk3576_dsi2_send_cmd(0x05, &dcs_sleep_out, 1);
+            up_mdelay(150);
+            r2 = rk3576_dsi2_send_cmd(0x05, &dcs_display_on, 1);
+            up_mdelay(50);
+
+            /* 返回值必须打出来。命令接口忙超时的话这两条根本没发出去，
+             * 而"背光亮无图像"的现象与没发是一模一样的 —— 不打就分不清。
+             */
+
+            syslog(LOG_INFO,
+                   "DSI2: 面板唤醒 sleep_out=%d display_on=%d\n", r1, r2);
+          }
+
+          /* ★ 配置完停在命令模式是没有图像的直接原因 —— DSI 不接收
+           * VOP 送来的像素流。必须显式切到视频模式。
+           *
+           * 本板不能用命令模式：原理图第 27 页 FPC Pin18 (LCD_TE)
+           * 打叉未连线，没有 TE 就无法与面板刷新同步。
+           */
+
+          rk3576_dsi2_set_video_mode();
         }
 #endif
+
+      /* 整条链路配完之后再问一句：VP 到底在不在扫描。
+       * 放在最后是因为 DSI 起来前 VP 可能被下游反压。
+       */
+
+      rk3576_vop2_check_scanning(0);
     }
 #endif
 
@@ -268,19 +333,6 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: 音频初始化失败: %d\n", ret);
-    }
-#endif
-
-#if defined(CONFIG_INPUT_GT9XX) || defined(CONFIG_RK3576_VOP2)
-  /* 屏与触摸共用 VCC3V3_LCD_S0，必须先把这条轨打开。
-   * 触摸芯片没电时，扫遍任何 I2C 总线都不会应答 —— 这正是之前
-   * 找不到触摸的原因之一。
-   */
-
-  ret = kickpi_k7_lcd_power(true);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: LCD 电源轨打开失败: %d\n", ret);
     }
 #endif
 
