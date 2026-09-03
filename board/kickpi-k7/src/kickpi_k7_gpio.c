@@ -102,6 +102,14 @@ struct kickpi_gpin_s
   uint8_t           minor;
   const char       *name;
   pin_interrupt_t   callback;
+
+  /* setpintype 定下的触发方式，enable 时照搬。分开存是必须的：
+   * 上层的调用顺序是 setpintype -> attach -> enable，如果 enable
+   * 自己再配一遍，setpintype 选的类型就被丢掉了。
+   */
+
+  bool              irq_rising;
+  bool              irq_level;
 };
 
 static int kickpi_gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
@@ -156,9 +164,12 @@ static int kickpi_gpin_enable(FAR struct gpio_dev_s *dev, bool enable)
 
   if (enable)
     {
-      /* 双边沿：用例会主动拉动引脚验证两个方向都能触发。 */
+      /* 只挂接，不重配触发方式 —— 那是 setpintype 的职责。
+       * 这里再调一次 irq_config 会把上层刚选好的类型覆盖掉，
+       * 而且不报错：默认恰好是下降沿时看不出来，选电平或上升沿
+       * 就会静默失效。
+       */
 
-      rk3576_gpio_irq_config(p->bank, p->pin, false, false);
       rk3576_gpio_irq_attach(p->bank, p->pin, kickpi_gpin_isr, p);
     }
 
@@ -185,11 +196,14 @@ static int kickpi_gpin_setpintype(FAR struct gpio_dev_s *dev,
       case GPIO_INTERRUPT_RISING_PIN:
       case GPIO_INTERRUPT_FALLING_PIN:
       case GPIO_INTERRUPT_BOTH_PIN:
+        p->irq_rising = (pintype == GPIO_INTERRUPT_RISING_PIN ||
+                         pintype == GPIO_INTERRUPT_HIGH_PIN);
+        p->irq_level  = (pintype == GPIO_INTERRUPT_HIGH_PIN ||
+                         pintype == GPIO_INTERRUPT_LOW_PIN);
+
         rk3576_gpio_setdir(p->bank, p->pin, false);
-        rk3576_gpio_irq_config(p->bank, p->pin,
-                               pintype == GPIO_INTERRUPT_RISING_PIN,
-                               pintype == GPIO_INTERRUPT_HIGH_PIN ||
-                               pintype == GPIO_INTERRUPT_LOW_PIN);
+        rk3576_gpio_irq_config(p->bank, p->pin, p->irq_rising,
+                               p->irq_level);
         break;
 
       default:
@@ -230,6 +244,20 @@ static struct kickpi_gpout_s g_gpouts[] =
     .bank = BOARD_FAN_PWR_BANK,       /* GPIO2_B3，风扇电源，默认 on */
     .pin  = BOARD_FAN_PWR_PIN,
     .name = "fan-pwr",
+  },
+  {
+    /* 与 testpin 配对的输出脚，供 cmocka_driver_gpio 的中断子项使用。
+     *
+     * ★ 放在最后一个，让它拿到 /dev/gpio2
+     *
+     *   那个用例会往输出脚写 0。之前把 /dev/gpio1（风扇电源）当输出脚，
+     *   跑一次测试就把风扇断掉了 —— 用例并不知道它拉的是什么，
+     *   所以能被它拉动的脚必须是拉了也无所谓的脚。
+     */
+
+    .bank = BOARD_TESTPIN_OUT_BANK,   /* GPIO4_A7，40 针扩展口，未接器件 */
+    .pin  = BOARD_TESTPIN_OUT_PIN,
+    .name = "testpin-out",
   },
 };
 
@@ -320,6 +348,12 @@ int kickpi_k7_gpio_initialize(void)
       p->gpio.gp_pintype = GPIO_OUTPUT_PIN;
       p->gpio.gp_ops     = &g_gpout_ops;
 
+      /* 显式设成 GPIO 功能。前两脚 U-Boot 已经配好，第三脚（排针上的
+       * testpin-out）U-Boot 不认识，不设的话方向寄存器写了也不起作用。
+       */
+
+      rk3576_pinmux_set(p->bank, p->pin, RK3576_PINMUX_GPIO);
+
       ret = rk3576_gpio_setdir(p->bank, p->pin, true);
       if (ret < 0)
         {
@@ -340,7 +374,7 @@ int kickpi_k7_gpio_initialize(void)
              i, p->name, p->bank, p->pin);
     }
 
-  /* 输入脚接在输出脚之后，编号顺延（当前为 /dev/gpio2）。 */
+  /* 输入脚接在输出脚之后，编号顺延（当前为 /dev/gpio3）。 */
 
   for (i = 0; i < KICKPI_NGPIN; i++)
     {

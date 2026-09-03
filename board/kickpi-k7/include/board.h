@@ -98,6 +98,21 @@
 #define BOARD_TESTPIN_BANK       4            /* GPIO4_B3 */
 #define BOARD_TESTPIN_PIN        11           /* RK_PB3 = 1*8+3 */
 
+/* 与上面那一脚配对的输出脚，用于 cmocka_driver_gpio 的中断子项。
+ *
+ * 那个用例需要一个输出脚和一个输入脚：它拉动输出脚产生边沿，再等
+ * 输入脚上的中断。两脚必须用杜邦线短接，否则输入脚上永远不会有边沿。
+ *
+ * ★ 必须和 GPIO4_B3 同在 1.8V 域
+ *
+ *   40 针口上的 GPIO 分属两个电压域（厂商 dtsi 逐条标了 1.8V / 3.3V）。
+ *   拿 3.3V 的输出脚去驱动 1.8V 的输入脚会超出该脚耐压。GPIO4_A7 与
+ *   GPIO4_B3 都标的 1.8V，可以直接对接。
+ */
+
+#define BOARD_TESTPIN_OUT_BANK   4            /* GPIO4_A7 */
+#define BOARD_TESTPIN_OUT_PIN    7            /* RK_PA7 = 0*8+7 */
+
 /* 实时时钟 HYM8563
  *
  * 出处：原厂 dtb 的 /i2c@2ac50000/hym8563@51（compatible "haoyu,hym8563"）。
