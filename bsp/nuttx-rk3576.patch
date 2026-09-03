@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 01/23] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 01/27] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 02/23] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 02/27] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1363,7 +1363,7 @@ index 559489f6..d2fb5605 100644
 From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:38:15 +0800
-Subject: [PATCH 03/23] arm64/rk3576: clear U-Boot's leftover
+Subject: [PATCH 03/27] arm64/rk3576: clear U-Boot's leftover
  HCR_EL2.{IMO,FMO,AMO}; fix load address
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1490,7 +1490,7 @@ index d2fb5605..128e8a22 100644
 From 1a226e049212fce50e0724ee37b6671ac0f23e23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:50:02 +0800
-Subject: [PATCH 04/23] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
+Subject: [PATCH 04/27] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
  =?UTF-8?q?=5FEL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
  =?UTF-8?q?=E4=B8=81=E7=9A=84=E5=85=B3=E7=B3=BB?=
 MIME-Version: 1.0
@@ -1535,7 +1535,7 @@ index 128e8a22..f76d45cb 100644
 From 509d2fa1a06f4560ce252d7cc6a4d507ea7bd6dc Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 23:18:55 +0800
-Subject: [PATCH 05/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
+Subject: [PATCH 05/27] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
  =?UTF-8?q?=20=E9=A9=B1=E5=8A=A8=EF=BC=88Rockchip=20GPIO=20v2=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1989,7 +1989,7 @@ index 00000000..2fe55c92
 From 895f1f4e4df1ffb6dc7c665adb230ea472f48600 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 00:43:14 +0800
-Subject: [PATCH 06/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
+Subject: [PATCH 06/27] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
  =?UTF-8?q?=E3=80=81=E5=BC=95=E8=84=9A=E5=A4=8D=E7=94=A8=E4=B8=8E=20I2C=20?=
  =?UTF-8?q?=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
@@ -3602,7 +3602,7 @@ index 00000000..8d4d6561
 From 0efe6a8352599f5b577eda2598ab46844332a791 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:24:26 +0800
-Subject: [PATCH 07/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
+Subject: [PATCH 07/27] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
  =?UTF-8?q?=20(dwcmshc/SDHCI)=20=E5=91=BD=E4=BB=A4=E9=80=9A=E8=B7=AF?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -4324,7 +4324,7 @@ index 00000000..971084de
 From 19f41551f493da28c0756c5e83a0850a0bcf9aae Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:29:46 +0800
-Subject: [PATCH 08/23] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
+Subject: [PATCH 08/27] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
  =?UTF-8?q?=E9=80=9A=E8=B7=AF=E6=89=93=E9=80=9A=EF=BC=88CMD9/CMD7/CMD17=20?=
  =?UTF-8?q?+=20PIO=20=E8=AF=BB=E5=9D=97=EF=BC=89?=
 MIME-Version: 1.0
@@ -4534,7 +4534,7 @@ index cd0d10dc..99c4ecc0 100644
 From 98b2a2df090330a6d91d6f52c098751b1697768a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 13:13:58 +0800
-Subject: [PATCH 09/23] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
+Subject: [PATCH 09/27] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
  =?UTF-8?q?=20sdio=5Fdev=5Fs=EF=BC=8C/dev/mmcsd0=20=E5=8F=AF=E7=94=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -5263,7 +5263,7 @@ index 971084de..c0f64978 100644
 From 3a65d6b63b5febca4827bd7fecd8d2145adb51a0 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:07:47 +0800
-Subject: [PATCH 10/23] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
+Subject: [PATCH 10/27] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
  =?UTF-8?q?=E5=A4=87=E8=AF=BB=E9=80=9A=EF=BC=881=20=E4=BD=8D=20@50MHz?=
  =?UTF-8?q?=EF=BC=89=EF=BC=8C4=20=E4=BD=8D=E5=BE=85=E4=BF=AE?=
 MIME-Version: 1.0
@@ -5486,7 +5486,7 @@ index a3b84e47..a2996f1a 100644
 From 84d0c755aa873b306fefd87a20e4c2e0abccf064 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:14:24 +0800
-Subject: [PATCH 11/23] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
+Subject: [PATCH 11/27] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
  =?UTF-8?q?=E6=80=BB=E7=BA=BF=E6=89=93=E9=80=9A=EF=BC=8850MHz=EF=BC=89?=
  =?UTF-8?q?=EF=BC=8C=E6=A0=B9=E5=9B=A0=E6=98=AF=E8=83=BD=E5=8A=9B=E5=A3=B0?=
  =?UTF-8?q?=E6=98=8E?=
@@ -5587,7 +5587,7 @@ index a2996f1a..2206c8ab 100644
 From 5250326bc4b5ede69c28dea6feaf51d0ae74e46a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:27:58 +0800
-Subject: [PATCH 12/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
+Subject: [PATCH 12/27] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F(PMU)=E4=B8=8E=20GPIO=20=E4=B8=AD?=
  =?UTF-8?q?=E6=96=AD=EF=BC=8C=E4=B8=BA=E6=98=BE=E7=A4=BA=E4=B8=8E=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E9=93=BA=E8=B7=AF?=
@@ -6294,7 +6294,7 @@ index 00000000..80545549
 From 40634c8959141615d593598f97b5c70597d2039d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:41:21 +0800
-Subject: [PATCH 13/23] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
+Subject: [PATCH 13/27] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F=E7=BC=96=E5=8F=B7=E4=B8=8E=E6=AF=8F?=
  =?UTF-8?q?=E5=9F=9F=E7=9A=84=20req=20=E5=81=8F=E7=A7=BB?=
 MIME-Version: 1.0
@@ -6451,7 +6451,7 @@ index 80545549..84de6b0f 100644
 From d632b41753c213abee75ccaedbe6a88659d68b89 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:59:50 +0800
-Subject: [PATCH 14/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
+Subject: [PATCH 14/27] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
  =?UTF-8?q?=20=E9=9F=B3=E9=A2=91=E6=8E=A5=E5=8F=A3=E9=A9=B1=E5=8A=A8?=
  =?UTF-8?q?=EF=BC=88PIO=20=E5=8F=91=E9=80=81=EF=BC=89?=
 MIME-Version: 1.0
@@ -7201,7 +7201,7 @@ index 00000000..4c5ceb1c
 From 945dc74f703bb97d7c2331a2eb40df1bc888eb23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:26:44 +0800
-Subject: [PATCH 15/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
+Subject: [PATCH 15/27] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
  =?UTF-8?q?=20=E6=98=BE=E7=A4=BA=E6=8E=A7=E5=88=B6=E5=99=A8=EF=BC=88?=
  =?UTF-8?q?=E8=87=AA=E6=A3=80=20+=20=E5=86=85=E7=BD=AE=E5=BD=A9=E6=9D=A1?=
  =?UTF-8?q?=EF=BC=89?=
@@ -7744,7 +7744,7 @@ index 00000000..d59f5f55
 From e19fbf3e1dcfc9bd8c9cac919da3591de3b6bdb5 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:38:18 +0800
-Subject: [PATCH 16/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 16/27] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20DSI2=20=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8360,7 +8360,7 @@ index 00000000..b4cf8682
 From 506a2907cd27c7244a478ced9cc2e03e3e02ff77 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:44:28 +0800
-Subject: [PATCH 17/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 17/27] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20D/C-PHY=20=E9=A9=B1=E5=8A=A8=EF=BC=88D-PHY=20PLL=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8813,7 +8813,7 @@ index 00000000..6183bd51
 From 67474c8ffe832b715faa83734a71a32b80b33da6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:54:26 +0800
-Subject: [PATCH 18/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
+Subject: [PATCH 18/27] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
  =?UTF-8?q?=20=E5=89=8D=E7=BD=AE=E9=93=BE=E8=B7=AF=E4=B8=8E=20MDIO?=
  =?UTF-8?q?=EF=BC=88DWMAC=204.20a=EF=BC=89?=
 MIME-Version: 1.0
@@ -9314,7 +9314,7 @@ index 00000000..92991a43
 From 474c4a000e75319ecee875dffde4a0e7342ba12d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:07:45 +0800
-Subject: [PATCH 19/23] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
+Subject: [PATCH 19/27] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
  =?UTF-8?q?=E9=93=BE=E8=B7=AF=E5=85=AD=E9=A1=B9=E9=85=8D=E9=BD=90=EF=BC=8C?=
  =?UTF-8?q?DMA=20=E8=BD=AF=E5=A4=8D=E4=BD=8D=E4=BB=8D=E6=9C=AA=E5=AE=8C?=
  =?UTF-8?q?=E6=88=90?=
@@ -9867,7 +9867,7 @@ index 6f8e5f23..5afaf918 100644
 From 51d98edc4f4ae78ed5d33d08d8b5fdf85719c59b Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:24:18 +0800
-Subject: [PATCH 20/23] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
+Subject: [PATCH 20/27] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
  =?UTF-8?q?=E5=88=B0=E4=B8=83=E6=9D=A1=E6=80=BB=E7=BA=BF=EF=BC=88=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E5=AE=9A=E4=BD=8D=E7=94=A8=EF=BC=89?=
 MIME-Version: 1.0
@@ -9974,7 +9974,7 @@ index f57a2bfa..43f2313e 100644
 From 7a968bf8c6c3d85daf2dc81619a2800cf4bf89c4 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 11:12:37 +0800
-Subject: [PATCH 21/23] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
+Subject: [PATCH 21/27] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
  =?UTF-8?q?=E8=B7=AF=E4=BF=AE=E6=AD=A3=20+=20I2C0(PMU=20=E5=9F=9F)=20+=20?=
  =?UTF-8?q?=E5=BC=95=E8=84=9A=E4=B8=8A=E4=B8=8B=E6=8B=89=20API?=
 MIME-Version: 1.0
@@ -10837,7 +10837,7 @@ index d59f5f55..8c0f10a3 100644
 From c8d3eeab1d0eb34c8c9922e7a7fb4fa48df7c057 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 12:05:26 +0800
-Subject: [PATCH 22/23] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
+Subject: [PATCH 22/27] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
  =?UTF-8?q?=E6=AD=A3=20sizeof=20=E7=9A=84=E6=A0=BC=E5=BC=8F=E4=B8=B2?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -11173,7 +11173,7 @@ index be5db167..34eb7303 100644
 From abf918d9dedc4458cf1505937f86a90791fd1681 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 00:31:04 +0800
-Subject: [PATCH 23/23] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
+Subject: [PATCH 23/27] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
  =?UTF-8?q?=E5=9D=97=E8=AF=BB=E5=86=99=E3=80=81=E6=91=84=E5=83=8F=E5=A4=B4?=
  =?UTF-8?q?=20MCLK=E3=80=81=E5=85=8D=20recovery=20=E9=87=8D=E5=90=AF?=
 MIME-Version: 1.0
@@ -13329,6 +13329,2699 @@ index f8333cb5..d841ebfb 100644
  void rk3576_vop2_dump_uboot_state(void);
  
  #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_VOP2_H */
+-- 
+2.43.0
+
+
+From 2d8fa26231ab76705ef1144e445f76f2a8959934 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Thu, 3 Sep 2026 12:01:05 +0800
+Subject: [PATCH 24/27] =?UTF-8?q?drivers/timers:=20=E6=96=B0=E5=A2=9E=20HY?=
+ =?UTF-8?q?M8563=20I2C=20RTC=20=E9=A9=B1=E5=8A=A8?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+板上 RTC 为 Haoyu HYM8563 @I2C2:0x51（原厂 dtb 的 haoyu,hym8563），
+同时输出 32.768kHz 供 SDIO WiFi 使用。寄存器定义取自厂商 SDK 的
+kernel-6.1/drivers/rtc/rtc-hym8563.c。
+
+★ 秒寄存器 bit7 是掉电标志(VL)：置位表示走时曾中断、读出的时间是
+  随机值。本驱动在该情况下让 rdtime 返回 -ENODATA，而不是交出一个
+  看似合法的时间 —— 后者比读不出来更难排查。
+★ 注册前先读控制寄存器确认器件应答，注册成功不等于器件存在。
+
+dwmmc（SD 卡，仍未通过识别，但以下三处是对照厂商源码确认的真缺陷）：
+- 卡时钟改为调 CIU 源时钟、CLKDIV 固定 0。Rockchip 的 dw_mmc 规定
+  CLKDIV 只能取 0 或 1（dw_mmc-rockchip.c 注释），此前用 CLKDIV 做
+  大分频（400kHz 算出 div=30）属超规格取值。
+- FIFOTH 的 msize 由 0 改为 2，并显式清 CLKSRC（对齐厂商初始化）。
+- PRV_DAT_WAIT 改为对所有命令都设（STOP 除外），依据是厂商 SDK 中
+  U-Boot 的轮询式实现 dwmci_send_cmd()。
+- 恢复 RTO 错误日志（限流 8 次）。此前为避免刷屏而屏蔽 RTO，导致
+  排查时看到驱动未报任何错误，反而误导方向。
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FBQkQQFX3kTDP3AzvLzDGx
+---
+ arch/arm64/src/rk3576/hardware/rk3576_dwmmc.h |  16 +
+ arch/arm64/src/rk3576/rk3576_dwmmc.c          | 180 +++++++++--
+ arch/arm64/src/rk3576/rk3576_gmac.c           |  82 +++++
+ drivers/timers/Kconfig                        |  11 +
+ drivers/timers/Make.defs                      |   4 +
+ drivers/timers/hym8563.c                      | 300 ++++++++++++++++++
+ include/nuttx/timers/hym8563.h                |  28 ++
+ 7 files changed, 589 insertions(+), 32 deletions(-)
+ create mode 100644 drivers/timers/hym8563.c
+ create mode 100644 include/nuttx/timers/hym8563.h
+
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_dwmmc.h b/arch/arm64/src/rk3576/hardware/rk3576_dwmmc.h
+index 939cd4c6..37435bb3 100644
+--- a/arch/arm64/src/rk3576/hardware/rk3576_dwmmc.h
++++ b/arch/arm64/src/rk3576/hardware/rk3576_dwmmc.h
+@@ -153,6 +153,22 @@
+ #define DWMMC_STATUS_FIFO_EMPTY (1u << 2)
+ #define DWMMC_STATUS_FIFO_FULL  (1u << 3)
+ #define DWMMC_STATUS_BUSY       (1u << 9)   /* data busy         */
++
++/* ★ STATUS[7:4] 是命令状态机，只有 0 是 Idle（TRM Part1）。
++ *
++ *   其中 4'he 叫 "Cmd path wait NCC" —— SD 规范要求相邻两条命令之间
++ *   至少间隔 NCC（8 个时钟）。控制器会自己走完这段，但**软件必须等**，
++ *   在它回到 Idle 之前发下一条命令会丢。
++ *
++ *   这是本端口踩过的一个隐蔽陷阱：打开命令 trace 时每条命令会打一行
++ *   日志，串口输出的耗时恰好盖住了这段等待，于是"开 trace 认得卡、
++ *   关掉就认不出"。调试输出成了功能的一部分，最容易被误判成
++ *   "关掉某个开关就坏了"。
++ */
++
++#define DWMMC_STATUS_CMD_FSM_SHIFT  4
++#define DWMMC_STATUS_CMD_FSM_MASK   (0xfu << 4)
++#define DWMMC_STATUS_CMD_FSM_IDLE   0
+ #define DWMMC_STATUS_MC_BUSY    (1u << 10)
+ #define DWMMC_GET_FCNT(x)       (((x) >> 17) & 0x1fff)
+ 
+diff --git a/arch/arm64/src/rk3576/rk3576_dwmmc.c b/arch/arm64/src/rk3576/rk3576_dwmmc.c
+index 053ed35f..cee9fbb5 100644
+--- a/arch/arm64/src/rk3576/rk3576_dwmmc.c
++++ b/arch/arm64/src/rk3576/rk3576_dwmmc.c
+@@ -60,6 +60,15 @@
+ #define DWMMC_GATE_HCLK     2        /* HCLK_SDMMC0     */
+ #define DWMMC_SEL_CON       105
+ #define DWMMC_SEL_MUX_SHIFT 13       /* 2 位：0=gpll 1=cpll 2=24M */
++#define DWMMC_SEL_MUX_GPLL  0
++#define DWMMC_SEL_MUX_24M   2
++#define DWMMC_GPLL_HZ       1188000000u
++
++/* ★ 控制器内部在 CIU 时钟上还有一级固定 2 分频（CLKGEN）。
++ * 出处 dw_mmc-rockchip.c 的 RK3288_CLKGEN_DIV。算卡时钟必须算上它。
++ */
++
++#define DWMMC_CLKGEN_DIV    2
+ #define DWMMC_SEL_DIV_SHIFT 7        /* 6 位分频            */
+ 
+ #define DWMMC_SRST_H        269      /* SRST_H_SDMMC0 */
+@@ -388,7 +397,7 @@ struct rk3576_dwmmc_dev_s
+   uint32_t          waittimeout_ms;
+   bool              widebus;
+   uint32_t          fifo_off;         /* FIFO 数据窗口偏移     */
+-  uint32_t          src_hz;           /* 控制器源时钟          */
++  uint32_t          card_hz;          /* 实际卡时钟            */
+ 
+   /* ★ 上一条命令的结果。recv_r* 必须如实返回它。
+    *
+@@ -457,45 +466,103 @@ static int dw_update_clk(void)
+ 
+ static void dw_set_clock_hz(struct rk3576_dwmmc_dev_s *priv, uint32_t hz)
+ {
++  uint32_t cclkin;
+   uint32_t div;
++  uint32_t parent;
++  uint32_t mux;
+ 
+-  /* 先停时钟再改分频 —— 运行中改分频会产生毛刺。 */
++  /* 先停时钟再改 —— 运行中改分频会产生毛刺。 */
+ 
+   dw_putreg(DWMMC_CLKENA, 0);
+   dw_update_clk();
+ 
+   if (hz == 0)
+     {
++      priv->card_hz = 0;
+       return;
+     }
+ 
+-  /* dw_mmc 的 CLKDIV 是**二倍分频**：实际 = src / (2 * div)，div=0 表示
+-   * 直通（分频比 1）。按 SDHCI 的 div 语义写会得到一半的时钟。
++  /* ★ Rockchip 的 dw_mmc 不是靠 CLKDIV 调卡时钟的，而是靠调 CIU 源时钟。
++   *
++   *   厂商驱动 dw_mmc-rockchip.c 的 dw_mci_rk3288_set_ios() 注释：
++   *
++   *     bus_hz = cclkin / RK3288_CLKGEN_DIV        // CLKGEN 固定 2 分频
++   *     ios->clock = (div == 0) ? bus_hz : bus_hz / (2 * div)
++   *     Note: div can only be 0 or 1
++   *     cclkin = ios->clock * RK3288_CLKGEN_DIV    // clk_set_rate 调源时钟
++   *
++   *   也就是说控制器内部先固定 2 分频，CLKDIV 只允许 0 或 1。
++   *
++   *   此前本端口把源时钟固定在 24MHz、用 CLKDIV 做大分频（400kHz 算出
++   *   div=30）—— 那是**超出规格的取值**。控制器由此进入未定义行为，
++   *   表现为对代码布局极度敏感：命令路径上多一条 syslog 就能工作，
++   *   换成等效延时、编译屏障或让出 CPU 都不行。这类"看起来像时序"的
++   *   现象，根子往往是某个字段被写了非法值。
++   *
++   *   现在改为：CLKDIV 固定 0，用 CRU 调 CCLK_SRC_SDMMC0 到 hz*2。
++   *
++   *     COMPOSITE(CCLK_SRC_SDMMC0, gpll_cpll_24m_p,
++   *               CLKSEL_CON(105), 13, 2, MFLAGS,   选源
++   *                                 7, 6, DFLAGS)   6 位分频
++   */
++
++  /* ★ 这里不乘 CLKGEN_DIV。
++   *
++   *   厂商 RK3288 的驱动里 cclkin = ios->clock * RK3288_CLKGEN_DIV，
++   *   前提是控制器内部确有那一级 2 分频。RK3576 是否相同**未经证实** ——
++   *   若没有，乘 2 会让识别阶段的卡时钟变成 800kHz，超过规范的 400kHz
++   *   上限，表现为部分命令响应超时（实测 CMD55 RTO）。
++   *
++   *   按 hz 直接设源时钟，两种情况下都合法：
++   *     有 CLKGEN/2 -> 实际 hz/2，偏慢但合规
++   *     无 CLKGEN/2 -> 实际 hz，正好
++   *   先保证能工作，分频器是否存在等能通信后再用实测频率确认。
+    */
+ 
+-  if (hz >= priv->src_hz)
++  cclkin = hz;
++
++  /* 选源：低速用 24M 分频，高速用 gpll。分频器只有 6 位（1..64），
++   * 所以源频率不能离目标太远。
++   */
++
++  if (cclkin <= 24000000)
+     {
+-      div = 0;
++      parent = 24000000;
++      mux    = DWMMC_SEL_MUX_24M;
+     }
+   else
+     {
+-      div = (priv->src_hz + (hz * 2) - 1) / (hz * 2);
+-      if (div > 0xff)
+-        {
+-          div = 0xff;
+-        }
++      parent = DWMMC_GPLL_HZ;
++      mux    = DWMMC_SEL_MUX_GPLL;
+     }
+ 
+-  dw_putreg(DWMMC_CLKDIV, div);
++  div = (parent + cclkin - 1) / cclkin;
++  if (div < 1)
++    {
++      div = 1;
++    }
++  else if (div > 64)
++    {
++      div = 64;
++    }
++
++  rk3576_clk_setmux(DWMMC_SEL_CON, DWMMC_SEL_MUX_SHIFT, 2, mux);
++  rk3576_clk_setmux(DWMMC_SEL_CON, DWMMC_SEL_DIV_SHIFT, 6, div - 1);
++
++  /* CLKDIV 固定 0 = 直通（规格只允许 0 或 1） */
++
++  dw_putreg(DWMMC_CLKDIV, 0);
+   dw_update_clk();
+ 
+   dw_putreg(DWMMC_CLKENA, DWMMC_CLKENA_ENABLE);
+   dw_update_clk();
+ 
++  priv->card_hz = parent / div;
++
+   syslog(LOG_INFO,
+-         "DW clock() 目标 %" PRIu32 "Hz div=%" PRIu32
+-         " 实际 %" PRIu32 "Hz\n",
+-         hz, div, div == 0 ? priv->src_hz : priv->src_hz / (2 * div));
++         "DWMMC: 卡时钟 目标 %" PRIu32 "Hz 源=%" PRIu32 "Hz/%" PRIu32
++         " = %" PRIu32 "Hz（若含 CLKGEN/2 则再半）\n",
++         hz, parent, div, priv->card_hz);
+ }
+ 
+ /****************************************************************************
+@@ -718,7 +785,7 @@ static int rk3576_dwmmc_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
+   if ((cmd & MMCSD_DATAXFR_MASK) != MMCSD_NODATAXFR &&
+       priv->buffer != NULL && priv->remaining > 0)
+     {
+-      regval |= DWMMC_CMD_DAT_EXP | DWMMC_CMD_PRV_DAT_WAIT;
++      regval |= DWMMC_CMD_DAT_EXP;
+       if ((cmd & MMCSD_WRXFR) != 0)
+         {
+           regval |= DWMMC_CMD_DAT_WR;
+@@ -743,18 +810,38 @@ static int rk3576_dwmmc_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
+       regval |= DWMMC_CMD_INIT;
+     }
+ 
++  /* ★ PRV_DAT_WAIT 要对**每一条**命令都设，不只是带数据的。
++   *
++   *   出处是厂商 SDK 里 U-Boot 的轮询式实现（与本驱动同构）
++   *   u-boot/drivers/mmc/dw_mmc.c dwmci_send_cmd()：
++   *
++   *     if (cmd->cmdidx == MMC_CMD_STOP_TRANSMISSION)
++   *             flags |= DWMCI_CMD_ABORT_STOP;
++   *     else
++   *             flags |= DWMCI_CMD_PRV_DAT_WAIT;
++   *
++   *   不设它时，命令可能在控制器尚未收尾时发出而丢失 —— 表现为
++   *   waitresponse 等不到 CMD_DONE，且现象随代码布局漂移。
++   */
++
++  if ((cmd & MMCSD_CMDIDX_MASK) == 12)
++    {
++      regval |= DWMMC_CMD_STOP;
++    }
++  else
++    {
++      regval |= DWMMC_CMD_PRV_DAT_WAIT;
++    }
++
+   /* 每条命令开始时先置为未完成，避免沿用上一条的结果。 */
+ 
+   priv->last_result = -EBUSY;
+ 
++  /* 顺序与 U-Boot 一致：先等卡不忙，再清中断状态，最后写参数与命令。 */
++
++  dw_wait_while_busy();
+   dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);
+   dw_putreg(DWMMC_CMDARG, arg);
+-
+-  if (regval & DWMMC_CMD_PRV_DAT_WAIT)
+-    {
+-      dw_wait_while_busy();
+-    }
+-
+   dw_putreg(DWMMC_CMD, regval);
+ 
+   /* 等待命令被控制器接受（START 位自清）。这一步不等于命令完成，
+@@ -817,12 +904,28 @@ static int rk3576_dwmmc_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
+           syslog(LOG_INFO, "DW CMD%" PRIu32 " err sts=0x%08" PRIx32 "\n",
+                  cmd & MMCSD_CMDIDX_MASK, sts);
+ #else
+-          if ((sts & DWMMC_INT_RTO) == 0)
+-            {
+-              syslog(LOG_ERR,
+-                     "ERROR: DWMMC CMD%" PRIu32 " 响应错误 RINTSTS=0x%08"
+-                     PRIx32 "\n", cmd & MMCSD_CMDIDX_MASK, sts);
+-            }
++          /* ★ RTO 也要记。曾经为避免刷屏而只记非 RTO 的错误，结果把
++           * "CMD55 响应超时"这条最关键的信息屏蔽掉了，排查时看到的是
++           * "驱动没报任何错误"，反而误导。刷屏可以靠限流解决，信息
++           * 缺失无法补救。
++           */
++
++          {
++            static int rto_reported;
++
++            if ((sts & DWMMC_INT_RTO) == 0 || rto_reported < 8)
++              {
++                if (sts & DWMMC_INT_RTO)
++                  {
++                    rto_reported++;
++                  }
++
++                syslog(LOG_ERR,
++                       "DWMMC CMD%" PRIu32 " %s RINTSTS=0x%08" PRIx32 "\n",
++                       cmd & MMCSD_CMDIDX_MASK,
++                       (sts & DWMMC_INT_RTO) ? "响应超时" : "响应错误", sts);
++              }
++          }
+ #endif
+ 
+           dw_putreg(DWMMC_RINTSTS, DWMMC_INT_CMD_ERROR);
+@@ -1203,7 +1306,7 @@ struct sdio_dev_s *rk3576_dwmmc_initialize(void)
+ 
+   /* 源时钟：上面把选源设成了 xin24m、不分频。 */
+ 
+-  priv->src_hz = 24000000;
++
+ 
+   /* FIFO 水位：msize=0（1 字突发），收发水位都取深度的一半。
+    *
+@@ -1218,15 +1321,28 @@ struct sdio_dev_s *rk3576_dwmmc_initialize(void)
+     {
+       depth = 128;
+     }
++  /* ★ msize 取 2，不是 0。
++   *
++   *   厂商驱动 dw_mmc.c 的初始化：
++   *     host->fifoth_val = SDMMC_SET_FIFOTH(0x2, fifo_size / 2 - 1,
++   *                                              fifo_size / 2);
++   *   msize 是 FIFO 与卡之间的突发长度编码，写错会让搬运行为异常。
++   */
++
+   dw_putreg(DWMMC_FIFOTH,
+-            DWMMC_SET_FIFOTH(0, depth / 2 - 1, depth / 2));
++            DWMMC_SET_FIFOTH(0x2, depth / 2 - 1, depth / 2));
++
++  /* 厂商在初始化时显式清 CLKSRC（该寄存器在新版 IP 上保留不用，
++   * 但残留值会影响时钟选择）。
++   */
++
++  dw_putreg(DWMMC_CLKSRC, 0);
+ 
+   dw_putreg(DWMMC_CTRL, DWMMC_CTRL_INT_ENABLE);
+ 
+   syslog(LOG_INFO,
+          "DWMMC: sdio_dev 就绪 FIFO 窗口=0x%03" PRIx32
+-         " 深度=%" PRIu32 " 源时钟=%" PRIu32 "Hz\n",
+-         priv->fifo_off, depth, priv->src_hz);
++         " 深度=%" PRIu32 "\n", priv->fifo_off, depth);
+ 
+   return &priv->dev;
+ }
+diff --git a/arch/arm64/src/rk3576/rk3576_gmac.c b/arch/arm64/src/rk3576/rk3576_gmac.c
+index 9ccc73f8..87850136 100644
+--- a/arch/arm64/src/rk3576/rk3576_gmac.c
++++ b/arch/arm64/src/rk3576/rk3576_gmac.c
+@@ -478,6 +478,88 @@ int rk3576_gmac_probe(int port)
+          "GMAC%d: 复位前 DMA_MODE=0x%08" PRIx32 " MAC_VERSION=0x%08" PRIx32
+          "\n", port, gmac_getreg(port, RK3576_GMAC_DMA_MODE), version);
+ 
++  /* ★ 复位之前先把「时钟到底在不在跑」测出来。
++   *
++   *   DWMAC 4.20a 的 SWR 只有在**所有时钟域都就绪**后才会自清，其中
++   *   包含 PHY 送来的 RX 时钟。因此 SWR 不清有至少四种原因：
++   *     a) PHY 没有输出 RX 时钟（没上电／被摁在复位／没插网线）
++   *     b) SoC 侧的 TX 时钟没配好
++   *     c) CRU 里还有门控没开
++   *     d) GRF 的接口选择不对
++   *   四者现象完全一样，此前在它们之间来回排除了多轮仍未定位。
++   *
++   *   直接测量：把时钟脚临时切成 GPIO 输入，连续采样若干次。时钟在跑
++   *   的话采样值必然有 0 有 1（125MHz 对 GPIO 读是高度混叠的随机采样）；
++   *   恒为同一个值就说明这根线是静止的。
++   *
++   *   这一步能把 (a)(b) 与 (c)(d) 彻底分开 —— 前者是板级/PHY 问题，
++   *   后者是 SoC 配置问题，修法毫不相干。
++   */
++
++  {
++    static const struct
++    {
++      const char *name;
++      uint8_t     pin;
++    }
++    clkpins[] =
++    {
++      { "RXCLK(PHY 送来)", 25 },
++      { "TXCLK(SoC 送出)", 14 },
++    };
++
++    int i;
++
++    for (i = 0; i < 2; i++)
++      {
++        int ones = 0;
++        int j;
++        int prev;
++        int edges = 0;
++
++        rk3576_pinmux_set(GMAC0_PIN_BANK, clkpins[i].pin,
++                          RK3576_PINMUX_GPIO);
++        rk3576_pinmux_setpull(GMAC0_PIN_BANK, clkpins[i].pin,
++                              RK3576_PULL_NONE);
++        rk3576_gpio_setdir(GMAC0_PIN_BANK, clkpins[i].pin, false);
++        up_udelay(50);
++
++        prev = rk3576_gpio_read(GMAC0_PIN_BANK, clkpins[i].pin);
++
++        for (j = 0; j < 200; j++)
++          {
++            int v = rk3576_gpio_read(GMAC0_PIN_BANK, clkpins[i].pin);
++
++            ones += v;
++            if (v != prev)
++              {
++                edges++;
++              }
++
++            prev = v;
++          }
++
++        syslog(LOG_INFO,
++               "GMAC%d: %s g%d-%u 采样 200 次 高=%d 跳变=%d —— %s\n",
++               port, clkpins[i].name, GMAC0_PIN_BANK, clkpins[i].pin,
++               ones, edges,
++               edges > 0 ? "有跳变，时钟在跑" :
++                           (ones == 0 ? "恒低，无时钟" : "恒高，无时钟"));
++
++        /* 串口在连续输出时会丢字节，这两行是本次测量的全部结论，
++         * 丢一行就等于白测，所以留出间隔。
++         */
++
++        up_mdelay(20);
++
++        /* 测完还回 RGMII 功能 —— 诊断改了复用必须还原，
++         * 否则后面的现象都是自己造出来的（本项目在触摸那次踩过）。
++         */
++
++        rk3576_pinmux_set(GMAC0_PIN_BANK, clkpins[i].pin, GMAC0_PIN_FUNC);
++      }
++  }
++
+   gmac_putreg(port, RK3576_GMAC_DMA_MODE, GMAC_DMA_MODE_SWR);
+ 
+   syslog(LOG_INFO, "GMAC%d: 写 SWR 后立刻回读 DMA_MODE=0x%08" PRIx32 "\n",
+diff --git a/drivers/timers/Kconfig b/drivers/timers/Kconfig
+index 31c2f53f..e08c5074 100644
+--- a/drivers/timers/Kconfig
++++ b/drivers/timers/Kconfig
+@@ -328,6 +328,17 @@ config RTC_DS1307
+ 	---help---
+ 		Enables support for the Maxim Integrated DS1307 I2C RTC timer.
+ 
++config RTC_HYM8563
++	bool "Haoyu HYM8563 I2C RTC"
++	default n
++	depends on I2C
++	---help---
++		Haoyu HYM8563 I2C 实时时钟。
++
++		★ 秒寄存器 bit7 是掉电标志（VL），置位表示走时曾中断、
++		  读出的时间不可信。本驱动在该情况下让 rdtime 返回 -ENODATA，
++		  而不是交出一个看似合法的随机时间 —— 后者比读不出来更难查。
++
+ config RTC_DS3231
+ 	bool "DS3231"
+ 	---help---
+diff --git a/drivers/timers/Make.defs b/drivers/timers/Make.defs
+index ee3d0b00..6681aba3 100644
+--- a/drivers/timers/Make.defs
++++ b/drivers/timers/Make.defs
+@@ -153,3 +153,7 @@ endif
+ 
+ DEPPATH += $(TMRDEPPATH)
+ VPATH += $(TMRVPATH)
++
++ifeq ($(CONFIG_RTC_HYM8563),y)
++  CSRCS += hym8563.c
++endif
+diff --git a/drivers/timers/hym8563.c b/drivers/timers/hym8563.c
+new file mode 100644
+index 00000000..f8845b62
+--- /dev/null
++++ b/drivers/timers/hym8563.c
+@@ -0,0 +1,300 @@
++/****************************************************************************
++ * drivers/timers/hym8563.c
++ *
++ * Haoyu HYM8563 I2C 实时时钟。
++ *
++ * 寄存器定义取自 Linux drivers/rtc/rtc-hym8563.c。
++ *
++ * ★ 掉电标志（秒寄存器 bit7，VL）是这颗芯片唯一能说明"时间可不可信"
++ *   的位。它置位表示电压曾经低到无法保证走时，读出来的时间是垃圾。
++ *   不检查它的话，上层会拿到一个看似合法、实则随机的时间，而且没有
++ *   任何迹象表明有问题 —— 这类错误比读不出来更难查。
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include <stdint.h>
++#include <stdbool.h>
++#include <string.h>
++#include <errno.h>
++#include <syslog.h>
++
++#include <nuttx/i2c/i2c_master.h>
++#include <nuttx/timers/rtc.h>
++#include <nuttx/kmalloc.h>
++
++#ifdef CONFIG_RTC_HYM8563
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++#define HYM8563_CTL1        0x00
++#define HYM8563_CTL1_STOP   (1 << 5)
++
++#define HYM8563_CTL2        0x01
++
++#define HYM8563_SEC         0x02
++#define HYM8563_SEC_VL      (1 << 7)   /* 掉电标志：置位表示时间不可信 */
++#define HYM8563_SEC_MASK    0x7f
++#define HYM8563_MIN_MASK    0x7f
++#define HYM8563_HOUR_MASK   0x3f
++#define HYM8563_DAY_MASK    0x3f
++#define HYM8563_WEEKDAY_MASK 0x07
++#define HYM8563_MONTH_CENTURY (1 << 7)
++#define HYM8563_MONTH_MASK  0x1f
++
++/****************************************************************************
++ * Private Types
++ ****************************************************************************/
++
++struct hym8563_dev_s
++{
++  struct rtc_lowerhalf_s      lower;   /* 必须是第一个成员 */
++  FAR struct i2c_master_s    *i2c;
++  uint8_t                     addr;
++  uint32_t                    freq;
++};
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint8_t bcd2bin(uint8_t v)
++{
++  return (v & 0x0f) + ((v >> 4) * 10);
++}
++
++static inline uint8_t bin2bcd(uint8_t v)
++{
++  return ((v / 10) << 4) | (v % 10);
++}
++
++static int hym8563_read(FAR struct hym8563_dev_s *priv, uint8_t reg,
++                        FAR uint8_t *buf, size_t len)
++{
++  struct i2c_msg_s msg[2];
++
++  msg[0].frequency = priv->freq;
++  msg[0].addr      = priv->addr;
++  msg[0].flags     = 0;
++  msg[0].buffer    = &reg;
++  msg[0].length    = 1;
++
++  msg[1].frequency = priv->freq;
++  msg[1].addr      = priv->addr;
++  msg[1].flags     = I2C_M_READ;
++  msg[1].buffer    = buf;
++  msg[1].length    = len;
++
++  return I2C_TRANSFER(priv->i2c, msg, 2);
++}
++
++static int hym8563_write(FAR struct hym8563_dev_s *priv, uint8_t reg,
++                         FAR const uint8_t *buf, size_t len)
++{
++  struct i2c_msg_s msg;
++  uint8_t tmp[8];
++
++  if (len + 1 > sizeof(tmp))
++    {
++      return -EINVAL;
++    }
++
++  tmp[0] = reg;
++  memcpy(&tmp[1], buf, len);
++
++  msg.frequency = priv->freq;
++  msg.addr      = priv->addr;
++  msg.flags     = 0;
++  msg.buffer    = tmp;
++  msg.length    = len + 1;
++
++  return I2C_TRANSFER(priv->i2c, &msg, 1);
++}
++
++/****************************************************************************
++ * Name: hym8563_rdtime
++ ****************************************************************************/
++
++static int hym8563_rdtime(FAR struct rtc_lowerhalf_s *lower,
++                          FAR struct rtc_time *rtctime)
++{
++  FAR struct hym8563_dev_s *priv = (FAR struct hym8563_dev_s *)lower;
++  uint8_t buf[7];
++  int ret;
++
++  ret = hym8563_read(priv, HYM8563_SEC, buf, sizeof(buf));
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  /* ★ 先看掉电标志再解释数据。置位时后面的值是随机的，返回它等于
++   * 给上层一个看似合法的错误时间。
++   */
++
++  if (buf[0] & HYM8563_SEC_VL)
++    {
++      syslog(LOG_WARNING,
++             "HYM8563: 掉电标志置位，时间不可信（需先 settime）\n");
++      return -ENODATA;
++    }
++
++  rtctime->tm_sec  = bcd2bin(buf[0] & HYM8563_SEC_MASK);
++  rtctime->tm_min  = bcd2bin(buf[1] & HYM8563_MIN_MASK);
++  rtctime->tm_hour = bcd2bin(buf[2] & HYM8563_HOUR_MASK);
++  rtctime->tm_mday = bcd2bin(buf[3] & HYM8563_DAY_MASK);
++  rtctime->tm_wday = bcd2bin(buf[4] & HYM8563_WEEKDAY_MASK);
++  rtctime->tm_mon  = bcd2bin(buf[5] & HYM8563_MONTH_MASK) - 1;
++
++  /* 世纪位在月份寄存器的 bit7：置位表示 20xx 之前的世纪。
++   * tm_year 以 1900 为基准。
++   */
++
++  rtctime->tm_year = bcd2bin(buf[6]) +
++                     ((buf[5] & HYM8563_MONTH_CENTURY) ? 0 : 100);
++  return OK;
++}
++
++/****************************************************************************
++ * Name: hym8563_settime
++ ****************************************************************************/
++
++static int hym8563_settime(FAR struct rtc_lowerhalf_s *lower,
++                           FAR const struct rtc_time *rtctime)
++{
++  FAR struct hym8563_dev_s *priv = (FAR struct hym8563_dev_s *)lower;
++  uint8_t buf[7];
++  uint8_t ctl1;
++  int ret;
++
++  /* 写时间之前必须停走时，否则可能写到一半被进位打断。 */
++
++  ret = hym8563_read(priv, HYM8563_CTL1, &ctl1, 1);
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  ctl1 |= HYM8563_CTL1_STOP;
++  ret = hym8563_write(priv, HYM8563_CTL1, &ctl1, 1);
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  buf[0] = bin2bcd(rtctime->tm_sec);    /* 写 0 到 VL 位，清掉电标志 */
++  buf[1] = bin2bcd(rtctime->tm_min);
++  buf[2] = bin2bcd(rtctime->tm_hour);
++  buf[3] = bin2bcd(rtctime->tm_mday);
++  buf[4] = bin2bcd(rtctime->tm_wday);
++  buf[5] = bin2bcd(rtctime->tm_mon + 1);
++  buf[6] = bin2bcd(rtctime->tm_year % 100);
++
++  if (rtctime->tm_year < 100)
++    {
++      buf[5] |= HYM8563_MONTH_CENTURY;
++    }
++
++  ret = hym8563_write(priv, HYM8563_SEC, buf, sizeof(buf));
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  /* 恢复走时 */
++
++  ctl1 &= ~HYM8563_CTL1_STOP;
++  return hym8563_write(priv, HYM8563_CTL1, &ctl1, 1);
++}
++
++static bool hym8563_havesettime(FAR struct rtc_lowerhalf_s *lower)
++{
++  FAR struct hym8563_dev_s *priv = (FAR struct hym8563_dev_s *)lower;
++  uint8_t sec;
++
++  /* 掉电标志没置位，就说明走时未中断过，时间可信。 */
++
++  if (hym8563_read(priv, HYM8563_SEC, &sec, 1) < 0)
++    {
++      return false;
++    }
++
++  return (sec & HYM8563_SEC_VL) == 0;
++}
++
++static const struct rtc_ops_s g_hym8563_ops =
++{
++  .rdtime      = hym8563_rdtime,
++  .settime     = hym8563_settime,
++  .havesettime = hym8563_havesettime,
++};
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: hym8563_rtc_initialize
++ *
++ * Description:
++ *   注册 HYM8563 为 /dev/rtcN。
++ *
++ ****************************************************************************/
++
++int hym8563_rtc_initialize(int minor, FAR struct i2c_master_s *i2c,
++                           uint8_t addr, uint32_t frequency)
++{
++  FAR struct hym8563_dev_s *priv;
++  uint8_t ctl[2];
++  int ret;
++
++  if (i2c == NULL)
++    {
++      return -EINVAL;
++    }
++
++  priv = kmm_zalloc(sizeof(struct hym8563_dev_s));
++  if (priv == NULL)
++    {
++      return -ENOMEM;
++    }
++
++  priv->lower.ops = &g_hym8563_ops;
++  priv->i2c       = i2c;
++  priv->addr      = addr;
++  priv->freq      = frequency;
++
++  /* ★ 先读一次控制寄存器确认芯片真的在总线上应答。
++   * 注册成功不等于器件存在 —— 这一点在本板的触摸上踩过。
++   */
++
++  ret = hym8563_read(priv, HYM8563_CTL1, ctl, 2);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "ERROR: HYM8563 @0x%02x 无应答: %d\n", addr, ret);
++      kmm_free(priv);
++      return ret;
++    }
++
++  syslog(LOG_INFO, "HYM8563: 应答正常 CTL1=0x%02x CTL2=0x%02x\n",
++         ctl[0], ctl[1]);
++
++  ret = rtc_initialize(minor, (FAR struct rtc_lowerhalf_s *)priv);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "ERROR: 注册 /dev/rtc%d 失败: %d\n", minor, ret);
++      kmm_free(priv);
++      return ret;
++    }
++
++  return OK;
++}
++
++#endif /* CONFIG_RTC_HYM8563 */
+diff --git a/include/nuttx/timers/hym8563.h b/include/nuttx/timers/hym8563.h
+new file mode 100644
+index 00000000..b597148d
+--- /dev/null
++++ b/include/nuttx/timers/hym8563.h
+@@ -0,0 +1,28 @@
++/****************************************************************************
++ * include/nuttx/timers/hym8563.h
++ ****************************************************************************/
++
++#ifndef __INCLUDE_NUTTX_TIMERS_HYM8563_H
++#define __INCLUDE_NUTTX_TIMERS_HYM8563_H
++
++#include <nuttx/config.h>
++#include <stdint.h>
++#include <nuttx/i2c/i2c_master.h>
++
++/****************************************************************************
++ * Public Function Prototypes
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: hym8563_rtc_initialize
++ *
++ * Description:
++ *   把 HYM8563 注册为 /dev/rtc<minor>。注册前会读控制寄存器确认器件
++ *   在位；掉电标志置位时 rdtime 返回 -ENODATA，而不是交出随机时间。
++ *
++ ****************************************************************************/
++
++int hym8563_rtc_initialize(int minor, FAR struct i2c_master_s *i2c,
++                           uint8_t addr, uint32_t frequency);
++
++#endif /* __INCLUDE_NUTTX_TIMERS_HYM8563_H */
+-- 
+2.43.0
+
+
+From d170765c4ab997d9f7dc6270211cbdfe3a18cd5b Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Thu, 3 Sep 2026 13:34:59 +0800
+Subject: [PATCH 25/27] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=20DesignWare?=
+ =?UTF-8?q?=20=E7=9C=8B=E9=97=A8=E7=8B=97=E9=A9=B1=E5=8A=A8=EF=BC=88xTS=20?=
+ =?UTF-8?q?1.3.15=EF=BC=89?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+watchdog@2ace0000（snps,dw-wdt），时钟 PCLK_WDT0/TCLK_WDT0 =
+CLKGATE_CON(16) bit7/bit8，tclk 接 xin24m。
+
+★ 两处与常规看门狗不同，已在代码与 Kconfig 中写明：
+  1) 使能后无法由软件关闭，stop() 返回 -ENOSYS 而非假装成功 ——
+     上层若以为已停而不再喂狗，会莫名重启且极难追查。
+  2) 超时只能取 2^(16+i) 个 tclk 周期的离散档位。驱动取不小于请求值
+     的最小档（宁长勿短），getstatus() 报告实际值而非请求值。
+     实测请求 10000ms 落在档位 12 = 11184ms。
+
+初始化时取两个独立判据：TORR 写回读验证 pclk 与基址；CCVR 两次读数
+验证 tclk（未使能时不计数属正常，已在日志中说明）。
+
+板级新增 board_reset_cause()，依据 TRM 的 CRU_GLBRST_ST(0x0C04) 区分
+上电复位与看门狗复位，读后写 1 清 —— 不清的话下次启动仍看到旧原因，
+而 xTS 用例正是靠这个变化判定的。
+
+板上实测：用例运行后看门狗触发系统复位，重启后恢复正常。
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FBQkQQFX3kTDP3AzvLzDGx
+---
+ arch/arm64/src/rk3576/Kconfig                 |  13 +
+ arch/arm64/src/rk3576/Make.defs               |   4 +
+ .../src/rk3576/hardware/rk3576_memorymap.h    |   1 +
+ arch/arm64/src/rk3576/rk3576_gpio.c           |  14 +
+ arch/arm64/src/rk3576/rk3576_wdt.c            | 300 ++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_wdt.h            |  26 ++
+ drivers/timers/hym8563.c                      |  16 +
+ 7 files changed, 374 insertions(+)
+ create mode 100644 arch/arm64/src/rk3576/rk3576_wdt.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_wdt.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index 62ae7f6b..ad03965e 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -81,6 +81,19 @@ config RK3576_VOP2
+ 		当前实现电源域/时钟自检与内置彩条输出。彩条不经过帧缓冲与
+ 		图层，可把"VOP 时序配置"与"图层/内存通路"两类问题分开验证。
+ 
++config RK3576_WDT
++	bool "看门狗 (Synopsys DesignWare)"
++	default n
++	depends on WATCHDOG
++	---help---
++		RK3576 的看门狗（0x2ace0000，snps,dw-wdt）。
++
++		★ 两点与常规看门狗不同，接入时要留意：
++		  1) 一旦使能便**无法由软件关闭**，stop() 返回 -ENOSYS。
++		     假装停成功会让上层不再喂狗，之后莫名重启。
++		  2) 超时只能取 2^(16+i) 个 tclk 周期的离散档位，设不出精确值。
++		     驱动取不小于请求值的最小档，并让 getstatus() 报告实际值。
++
+ config RK3576_DWMMC
+ 	bool "SD 卡控制器 (DesignWare MSHC)"
+ 	default n
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index 06e78269..a4c0967f 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -46,6 +46,10 @@ ifeq ($(CONFIG_RK3576_VOP2),y)
+ CHIP_CSRCS += rk3576_vop2.c
+ endif
+ 
++ifeq ($(CONFIG_RK3576_WDT),y)
++CHIP_CSRCS += rk3576_wdt.c
++endif
++
+ CHIP_CSRCS += rk3576_reboot.c
+ 
+ ifeq ($(CONFIG_RK3576_DWMMC),y)
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h b/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+index f9b08881..9dec6e4c 100644
+--- a/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
++++ b/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+@@ -123,6 +123,7 @@
+ 
+ /* I2C —— 同样分两段 */
+ 
++#define RK3576_WDT_ADDR        0x2ace0000   /* 看门狗 snps,dw-wdt */
+ #define RK3576_I2C0_ADDR       0x27300000
+ #define RK3576_I2C1_ADDR       0x2ac40000
+ #define RK3576_I2C2_ADDR       0x2ac50000
+diff --git a/arch/arm64/src/rk3576/rk3576_gpio.c b/arch/arm64/src/rk3576/rk3576_gpio.c
+index 0e970b29..edb7a4ee 100644
+--- a/arch/arm64/src/rk3576/rk3576_gpio.c
++++ b/arch/arm64/src/rk3576/rk3576_gpio.c
+@@ -124,6 +124,20 @@ static int rk3576_gpio_interrupt(int irq, void *context, void *arg)
+   base   = g_gpio_base[bank];
+   status = getreg32(base + RK3576_GPIO_INT_STATUS);
+ 
++  /* ★ 状态为 0 的伪中断也必须清一次，否则直接返回会让中断线一直有效，
++   * 立刻重入 —— 形成中断风暴，现象是整块板子失去响应而不是报错。
++   */
++
++  if (status == 0)
++    {
++      for (pin = 0; pin < RK3576_GPIO_NPINS; pin++)
++        {
++          rk3576_gpio_wr16(base, RK3576_GPIO_PORT_EOI_L, pin, true);
++        }
++
++      return OK;
++    }
++
+   for (pin = 0; pin < RK3576_GPIO_NPINS; pin++)
+     {
+       if ((status & (1u << pin)) == 0)
+diff --git a/arch/arm64/src/rk3576/rk3576_wdt.c b/arch/arm64/src/rk3576/rk3576_wdt.c
+new file mode 100644
+index 00000000..312f31ec
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_wdt.c
+@@ -0,0 +1,300 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_wdt.c
++ *
++ * RK3576 看门狗（Synopsys DesignWare WDT，watchdog@2ace0000）。
++ *
++ * 板级依据取自原厂 dtb：
++ *   compatible = "snps,dw-wdt"
++ *   reg        = <0x2ace0000 0x100>
++ *   interrupts = <GIC_SPI 40>
++ *   clocks     = tclk（xin24m）, pclk
++ *
++ * 时钟（clk-rk3576.c）：
++ *   GATE(PCLK_WDT0, "pclk_wdt0", "pclk_bus_root", RK3576_CLKGATE_CON(16), 7)
++ *   GATE(TCLK_WDT0, "tclk_wdt0", "xin24m",        RK3576_CLKGATE_CON(16), 8)
++ *
++ * ★ DesignWare 看门狗的超时不是任意值：它只能取 2^(16+i) 个 tclk 周期，
++ *   i 为 0..15。也就是说超时时间是一组离散档位，设不出精确值。本驱动
++ *   选「不小于请求值的最小档」，并把实际生效的值回填给上层 —— 上层若
++ *   按请求值去算喂狗间隔，可能比实际超时更长而被复位。
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include <stdint.h>
++#include <inttypes.h>
++#include <errno.h>
++#include <syslog.h>
++
++#include <nuttx/timers/watchdog.h>
++
++#include "arm64_internal.h"
++#include "rk3576_cru.h"
++#include "rk3576_wdt.h"
++#include "hardware/rk3576_memorymap.h"
++
++#ifdef CONFIG_RK3576_WDT
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++#define WDT_CR              0x00     /* 控制         */
++#define WDT_CR_EN           (1 << 0)
++#define WDT_CR_RMOD         (1 << 1) /* 0=直接复位 1=先中断再复位 */
++
++#define WDT_TORR            0x04     /* 超时档位     */
++#define WDT_CCVR            0x08     /* 当前计数值   */
++#define WDT_CRR             0x0c     /* 喂狗         */
++#define WDT_CRR_KICK        0x76     /* 喂狗魔数     */
++#define WDT_STAT            0x10
++#define WDT_EOI             0x14
++
++#define WDT_GATE_CON        16
++#define WDT_GATE_PCLK       7
++#define WDT_GATE_TCLK       8
++
++#define WDT_TCLK_HZ         24000000u   /* tclk 接 xin24m */
++#define WDT_MAX_TOP         15
++
++/****************************************************************************
++ * Private Types
++ ****************************************************************************/
++
++struct rk3576_wdt_s
++{
++  struct watchdog_lowerhalf_s lower;   /* 必须是第一个成员 */
++  uint32_t                    timeout_ms;   /* 上层请求的值 */
++  uint32_t                    actual_ms;    /* 实际生效的档位 */
++  bool                        started;
++};
++
++/****************************************************************************
++ * Private Data
++ ****************************************************************************/
++
++static struct rk3576_wdt_s g_wdt;
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint32_t wdt_getreg(uint32_t off)
++{
++  return getreg32(RK3576_WDT_ADDR + off);
++}
++
++static inline void wdt_putreg(uint32_t off, uint32_t val)
++{
++  putreg32(val, RK3576_WDT_ADDR + off);
++}
++
++/****************************************************************************
++ * Name: wdt_top_for_ms
++ *
++ * Description:
++ *   把毫秒换成 DesignWare 的超时档位。
++ *
++ *   档位 i 对应 2^(16+i) 个 tclk 周期。取不小于请求值的最小档 ——
++ *   宁可超时比请求的长，也不能短：短了会在上层认为安全的间隔内复位。
++ *
++ ****************************************************************************/
++
++static uint32_t wdt_top_for_ms(uint32_t ms, FAR uint32_t *actual_ms)
++{
++  uint64_t want = (uint64_t)ms * WDT_TCLK_HZ / 1000;
++  uint32_t i;
++
++  for (i = 0; i <= WDT_MAX_TOP; i++)
++    {
++      uint64_t cycles = 1ull << (16 + i);
++
++      if (cycles >= want)
++        {
++          *actual_ms = (uint32_t)(cycles * 1000 / WDT_TCLK_HZ);
++          return i;
++        }
++    }
++
++  *actual_ms = (uint32_t)((1ull << (16 + WDT_MAX_TOP)) * 1000 / WDT_TCLK_HZ);
++  return WDT_MAX_TOP;
++}
++
++/****************************************************************************
++ * 下半部接口
++ ****************************************************************************/
++
++static int rk3576_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
++{
++  FAR struct rk3576_wdt_s *priv = (FAR struct rk3576_wdt_s *)lower;
++
++  /* 先喂一次再使能，避免刚开就因残留计数被复位。 */
++
++  wdt_putreg(WDT_CRR, WDT_CRR_KICK);
++
++  /* RMOD=0：超时直接复位系统，不先产生中断。看门狗的意义就是在
++   * 软件已经失控时把系统拉回来，中断处理程序未必还能运行。
++   */
++
++  wdt_putreg(WDT_CR, WDT_CR_EN);
++  priv->started = true;
++  return OK;
++}
++
++static int rk3576_wdt_stop(FAR struct watchdog_lowerhalf_s *lower)
++{
++  FAR struct rk3576_wdt_s *priv = (FAR struct rk3576_wdt_s *)lower;
++
++  /* ★ DesignWare 看门狗一旦使能，**软件无法关闭** —— WDT_CR 的使能位
++   *   是「写一次生效、只能靠复位清除」的。这里如实返回不支持，而不是
++   *   假装成功：上层若以为已经停了而不再喂狗，会在超时后被复位，
++   *   现象是"莫名其妙重启"，极难追查。
++   */
++
++  UNUSED(priv);
++  syslog(LOG_WARNING,
++         "WDT: DesignWare 看门狗使能后不能由软件关闭，忽略 stop\n");
++  return -ENOSYS;
++}
++
++static int rk3576_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)
++{
++  UNUSED(lower);
++  wdt_putreg(WDT_CRR, WDT_CRR_KICK);
++  return OK;
++}
++
++static int rk3576_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
++                                FAR struct watchdog_status_s *status)
++{
++  FAR struct rk3576_wdt_s *priv = (FAR struct rk3576_wdt_s *)lower;
++  uint32_t ccvr;
++
++  if (status == NULL)
++    {
++      return -EINVAL;
++    }
++
++  status->flags   = 0;
++  if (priv->started)
++    {
++      status->flags |= WDFLAGS_ACTIVE;
++    }
++
++  /* ★ 报告**实际生效**的超时，不是上层请求的值。档位是离散的，
++   * 两者往往不同；报请求值会让上层按一个并不存在的超时去安排喂狗。
++   */
++
++  status->timeout = priv->actual_ms;
++
++  ccvr = wdt_getreg(WDT_CCVR);
++  status->timeleft = (uint32_t)((uint64_t)ccvr * 1000 / WDT_TCLK_HZ);
++  return OK;
++}
++
++static int rk3576_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
++                                 uint32_t timeout)
++{
++  FAR struct rk3576_wdt_s *priv = (FAR struct rk3576_wdt_s *)lower;
++  uint32_t actual;
++  uint32_t top;
++
++  top = wdt_top_for_ms(timeout, &actual);
++
++  /* TORR 的低 4 位是复位后的档位，高 4 位是初始档位，两者写相同值。 */
++
++  wdt_putreg(WDT_TORR, (top << 4) | top);
++  wdt_putreg(WDT_CRR, WDT_CRR_KICK);
++
++  priv->timeout_ms = timeout;
++  priv->actual_ms  = actual;
++
++  if (actual != timeout)
++    {
++      syslog(LOG_INFO,
++             "WDT: 请求 %" PRIu32 "ms，档位 %" PRIu32
++             " 实际 %" PRIu32 "ms（档位为 2^(16+i) 个 tclk，不连续）\n",
++             timeout, top, actual);
++    }
++
++  return OK;
++}
++
++static const struct watchdog_ops_s g_wdt_ops =
++{
++  .start      = rk3576_wdt_start,
++  .stop       = rk3576_wdt_stop,
++  .keepalive  = rk3576_wdt_keepalive,
++  .getstatus  = rk3576_wdt_getstatus,
++  .settimeout = rk3576_wdt_settimeout,
++};
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++int rk3576_wdt_initialize(FAR const char *devpath)
++{
++  FAR struct rk3576_wdt_s *priv = &g_wdt;
++  uint32_t torr;
++
++  /* 两路时钟：pclk 供寄存器访问，tclk 驱动计数。只开 pclk 的话寄存器
++   * 读写正常但计数不动 —— 这个坑在本端口的 I2C 与 SD 上都踩过。
++   */
++
++  rk3576_clk_gate(WDT_GATE_CON, WDT_GATE_PCLK, true);
++  rk3576_clk_gate(WDT_GATE_CON, WDT_GATE_TCLK, true);
++
++  priv->lower.ops = &g_wdt_ops;
++  priv->started   = false;
++
++  /* 自检：写一个档位再读回。读回一致说明 pclk 已开、基址与映射正确。
++   * 注意这只验证 pclk，不验证 tclk —— tclk 是否在跑要看 CCVR 会不会变。
++   */
++
++  wdt_putreg(WDT_TORR, (3 << 4) | 3);
++  torr = wdt_getreg(WDT_TORR);
++
++  if ((torr & 0xf) != 3)
++    {
++      syslog(LOG_ERR,
++             "ERROR: WDT TORR 写 3 读回 0x%08" PRIx32 " —— 寄存器块无响应\n",
++             torr);
++      return -ENODEV;
++    }
++
++  /* tclk 判据：计数器在未使能时也应随 tclk 递减。取两次读数比较，
++   * 相同则说明 tclk 没在跑。
++   */
++
++  {
++    uint32_t c0 = wdt_getreg(WDT_CCVR);
++    uint32_t c1;
++
++    up_udelay(200);
++    c1 = wdt_getreg(WDT_CCVR);
++
++    syslog(LOG_INFO,
++           "WDT: TORR 回读正常 CCVR %" PRIu32 " -> %" PRIu32 " —— %s\n",
++           c0, c1, (c0 != c1) ? "tclk 在跑" : "tclk 未动（使能后才计数）");
++  }
++
++  rk3576_wdt_settimeout(&priv->lower, 10000);
++
++  /* watchdog_register 返回的是句柄（失败为 NULL），不是错误码。 */
++
++  if (watchdog_register(devpath, &priv->lower) == NULL)
++    {
++      syslog(LOG_ERR, "ERROR: 注册 %s 失败\n", devpath);
++      return -ENODEV;
++    }
++
++  return OK;
++}
++
++#endif /* CONFIG_RK3576_WDT */
+diff --git a/arch/arm64/src/rk3576/rk3576_wdt.h b/arch/arm64/src/rk3576/rk3576_wdt.h
+new file mode 100644
+index 00000000..1319ece5
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_wdt.h
+@@ -0,0 +1,26 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_wdt.h
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_WDT_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_WDT_H
++
++/****************************************************************************
++ * Public Function Prototypes
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_wdt_initialize
++ *
++ * Description:
++ *   开时钟、自检并把看门狗注册为 devpath（通常是 "/dev/watchdog0"）。
++ *
++ *   ★ DesignWare 看门狗一旦使能便无法由软件关闭，stop() 返回 -ENOSYS
++ *     而不是假装成功。超时值只能取 2^(16+i) 个 tclk 周期的离散档位，
++ *     getstatus() 报告的是实际生效值而非请求值。
++ *
++ ****************************************************************************/
++
++int rk3576_wdt_initialize(FAR const char *devpath);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_WDT_H */
+diff --git a/drivers/timers/hym8563.c b/drivers/timers/hym8563.c
+index f8845b62..8609631b 100644
+--- a/drivers/timers/hym8563.c
++++ b/drivers/timers/hym8563.c
+@@ -26,6 +26,9 @@
+ 
+ #include <nuttx/i2c/i2c_master.h>
+ #include <nuttx/timers/rtc.h>
++#ifdef CONFIG_RTC_ARCH
++#  include <nuttx/timers/arch_rtc.h>
++#endif
+ #include <nuttx/kmalloc.h>
+ 
+ #ifdef CONFIG_RTC_HYM8563
+@@ -294,6 +297,19 @@ int hym8563_rtc_initialize(int minor, FAR struct i2c_master_s *i2c,
+       return ret;
+     }
+ 
++#ifdef CONFIG_RTC_ARCH
++  /* ★ rtc_initialize() 只是注册 /dev/rtcN 这个字符设备，系统时钟并不
++   * 会因此用上它。要让开机自动恢复时间，还得把下半部交给 arch_rtc：
++   *
++   *     up_rtc_set_lowerhalf(lower, sync)
++   *
++   * sync=true 会立刻用 RTC 的值同步系统时钟。掉电标志置位时 rdtime
++   * 返回 -ENODATA，clock_synchronize() 会保持原有时间，不会写入垃圾值。
++   */
++
++  up_rtc_set_lowerhalf((FAR struct rtc_lowerhalf_s *)priv, true);
++#endif
++
+   return OK;
+ }
+ 
+-- 
+2.43.0
+
+
+From b5d7ce5c4d828ecac48a28c26d3327828b2d3645 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Thu, 3 Sep 2026 13:46:09 +0800
+Subject: [PATCH 26/27] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=E7=A1=AC?=
+ =?UTF-8?q?=E4=BB=B6=E9=9A=8F=E6=9C=BA=E6=95=B0=E9=A9=B1=E5=8A=A8=20/dev/r?=
+ =?UTF-8?q?andom=EF=BC=88xTS=201.3.16=EF=BC=89?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+rng@2a410000，compatible rockchip,rkrng。时钟 HCLK_TRNG_NS =
+CRU_NON_SECURE_GATING_CON00(0x0C48) bit13。
+
+★ 与 crypto v1/v2 两代寄存器完全不同：v1 在 CRYPTO 块的 0x0200、
+  v2 在 0x0400 偏移，rkrng 是独立地址空间、CTRL 在 0x0010。
+  照 v2 写不报错，只是读到全 0 —— 必须按 compatible 选对那一代。
+
+取数流程：CTRL 写 SW_DRNG_REQ（带高 16 位写使能掩码）-> 轮询
+STATE.SW_DRNG_ACK -> 读 8 个数据寄存器 -> 写 1 清 ACK。
+
+★ 自检取两批数据比较，完全相同则判定硬件未工作并拒绝注册。
+  只检查读到了数据不够：寄存器块未上电时读回全 0 或全 f，
+  长度检查一样能过，而让上层拿着固定值当随机数用比没有随机数更危险。
+
+板上实测：自检通过，hexdump /dev/random 两次读数完全不同。
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FBQkQQFX3kTDP3AzvLzDGx
+---
+ arch/arm64/src/rk3576/Kconfig                 |  12 +
+ arch/arm64/src/rk3576/Make.defs               |   4 +
+ .../src/rk3576/hardware/rk3576_memorymap.h    |   1 +
+ arch/arm64/src/rk3576/rk3576_rng.c            | 219 ++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_rng.h            |  22 ++
+ 5 files changed, 258 insertions(+)
+ create mode 100644 arch/arm64/src/rk3576/rk3576_rng.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_rng.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index ad03965e..253e4232 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -81,6 +81,18 @@ config RK3576_VOP2
+ 		当前实现电源域/时钟自检与内置彩条输出。彩条不经过帧缓冲与
+ 		图层，可把"VOP 时序配置"与"图层/内存通路"两类问题分开验证。
+ 
++config RK3576_RNG
++	bool "硬件随机数 (/dev/random)"
++	default n
++	---help---
++		RK3576 的硬件随机数（0x2a410000，compatible "rockchip,rkrng"）。
++
++		★ 与 crypto v1/v2 两代的寄存器完全不同：v1 在 CRYPTO 块的
++		  0x0200、v2 在 0x0400 偏移，而 rkrng 是独立地址空间、
++		  CTRL 在 0x0010。照 v2 写不报错，只是读到全 0。
++
++		初始化时取两批数据比较，完全相同则判定硬件未工作并拒绝注册。
++
+ config RK3576_WDT
+ 	bool "看门狗 (Synopsys DesignWare)"
+ 	default n
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index a4c0967f..1dba1fb4 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -46,6 +46,10 @@ ifeq ($(CONFIG_RK3576_VOP2),y)
+ CHIP_CSRCS += rk3576_vop2.c
+ endif
+ 
++ifeq ($(CONFIG_RK3576_RNG),y)
++CHIP_CSRCS += rk3576_rng.c
++endif
++
+ ifeq ($(CONFIG_RK3576_WDT),y)
+ CHIP_CSRCS += rk3576_wdt.c
+ endif
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h b/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+index 9dec6e4c..cc66c819 100644
+--- a/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
++++ b/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h
+@@ -123,6 +123,7 @@
+ 
+ /* I2C —— 同样分两段 */
+ 
++#define RK3576_RNG_ADDR        0x2a410000   /* 硬件随机数 rockchip,rkrng */
+ #define RK3576_WDT_ADDR        0x2ace0000   /* 看门狗 snps,dw-wdt */
+ #define RK3576_I2C0_ADDR       0x27300000
+ #define RK3576_I2C1_ADDR       0x2ac40000
+diff --git a/arch/arm64/src/rk3576/rk3576_rng.c b/arch/arm64/src/rk3576/rk3576_rng.c
+new file mode 100644
+index 00000000..2f62990a
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_rng.c
+@@ -0,0 +1,219 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_rng.c
++ *
++ * RK3576 硬件随机数（rng@2a410000，compatible "rockchip,rkrng"）。
++ *
++ * ★ 不是 crypto v1/v2 那两代。厂商驱动 rockchip-rng.c 里同时支持三代，
++ *   寄存器完全不同：v1 在 CRYPTO 块的 0x0200，v2 在 0x0400 偏移，
++ *   而 rkrng 是独立地址空间、CTRL 在 0x0010。照 v2 写不会报错，
++ *   只是读到全 0。本板的 compatible 明确是 rockchip,rkrng。
++ *
++ * 时钟（clk-rk3576.c）：
++ *   GATE(HCLK_TRNG_NS, "hclk_trng_ns", "hclk_secure_s",
++ *        RK3576_NON_SECURE_GATING_CON00, 13, GFLAGS)
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include <stdint.h>
++#include <inttypes.h>
++#include <string.h>
++#include <errno.h>
++#include <syslog.h>
++
++#include <nuttx/fs/fs.h>
++#include <nuttx/drivers/drivers.h>
++
++#include "arm64_internal.h"
++#include "rk3576_rng.h"
++#include "hardware/rk3576_memorymap.h"
++
++#ifdef CONFIG_RK3576_RNG
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++#define RKRNG_CTRL              0x0010
++#define RKRNG_CTRL_SW_DRNG_REQ  (1 << 3)
++
++#define RKRNG_STATE             0x0014
++#define RKRNG_STATE_SW_DRNG_ACK (1 << 3)
++
++#define RKRNG_DRNG_DATA_0       0x0070
++#define RKRNG_MAX_BYTES         32          /* 8 个 32 位寄存器 */
++
++/* ★ CTRL 用 Rockchip 惯例的高 16 位写使能掩码。忘记掩码时写入无效，
++ * 但读回 STATE 永远等不到 ACK —— 表现为超时而非报错。
++ */
++
++#define RKRNG_HIWORD(val, mask) (((mask) << 16) | ((val) & (mask)))
++
++#define RKRNG_POLL_US           50000
++
++/* 时钟：非安全域门控寄存器 */
++
++#define RKRNG_GATE_REG          0x0c48      /* CRU_NON_SECURE_GATING_CON00 */
++#define RKRNG_GATE_BIT          13
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint32_t rng_getreg(uint32_t off)
++{
++  return getreg32(RK3576_RNG_ADDR + off);
++}
++
++static inline void rng_putreg(uint32_t off, uint32_t val)
++{
++  putreg32(val, RK3576_RNG_ADDR + off);
++}
++
++/****************************************************************************
++ * Name: rk3576_rng_fill
++ *
++ * Description:
++ *   取一批随机数。一次最多 32 字节（8 个数据寄存器）。
++ *
++ ****************************************************************************/
++
++static int rk3576_rng_fill(FAR uint8_t *buf, size_t len)
++{
++  uint32_t words[RKRNG_MAX_BYTES / 4];
++  size_t   got = 0;
++  int      i;
++  int      us;
++
++  while (got < len)
++    {
++      size_t chunk = len - got;
++
++      if (chunk > RKRNG_MAX_BYTES)
++        {
++          chunk = RKRNG_MAX_BYTES;
++        }
++
++      rng_putreg(RKRNG_CTRL,
++                 RKRNG_HIWORD(RKRNG_CTRL_SW_DRNG_REQ, 0xffff));
++
++      for (us = 0; us < RKRNG_POLL_US; us++)
++        {
++          if (rng_getreg(RKRNG_STATE) & RKRNG_STATE_SW_DRNG_ACK)
++            {
++              break;
++            }
++
++          up_udelay(1);
++        }
++
++      if (us >= RKRNG_POLL_US)
++        {
++          syslog(LOG_ERR,
++                 "ERROR: RNG 取数超时 STATE=0x%08" PRIx32 "\n",
++                 rng_getreg(RKRNG_STATE));
++          return -ETIMEDOUT;
++        }
++
++      /* 写 1 清 ACK，供下一轮使用。 */
++
++      rng_putreg(RKRNG_STATE, RKRNG_STATE_SW_DRNG_ACK);
++
++      for (i = 0; i < (int)(RKRNG_MAX_BYTES / 4); i++)
++        {
++          words[i] = rng_getreg(RKRNG_DRNG_DATA_0 + i * 4);
++        }
++
++      memcpy(buf + got, words, chunk);
++      got += chunk;
++    }
++
++  return OK;
++}
++
++/****************************************************************************
++ * 字符设备接口
++ ****************************************************************************/
++
++static ssize_t rk3576_rng_read(FAR struct file *filep, FAR char *buffer,
++                               size_t buflen)
++{
++  UNUSED(filep);
++
++  if (buffer == NULL || buflen == 0)
++    {
++      return -EINVAL;
++    }
++
++  if (rk3576_rng_fill((FAR uint8_t *)buffer, buflen) < 0)
++    {
++      return -EIO;
++    }
++
++  return (ssize_t)buflen;
++}
++
++static const struct file_operations g_rng_fops =
++{
++  NULL,               /* open  */
++  NULL,               /* close */
++  rk3576_rng_read,    /* read  */
++  NULL,               /* write */
++};
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++int rk3576_rng_initialize(void)
++{
++  uint8_t a[16];
++  uint8_t b[16];
++  int ret;
++
++  /* 开时钟。非安全域门控同样是高 16 位写使能掩码。 */
++
++  putreg32((1u << (RKRNG_GATE_BIT + 16)) | (0u << RKRNG_GATE_BIT),
++           RK3576_CRU_ADDR + RKRNG_GATE_REG);
++
++  /* ★ 自检要能证伪"取到的是随机数"。
++   *
++   *   只看"读到了数据"不够 —— 寄存器块没上电时读回的是全 0 或全 f，
++   *   长度检查一样能通过。这里取两批比较：两批完全相同，说明拿到的
++   *   是常量而非随机数（硬件没工作），此时宁可不注册也不能让上层
++   *   拿着一串固定值当随机数用。
++   */
++
++  ret = rk3576_rng_fill(a, sizeof(a));
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  ret = rk3576_rng_fill(b, sizeof(b));
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  if (memcmp(a, b, sizeof(a)) == 0)
++    {
++      syslog(LOG_ERR,
++             "ERROR: RNG 两次取数完全相同（首字节 0x%02x）——"
++             "不是随机数，硬件未工作\n", a[0]);
++      return -EIO;
++    }
++
++  syslog(LOG_INFO,
++         "RNG: 自检通过，两批取数不同（0x%02x%02x… vs 0x%02x%02x…）\n",
++         a[0], a[1], b[0], b[1]);
++
++  return register_driver("/dev/random", &g_rng_fops, 0444, NULL);
++}
++
++#endif /* CONFIG_RK3576_RNG */
+diff --git a/arch/arm64/src/rk3576/rk3576_rng.h b/arch/arm64/src/rk3576/rk3576_rng.h
+new file mode 100644
+index 00000000..70e4a877
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_rng.h
+@@ -0,0 +1,22 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_rng.h
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_RNG_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_RNG_H
++
++/****************************************************************************
++ * Name: rk3576_rng_initialize
++ *
++ * Description:
++ *   开时钟、自检并注册 /dev/random。
++ *
++ *   ★ 自检取两批数据比较：完全相同说明拿到的是常量而非随机数
++ *     （硬件未工作），此时返回错误而不注册 —— 让上层拿着固定值
++ *     当随机数用，比没有随机数更危险。
++ *
++ ****************************************************************************/
++
++int rk3576_rng_initialize(void);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_RNG_H */
+-- 
+2.43.0
+
+
+From a4e9b7be465cd44bd2299b7d3a9c79d9b8c4340d Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Thu, 3 Sep 2026 15:38:11 +0800
+Subject: [PATCH 27/27] arch/arm64/rk3576: add polled SPI master driver (SPI4)
+
+Synopsys DesignWare SSI, Rockchip variant (rockchip,rk3066-spi).
+Register layout differs from stock DW SSI: data ports are split
+(TXDR 0x400 / RXDR 0x800) and CTRLR0 bitfields are rearranged.
+
+Only SPI4 is implemented: it is the sole general-purpose SPI routed
+to the 40-pin header on KICKPI-K7; the other three are disabled in
+the base dtb with no external pins.
+
+Chip select uses GPIO4_A5 rather than the controller's native CS,
+matching the vendor cs-gpios.  NuttX splits chip select into
+independent select/deselect calls that must hold for a whole
+transaction, which native per-frame CS cannot do.  SER bit0 is still
+asserted -- with SER clear the controller emits no clock.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FBQkQQFX3kTDP3AzvLzDGx
+---
+ arch/arm64/src/rk3576/Kconfig               |  19 +
+ arch/arm64/src/rk3576/Make.defs             |   4 +
+ arch/arm64/src/rk3576/hardware/rk3576_spi.h | 134 ++++
+ arch/arm64/src/rk3576/rk3576_spi.c          | 735 ++++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_spi.h          |  68 ++
+ 5 files changed, 960 insertions(+)
+ create mode 100644 arch/arm64/src/rk3576/hardware/rk3576_spi.h
+ create mode 100644 arch/arm64/src/rk3576/rk3576_spi.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_spi.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index 253e4232..c7cdc066 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -22,6 +22,25 @@ config RK3576_UART0_IS_CONSOLE
+ 		已由 KICKPI 官方 Armbian 源码的 U-Boot defconfig 确认：
+ 		CONFIG_DEBUG_UART_BASE=0x2ad40000，即 UART0。
+ 
++config RK3576_SPI
++	bool "SPI 主机（轮询式）"
++	default n
++	select SPI
++	select SPI_EXCHANGE
++	---help---
++		Synopsys DesignWare SSI 的 Rockchip 改版，原厂 dtb 里
++		compatible 为 "rockchip,rk3576-spi", "rockchip,rk3066-spi"。
++		寄存器布局与 DW 原版有出入（数据口分成 TXDR 0x400 /
++		RXDR 0x800，CTRLR0 位域重排），照 DW 手册写会踩空。
++
++		当前只实现 SPI4：板上四个通用 SPI 控制器在基础 dtb 里都是
++		disabled，只有 SPI4 被厂商的 40 针扩展 dtsi 使能并引到排针
++		上（m2 复用组）。其余三个没有对外引脚，无从验证。
++
++		片选用 GPIO（GPIO4_A5）而不是控制器原生 CS，与厂商 dtsi 的
++		cs-gpios 一致 —— NuttX 把片选拆成独立的 select/deselect，
++		要求整个事务期间保持有效，原生 CS 做不到。
++
+ config RK3576_I2C
+ 	bool "I2C 主机（轮询式）"
+ 	default n
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index 1dba1fb4..fec2f2c2 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -76,6 +76,10 @@ ifeq ($(CONFIG_RK3576_I2C),y)
+ CHIP_CSRCS += rk3576_i2c.c
+ endif
+ 
++ifeq ($(CONFIG_RK3576_SPI),y)
++CHIP_CSRCS += rk3576_spi.c
++endif
++
+ ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
+ CHIP_ASRCS  = rk3576_lowputc.S
+ endif
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_spi.h b/arch/arm64/src/rk3576/hardware/rk3576_spi.h
+new file mode 100644
+index 00000000..53216bcc
+--- /dev/null
++++ b/arch/arm64/src/rk3576/hardware/rk3576_spi.h
+@@ -0,0 +1,134 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/hardware/rk3576_spi.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* RK3576 SPI 控制器寄存器定义。
++ *
++ * IP 是 Synopsys DesignWare SSI 的 Rockchip 改版，compatible
++ * "rockchip,rk3066-spi"。寄存器布局取自内核 drivers/spi/spi-rockchip.c，
++ * 与 RK3576 TRM 的 SPI 章节一致。
++ *
++ * 与原版 DW SSI 的区别（照抄 DW 手册会踩的坑）：
++ *   - 数据口不在 0x60，收发分开：TXDR 0x400 / RXDR 0x800。
++ *   - CTRLR0 的位域被重排过，SCPH/SCPOL 在 6/7 而不是 DW 的 6/7 之外，
++ *     XFM(传输方向) 在 18，DW 原版叫 TMOD 在 8。
++ *   - BAUDR 的分频值必须是偶数。
++ */
++
++#ifndef __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_SPI_H
++#define __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_SPI_H
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* 寄存器偏移 ***************************************************************/
++
++#define RK3576_SPI_CTRLR0        0x0000  /* 控制寄存器 0 */
++#define RK3576_SPI_CTRLR1        0x0004  /* 帧数 - 1（只对只收模式有意义）*/
++#define RK3576_SPI_SSIENR        0x0008  /* 控制器使能 */
++#define RK3576_SPI_SER           0x000c  /* 片选使能（每位一个 CS）*/
++#define RK3576_SPI_BAUDR         0x0010  /* 分频，必须是偶数 */
++#define RK3576_SPI_TXFTLR        0x0014  /* 发送 FIFO 阈值 */
++#define RK3576_SPI_RXFTLR        0x0018  /* 接收 FIFO 阈值 */
++#define RK3576_SPI_TXFLR         0x001c  /* 发送 FIFO 当前深度 */
++#define RK3576_SPI_RXFLR         0x0020  /* 接收 FIFO 当前深度 */
++#define RK3576_SPI_SR            0x0024  /* 状态 */
++#define RK3576_SPI_IPR           0x0028
++#define RK3576_SPI_IMR           0x002c  /* 中断屏蔽 */
++#define RK3576_SPI_ISR           0x0030
++#define RK3576_SPI_RISR          0x0034
++#define RK3576_SPI_ICR           0x0038  /* 中断清除 */
++#define RK3576_SPI_DMACR         0x003c
++#define RK3576_SPI_DMATDLR       0x0040
++#define RK3576_SPI_DMARDLR       0x0044
++#define RK3576_SPI_VERSION       0x0048  /* 版本，用来推 FIFO 深度 */
++#define RK3576_SPI_TXDR          0x0400  /* 发送数据 */
++#define RK3576_SPI_RXDR          0x0800  /* 接收数据 */
++
++/* CTRLR0 位域 **************************************************************/
++
++#define SPI_CR0_DFS_SHIFT        0       /* 数据帧长度 */
++#define SPI_CR0_DFS_4BIT         0
++#define SPI_CR0_DFS_8BIT         1
++#define SPI_CR0_DFS_16BIT        2
++
++#define SPI_CR0_SCPH_SHIFT       6       /* 时钟相位  = SPI mode 的 bit0 */
++#define SPI_CR0_SCPOL_SHIFT      7       /* 时钟极性  = SPI mode 的 bit1 */
++
++#define SPI_CR0_CSM_SHIFT        8       /* 帧间 CS 保持方式 */
++#define SPI_CR0_CSM_KEEP         0       /* 连续传输期间 CS 一直有效 */
++
++#define SPI_CR0_SSD_SHIFT        10      /* CS 有效到 SCLK 有效的间隔 */
++#define SPI_CR0_SSD_HALF         0
++#define SPI_CR0_SSD_ONE          1
++
++#define SPI_CR0_EM_SHIFT         11      /* 字节序 */
++#define SPI_CR0_EM_BIG           1
++
++#define SPI_CR0_FBM_SHIFT        12      /* 先发高位还是低位 */
++#define SPI_CR0_FBM_MSB          0
++#define SPI_CR0_FBM_LSB          1
++
++#define SPI_CR0_BHT_SHIFT        13      /* APB 侧半字/字节访问宽度 */
++#define SPI_CR0_BHT_8BIT         1
++
++#define SPI_CR0_RSD_SHIFT        14      /* 采样延迟，单位为 SCLK 周期 */
++#define SPI_CR0_RSD_MAX          3
++
++#define SPI_CR0_FRF_SHIFT        16      /* 帧格式 */
++#define SPI_CR0_FRF_SPI          0
++
++#define SPI_CR0_XFM_SHIFT        18      /* 传输方向 */
++#define SPI_CR0_XFM_TR           0       /* 全双工，收发同时 */
++#define SPI_CR0_XFM_TO           1       /* 只发 */
++#define SPI_CR0_XFM_RO           2       /* 只收（帧数由 CTRLR1 决定）*/
++
++#define SPI_CR0_OPM_SHIFT        20      /* 主/从 */
++#define SPI_CR0_OPM_MASTER       0
++
++#define SPI_CR0_SOI_SHIFT        23      /* CS 空闲电平（置位 = 高有效）*/
++
++/* SR 位域 ******************************************************************/
++
++#define SPI_SR_BUSY              (1 << 0)
++#define SPI_SR_TF_FULL           (1 << 1)
++#define SPI_SR_TF_EMPTY          (1 << 2)
++#define SPI_SR_RF_EMPTY          (1 << 3)
++#define SPI_SR_RF_FULL           (1 << 4)
++
++/* BAUDR 取值范围 ***********************************************************/
++
++#define SPI_BAUDR_MIN            2
++#define SPI_BAUDR_MAX            65534
++
++/* VERSION -> FIFO 深度 *****************************************************/
++
++#define SPI_VER2_TYPE1           0x05ec0002
++#define SPI_VER2_TYPE2           0x00110002
++#define SPI_FIFO_LEN_V2          64
++#define SPI_FIFO_LEN_V1          32
++
++/* 主机内部逻辑能跑到的 SCLK 上限，出处是内核驱动的 MAX_SCLK_OUT */
++
++#define SPI_MAX_SCLK_HZ          50000000u
++
++#endif /* __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_SPI_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_spi.c b/arch/arm64/src/rk3576/rk3576_spi.c
+new file mode 100644
+index 00000000..9b983e82
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_spi.c
+@@ -0,0 +1,735 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_spi.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* RK3576 SPI 主机驱动（轮询式）。
++ *
++ * ★ 只做 SPI4
++ *
++ *   板上四个通用 SPI 控制器在基础 dtb 里全是 disabled，只有 SPI4 被
++ *   厂商的 40 针扩展 dtsi 使能并引到排针上（走 m2 复用组）。其余三个
++ *   没有对外引脚，实现了也无从验证，所以配置表里只放 SPI4。
++ *
++ * ★ 片选用 GPIO 而不是控制器的原生 CS
++ *
++ *   厂商 dtsi 写的是 cs-gpios = <&gpio4 RK_PA5>，即把 SPI4_CSN1_M2 那
++ *   根线当普通 GPIO 用。这么做不是多此一举：NuttX 的 SPI 接口把片选
++ *   拆成独立的 select()/deselect() 调用，语义是"整个事务期间保持有效"，
++ *   而原生 CS 的有效区间由控制器按帧决定，跨多次 send()/exchange() 时
++ *   会在中间抬起来。用 GPIO 才能对上 NuttX 的语义。
++ *
++ *   ★ 但 SER 仍然要置位。SER=0 时控制器认为没有选中任何从机，不产生
++ *     时钟。内核驱动在 cs_gpiod 分支里照样写 SER 的 bit0，就是这个原因。
++ *     只用 GPIO 拉低 CS 而忘了 SER，现象是波形上 CS 有效但 SCLK 不动。
++ *
++ * ★ 为什么是轮询
++ *
++ *   与 rk3576_i2c.c 同样的取舍：先把总线跑通，少一个 GIC 挂接的出错
++ *   环节。FIFO 有 64 项，8 位帧下一次能吞 64 字节，短事务几乎不需要
++ *   等待；长传输才会在循环里空转。有性能需求时再加中断/DMA。
++ *
++ * ★ 分频必须是偶数
++ *
++ *   BAUDR 的硬件只认偶数分频。向上取偶保证实际频率不高于请求值 ——
++ *   方向是安全的：从机都规定 SCLK 上限，低于上限一律工作。
++ *
++ * 寄存器布局与配置流程的出处是内核 drivers/spi/spi-rockchip.c；
++ * 引脚与时钟的出处是 RK3576 TRM 与 clk-rk3576.c，逐条记在下面。
++ */
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <debug.h>
++#include <errno.h>
++#include <inttypes.h>
++#include <stdbool.h>
++#include <stdint.h>
++#include <string.h>
++#include <syslog.h>
++
++#include <nuttx/arch.h>
++#include <nuttx/mutex.h>
++#include <nuttx/spi/spi.h>
++
++#include "arm64_internal.h"
++#include "rk3576_cru.h"
++#include "rk3576_gpio.h"
++#include "rk3576_pinmux.h"
++#include "rk3576_spi.h"
++#include "hardware/rk3576_spi.h"
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* 等待 BUSY 清除的上限。按最慢的 SCLK（源 24MHz / 65534）算，一帧
++ * 也只要几百微秒；给到 100ms 是纯粹的兜底，正常路径永远走不到。
++ */
++
++#define SPI_BUSY_TIMEOUT_US   100000
++
++/* 默认参数，与厂商 dtsi 里 spidev 的 spi-max-frequency 一致 */
++
++#define SPI_DEFAULT_FREQ_HZ   24000000
++#define SPI_DEFAULT_NBITS     8
++
++/****************************************************************************
++ * Private Types
++ ****************************************************************************/
++
++struct rk3576_spi_config_s
++{
++  uint8_t   port;
++  uintptr_t base;
++  uint8_t   gate_con;      /* CLKGATE_CON 序号（PCLK 与 CLK 同属一个）*/
++  uint8_t   gate_pclk;     /* PCLK_SPIn 的位号 */
++  uint8_t   gate_clk;      /* CLK_SPIn 的位号  */
++  uint8_t   sel_con;       /* CLKSEL_CON 序号  */
++  uint8_t   sel_shift;     /* 时钟源位域起始位 */
++  int8_t    clk_bank;      /* SCLK 引脚 */
++  int8_t    clk_pin;
++  int8_t    mosi_bank;
++  int8_t    mosi_pin;
++  int8_t    miso_bank;
++  int8_t    miso_pin;
++  uint8_t   pin_func;      /* 三根信号线的复用功能号相同 */
++  int8_t    cs_bank;       /* 片选，当普通 GPIO 用 */
++  int8_t    cs_pin;
++};
++
++struct rk3576_spi_priv_s
++{
++  const struct spi_ops_s            *ops;   /* 必须是第一个成员 */
++  const struct rk3576_spi_config_s  *cfg;
++  uintptr_t                          base;
++  uint32_t                           src_hz;   /* 实测的输入时钟频率 */
++  uint32_t                           fifo_len; /* 由 VERSION 推出 */
++  uint32_t                           frequency;/* 当前请求的 SCLK */
++  uint32_t                           actual;   /* 实际得到的 SCLK */
++  uint8_t                            nbits;
++  uint8_t                            mode;
++  mutex_t                            lock;
++  bool                               initialized;
++};
++
++/****************************************************************************
++ * Private Function Prototypes
++ ****************************************************************************/
++
++static int      spi_lock(struct spi_dev_s *dev, bool lock);
++static void     spi_select(struct spi_dev_s *dev, uint32_t devid,
++                           bool selected);
++static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency);
++static void     spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
++static void     spi_setbits(struct spi_dev_s *dev, int nbits);
++static uint8_t  spi_status(struct spi_dev_s *dev, uint32_t devid);
++static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd);
++#ifdef CONFIG_SPI_EXCHANGE
++static void     spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
++                             void *rxbuffer, size_t nwords);
++#else
++static void     spi_sndblock(struct spi_dev_s *dev, const void *buffer,
++                             size_t nwords);
++static void     spi_recvblock(struct spi_dev_s *dev, void *buffer,
++                              size_t nwords);
++#endif
++
++/****************************************************************************
++ * Private Data
++ ****************************************************************************/
++
++/* 时钟源父表。clk-rk3576.c 里 CLK_SPI4 用的是
++ *   mux_200m_150m_100m_24m_p = { 200M, 150M, 100M, 24M }
++ * 与 I2C 的父表(200/100/50/24)不同，别抄错。
++ */
++
++static const uint32_t g_spi_src_hz[4] =
++{
++  200000000, 150000000, 100000000, 24000000
++};
++
++static const struct rk3576_spi_config_s g_spi_config[] =
++{
++  {
++    /* SPI4 —— 40 针扩展口。
++     *
++     * 出处 1（引脚）：RK3576 TRM 的 IOMUX 表，func 9 时
++     *   GPIO4_B0 = SPI4_CLK_M2    (bank4 pin 8)
++     *   GPIO4_B1 = SPI4_MOSI_M2   (bank4 pin 9)
++     *   GPIO4_B2 = SPI4_MISO_M2   (bank4 pin 10)
++     *   GPIO4_A5 = SPI4_CSN1_M2   (bank4 pin 5) —— 这里当 GPIO 用
++     * 与 dtb 里 spi4m2-pins 的 <4 8 9>,<4 10 9>,<4 9 9> 逐条对得上
++     * （dtsi 组内顺序是 clk/miso/mosi，不是 clk/mosi/miso，容易看反）。
++     *
++     * 出处 2（时钟）：clk-rk3576.c
++     *   GATE(PCLK_SPI4, "pclk_spi4", ... CLKGATE_CON(16), 1)
++     *   COMPOSITE_NODIV(CLK_SPI4, ... CLKSEL_CON(71), 6, 2,
++     *                                 CLKGATE_CON(16), 6)
++     */
++
++    .port       = 4,
++    .base       = 0x2ad20000,
++    .gate_con   = 16,
++    .gate_pclk  = 1,
++    .gate_clk   = 6,
++    .sel_con    = 71,
++    .sel_shift  = 6,
++    .clk_bank   = 4, .clk_pin  = 8,
++    .mosi_bank  = 4, .mosi_pin = 9,
++    .miso_bank  = 4, .miso_pin = 10,
++    .pin_func   = 9,
++    .cs_bank    = 4, .cs_pin   = 5,
++  },
++};
++
++#define RK3576_NSPI (sizeof(g_spi_config) / sizeof(g_spi_config[0]))
++
++static const struct spi_ops_s g_spi_ops =
++{
++  .lock         = spi_lock,
++  .select       = spi_select,
++  .setfrequency = spi_setfrequency,
++  .setmode      = spi_setmode,
++  .setbits      = spi_setbits,
++  .status       = spi_status,
++  .send         = spi_send,
++#ifdef CONFIG_SPI_EXCHANGE
++  .exchange     = spi_exchange,
++#else
++  .sndblock     = spi_sndblock,
++  .recvblock    = spi_recvblock,
++#endif
++};
++
++static struct rk3576_spi_priv_s g_spi_priv[RK3576_NSPI] =
++{
++  {
++    .ops         = &g_spi_ops,
++    .lock        = NXMUTEX_INITIALIZER,
++    .initialized = false,
++  },
++};
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint32_t spi_getreg(struct rk3576_spi_priv_s *priv,
++                                  unsigned int offset)
++{
++  return getreg32(priv->base + offset);
++}
++
++static inline void spi_putreg(struct rk3576_spi_priv_s *priv,
++                              unsigned int offset, uint32_t value)
++{
++  putreg32(value, priv->base + offset);
++}
++
++/****************************************************************************
++ * Name: spi_enable
++ *
++ * Description:
++ *   开关控制器。CTRLR0 与 BAUDR 只有在关闭状态下写才生效，关闭同时会
++ *   清空收发 FIFO —— 每次传输前后都关一次，可以保证不会有上一次事务
++ *   的残留数据混进来。
++ *
++ ****************************************************************************/
++
++static void spi_enable(struct rk3576_spi_priv_s *priv, bool enable)
++{
++  spi_putreg(priv, RK3576_SPI_SSIENR, enable ? 1 : 0);
++}
++
++/****************************************************************************
++ * Name: spi_wait_idle
++ *
++ * Description:
++ *   等 BUSY 清除。返回 false 表示超时 —— 只可能是时钟没跑起来，
++ *   继续下去只会读到一堆 0，所以调用方要把它当错误看待。
++ *
++ ****************************************************************************/
++
++static bool spi_wait_idle(struct rk3576_spi_priv_s *priv)
++{
++  unsigned int elapsed;
++
++  for (elapsed = 0; elapsed < SPI_BUSY_TIMEOUT_US; elapsed++)
++    {
++      if ((spi_getreg(priv, RK3576_SPI_SR) & SPI_SR_BUSY) == 0)
++        {
++          return true;
++        }
++
++      up_udelay(1);
++    }
++
++  spierr("ERROR: SPI%d BUSY 一直不清，SR=0x%08" PRIx32 "\n",
++         priv->cfg->port, spi_getreg(priv, RK3576_SPI_SR));
++  return false;
++}
++
++/****************************************************************************
++ * Name: spi_setup_ctrlr0
++ *
++ * Description:
++ *   按当前的 mode/nbits 拼出 CTRLR0 并写入。必须在控制器关闭时调用。
++ *
++ *   固定位的取值照搬内核驱动：帧格式 SPI、APB 侧按字节访问、CS 到
++ *   SCLK 间隔一个周期、大端。RSD（采样延迟）保持 0：厂商 dtsi 没有给
++ *   rx-sample-delay-ns，说明这块板子不需要补偿。
++ *
++ ****************************************************************************/
++
++static void spi_setup_ctrlr0(struct rk3576_spi_priv_s *priv)
++{
++  uint32_t cr0;
++
++  cr0 = (SPI_CR0_FRF_SPI  << SPI_CR0_FRF_SHIFT)  |
++        (SPI_CR0_BHT_8BIT << SPI_CR0_BHT_SHIFT)  |
++        (SPI_CR0_SSD_ONE  << SPI_CR0_SSD_SHIFT)  |
++        (SPI_CR0_EM_BIG   << SPI_CR0_EM_SHIFT)   |
++        (SPI_CR0_OPM_MASTER << SPI_CR0_OPM_SHIFT) |
++        (SPI_CR0_CSM_KEEP << SPI_CR0_CSM_SHIFT)  |
++        (SPI_CR0_XFM_TR   << SPI_CR0_XFM_SHIFT);
++
++  /* NuttX 的 mode 枚举与硬件的 SCPH/SCPOL 位序一致：
++   *   MODE0=0 -> SCPH=0 SCPOL=0 ... MODE3=3 -> SCPH=1 SCPOL=1
++   * 所以低两位直接搬过去即可。
++   */
++
++  cr0 |= ((uint32_t)priv->mode & 3) << SPI_CR0_SCPH_SHIFT;
++
++  if (priv->nbits == 16)
++    {
++      cr0 |= SPI_CR0_DFS_16BIT << SPI_CR0_DFS_SHIFT;
++    }
++  else if (priv->nbits == 4)
++    {
++      cr0 |= SPI_CR0_DFS_4BIT << SPI_CR0_DFS_SHIFT;
++    }
++  else
++    {
++      cr0 |= SPI_CR0_DFS_8BIT << SPI_CR0_DFS_SHIFT;
++    }
++
++  spi_putreg(priv, RK3576_SPI_CTRLR0, cr0);
++}
++
++/****************************************************************************
++ * Name: spi_transfer
++ *
++ * Description:
++ *   全双工搬运 nwords 帧。txbuffer 为 NULL 时发 0xff，rxbuffer 为
++ *   NULL 时把收到的丢掉。
++ *
++ *   ★ 为什么不用只发(TO)/只收(RO)模式
++ *
++ *     两种单向模式各有额外约束：RO 的帧数由 CTRLR1 决定而不是由你压
++ *     进去多少，TO 在轮询下要另外处理 RX FIFO 溢出。统一走全双工、
++ *     压多少帧就取多少帧，只有一条路径要验证。代价是收发都占 FIFO，
++ *     在这个速率下无所谓。
++ *
++ *   ★ 在途帧数必须卡住
++ *
++ *     压进去还没取走的帧会堆在 RX FIFO 里。只看 TX 有没有空位就继续
++ *     压，RX 满了之后新到的帧会被丢掉，表现为读回的数据错位 —— 而且
++ *     不报错。所以每轮压入量同时受三个上限约束：TX 空位、RX 剩余
++ *     容量、剩余帧数。
++ *
++ ****************************************************************************/
++
++static void spi_transfer(struct rk3576_spi_priv_s *priv,
++                         const void *txbuffer, void *rxbuffer,
++                         size_t nwords)
++{
++  const uint8_t  *tx8  = txbuffer;
++  const uint16_t *tx16 = txbuffer;
++  uint8_t        *rx8  = rxbuffer;
++  uint16_t       *rx16 = rxbuffer;
++  bool     wide    = (priv->nbits > 8);
++  size_t   to_push = nwords;
++  size_t   to_pop  = nwords;
++  size_t   inflight;
++  uint32_t room;
++
++  if (nwords == 0)
++    {
++      return;
++    }
++
++  spi_enable(priv, false);
++  spi_setup_ctrlr0(priv);
++  spi_putreg(priv, RK3576_SPI_CTRLR1, nwords - 1);
++  spi_putreg(priv, RK3576_SPI_IMR, 0);
++  spi_putreg(priv, RK3576_SPI_DMACR, 0);
++  spi_enable(priv, true);
++
++  while (to_pop > 0)
++    {
++      /* 压入：三个上限取最小 */
++
++      inflight = to_pop - to_push;             /* 已压未取 */
++      room     = priv->fifo_len -
++                 spi_getreg(priv, RK3576_SPI_TXFLR);
++
++      if (room > priv->fifo_len - inflight)
++        {
++          room = priv->fifo_len - inflight;
++        }
++
++      while (room > 0 && to_push > 0)
++        {
++          uint32_t wd;
++
++          if (wide)
++            {
++              wd = tx16 ? *tx16++ : 0xffff;
++            }
++          else
++            {
++              wd = tx8 ? *tx8++ : 0xff;
++            }
++
++          spi_putreg(priv, RK3576_SPI_TXDR, wd);
++          to_push--;
++          room--;
++        }
++
++      /* 取出：FIFO 里有多少取多少 */
++
++      while (spi_getreg(priv, RK3576_SPI_RXFLR) > 0 && to_pop > 0)
++        {
++          uint32_t rd = spi_getreg(priv, RK3576_SPI_RXDR);
++
++          if (wide)
++            {
++              if (rx16)
++                {
++                  *rx16++ = (uint16_t)rd;
++                }
++            }
++          else
++            {
++              if (rx8)
++                {
++                  *rx8++ = (uint8_t)rd;
++                }
++            }
++
++          to_pop--;
++        }
++    }
++
++  spi_wait_idle(priv);
++  spi_enable(priv, false);
++}
++
++/****************************************************************************
++ * Name: spi_lock
++ ****************************************************************************/
++
++static int spi_lock(struct spi_dev_s *dev, bool lock)
++{
++  struct rk3576_spi_priv_s *priv = (struct rk3576_spi_priv_s *)dev;
++
++  return lock ? nxmutex_lock(&priv->lock) : nxmutex_unlock(&priv->lock);
++}
++
++/****************************************************************************
++ * Name: spi_select
++ *
++ * Description:
++ *   片选。GPIO 拉低表示选中（厂商 dtsi 是 GPIO_ACTIVE_LOW），同时置位
++ *   SER 的 bit0 —— 少了它控制器不产生时钟，见文件头说明。
++ *
++ ****************************************************************************/
++
++static void spi_select(struct spi_dev_s *dev, uint32_t devid, bool selected)
++{
++  struct rk3576_spi_priv_s *priv = (struct rk3576_spi_priv_s *)dev;
++  const struct rk3576_spi_config_s *cfg = priv->cfg;
++
++  if (selected)
++    {
++      spi_putreg(priv, RK3576_SPI_SER, 1);
++      rk3576_gpio_write(cfg->cs_bank, cfg->cs_pin, false);
++    }
++  else
++    {
++      rk3576_gpio_write(cfg->cs_bank, cfg->cs_pin, true);
++      spi_putreg(priv, RK3576_SPI_SER, 0);
++    }
++}
++
++/****************************************************************************
++ * Name: spi_setfrequency
++ *
++ * Description:
++ *   设置 SCLK。分频只能是偶数，向上取偶保证实际值不超过请求值。
++ *
++ * Returned Value:
++ *   实际得到的频率。调用方拿它去核对，不要假设等于请求值。
++ *
++ ****************************************************************************/
++
++static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
++{
++  struct rk3576_spi_priv_s *priv = (struct rk3576_spi_priv_s *)dev;
++  uint32_t div;
++
++  if (frequency == priv->frequency)
++    {
++      return priv->actual;
++    }
++
++  if (frequency > SPI_MAX_SCLK_HZ)
++    {
++      frequency = SPI_MAX_SCLK_HZ;
++    }
++
++  /* 2 * ceil(src / (2 * f))：先按半频向上取整再乘 2，结果一定是偶数
++   * 且分出来的频率 <= f。
++   */
++
++  div = 2 * ((priv->src_hz + 2 * frequency - 1) / (2 * frequency));
++
++  if (div < SPI_BAUDR_MIN)
++    {
++      div = SPI_BAUDR_MIN;
++    }
++  else if (div > SPI_BAUDR_MAX)
++    {
++      div = SPI_BAUDR_MAX;
++    }
++
++  spi_enable(priv, false);
++  spi_putreg(priv, RK3576_SPI_BAUDR, div);
++
++  priv->frequency = frequency;
++  priv->actual    = priv->src_hz / div;
++
++  spiinfo("SPI%d: 请求 %" PRIu32 "Hz 分频 %" PRIu32 " 实际 %" PRIu32 "Hz\n",
++          priv->cfg->port, frequency, div, priv->actual);
++
++  return priv->actual;
++}
++
++/****************************************************************************
++ * Name: spi_setmode
++ ****************************************************************************/
++
++static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
++{
++  struct rk3576_spi_priv_s *priv = (struct rk3576_spi_priv_s *)dev;
++
++  /* 只记下来，真正写 CTRLR0 是在传输前 —— 那时控制器一定是关闭的，
++   * 写才会生效。
++   */
++
++  priv->mode = (uint8_t)mode;
++}
++
++/****************************************************************************
++ * Name: spi_setbits
++ ****************************************************************************/
++
++static void spi_setbits(struct spi_dev_s *dev, int nbits)
++{
++  struct rk3576_spi_priv_s *priv = (struct rk3576_spi_priv_s *)dev;
++
++  if (nbits != 4 && nbits != 8 && nbits != 16)
++    {
++      spierr("ERROR: SPI%d 不支持 %d 位帧，保持 %d 位\n",
++             priv->cfg->port, nbits, priv->nbits);
++      return;
++    }
++
++  priv->nbits = (uint8_t)nbits;
++}
++
++/****************************************************************************
++ * Name: spi_status
++ ****************************************************************************/
++
++static uint8_t spi_status(struct spi_dev_s *dev, uint32_t devid)
++{
++  /* 排针上接什么由用户决定，驱动无从判断有没有卡/设备在位 */
++
++  return 0;
++}
++
++/****************************************************************************
++ * Name: spi_send
++ ****************************************************************************/
++
++static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
++{
++  struct rk3576_spi_priv_s *priv = (struct rk3576_spi_priv_s *)dev;
++  uint16_t tx16 = (uint16_t)wd;
++  uint16_t rx16 = 0;
++  uint8_t  tx8  = (uint8_t)wd;
++  uint8_t  rx8  = 0;
++
++  if (priv->nbits > 8)
++    {
++      spi_transfer(priv, &tx16, &rx16, 1);
++      return rx16;
++    }
++
++  spi_transfer(priv, &tx8, &rx8, 1);
++  return rx8;
++}
++
++/****************************************************************************
++ * Name: spi_exchange / spi_sndblock / spi_recvblock
++ ****************************************************************************/
++
++#ifdef CONFIG_SPI_EXCHANGE
++static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
++                         void *rxbuffer, size_t nwords)
++{
++  spi_transfer((struct rk3576_spi_priv_s *)dev, txbuffer, rxbuffer, nwords);
++}
++#else
++static void spi_sndblock(struct spi_dev_s *dev, const void *buffer,
++                         size_t nwords)
++{
++  spi_transfer((struct rk3576_spi_priv_s *)dev, buffer, NULL, nwords);
++}
++
++static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
++{
++  spi_transfer((struct rk3576_spi_priv_s *)dev, NULL, buffer, nwords);
++}
++#endif
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_spibus_initialize
++ ****************************************************************************/
++
++struct spi_dev_s *rk3576_spibus_initialize(int port)
++{
++  const struct rk3576_spi_config_s *cfg = NULL;
++  struct rk3576_spi_priv_s *priv = NULL;
++  uint32_t version;
++  uint32_t readback;
++  unsigned int sel;
++  int i;
++
++  for (i = 0; i < RK3576_NSPI; i++)
++    {
++      if (g_spi_config[i].port == port)
++        {
++          cfg  = &g_spi_config[i];
++          priv = &g_spi_priv[i];
++          break;
++        }
++    }
++
++  if (cfg == NULL)
++    {
++      spierr("ERROR: SPI%d 不在支持列表里（当前只有 SPI4 引到排针）\n",
++             port);
++      return NULL;
++    }
++
++  if (priv->initialized)
++    {
++      return (struct spi_dev_s *)priv;
++    }
++
++  priv->cfg  = cfg;
++  priv->base = cfg->base;
++
++  /* 1) 时钟：PCLK 和功能时钟同属一个 CLKGATE_CON */
++
++  rk3576_clk_gate(cfg->gate_con, cfg->gate_pclk, true);
++  rk3576_clk_gate(cfg->gate_con, cfg->gate_clk, true);
++
++  /* 2) 引脚复用。CS 那根走 GPIO：先拉高（不选中）再设成输出，
++   *    顺序反了会在设成输出的一瞬间输出上一次的残留电平，
++   *    对从机就是一次伪片选。
++   */
++
++  rk3576_pinmux_set(cfg->clk_bank,  cfg->clk_pin,  cfg->pin_func);
++  rk3576_pinmux_set(cfg->mosi_bank, cfg->mosi_pin, cfg->pin_func);
++  rk3576_pinmux_set(cfg->miso_bank, cfg->miso_pin, cfg->pin_func);
++
++  rk3576_gpio_write(cfg->cs_bank, cfg->cs_pin, true);
++  rk3576_pinmux_set(cfg->cs_bank, cfg->cs_pin, 0);
++  rk3576_gpio_setdir(cfg->cs_bank, cfg->cs_pin, true);
++  rk3576_gpio_write(cfg->cs_bank, cfg->cs_pin, true);
++
++  /* 3) 读时钟源。父表与 I2C 的不同，见 g_spi_src_hz 的注释 */
++
++  sel = rk3576_clk_getmux(cfg->sel_con, cfg->sel_shift, 2);
++  priv->src_hz = g_spi_src_hz[sel];
++
++  /* 4) 自检：控制器必须先关掉，BAUDR 在使能状态下写不进去。
++   *    写一个值再读回，一致说明 PCLK 已使能、基址正确、MMU 已映射。
++   */
++
++  spi_enable(priv, false);
++  spi_putreg(priv, RK3576_SPI_BAUDR, 8);
++  readback = spi_getreg(priv, RK3576_SPI_BAUDR);
++
++  if (readback != 8)
++    {
++      spierr("ERROR: SPI%d BAUDR 写 8 读回 0x%08" PRIx32
++             " —— 寄存器块无响应\n", port, readback);
++      return NULL;
++    }
++
++  /* 5) FIFO 深度由版本号决定，不能写死 */
++
++  version = spi_getreg(priv, RK3576_SPI_VERSION);
++  priv->fifo_len = (version == SPI_VER2_TYPE1 || version == SPI_VER2_TYPE2) ?
++                   SPI_FIFO_LEN_V2 : SPI_FIFO_LEN_V1;
++
++  /* 6) 默认参数 */
++
++  priv->mode      = SPIDEV_MODE0;
++  priv->nbits     = SPI_DEFAULT_NBITS;
++  priv->frequency = 0;
++  spi_setfrequency((struct spi_dev_s *)priv, SPI_DEFAULT_FREQ_HZ);
++
++  spi_putreg(priv, RK3576_SPI_SER, 0);
++  spi_putreg(priv, RK3576_SPI_IMR, 0);
++  spi_putreg(priv, RK3576_SPI_ICR, 0xffffffff);
++
++  priv->initialized = true;
++
++  syslog(LOG_INFO,
++         "SPI%d: 版本 0x%08" PRIx32 " FIFO %" PRIu32 " 源 %" PRIu32
++         "MHz SCLK %" PRIu32 "Hz\n",
++         port, version, priv->fifo_len, priv->src_hz / 1000000,
++         priv->actual);
++
++  return (struct spi_dev_s *)priv;
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_spi.h b/arch/arm64/src/rk3576/rk3576_spi.h
+new file mode 100644
+index 00000000..f37ca9d6
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_spi.h
+@@ -0,0 +1,68 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_spi.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_SPI_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_SPI_H
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <nuttx/spi/spi.h>
++
++/****************************************************************************
++ * Public Function Prototypes
++ ****************************************************************************/
++
++#undef EXTERN
++#if defined(__cplusplus)
++#define EXTERN extern "C"
++extern "C"
++{
++#else
++#define EXTERN extern
++#endif
++
++/****************************************************************************
++ * Name: rk3576_spibus_initialize
++ *
++ * Description:
++ *   初始化并返回一条 SPI 总线。
++ *
++ *   当前只支持 port 4 —— KICKPI-K7 上只有 SPI4 引到了 40 针扩展口
++ *   （厂商 dtsi rk3576-kickpi-k7c-extend-40pin.dtsi 里也只使能了它，
++ *   走 m2 复用组）。其余三个通用 SPI 在基础 dtb 里都是 disabled。
++ *
++ * Returned Value:
++ *   成功返回总线句柄；端口不支持或寄存器块无响应返回 NULL。
++ *
++ ****************************************************************************/
++
++struct spi_dev_s *rk3576_spibus_initialize(int port);
++
++#undef EXTERN
++#if defined(__cplusplus)
++}
++#endif
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_SPI_H */
 -- 
 2.43.0
 

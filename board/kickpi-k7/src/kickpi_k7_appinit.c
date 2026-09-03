@@ -131,6 +131,14 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_RK3576_SPI
+  ret = kickpi_k7_spi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: SPI 初始化失败: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_RK3576_SDHCI
   /* eMMC：拿到 sdio_dev_s 句柄，交给 mmcsd 上层注册 /dev/mmcsd0。
    * 失败不阻断其余初始化 —— 没有存储时控制台仍应可用，便于继续排查。
