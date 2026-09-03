@@ -50,6 +50,7 @@
 #include "rk3576_dsi2.h"
 #include "rk3576_dwmmc.h"
 #include "rk3576_wdt.h"
+#include "rk3576_rng.h"
 #include "rk3576_gmac.h"
 #include "rk3576_vop2.h"
 #include "rk3576_sdhci.h"
@@ -437,6 +438,18 @@ int board_app_initialize(uintptr_t arg)
                 }
             }
         }
+    }
+#endif
+
+#ifdef CONFIG_RK3576_RNG
+  ret = rk3576_rng_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 硬件随机数初始化失败: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "随机数: /dev/random 就绪\n");
     }
 #endif
 

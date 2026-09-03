@@ -97,7 +97,7 @@ eMMC 第 0 扇区往后是引导器与启动镜像，跑一次就把板子写坏
 | 1.3.13 | **Timer 定时器** | `cmocka_driver_oneshot` | ✅ 1/1（注册 /dev/oneshot） |
 | 1.3.14 | 时间一致性 | 同上 | ☐ |
 | 1.3.15 | Watchdog | `cmocka_driver_watchdog` | ✅ 实测触发系统复位并恢复 |
-| 1.3.16 | RNG | 硬件随机数 | ☐ |
+| 1.3.16 | RNG | `hexdump /dev/random` | ✅ 自检两批不同，实测读数随机 |
 | 1.3.17 | Crypto | 加解密引擎 | ☐ |
 
 已知的 cmocka 驱动测试命令：
