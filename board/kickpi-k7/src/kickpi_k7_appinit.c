@@ -34,6 +34,8 @@
 #include <inttypes.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/video/fb.h>
+#include <nuttx/timers/oneshot.h>
+#include "arm64_arch_timer.h"
 #include <stdint.h>
 #include <nuttx/board.h>
 #include <nuttx/sdio.h>
@@ -435,6 +437,36 @@ int board_app_initialize(uintptr_t arg)
             }
         }
     }
+#endif
+
+#ifdef CONFIG_ONESHOT
+  /* 注册 /dev/oneshot（xTS 1.3.13/14 的 cmocka_driver_oneshot 需要它）。
+   *
+   * 下半部由 arm64 通用定时器提供（arm64_arch_timer.c 的
+   * arm64_oneshot_initialize），本板不需要额外的定时器硬件 ——
+   * ARM 通用定时器就是 SoC 无关的那一个，频率已实测为 24MHz。
+   */
+
+  {
+    struct oneshot_lowerhalf_s *os = arm64_oneshot_initialize();
+
+    if (os == NULL)
+      {
+        syslog(LOG_ERR, "ERROR: oneshot 下半部初始化失败\n");
+      }
+    else
+      {
+        ret = oneshot_register("/dev/oneshot", os);
+        if (ret < 0)
+          {
+            syslog(LOG_ERR, "ERROR: 注册 /dev/oneshot 失败: %d\n", ret);
+          }
+        else
+          {
+            syslog(LOG_INFO, "定时器: /dev/oneshot 就绪\n");
+          }
+      }
+  }
 #endif
 
 #ifdef CONFIG_RTC_HYM8563

@@ -1386,3 +1386,43 @@ NuttX 本来就为这种控制器留了开关：capabilities 报
   也不会报错。规则必须抄来源。
 - **标志名会误导。** `SDIO_CAPS_DMABEFOREWRITE` 管的是顺序不是 DMA。
   拿不准时看它在框架里的**使用处**，比看名字可靠。
+
+## 案例 14：GPIO 中断子项挂死 —— 缺回调不是返回错误，是直接断言
+
+### 现象
+
+`cmocka_driver_gpio` 四个子项里，`drivertest_gpio_interrupt` 先是
+`fd_in < 0`（板上只注册了两个输出脚，没有 `/dev/gpio2`），补上输入脚后
+改为断言失败并打印栈回溯：
+
+    Assertion failed : at file: ioexpander/gpio.c:560
+
+### 第一层：上层用 DEBUGASSERT 检查回调，不是返回错误
+
+`drivers/ioexpander/gpio.c` 处理 `GPIOC_SETPINTYPE` 时：
+
+    DEBUGASSERT(dev->gp_ops->go_setpintype != NULL);
+    ret = dev->gp_ops->go_setpintype(dev, pintype);
+
+缺回调不会得到 `-ENOTSUP`，而是直接断言 —— 现象是整个任务崩掉并打印
+一大段栈回溯，和"功能不支持"完全不同。实现 `gpio_dev_s` 时
+**go_read 一个不够**：只要用例会切引脚类型，
+`go_setpintype` / `go_attach` / `go_enable` 就得一起给。
+
+### 第二层：补齐回调后板子挂死
+
+补上三个回调后，用例跑到中断子项时板子失去响应（串口无输出）。
+
+选的输入脚是 TP_INT_L（GPIO0_C5）—— 触摸中断脚。选它的理由是板上有
+10K 外部上拉、读它不干扰别的东西；但**忽略了触摸驱动也在用这一脚**：
+`kickpi_k7_touch.c` 已经 attach 了自己的中断处理，用例再把它配成双边沿
+并使能，两个使用者对同一根中断线做了不同的配置。
+
+这与本项目早先那次"gpio3-3 既当触摸中断又是 GMAC1 PHY 复位"是同一类
+错误：**选引脚时只看了电气特性，没查它是否已被占用。**
+
+### 教训
+
+- 板级资源要先查占用再使用。电气上可用 ≠ 空闲。
+- 给测试用的输入脚应当选**确实空闲**的引脚，或者干脆引出一个未接器件的
+  扩展口引脚。

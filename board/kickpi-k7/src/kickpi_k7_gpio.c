@@ -41,6 +41,7 @@
 #include <arch/board/board.h>
 
 #include "rk3576_gpio.h"
+#include "rk3576_pinmux.h"
 #include "hardware/rk3576_gpio.h"
 #include "kickpi_k7.h"
 
@@ -81,6 +82,142 @@ static const struct gpio_operations_s g_gpout_ops =
 };
 
 /* 板上可用的输出引脚。引脚号来自 include/board.h，出处是厂商 dts。 */
+
+/****************************************************************************
+ * 输入引脚
+ *
+ * ★ cmocka_driver_gpio 需要一个输入设备（默认 /dev/gpio2），此前板上
+ *   只注册了两个输出脚，用例的中断子项因 fd_in < 0 失败。
+ *
+ *   选 TP_INT_L（GPIO0_C5）作输入：它是触摸中断脚，板上有 10K 上拉到
+ *   3V3（原理图 R5106），读它不会干扰任何东西；而且触摸驱动此时尚未
+ *   接管中断，两者不冲突。
+ */
+
+struct kickpi_gpin_s
+{
+  struct gpio_dev_s gpio;
+  uint8_t           bank;
+  uint8_t           pin;
+  uint8_t           minor;
+  const char       *name;
+  pin_interrupt_t   callback;
+};
+
+static int kickpi_gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+{
+  FAR struct kickpi_gpin_s *p = (FAR struct kickpi_gpin_s *)dev;
+
+  if (value == NULL)
+    {
+      return -EINVAL;
+    }
+
+  *value = rk3576_gpio_read(p->bank, p->pin) != 0;
+  return OK;
+}
+
+/****************************************************************************
+ * ★ 输入脚不能只实现 go_read。
+ *
+ *   cmocka_driver_gpio 的中断子项会通过 GPIOC_SETPINTYPE 把引脚切成
+ *   中断类型，上层在调用前用 DEBUGASSERT 检查回调非空 —— 缺哪个就直接
+ *   断言失败并打印栈回溯，而不是返回错误码。所以 setpintype / attach /
+ *   enable 三个必须一起给出。
+ *
+ *   底层中断能力本来就有（触摸用的就是它），这里只是把它接到 gpio
+ *   上层的接口上。
+ ****************************************************************************/
+
+static int kickpi_gpin_attach(FAR struct gpio_dev_s *dev,
+                              pin_interrupt_t callback)
+{
+  FAR struct kickpi_gpin_s *p = (FAR struct kickpi_gpin_s *)dev;
+
+  p->callback = callback;
+  return OK;
+}
+
+static int kickpi_gpin_isr(int irq, FAR void *context, FAR void *arg)
+{
+  FAR struct kickpi_gpin_s *p = (FAR struct kickpi_gpin_s *)arg;
+
+  if (p->callback != NULL)
+    {
+      p->callback(&p->gpio, p->minor);
+    }
+
+  return OK;
+}
+
+static int kickpi_gpin_enable(FAR struct gpio_dev_s *dev, bool enable)
+{
+  FAR struct kickpi_gpin_s *p = (FAR struct kickpi_gpin_s *)dev;
+
+  if (enable)
+    {
+      /* 双边沿：用例会主动拉动引脚验证两个方向都能触发。 */
+
+      rk3576_gpio_irq_config(p->bank, p->pin, false, false);
+      rk3576_gpio_irq_attach(p->bank, p->pin, kickpi_gpin_isr, p);
+    }
+
+  return rk3576_gpio_irq_enable(p->bank, p->pin, enable);
+}
+
+static int kickpi_gpin_setpintype(FAR struct gpio_dev_s *dev,
+                                  enum gpio_pintype_e pintype)
+{
+  FAR struct kickpi_gpin_s *p = (FAR struct kickpi_gpin_s *)dev;
+
+  switch (pintype)
+    {
+      case GPIO_INPUT_PIN:
+      case GPIO_INPUT_PIN_PULLUP:
+      case GPIO_INPUT_PIN_PULLDOWN:
+        rk3576_gpio_irq_enable(p->bank, p->pin, false);
+        rk3576_gpio_setdir(p->bank, p->pin, false);
+        break;
+
+      case GPIO_INTERRUPT_PIN:
+      case GPIO_INTERRUPT_HIGH_PIN:
+      case GPIO_INTERRUPT_LOW_PIN:
+      case GPIO_INTERRUPT_RISING_PIN:
+      case GPIO_INTERRUPT_FALLING_PIN:
+      case GPIO_INTERRUPT_BOTH_PIN:
+        rk3576_gpio_setdir(p->bank, p->pin, false);
+        rk3576_gpio_irq_config(p->bank, p->pin,
+                               pintype == GPIO_INTERRUPT_RISING_PIN,
+                               pintype == GPIO_INTERRUPT_HIGH_PIN ||
+                               pintype == GPIO_INTERRUPT_LOW_PIN);
+        break;
+
+      default:
+        return -EINVAL;
+    }
+
+  dev->gp_pintype = pintype;
+  return OK;
+}
+
+static const struct gpio_operations_s g_gpin_ops =
+{
+  .go_read       = kickpi_gpin_read,
+  .go_attach     = kickpi_gpin_attach,
+  .go_enable     = kickpi_gpin_enable,
+  .go_setpintype = kickpi_gpin_setpintype,
+};
+
+static struct kickpi_gpin_s g_gpins[] =
+{
+  {
+    .bank = BOARD_TP_INT_BANK,        /* GPIO0_C5，触摸中断脚，有外部上拉 */
+    .pin  = BOARD_TP_INT_PIN,
+    .name = "tp-int",
+  },
+};
+
+#define KICKPI_NGPIN (sizeof(g_gpins) / sizeof(g_gpins[0]))
 
 static struct kickpi_gpout_s g_gpouts[] =
 {
@@ -201,6 +338,40 @@ int kickpi_k7_gpio_initialize(void)
 
       syslog(LOG_INFO, "GPIO: /dev/gpio%d = %s (gpio%u-%u)\n",
              i, p->name, p->bank, p->pin);
+    }
+
+  /* 输入脚接在输出脚之后，编号顺延（当前为 /dev/gpio2）。 */
+
+  for (i = 0; i < KICKPI_NGPIN; i++)
+    {
+      FAR struct kickpi_gpin_s *p = &g_gpins[i];
+      int minor = KICKPI_NGPOUT + i;
+
+      p->gpio.gp_pintype = GPIO_INPUT_PIN;
+      p->gpio.gp_ops     = &g_gpin_ops;
+      p->minor           = minor;
+
+      rk3576_pinmux_set(p->bank, p->pin, RK3576_PINMUX_GPIO);
+
+      ret = rk3576_gpio_setdir(p->bank, p->pin, false);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: %s (gpio%u-%u) 设为输入失败: %d\n",
+                 p->name, p->bank, p->pin, ret);
+          continue;
+        }
+
+      ret = gpio_pin_register(&p->gpio, minor);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: %s 注册 /dev/gpio%d 失败: %d\n",
+                 p->name, minor, ret);
+          continue;
+        }
+
+      syslog(LOG_INFO, "GPIO: /dev/gpio%d = %s (gpio%u-%u, 输入=%d)\n",
+             minor, p->name, p->bank, p->pin,
+             rk3576_gpio_read(p->bank, p->pin));
     }
 
   return OK;
