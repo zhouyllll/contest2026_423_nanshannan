@@ -437,6 +437,18 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_RTC_HYM8563
+  ret = kickpi_k7_rtc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: RTC 初始化失败: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "RTC: /dev/rtc0 就绪（HYM8563@I2C2:0x51）\n");
+    }
+#endif
+
 #ifdef CONFIG_RK3576_I2C
   /* 摄像头传感器探测（不建立取图通路，见 kickpi_k7_camera.c 说明） */
 

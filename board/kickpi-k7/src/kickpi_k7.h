@@ -98,6 +98,16 @@ int kickpi_k7_lcd_power(bool on);
 
 int kickpi_k7_camera_initialize(void);
 
+/****************************************************************************
+ * Name: kickpi_k7_rtc_initialize
+ *
+ * Description:
+ *   注册板上 HYM8563 为 /dev/rtc0。
+ *
+ ****************************************************************************/
+
+int kickpi_k7_rtc_initialize(void);
+
 #if defined(CONFIG_AUDIO_ES8388) && defined(CONFIG_RK3576_SAI)
 /****************************************************************************
  * Name: kickpi_k7_audio_initialize

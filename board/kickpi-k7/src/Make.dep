@@ -245,6 +245,8 @@ kickpi_k7_i2c.o: kickpi_k7_i2c.c \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wdog.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/list_type.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/i2c/i2c_master.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/arch/board/board.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/timers/hym8563.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_i2c.h \
  kickpi_k7.h
 kickpi_k7_lcd.o: kickpi_k7_lcd.c \

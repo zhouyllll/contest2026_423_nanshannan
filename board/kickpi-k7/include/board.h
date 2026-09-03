@@ -82,6 +82,15 @@
 #define BOARD_GMAC1_RST_BANK     3
 #define BOARD_GMAC1_RST_PIN      3            /* RK_PA3 = 0*8+3，低有效 */
 
+/* 实时时钟 HYM8563
+ *
+ * 出处：原厂 dtb 的 /i2c@2ac50000/hym8563@51（compatible "haoyu,hym8563"）。
+ * 该芯片同时输出 32.768kHz 给 SDIO WiFi 模块用。
+ */
+
+#define BOARD_RTC_I2C_BUS        2
+#define BOARD_RTC_I2C_ADDR       0x51
+
 /* 5 寸 MIPI 屏 + 电容触摸（F050008M01，720x1280）
  *
  * ★ 出处：原理图 K7_V1.1_20241211_SCH.pdf 第 27 页 "Single-MIPI LCM"，

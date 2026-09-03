@@ -42,6 +42,9 @@
 
 #include <nuttx/i2c/i2c_master.h>
 
+#include <arch/board/board.h>
+#include <nuttx/timers/hym8563.h>
+
 #include "rk3576_i2c.h"
 #include "kickpi_k7.h"
 
@@ -134,3 +137,54 @@ int kickpi_k7_i2c_initialize(void)
 }
 
 #endif /* CONFIG_RK3576_I2C */
+
+#ifdef CONFIG_RTC_HYM8563
+/****************************************************************************
+ * Name: kickpi_k7_rtc_initialize
+ *
+ * Description:
+ *   注册板上的 HYM8563 为 /dev/rtc0。
+ *
+ *   出处：原厂 dtb 的 /i2c@2ac50000/hym8563@51，compatible 为
+ *   "haoyu,hym8563"，同时对外输出 32.768kHz 给 SDIO WiFi 用。
+ *
+ ****************************************************************************/
+
+int kickpi_k7_rtc_initialize(void)
+{
+  struct i2c_master_s *i2c;
+
+  i2c = rk3576_i2cbus_initialize(BOARD_RTC_I2C_BUS);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: RTC 所在 I2C%d 初始化失败\n",
+             BOARD_RTC_I2C_BUS);
+      return -ENODEV;
+    }
+
+  return hym8563_rtc_initialize(0, i2c, BOARD_RTC_I2C_ADDR, 400000);
+}
+#endif
+
+#ifdef CONFIG_RTC_ARCH
+/****************************************************************************
+ * Name: up_rtc_initialize
+ *
+ * Description:
+ *   NuttX 在 clock_initialize() 里调用它初始化 RTC。
+ *
+ *   ★ 本板的 RTC 挂在 I2C 上，而这个函数在系统启动很早期被调用 ——
+ *     那时 I2C 控制器尚未初始化，真正的注册必须放到 board_app_initialize()
+ *     里做（见 kickpi_k7_rtc_initialize）。这里只返回成功，让时钟子系统
+ *     先用软件计时启动，等 RTC 就绪后由 up_rtc_set_lowerhalf() 接管。
+ *
+ *     如果在这里访问 I2C，会在 PMIC/时钟都还没配好的时候操作总线，
+ *     现象是启动早期挂死且没有任何日志。
+ *
+ ****************************************************************************/
+
+int up_rtc_initialize(void)
+{
+  return OK;
+}
+#endif
