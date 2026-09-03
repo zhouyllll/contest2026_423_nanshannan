@@ -82,6 +82,22 @@
 #define BOARD_GMAC1_RST_BANK     3
 #define BOARD_GMAC1_RST_PIN      3            /* RK_PA3 = 0*8+3，低有效 */
 
+/* 测试用输入引脚
+ *
+ * ★ 必须选一个**确实空闲**的脚，不能图方便借用已有器件的中断线。
+ *
+ *   最初借用了 TP_INT_L(GPIO0_C5)，理由是它有外部上拉、读起来安全 ——
+ *   但触摸驱动已经 attach 了自己的中断处理，测试用例再把它配成双边沿
+ *   并使能，两个使用者对同一根中断线做了冲突配置，结果板子挂死。
+ *   电气上可用不等于空闲。
+ *
+ *   GPIO4_B3 取自 40 针扩展口（厂商 rk3576-kickpi-k7c-extend-40pin.dtsi
+ *   列出的引脚之一），板上没有器件接它。
+ */
+
+#define BOARD_TESTPIN_BANK       4            /* GPIO4_B3 */
+#define BOARD_TESTPIN_PIN        11           /* RK_PB3 = 1*8+3 */
+
 /* 实时时钟 HYM8563
  *
  * 出处：原厂 dtb 的 /i2c@2ac50000/hym8563@51（compatible "haoyu,hym8563"）。

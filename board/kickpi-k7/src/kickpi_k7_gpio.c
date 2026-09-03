@@ -211,9 +211,9 @@ static const struct gpio_operations_s g_gpin_ops =
 static struct kickpi_gpin_s g_gpins[] =
 {
   {
-    .bank = BOARD_TP_INT_BANK,        /* GPIO0_C5，触摸中断脚，有外部上拉 */
-    .pin  = BOARD_TP_INT_PIN,
-    .name = "tp-int",
+    .bank = BOARD_TESTPIN_BANK,       /* GPIO4_B3，40 针扩展口，未接器件 */
+    .pin  = BOARD_TESTPIN_PIN,
+    .name = "testpin",
   },
 };
 
