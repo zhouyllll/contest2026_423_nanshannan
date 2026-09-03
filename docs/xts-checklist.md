@@ -24,14 +24,14 @@
 | 1.1.3 | 系统调用 | `cmocka_syscall_test` | 74 个用例，需 tmpfs 挂到 `/data`（已加，待复测） |
 | 1.1.4 | Kernel-ostest | `ostest` | ✅ 24 个套件 |
 | 1.1.5 | Kernel-getprime | `getprime` | ✅ |
-| 1.1.6 | Kernel-mm 内存 | |
-| 1.1.7 | Kernel-scanftest | |
-| 1.1.8 | Kernel-C | |
-| 1.1.9 | Kernel-Cxx | |
-| 1.1.10 | Kernel-popen | |
-| 1.1.11 | Kernel-pipe | |
-| 1.1.12 | Kernel-md5 | |
-| 1.1.13 | Kernel-C++ 功能 | |
+| 1.1.6 | Kernel-mm 内存 | `mm` | ✅ TEST COMPLETE |
+| 1.1.7 | Kernel-scanftest | `scanftest` | ⚠️ 85 通过 / 11 失败 |
+| 1.1.8 | Kernel-C | | 待做 |
+| 1.1.9 | Kernel-Cxx | `helloxx` | ❌ 需先接 C++ 标准库 |
+| 1.1.10 | Kernel-popen | `popen` | ❌ 本 libc 无 popen 实现 |
+| 1.1.11 | Kernel-pipe | `pipe` | ✅ PASSED（含重定向） |
+| 1.1.12 | Kernel-md5 | | 待做 |
+| 1.1.13 | Kernel-C++ 功能 | `cxxtest` | ❌ 同 1.1.9 |
 
 公共前提配置：
 ```
@@ -65,6 +65,20 @@ CONFIG_SCHED_LPWORK=y
 Makefile 里却仍留着 sched/syscall/time/pthread/mutex 的分支，开启后
 make 会去找不存在的 `cmocka_sched_test.c`。已给这 8 个分支补上
 "主源文件存在"的条件，作为补丁归档。
+
+### ★ 1.3.5 Flash 功能只能对 SD 卡跑，不能对 eMMC 跑
+
+`cmocka_driver_block` 从**第 0 扇区**开始写：
+
+```c
+for (i = 0; i < nsectors; i++)
+  {
+    lseek(pre->fd, i * pre->cfg.geo_sectorsize, SEEK_SET);
+    ret = write(pre->fd, input, pre->cfg.geo_sectorsize);
+```
+
+eMMC 第 0 扇区往后是引导器与启动镜像，跑一次就把板子写坏。目标必须是
+`/dev/mmcsd1`（TF 卡），卡上没有需要保留的内容。
 
 ## 二、驱动 BSP（15 项）—— 这是主战场
 

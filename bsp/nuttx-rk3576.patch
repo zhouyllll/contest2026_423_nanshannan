@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 01/21] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 01/23] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 02/21] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 02/23] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1363,7 +1363,7 @@ index 559489f6..d2fb5605 100644
 From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:38:15 +0800
-Subject: [PATCH 03/21] arm64/rk3576: clear U-Boot's leftover
+Subject: [PATCH 03/23] arm64/rk3576: clear U-Boot's leftover
  HCR_EL2.{IMO,FMO,AMO}; fix load address
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1490,7 +1490,7 @@ index d2fb5605..128e8a22 100644
 From 1a226e049212fce50e0724ee37b6671ac0f23e23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:50:02 +0800
-Subject: [PATCH 04/21] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
+Subject: [PATCH 04/23] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
  =?UTF-8?q?=5FEL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
  =?UTF-8?q?=E4=B8=81=E7=9A=84=E5=85=B3=E7=B3=BB?=
 MIME-Version: 1.0
@@ -1535,7 +1535,7 @@ index 128e8a22..f76d45cb 100644
 From 509d2fa1a06f4560ce252d7cc6a4d507ea7bd6dc Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 23:18:55 +0800
-Subject: [PATCH 05/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
+Subject: [PATCH 05/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
  =?UTF-8?q?=20=E9=A9=B1=E5=8A=A8=EF=BC=88Rockchip=20GPIO=20v2=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1989,7 +1989,7 @@ index 00000000..2fe55c92
 From 895f1f4e4df1ffb6dc7c665adb230ea472f48600 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 00:43:14 +0800
-Subject: [PATCH 06/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
+Subject: [PATCH 06/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
  =?UTF-8?q?=E3=80=81=E5=BC=95=E8=84=9A=E5=A4=8D=E7=94=A8=E4=B8=8E=20I2C=20?=
  =?UTF-8?q?=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
@@ -3602,7 +3602,7 @@ index 00000000..8d4d6561
 From 0efe6a8352599f5b577eda2598ab46844332a791 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:24:26 +0800
-Subject: [PATCH 07/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
+Subject: [PATCH 07/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
  =?UTF-8?q?=20(dwcmshc/SDHCI)=20=E5=91=BD=E4=BB=A4=E9=80=9A=E8=B7=AF?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -4324,7 +4324,7 @@ index 00000000..971084de
 From 19f41551f493da28c0756c5e83a0850a0bcf9aae Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:29:46 +0800
-Subject: [PATCH 08/21] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
+Subject: [PATCH 08/23] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
  =?UTF-8?q?=E9=80=9A=E8=B7=AF=E6=89=93=E9=80=9A=EF=BC=88CMD9/CMD7/CMD17=20?=
  =?UTF-8?q?+=20PIO=20=E8=AF=BB=E5=9D=97=EF=BC=89?=
 MIME-Version: 1.0
@@ -4534,7 +4534,7 @@ index cd0d10dc..99c4ecc0 100644
 From 98b2a2df090330a6d91d6f52c098751b1697768a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 13:13:58 +0800
-Subject: [PATCH 09/21] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
+Subject: [PATCH 09/23] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
  =?UTF-8?q?=20sdio=5Fdev=5Fs=EF=BC=8C/dev/mmcsd0=20=E5=8F=AF=E7=94=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -5263,7 +5263,7 @@ index 971084de..c0f64978 100644
 From 3a65d6b63b5febca4827bd7fecd8d2145adb51a0 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:07:47 +0800
-Subject: [PATCH 10/21] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
+Subject: [PATCH 10/23] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
  =?UTF-8?q?=E5=A4=87=E8=AF=BB=E9=80=9A=EF=BC=881=20=E4=BD=8D=20@50MHz?=
  =?UTF-8?q?=EF=BC=89=EF=BC=8C4=20=E4=BD=8D=E5=BE=85=E4=BF=AE?=
 MIME-Version: 1.0
@@ -5486,7 +5486,7 @@ index a3b84e47..a2996f1a 100644
 From 84d0c755aa873b306fefd87a20e4c2e0abccf064 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:14:24 +0800
-Subject: [PATCH 11/21] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
+Subject: [PATCH 11/23] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
  =?UTF-8?q?=E6=80=BB=E7=BA=BF=E6=89=93=E9=80=9A=EF=BC=8850MHz=EF=BC=89?=
  =?UTF-8?q?=EF=BC=8C=E6=A0=B9=E5=9B=A0=E6=98=AF=E8=83=BD=E5=8A=9B=E5=A3=B0?=
  =?UTF-8?q?=E6=98=8E?=
@@ -5587,7 +5587,7 @@ index a2996f1a..2206c8ab 100644
 From 5250326bc4b5ede69c28dea6feaf51d0ae74e46a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:27:58 +0800
-Subject: [PATCH 12/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
+Subject: [PATCH 12/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F(PMU)=E4=B8=8E=20GPIO=20=E4=B8=AD?=
  =?UTF-8?q?=E6=96=AD=EF=BC=8C=E4=B8=BA=E6=98=BE=E7=A4=BA=E4=B8=8E=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E9=93=BA=E8=B7=AF?=
@@ -6294,7 +6294,7 @@ index 00000000..80545549
 From 40634c8959141615d593598f97b5c70597d2039d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:41:21 +0800
-Subject: [PATCH 13/21] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
+Subject: [PATCH 13/23] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F=E7=BC=96=E5=8F=B7=E4=B8=8E=E6=AF=8F?=
  =?UTF-8?q?=E5=9F=9F=E7=9A=84=20req=20=E5=81=8F=E7=A7=BB?=
 MIME-Version: 1.0
@@ -6451,7 +6451,7 @@ index 80545549..84de6b0f 100644
 From d632b41753c213abee75ccaedbe6a88659d68b89 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:59:50 +0800
-Subject: [PATCH 14/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
+Subject: [PATCH 14/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
  =?UTF-8?q?=20=E9=9F=B3=E9=A2=91=E6=8E=A5=E5=8F=A3=E9=A9=B1=E5=8A=A8?=
  =?UTF-8?q?=EF=BC=88PIO=20=E5=8F=91=E9=80=81=EF=BC=89?=
 MIME-Version: 1.0
@@ -7201,7 +7201,7 @@ index 00000000..4c5ceb1c
 From 945dc74f703bb97d7c2331a2eb40df1bc888eb23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:26:44 +0800
-Subject: [PATCH 15/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
+Subject: [PATCH 15/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
  =?UTF-8?q?=20=E6=98=BE=E7=A4=BA=E6=8E=A7=E5=88=B6=E5=99=A8=EF=BC=88?=
  =?UTF-8?q?=E8=87=AA=E6=A3=80=20+=20=E5=86=85=E7=BD=AE=E5=BD=A9=E6=9D=A1?=
  =?UTF-8?q?=EF=BC=89?=
@@ -7744,7 +7744,7 @@ index 00000000..d59f5f55
 From e19fbf3e1dcfc9bd8c9cac919da3591de3b6bdb5 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:38:18 +0800
-Subject: [PATCH 16/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 16/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20DSI2=20=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8360,7 +8360,7 @@ index 00000000..b4cf8682
 From 506a2907cd27c7244a478ced9cc2e03e3e02ff77 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:44:28 +0800
-Subject: [PATCH 17/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 17/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20D/C-PHY=20=E9=A9=B1=E5=8A=A8=EF=BC=88D-PHY=20PLL=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8813,7 +8813,7 @@ index 00000000..6183bd51
 From 67474c8ffe832b715faa83734a71a32b80b33da6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:54:26 +0800
-Subject: [PATCH 18/21] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
+Subject: [PATCH 18/23] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
  =?UTF-8?q?=20=E5=89=8D=E7=BD=AE=E9=93=BE=E8=B7=AF=E4=B8=8E=20MDIO?=
  =?UTF-8?q?=EF=BC=88DWMAC=204.20a=EF=BC=89?=
 MIME-Version: 1.0
@@ -9314,7 +9314,7 @@ index 00000000..92991a43
 From 474c4a000e75319ecee875dffde4a0e7342ba12d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:07:45 +0800
-Subject: [PATCH 19/21] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
+Subject: [PATCH 19/23] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
  =?UTF-8?q?=E9=93=BE=E8=B7=AF=E5=85=AD=E9=A1=B9=E9=85=8D=E9=BD=90=EF=BC=8C?=
  =?UTF-8?q?DMA=20=E8=BD=AF=E5=A4=8D=E4=BD=8D=E4=BB=8D=E6=9C=AA=E5=AE=8C?=
  =?UTF-8?q?=E6=88=90?=
@@ -9867,7 +9867,7 @@ index 6f8e5f23..5afaf918 100644
 From 51d98edc4f4ae78ed5d33d08d8b5fdf85719c59b Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:24:18 +0800
-Subject: [PATCH 20/21] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
+Subject: [PATCH 20/23] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
  =?UTF-8?q?=E5=88=B0=E4=B8=83=E6=9D=A1=E6=80=BB=E7=BA=BF=EF=BC=88=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E5=AE=9A=E4=BD=8D=E7=94=A8=EF=BC=89?=
 MIME-Version: 1.0
@@ -9974,7 +9974,7 @@ index f57a2bfa..43f2313e 100644
 From 7a968bf8c6c3d85daf2dc81619a2800cf4bf89c4 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 11:12:37 +0800
-Subject: [PATCH 21/21] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
+Subject: [PATCH 21/23] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
  =?UTF-8?q?=E8=B7=AF=E4=BF=AE=E6=AD=A3=20+=20I2C0(PMU=20=E5=9F=9F)=20+=20?=
  =?UTF-8?q?=E5=BC=95=E8=84=9A=E4=B8=8A=E4=B8=8B=E6=8B=89=20API?=
 MIME-Version: 1.0
@@ -10829,6 +10829,2505 @@ index d59f5f55..8c0f10a3 100644
 +
 +int rk3576_vop2_check_scanning(int vp);
 +
+ #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_VOP2_H */
+-- 
+2.43.0
+
+
+From c8d3eeab1d0eb34c8c9922e7a7fb4fa48df7c057 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Wed, 2 Sep 2026 12:05:26 +0800
+Subject: [PATCH 22/23] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
+ =?UTF-8?q?=E6=AD=A3=20sizeof=20=E7=9A=84=E6=A0=BC=E5=BC=8F=E4=B8=B2?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+64 位平台上 sizeof 是 size_t，用 %d 打印会触发
+-Werror=format 直接编译失败。改用 %zu。
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FBQkQQFX3kTDP3AzvLzDGx
+---
+ arch/arm64/src/rk3576/rk3576_dsi2.c |  58 ++++++++++
+ arch/arm64/src/rk3576/rk3576_dsi2.h |  10 ++
+ arch/arm64/src/rk3576/rk3576_vop2.c | 170 ++++++++++++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_vop2.h |  24 ++++
+ drivers/input/ft5x06.c              |   2 +-
+ 5 files changed, 263 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_dsi2.c b/arch/arm64/src/rk3576/rk3576_dsi2.c
+index 11d22f2c..c892e093 100644
+--- a/arch/arm64/src/rk3576/rk3576_dsi2.c
++++ b/arch/arm64/src/rk3576/rk3576_dsi2.c
+@@ -493,4 +493,62 @@ int rk3576_dsi2_set_video_mode(void)
+   return -ETIMEDOUT;
+ }
+ 
++
++/****************************************************************************
++ * Name: rk3576_dsi2_dump_uboot_state
++ *
++ * Description:
++ *   打印 U-Boot 留下的 DSI 寄存器状态，在本驱动写入之前调用。
++ *   出厂固件已经用这套配置在这块屏上显示过 logo。
++ *
++ ****************************************************************************/
++
++void rk3576_dsi2_dump_uboot_state(void)
++{
++  static const struct
++  {
++    const char *name;
++    uint32_t    off;
++  }
++  regs[] =
++  {
++    { "PWR_UP",           0x0000 },
++    { "SOFT_RESET",       0x0010 },
++    { "MODE_CTRL",        0x0018 },
++    { "MODE_STATUS",      0x001c },
++    { "CORE_STATUS",      0x0020 },
++    { "MANUAL_MODE_CFG",  0x0024 },
++    { "PHY_MODE_CFG",     0x0100 },
++    { "PHY_CLK_CFG",      0x0104 },
++    { "PHY_LP2HS",        0x010c },
++    { "PHY_HS2LP",        0x0114 },
++    { "PHY_IPI_RATIO",    0x0134 },
++    { "PHY_SYS_RATIO",    0x013c },
++    { "DSI_GENERAL_CFG",  0x0200 },
++    { "DSI_VCID_CFG",     0x0204 },
++    { "DSI_VID_TX_CFG",   0x020c },
++    { "IPI_COLOR_MAN",    0x0300 },
++    { "IPI_VID_HSA",      0x0304 },
++    { "IPI_VID_HBP",      0x030c },
++    { "IPI_VID_HACT",     0x0314 },
++    { "IPI_VID_HLINE",    0x031c },
++    { "IPI_VID_VSA",      0x0324 },
++    { "IPI_VID_VBP",      0x032c },
++    { "IPI_VID_VACT",     0x0334 },
++    { "IPI_VID_VFP",      0x033c },
++    { "IPI_PIX_PKT_CFG",  0x0344 },
++  };
++
++  int i;
++
++  syslog(LOG_INFO, "==== U-Boot 留下的 DSI 状态（未改动）====\n");
++
++  for (i = 0; i < (int)(sizeof(regs) / sizeof(regs[0])); i++)
++    {
++      syslog(LOG_INFO, "  %-18s 0x%08" PRIx32 "\n",
++             regs[i].name, dsi_getreg(regs[i].off));
++      up_mdelay(3);
++    }
++}
++
+ #endif /* CONFIG_RK3576_DSI2 */
+diff --git a/arch/arm64/src/rk3576/rk3576_dsi2.h b/arch/arm64/src/rk3576/rk3576_dsi2.h
+index fefd241f..887a4b05 100644
+--- a/arch/arm64/src/rk3576/rk3576_dsi2.h
++++ b/arch/arm64/src/rk3576/rk3576_dsi2.h
+@@ -100,4 +100,14 @@ int rk3576_dsi2_send_cmd(uint8_t dtype, const uint8_t *data, size_t len);
+ 
+ int rk3576_dsi2_set_video_mode(void);
+ 
++/****************************************************************************
++ * Name: rk3576_dsi2_dump_uboot_state
++ *
++ * Description:
++ *   打印 U-Boot 留下的 DSI 寄存器状态，须在本驱动写入之前调用。
++ *
++ ****************************************************************************/
++
++void rk3576_dsi2_dump_uboot_state(void);
++
+ #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_DSI2_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_vop2.c b/arch/arm64/src/rk3576/rk3576_vop2.c
+index 34ed6b49..5e4c0b3e 100644
+--- a/arch/arm64/src/rk3576/rk3576_vop2.c
++++ b/arch/arm64/src/rk3576/rk3576_vop2.c
+@@ -300,3 +300,173 @@ int rk3576_vop2_check_scanning(int vp)
+ 
+   return (raw & RK3576_VP_INT_FS) ? OK : -EIO;
+ }
++
++/****************************************************************************
++ * Name: rk3576_vop2_takeover
++ *
++ * Description:
++ *   接管 U-Boot 已经跑起来的显示，只改帧缓冲地址，其余一概不动。
++ *
++ *   ★ 为什么是接管而不是重建：
++ *     出厂固件在这块屏上显示过 Rockchip logo，寄存器现状表明这条链路
++ *     此刻仍是活的 —— VP1 未 standby、DSI 处于视频模式、ESMART1 图层
++ *     使能并指向 0xfdf00000。整条链路连同**我们拿不到的那份面板初始化
++ *     序列**都已经在跑。重建的话，面板初始化那一环是无论如何补不上的。
++ *
++ *     所以只做一件事：把图层的帧缓冲地址换成我们自己的缓冲区。
++ *     这同时是一次决定性实验 —— 屏幕内容若随之改变，就一次性证实了
++ *     VOP2、DSI、D-PHY、面板全都正常。
++ *
++ *   buffer 必须是物理地址。本端口的 RAM 是恒等映射，虚拟地址即物理地址。
++ *
++ ****************************************************************************/
++
++int rk3576_vop2_takeover(uintptr_t buffer, uint32_t *width, uint32_t *height,
++                         uint32_t *stride_bytes, uint32_t *bpp)
++{
++  uint32_t ctrl;
++  uint32_t act;
++  uint32_t dsp;
++  uint32_t vir;
++  uint32_t fmt;
++  uint32_t w;
++  uint32_t h;
++
++  ctrl = vop_getreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_CTRL);
++  act  = vop_getreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_ACT_INFO);
++  dsp  = vop_getreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_DSP_INFO);
++  vir  = vop_getreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_VIR);
++
++  syslog(LOG_INFO,
++         "VOP2: 接管 ESMART1 CTRL=0x%08" PRIx32 " ACT=0x%08" PRIx32
++         " DSP=0x%08" PRIx32 " VIR=%" PRIu32 "\n", ctrl, act, dsp, vir);
++
++  if ((ctrl & RK3576_SMART_REGION0_CTRL_EN) == 0)
++    {
++      syslog(LOG_ERR,
++             "ERROR: ESMART1 图层未使能，U-Boot 的显示不在活动状态\n");
++      return -ENODEV;
++    }
++
++  /* ACT_INFO 存的是 (h-1)<<16 | (w-1) */
++
++  w = (act & 0xffff) + 1;
++  h = ((act >> 16) & 0xffff) + 1;
++
++  fmt = (ctrl >> RK3576_SMART_REGION0_CTRL_FORMAT_SHIFT) & 0x1f;
++
++  syslog(LOG_INFO,
++         "VOP2: U-Boot 帧缓冲 %" PRIu32 "x%" PRIu32 " 格式=%" PRIu32
++         " 行跨距=%" PRIu32 " 字节\n", w, h, fmt, vir * 4);
++
++  /* buffer 为 0 表示只查询参数，不写寄存器 —— 调用方要先知道尺寸和
++   * 跨距才能分配缓冲区。这里若照写不误，会把 MST 置 0 先把画面清掉。
++   */
++
++  if (buffer != 0)
++    {
++      /* 只换地址。格式、尺寸、跨距全部沿用 U-Boot 的设置 —— 它们与
++       * 面板和这条链路是配套的，改一个就要改一串。
++       */
++
++      vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_YRGB_MST,
++                 (uint32_t)buffer);
++      vop_cfg_done();
++
++      syslog(LOG_INFO,
++             "VOP2: 帧缓冲已切到 0x%08lx\n", (unsigned long)buffer);
++    }
++
++  if (width  != NULL) *width  = w;
++  if (height != NULL) *height = h;
++  if (stride_bytes != NULL) *stride_bytes = vir * 4;
++  if (bpp != NULL) *bpp = (fmt == RK3576_VOP2_FMT_RGB565) ? 16 :
++                          (fmt == RK3576_VOP2_FMT_RGB888) ? 24 : 32;
++
++  return OK;
++}
++
++/****************************************************************************
++ * Name: rk3576_vop2_dump_uboot_state
++ *
++ * Description:
++ *   在本驱动写任何寄存器之前，把 VOP2 与 DSI 的关键寄存器原样打印出来。
++ *
++ *   ★ 为什么值得单独做这件事：这块板的出厂固件能在这块屏上显示
++ *     Rockchip logo，也就是说 U-Boot 已经完整跑通过一次「面板上电 ->
++ *     初始化序列 -> VOP2 -> DSI -> D-PHY」。它留在寄存器里的，是这块
++ *     屏的一份**已知可用配置**，比任何文档和参考驱动都贴近这块硬件。
++ *
++ *     此前一直在用自己算出来的值去覆盖它，等于把唯一的正确答案擦掉了。
++ *     先读再写。
++ *
++ ****************************************************************************/
++
++void rk3576_vop2_dump_uboot_state(void)
++{
++  static const struct
++  {
++    const char *name;
++    uint32_t    off;
++  }
++  regs[] =
++  {
++    { "SYS_CTRL_MIPI0_INFACE", 0x0180 },
++    { "SYS_AUTO_GATING",       0x0008 },
++    { "SYS_PORT_CTRL_IMD",     0x0028 },
++    { "VP0_DSP_CTRL",          0x0c00 },
++    { "VP0_MIPI_CTRL",         0x0c04 },
++    { "VP0_COLOR_BAR_CTRL",    0x0c08 },
++    { "VP0_HTOTAL_HS_END",     0x0c48 },
++    { "VP0_HACT_ST_END",       0x0c4c },
++    { "VP0_VTOTAL_VS_END",     0x0c50 },
++    { "VP0_VACT_ST_END",       0x0c54 },
++    { "VP1_DSP_CTRL",          0x0d00 },
++    { "VP1_MIPI_CTRL",         0x0d04 },
++    { "VP1_COLOR_BAR_CTRL",    0x0d08 },
++    { "VP1_HTOTAL_HS_END",     0x0d48 },
++    { "VP1_HACT_ST_END",       0x0d4c },
++    { "VP1_VTOTAL_VS_END",     0x0d50 },
++    { "VP1_VACT_ST_END",       0x0d54 },
++    { "VP2_DSP_CTRL",          0x0e00 },
++    { "ESMART0_REGION0_CTRL",  0x1810 },
++    { "ESMART0_REGION0_MST",   0x1814 },
++    { "ESMART0_REGION0_VIR",   0x181c },
++    { "ESMART0_REGION0_ACT",   0x1820 },
++    { "ESMART0_REGION0_DSP",   0x1824 },
++    { "OVL_CTRL_VP0",          0x0600 },
++    { "OVL_LAYER_SEL_VP0",     0x0604 },
++    { "OVL_CTRL_VP1",          0x0700 },
++    { "OVL_LAYER_SEL_VP1",     0x0704 },
++
++    /* ESMART0 全为 0，说明 U-Boot 的 logo 走的是别的图层。
++     * Cluster 是带 AFBC 的图层，Rockchip 的 U-Boot logo 常用它。
++     */
++
++    { "CLUSTER0_WIN0_CTRL0",   0x1000 },
++    { "CLUSTER0_WIN0_YRGB_MST", 0x1010 },
++    { "CLUSTER0_WIN0_VIR",     0x101c },
++    { "CLUSTER0_WIN0_ACT_INFO", 0x1020 },
++    { "CLUSTER0_WIN0_DSP_INFO", 0x1024 },
++    { "CLUSTER0_WIN0_DSP_ST",  0x1028 },
++    { "CLUSTER1_WIN0_CTRL0",   0x1200 },
++    { "CLUSTER1_WIN0_YRGB_MST", 0x1210 },
++    { "ESMART1_REGION0_CTRL",  0x1a10 },
++    { "ESMART1_REGION0_MST",   0x1a14 },
++  };
++
++  int i;
++
++  syslog(LOG_INFO, "==== U-Boot 留下的 VOP2 状态（未改动）====\n");
++
++  for (i = 0; i < (int)(sizeof(regs) / sizeof(regs[0])); i++)
++    {
++      syslog(LOG_INFO, "  %-22s 0x%08" PRIx32 "\n",
++             regs[i].name,
++             getreg32(RK3576_VOP2_ADDR + regs[i].off));
++
++      /* 串口在连续刷屏时会丢字节，把 dump 打断行读不全就白读了。 */
++
++      up_mdelay(3);
++    }
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_vop2.h b/arch/arm64/src/rk3576/rk3576_vop2.h
+index 8c0f10a3..f8333cb5 100644
+--- a/arch/arm64/src/rk3576/rk3576_vop2.h
++++ b/arch/arm64/src/rk3576/rk3576_vop2.h
+@@ -89,4 +89,28 @@ int rk3576_vop2_colorbar(const struct rk3576_vop2_timing_s *timing,
+ 
+ int rk3576_vop2_check_scanning(int vp);
+ 
++/****************************************************************************
++ * Name: rk3576_vop2_dump_uboot_state
++ *
++ * Description:
++ *   打印 U-Boot 留下的 VOP2 寄存器状态。出厂固件能点亮这块屏，它留下的
++ *   配置是一份已知可用的参考，必须在本驱动写入之前读。
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_vop2_takeover
++ *
++ * Description:
++ *   接管 U-Boot 已经跑起来的显示：只把 ESMART1 图层的帧缓冲地址换成
++ *   buffer，其余配置（时序、格式、DSI、面板初始化的效果）一概保留。
++ *   通过出参返回 U-Boot 所用的尺寸、跨距与位深。
++ *
++ ****************************************************************************/
++
++int rk3576_vop2_takeover(uintptr_t buffer, uint32_t *width, uint32_t *height,
++                         uint32_t *stride_bytes, uint32_t *bpp);
++
++void rk3576_vop2_dump_uboot_state(void);
++
+ #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_VOP2_H */
+diff --git a/drivers/input/ft5x06.c b/drivers/input/ft5x06.c
+index be5db167..34eb7303 100644
+--- a/drivers/input/ft5x06.c
++++ b/drivers/input/ft5x06.c
+@@ -1097,7 +1097,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
+   priv = kmm_zalloc(sizeof(struct ft5x06_dev_s));
+   if (!priv)
+     {
+-      ierr("ERROR: kmm_zalloc(%d) failed\n", sizeof(struct ft5x06_dev_s));
++      ierr("ERROR: kmm_zalloc(%zu) failed\n", sizeof(struct ft5x06_dev_s));
+       return -ENOMEM;
+     }
+ 
+-- 
+2.43.0
+
+
+From abf918d9dedc4458cf1505937f86a90791fd1681 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Thu, 3 Sep 2026 00:31:04 +0800
+Subject: [PATCH 23/23] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
+ =?UTF-8?q?=E5=9D=97=E8=AF=BB=E5=86=99=E3=80=81=E6=91=84=E5=83=8F=E5=A4=B4?=
+ =?UTF-8?q?=20MCLK=E3=80=81=E5=85=8D=20recovery=20=E9=87=8D=E5=90=AF?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+dwmmc:
+- capabilities 增报 SDIO_CAPS_DMABEFOREWRITE。NuttX 写单块默认先发
+  CMD24 再 SENDSETUP，而 DW 要求发命令前 BLKSIZ/BYTCNT 已就绪；该标志
+  控制的是调用顺序，与是否使用 DMA 无关。
+- FIFO 数据窗口按 IP 版本选择（verid >= 0x240A 用 0x200），此前按数据
+  总线宽度选 0x100，数据被写进 CDTHRCTL，不报错但无一字节到达卡。
+- FIFO 深度改用 FIFOTH 复位值反推的实测值。
+- 数据阶段按命令字的 MMCSD_DATAXFR 标志判断，不再看缓冲区是否挂载，
+  避免把 CMD55 当作带数据命令而卡死数据状态机。
+- recv_r* 如实返回上一条命令结果；此前无条件 OK 会让 CMD1 超时被当成
+  成功，mmcsd 据此误判为 MMC 卡而永不发送 CMD8。
+- 超时日志增加 TBBCNT/TCBCNT，用于区分未推入FIFO/未排到卡/卡未响应。
+
+新增 rk3576_reboot.c：写 PMU0_GRF 重启模式寄存器 + CRU 全局软复位，
+使引导器启动进入 rockusb 下载模式，免去手按 recovery 键。
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FBQkQQFX3kTDP3AzvLzDGx
+---
+ arch/arm64/src/rk3576/Kconfig                 |   45 +
+ arch/arm64/src/rk3576/Make.defs               |   10 +
+ arch/arm64/src/rk3576/hardware/rk3576_dwmmc.h |  178 +++
+ arch/arm64/src/rk3576/hardware/rk3576_vop2.h  |   11 +
+ arch/arm64/src/rk3576/rk3576_dwmmc.c          | 1234 +++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_dwmmc.h          |   39 +
+ arch/arm64/src/rk3576/rk3576_fb.c             |  167 +++
+ arch/arm64/src/rk3576/rk3576_reboot.c         |  107 ++
+ arch/arm64/src/rk3576/rk3576_reboot.h         |   33 +
+ arch/arm64/src/rk3576/rk3576_vop2.c           |  135 +-
+ arch/arm64/src/rk3576/rk3576_vop2.h           |   22 +
+ 11 files changed, 1975 insertions(+), 6 deletions(-)
+ create mode 100644 arch/arm64/src/rk3576/hardware/rk3576_dwmmc.h
+ create mode 100644 arch/arm64/src/rk3576/rk3576_dwmmc.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_dwmmc.h
+ create mode 100644 arch/arm64/src/rk3576/rk3576_fb.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_reboot.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_reboot.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index 274b22e7..62ae7f6b 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -81,6 +81,51 @@ config RK3576_VOP2
+ 		当前实现电源域/时钟自检与内置彩条输出。彩条不经过帧缓冲与
+ 		图层，可把"VOP 时序配置"与"图层/内存通路"两类问题分开验证。
+ 
++config RK3576_DWMMC
++	bool "SD 卡控制器 (DesignWare MSHC)"
++	default n
++	---help---
++		RK3576 的 SD 卡控制器（0x2a310000）。
++
++		★ 与 eMMC 不是同一种 IP，不能复用 RK3576_SDHCI 的代码：
++		    mmc@2a330000  rockchip,rk3576-dwcmshc  -> eMMC，标准 SDHCI
++		    mmc@2a310000  rockchip,rk3576-dw-mshc  -> SD 卡，Synopsys 自有
++		  名字只差两个字母，寄存器布局与状态机完全不同。
++
++		当前实现前置链路与自检：电源域 PD_SDGMAC、两路时钟、模块复位、
++		引脚复用，并用 VERID、软复位自清、CDETECT 三个独立读数确认状态。
++
++config RK3576_DWMMC_TRACE
++	bool "打印 SD 卡命令序列"
++	default n
++	depends on RK3576_DWMMC
++	---help---
++		把每条命令的编号与结果打出来。
++
++		用途是定位「卡未被识别」这类现象 —— mmcsd 会依次尝试 SD、SDIO、
++		MMC 的多种命令，不认得的必然超时，只看最终结论分不出哪一条是
++		真失败。打开后能直接看到序列断在哪。
++
++		日志量较大，定位完应关掉。
++
++config RK3576_FB
++	bool "VOP2 帧缓冲 (/dev/fb0)"
++	default n
++	depends on RK3576_VOP2 && VIDEO_FB
++	---help---
++		把 VOP2 的 ESMART1 图层接到 NuttX 的 fb 框架上。
++
++		★ 本驱动不初始化显示链路，只接管出厂 U-Boot 已经跑起来的那条。
++
++		  U-Boot 在加载内核前已完成面板上电、发送厂商初始化序列、配置
++		  D-PHY/DSI/VOP2 并在 VP1 上出图。那份面板初始化序列在厂商的
++		  rk3576-kickpi-k7-android-mipi-5-720-1280-F050008M01.dtsi 里，
++		  拿不到；面板一经复位就无法恢复，而背光是独立控制的，表现为
++		  「背光亮、永远无显示、寄存器读数却全部正常」，极难定位。
++
++		  因此本驱动只读时序取分辨率、分配帧缓冲、把图层指过去，
++		  绝不触碰面板复位、供电与 DSI 配置。
++
+ config RK3576_DSI2
+ 	bool "MIPI DSI2 主机"
+ 	default n
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index a48110f2..06e78269 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -46,6 +46,16 @@ ifeq ($(CONFIG_RK3576_VOP2),y)
+ CHIP_CSRCS += rk3576_vop2.c
+ endif
+ 
++CHIP_CSRCS += rk3576_reboot.c
++
++ifeq ($(CONFIG_RK3576_DWMMC),y)
++CHIP_CSRCS += rk3576_dwmmc.c
++endif
++
++ifeq ($(CONFIG_RK3576_FB),y)
++CHIP_CSRCS += rk3576_fb.c
++endif
++
+ ifeq ($(CONFIG_RK3576_SAI),y)
+ CHIP_CSRCS += rk3576_sai.c
+ endif
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_dwmmc.h b/arch/arm64/src/rk3576/hardware/rk3576_dwmmc.h
+new file mode 100644
+index 00000000..939cd4c6
+--- /dev/null
++++ b/arch/arm64/src/rk3576/hardware/rk3576_dwmmc.h
+@@ -0,0 +1,178 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/hardware/rk3576_dwmmc.h
++ *
++ * Synopsys DesignWare Mobile Storage Host Controller（dw_mmc / MSHC）。
++ *
++ * ★ 与 eMMC 用的那个不是同一种 IP。
++ *
++ *   原厂 dtb：
++ *     mmc@2a330000  compatible = "rockchip,rk3576-dwcmshc"  <- eMMC，SDHCI
++ *     mmc@2a310000  compatible = "rockchip,rk3576-dw-mshc"  <- SD 卡，本文件
++ *
++ *   名字只差两个字母，寄存器布局与状态机却完全不同：SDHCI 是标准
++ *   SD Host Controller，dw_mmc 是 Synopsys 自己的一套。rk3576_sdhci.c
++ *   的代码一行都套不上，必须另写。
++ *
++ *   寄存器定义取自 Linux drivers/mmc/host/dw_mmc.h。
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_DWMMC_H
++#define __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_DWMMC_H
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* 寄存器偏移 */
++
++#define DWMMC_CTRL          0x000
++#define DWMMC_PWREN         0x004
++#define DWMMC_CLKDIV        0x008
++#define DWMMC_CLKSRC        0x00c
++#define DWMMC_CLKENA        0x010
++#define DWMMC_TMOUT         0x014
++#define DWMMC_CTYPE         0x018
++#define DWMMC_BLKSIZ        0x01c
++#define DWMMC_BYTCNT        0x020
++#define DWMMC_INTMASK       0x024
++#define DWMMC_CMDARG        0x028
++#define DWMMC_CMD           0x02c
++#define DWMMC_RESP0         0x030
++#define DWMMC_RESP1         0x034
++#define DWMMC_RESP2         0x038
++#define DWMMC_RESP3         0x03c
++#define DWMMC_MINTSTS       0x040
++#define DWMMC_RINTSTS       0x044
++#define DWMMC_STATUS        0x048
++#define DWMMC_FIFOTH        0x04c
++#define DWMMC_CDETECT       0x050
++#define DWMMC_WRTPRT        0x054
++#define DWMMC_TCBCNT        0x05c
++#define DWMMC_TBBCNT        0x060
++#define DWMMC_DEBNCE        0x064
++#define DWMMC_USRID         0x068
++#define DWMMC_VERID         0x06c
++#define DWMMC_HCON          0x070
++#define DWMMC_UHS_REG       0x074
++#define DWMMC_RST_N         0x078
++#define DWMMC_BMOD          0x080
++#define DWMMC_CDTHRCTL      0x100
++
++/* FIFO 数据窗口。
++ *
++ * ★ 偏移由 **IP 版本**决定，与数据总线宽度无关：
++ *     verid <  0x240A  ->  0x100
++ *     verid >= 0x240A  ->  0x200
++ *
++ *   出处 dw_mmc.c：
++ *     else if (host->verid < DW_MMC_240A)
++ *             host->fifo_reg = host->regs + DATA_OFFSET;      // 0x100
++ *     else    host->fifo_reg = host->regs + DATA_240A_OFFSET; // 0x200
++ *
++ *   同一份代码里还有一句注释点明了后果：240A 之后 0x100 变成了
++ *   CDTHRCTL 寄存器（"that register offset is in the FIFO region"）。
++ *   也就是说版本判断错了的话，数据会被写进 CDTHRCTL —— 不报错，
++ *   但一个字节也到不了卡上（TBBCNT 恒为 0）。
++ *
++ *   本板 VERID=0x5342270a，版本号取低 16 位 = 0x270a，用 0x200。
++ */
++
++#define DWMMC_VERID_240A    0x240a
++#define DWMMC_GET_VERID(x)  ((x) & 0xffff)
++
++#define DWMMC_DATA_OLD      0x100
++#define DWMMC_DATA_240A     0x200
++
++/* CTRL */
++
++#define DWMMC_CTRL_RESET        (1u << 0)
++#define DWMMC_CTRL_FIFO_RESET   (1u << 1)
++#define DWMMC_CTRL_DMA_RESET    (1u << 2)
++#define DWMMC_CTRL_INT_ENABLE   (1u << 4)
++#define DWMMC_CTRL_DMA_ENABLE   (1u << 5)
++#define DWMMC_CTRL_USE_IDMAC    (1u << 25)
++
++#define DWMMC_CTRL_ALL_RESET    (DWMMC_CTRL_RESET | \
++                                 DWMMC_CTRL_FIFO_RESET | \
++                                 DWMMC_CTRL_DMA_RESET)
++
++/* CTYPE —— 总线宽度 */
++
++#define DWMMC_CTYPE_1BIT        0
++#define DWMMC_CTYPE_4BIT        (1u << 0)
++#define DWMMC_CTYPE_8BIT        (1u << 16)
++
++/* 中断/状态位。RINTSTS 与 INTMASK 共用这套位定义。 */
++
++#define DWMMC_INT_CD            (1u << 0)   /* 卡插拔           */
++#define DWMMC_INT_RESP_ERR      (1u << 1)
++#define DWMMC_INT_CMD_DONE      (1u << 2)
++#define DWMMC_INT_DATA_OVER     (1u << 3)
++#define DWMMC_INT_TXDR          (1u << 4)
++#define DWMMC_INT_RXDR          (1u << 5)
++#define DWMMC_INT_RCRC          (1u << 6)
++#define DWMMC_INT_DCRC          (1u << 7)
++#define DWMMC_INT_RTO           (1u << 8)   /* 响应超时         */
++#define DWMMC_INT_DRTO          (1u << 9)
++#define DWMMC_INT_HTO           (1u << 10)
++#define DWMMC_INT_FRUN          (1u << 11)
++#define DWMMC_INT_HLE           (1u << 12)  /* 硬件锁写错误     */
++#define DWMMC_INT_SBE           (1u << 13)
++#define DWMMC_INT_ACD           (1u << 14)
++#define DWMMC_INT_EBE           (1u << 15)
++
++#define DWMMC_INT_ALL           0x1ffff
++
++#define DWMMC_INT_CMD_ERROR     (DWMMC_INT_RESP_ERR | DWMMC_INT_RCRC | \
++                                 DWMMC_INT_RTO | DWMMC_INT_HLE)
++#define DWMMC_INT_DATA_ERROR    (DWMMC_INT_DCRC | DWMMC_INT_DRTO | \
++                                 DWMMC_INT_SBE | DWMMC_INT_EBE | \
++                                 DWMMC_INT_HTO | DWMMC_INT_FRUN)
++
++/* CMD */
++
++#define DWMMC_CMD_INDX(n)       ((n) & 0x3f)
++#define DWMMC_CMD_RESP_EXP      (1u << 6)
++#define DWMMC_CMD_RESP_LONG     (1u << 7)
++#define DWMMC_CMD_RESP_CRC      (1u << 8)
++#define DWMMC_CMD_DAT_EXP       (1u << 9)
++#define DWMMC_CMD_DAT_WR        (1u << 10)
++#define DWMMC_CMD_SEND_STOP     (1u << 12)
++#define DWMMC_CMD_PRV_DAT_WAIT  (1u << 13)
++#define DWMMC_CMD_STOP          (1u << 14)
++#define DWMMC_CMD_INIT          (1u << 15)
++#define DWMMC_CMD_UPD_CLK       (1u << 21)  /* 只更新时钟，不发命令 */
++#define DWMMC_CMD_USE_HOLD_REG  (1u << 29)
++#define DWMMC_CMD_START         (1u << 31)
++
++/* STATUS */
++
++#define DWMMC_STATUS_FIFO_RX    (1u << 0)
++#define DWMMC_STATUS_FIFO_TX    (1u << 1)
++#define DWMMC_STATUS_FIFO_EMPTY (1u << 2)
++#define DWMMC_STATUS_FIFO_FULL  (1u << 3)
++#define DWMMC_STATUS_BUSY       (1u << 9)   /* data busy         */
++#define DWMMC_STATUS_MC_BUSY    (1u << 10)
++#define DWMMC_GET_FCNT(x)       (((x) >> 17) & 0x1fff)
++
++/* HCON */
++
++#define DWMMC_GET_HDATA_WIDTH(x) (((x) >> 7) & 0x7)
++
++/* CLKENA */
++
++#define DWMMC_CLKENA_ENABLE     (1u << 0)
++#define DWMMC_CLKENA_LOWPWR     (1u << 16)
++
++/* CDETECT：位 0 为 0 表示卡在位（低有效） */
++
++#define DWMMC_CDETECT_PRESENT(x) (((x) & 1) == 0)
++
++/* FIFOTH: (msize << 28) | (rx_wmark << 16) | tx_wmark */
++
++#define DWMMC_SET_FIFOTH(m, r, t) ((((m) & 0x7) << 28) | \
++                                   (((r) & 0xfff) << 16) | \
++                                   ((t) & 0xfff))
++
++#endif /* __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_DWMMC_H */
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_vop2.h b/arch/arm64/src/rk3576/hardware/rk3576_vop2.h
+index 7684105e..53d28792 100644
+--- a/arch/arm64/src/rk3576/hardware/rk3576_vop2.h
++++ b/arch/arm64/src/rk3576/hardware/rk3576_vop2.h
+@@ -94,6 +94,17 @@
+ #define RK3576_VP_INT_FS_FIELD       (1u << 5)   /* 场起始           */
+ #define RK3576_VP_INT_POST_BUF_EMPTY (1u << 4)   /* 后级缓冲欠载     */
+ 
++/* ★ 本板的 MIPI 屏挂在 VP1 上，不是 VP0。
++ *
++ * 出处是出厂 U-Boot 留下的寄存器状态与它的启动日志：
++ *   VP0_DSP_CTRL=0x8000000f  (bit31 STANDBY=1，未使用)
++ *   VP1_DSP_CTRL=0x00060000  (未 standby，在用)
++ *   SYS_CTRL_MIPI0_INFACE 的 port_sel=01 -> VP1
++ *   日志："update mode to: 720x1280p79, type: MIPI0 for VP1"
++ */
++
++#define RK3576_VOP2_MIPI_VP          1
++
+ #define RK3576_VOP2_VP0_BASE         0x0c00
+ #define RK3576_VOP2_VP1_BASE         0x0d00
+ #define RK3576_VOP2_VP2_BASE         0x0e00
+diff --git a/arch/arm64/src/rk3576/rk3576_dwmmc.c b/arch/arm64/src/rk3576/rk3576_dwmmc.c
+new file mode 100644
+index 00000000..053ed35f
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_dwmmc.c
+@@ -0,0 +1,1234 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_dwmmc.c
++ *
++ * RK3576 的 SD 卡控制器（Synopsys DesignWare MSHC，mmc@2a310000）。
++ *
++ * ★ 与 eMMC 不是同一种控制器，rk3576_sdhci.c 的代码不能复用。
++ *   两者的区别见 hardware/rk3576_dwmmc.h 顶部。
++ *
++ * 板级依据（全部取自原厂 dtb，非推测）：
++ *   基址        0x2a310000，长度 16KB
++ *   中断        GIC_SPI 251
++ *   电源域      PD_SDGMAC（与 GMAC 共用，已有 rk3576_power_on）
++ *   总线宽度    4
++ *   FIFO 深度   256
++ *   引脚(func1) bus4 = GPIO2_A0..A3   cmd = GPIO2_A4   clk = GPIO2_A5
++ *               det  = GPIO0_A7       pwren = GPIO0_B6
++ *   时钟        clk-rk3576.c
++ *     COMPOSITE(CCLK_SRC_SDMMC0, ... gpll_cpll_24m_p,
++ *               RK3576_CLKSEL_CON(105), 13, 2, MFLAGS, 7, 6, DFLAGS,
++ *               RK3576_CLKGATE_CON(43), 1, GFLAGS)
++ *     GATE(HCLK_SDMMC0, ... RK3576_CLKGATE_CON(43), 2, GFLAGS)
++ *
++ *   ★ 时钟按**名字**从 clk-rk3576.c 取，不按 dtb 里的时钟编号推算：
++ *     厂商内核的编号与主线不是固定偏移（I2C0 差 8，SDMMC0 差 7），
++ *     按偏移换算会算到别的时钟上。
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include <stdint.h>
++#include <inttypes.h>
++#include <stdbool.h>
++#include <errno.h>
++#include <syslog.h>
++
++#include <nuttx/sdio.h>
++#include <nuttx/mmcsd.h>
++
++#include "arm64_internal.h"
++#include "rk3576_cru.h"
++#include "rk3576_power.h"
++#include "rk3576_gpio.h"
++#include "rk3576_pinmux.h"
++#include "hardware/rk3576_memorymap.h"
++#include "hardware/rk3576_dwmmc.h"
++
++#ifdef CONFIG_RK3576_DWMMC
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++#define DWMMC_GATE_CON      43
++#define DWMMC_GATE_CCLK     1        /* CCLK_SRC_SDMMC0 */
++#define DWMMC_GATE_HCLK     2        /* HCLK_SDMMC0     */
++#define DWMMC_SEL_CON       105
++#define DWMMC_SEL_MUX_SHIFT 13       /* 2 位：0=gpll 1=cpll 2=24M */
++#define DWMMC_SEL_DIV_SHIFT 7        /* 6 位分频            */
++
++#define DWMMC_SRST_H        269      /* SRST_H_SDMMC0 */
++
++/* 引脚 */
++
++#define PIN_FUNC            1
++#define PIN_BUS_BANK        2
++#define PIN_BUS_FIRST       0        /* GPIO2_A0..A3 */
++#define PIN_CMD_BANK        2
++#define PIN_CMD             4
++#define PIN_CLK_BANK        2
++#define PIN_CLK             5
++#define PIN_DET_BANK        0
++#define PIN_DET             7
++#define PIN_PWR_BANK        0
++#define PIN_PWR             14
++
++#define RESET_TIMEOUT_US    500000
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint32_t dw_getreg(uint32_t off)
++{
++  return getreg32(RK3576_SDMMC_ADDR + off);
++}
++
++static inline void dw_putreg(uint32_t off, uint32_t val)
++{
++  putreg32(val, RK3576_SDMMC_ADDR + off);
++}
++
++static int dw_update_clk(void);
++
++/****************************************************************************
++ * Name: dw_reset_ctrl
++ *
++ * Description:
++ *   控制器软复位。CTRL 的三个复位位由硬件在完成后自动清零，
++ *   清不掉就说明时钟没到位 —— 这与 GMAC 的 SWR 是同一类判据。
++ *
++ ****************************************************************************/
++
++static int dw_reset_ctrl(void)
++{
++  uint32_t val;
++  int us;
++
++  dw_putreg(DWMMC_CTRL, DWMMC_CTRL_ALL_RESET);
++
++  for (us = 0; us < RESET_TIMEOUT_US; us++)
++    {
++      val = dw_getreg(DWMMC_CTRL);
++      if ((val & DWMMC_CTRL_ALL_RESET) == 0)
++        {
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  syslog(LOG_ERR,
++         "ERROR: DWMMC 软复位超时 CTRL=0x%08" PRIx32
++         " —— 复位位不自清，通常是 CCLK 没供上\n", val);
++  return -ETIMEDOUT;
++}
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_dwmmc_probe
++ *
++ * Description:
++ *   SD 卡控制器前置链路：电源域 + 两路时钟 + 复位 + 引脚复用，
++ *   然后取三个互相独立的读数作为判据。
++ *
++ ****************************************************************************/
++
++int rk3576_dwmmc_probe(void)
++{
++  uint32_t verid;
++  uint32_t hcon;
++  uint32_t cdetect;
++  uint32_t fifo_depth;
++  int      ret;
++  int      i;
++
++  /* 1) 电源域。与 GMAC 同属 PD_SDGMAC。 */
++
++  ret = rk3576_power_on(RK3576_PD_SDGMAC);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "ERROR: PD_SDGMAC 上电失败: %d\n", ret);
++      return ret;
++    }
++
++  /* 2) 两路时钟。biu(hclk) 供寄存器访问，ciu(cclk) 驱动卡时钟 ——
++   *    只开 hclk 的话寄存器读写正常但卡不动，这个坑在 I2C 上踩过。
++   *
++   *    选源取 2 = xin24m：初始化阶段本来就要 400kHz 以下，用 24M
++   *    分频最省事，也避开了 gpll/cpll 实际频率的不确定性。
++   *    分频 6 位，写 (div/2 - 1)？——不，dw_mmc 的 CLKDIV 才是卡时钟
++   *    分频；这里的 CLKSEL 分频是给控制器源时钟的，取 1 分频。
++   */
++
++  rk3576_clk_setmux(DWMMC_SEL_CON, DWMMC_SEL_MUX_SHIFT, 2, 2);
++  rk3576_clk_setmux(DWMMC_SEL_CON, DWMMC_SEL_DIV_SHIFT, 6, 0);
++  rk3576_clk_gate(DWMMC_GATE_CON, DWMMC_GATE_CCLK, true);
++  rk3576_clk_gate(DWMMC_GATE_CON, DWMMC_GATE_HCLK, true);
++
++  /* 3) 解除模块复位 */
++
++  rk3576_reset(DWMMC_SRST_H, true);
++  up_udelay(20);
++  rk3576_reset(DWMMC_SRST_H, false);
++  up_udelay(100);
++
++  /* 4) 引脚复用。全部功能号 1。 */
++
++  for (i = 0; i < 4; i++)
++    {
++      rk3576_pinmux_set(PIN_BUS_BANK, PIN_BUS_FIRST + i, PIN_FUNC);
++    }
++
++  rk3576_pinmux_set(PIN_CMD_BANK, PIN_CMD, PIN_FUNC);
++  rk3576_pinmux_set(PIN_CLK_BANK, PIN_CLK, PIN_FUNC);
++  rk3576_pinmux_set(PIN_DET_BANK, PIN_DET, PIN_FUNC);
++
++  /* 卡供电。
++   *
++   * ★ 厂商 dtb 的 sdmmc0-pwren 把 GPIO0_B6 复用成功能 1，也就是控制器
++   *   自己的 SDMMC0_PWREN 输出，由 PWREN 寄存器(0x004)驱动 —— 不是当作
++   *   普通 GPIO 拉高。两种做法的电平可能相同，但只有前者与控制器的
++   *   上电时序联动。这里按厂商的来。
++   */
++
++  rk3576_pinmux_set(PIN_PWR_BANK, PIN_PWR, PIN_FUNC);
++  dw_putreg(DWMMC_PWREN, 1);
++  up_mdelay(20);
++
++  /* 5) 判据一：版本与硬件配置寄存器。
++   *
++   *    VERID 是只读的 IP 版本号，读回全 0 或全 f 说明基址错、时钟没开
++   *    或电源域没上电 —— 三者之一，但至少能立刻排除"代码逻辑问题"。
++   */
++
++  verid = dw_getreg(DWMMC_VERID);
++  hcon  = dw_getreg(DWMMC_HCON);
++
++  if (verid == 0 || verid == 0xffffffff)
++    {
++      syslog(LOG_ERR,
++             "ERROR: DWMMC VERID=0x%08" PRIx32 " —— 寄存器块无响应\n",
++             verid);
++      return -ENODEV;
++    }
++
++  syslog(LOG_INFO,
++         "DWMMC: VERID=0x%08" PRIx32 " HCON=0x%08" PRIx32
++         " 数据总线宽度=%" PRIu32 " 位\n",
++         verid, hcon,
++         DWMMC_GET_HDATA_WIDTH(hcon) == 0 ? 16 :
++         DWMMC_GET_HDATA_WIDTH(hcon) == 1 ? 32 : 64);
++
++  /* 6) 软复位。复位位自清是"时钟真的在跑"的证明，比读寄存器更强。 */
++
++  ret = dw_reset_ctrl();
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);   /* 清残留状态 */
++  dw_putreg(DWMMC_INTMASK, 0);               /* 轮询式，先不开中断 */
++  dw_putreg(DWMMC_TMOUT, 0xffffffff);
++
++  /* 判据二：FIFO 深度。dtb 说 256，从 FIFOTH 复位值反推一次，
++   * 对得上就说明读到的确实是这个控制器，而不是别的地址。
++   */
++
++  fifo_depth = ((dw_getreg(DWMMC_FIFOTH) >> 16) & 0xfff) + 1;
++
++  /* 判据三：卡在位检测。CDETECT 位 0 低有效。
++   *
++   * 这一条能把"控制器没配好"和"卡没插"分开 —— 两者的后续现象
++   * （命令超时）完全一样，事后无法区分。
++   */
++
++  cdetect = dw_getreg(DWMMC_CDETECT);
++
++  syslog(LOG_INFO,
++         "DWMMC: FIFO 深度≈%" PRIu32 "（dtb 记载 256）"
++         " CDETECT=0x%08" PRIx32 " —— %s\n",
++         fifo_depth, cdetect,
++         DWMMC_CDETECT_PRESENT(cdetect) ? "检测到卡在位" : "未检测到卡");
++
++  if (!DWMMC_CDETECT_PRESENT(cdetect))
++    {
++      return -ENODEV;
++    }
++
++  /* 7) 判据四：手工发 CMD0 + CMD8，直接看命令通路。
++   *
++   *    ★ 为什么单独做这一步：交给 mmcsd 之后，失败只会得到一句
++   *      "卡未被识别" —— 它内部会依次试 SD、SDIO、MMC 的多种命令，
++   *      不认得的必然超时，日志里分不出哪条是真失败。
++   *
++   *      CMD8 (SEND_IF_COND, arg=0x1aa) 是最干净的一条：任何 SD 2.0
++   *      及以上的卡都必须原样回显 0x1aa。回显对上 -> 时钟、命令线、
++   *      响应通路全部正常；超时 -> 卡没被时钟驱动或命令线不通；
++   *      回显不对 -> 采样时序有问题。三种结果互不相同。
++   */
++
++  {
++    uint32_t sts;
++    uint32_t resp;
++    int      us;
++
++    /* 先给足初始化时钟：400kHz 下 80 个时钟约 200us。 */
++
++    dw_putreg(DWMMC_CLKDIV, 30);          /* 24MHz / (2*30) = 400kHz */
++    dw_update_clk();
++    dw_putreg(DWMMC_CLKENA, DWMMC_CLKENA_ENABLE);
++    dw_update_clk();
++    up_mdelay(2);
++
++    /* CMD0 GO_IDLE_STATE，无响应，带初始化序列 */
++
++    dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);
++    dw_putreg(DWMMC_CMDARG, 0);
++    dw_putreg(DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG |
++                         DWMMC_CMD_INIT | DWMMC_CMD_INDX(0));
++
++    for (us = 0; us < 200000; us++)
++      {
++        if ((dw_getreg(DWMMC_CMD) & DWMMC_CMD_START) == 0)
++          {
++            break;
++          }
++
++        up_udelay(1);
++      }
++
++    for (us = 0; us < 200000; us++)
++      {
++        if (dw_getreg(DWMMC_RINTSTS) & DWMMC_INT_CMD_DONE)
++          {
++            break;
++          }
++
++        up_udelay(1);
++      }
++
++    syslog(LOG_INFO, "DWMMC: CMD0 后 RINTSTS=0x%08" PRIx32 "\n",
++           dw_getreg(DWMMC_RINTSTS));
++
++    up_mdelay(2);
++
++    /* CMD8 SEND_IF_COND，参数 0x1aa（2.7-3.6V + 校验图案 0xaa），
++     * 短响应带 CRC。
++     */
++
++    dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);
++    dw_putreg(DWMMC_CMDARG, 0x1aa);
++    dw_putreg(DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG |
++                         DWMMC_CMD_RESP_EXP | DWMMC_CMD_RESP_CRC |
++                         DWMMC_CMD_INDX(8));
++
++    for (us = 0; us < 200000; us++)
++      {
++        if ((dw_getreg(DWMMC_CMD) & DWMMC_CMD_START) == 0)
++          {
++            break;
++          }
++
++        up_udelay(1);
++      }
++
++    sts = 0;
++    for (us = 0; us < 500000; us++)
++      {
++        sts = dw_getreg(DWMMC_RINTSTS);
++        if (sts & (DWMMC_INT_CMD_DONE | DWMMC_INT_CMD_ERROR))
++          {
++            break;
++          }
++
++        up_udelay(1);
++      }
++
++    resp = dw_getreg(DWMMC_RESP0);
++
++    syslog(LOG_INFO,
++           "DWMMC: CMD8 RINTSTS=0x%08" PRIx32 " RESP0=0x%08" PRIx32
++           " —— %s\n",
++           sts, resp,
++           (sts & DWMMC_INT_RTO)      ? "响应超时：卡没被时钟驱动或命令线不通" :
++           (sts & DWMMC_INT_RCRC)     ? "CRC 错：采样时序有问题" :
++           ((resp & 0xfff) == 0x1aa)  ? "回显正确，命令通路正常" :
++                                        "回显不符，采样时序有问题");
++
++    dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);
++  }
++
++  return OK;
++}
++
++
++/****************************************************************************
++ * Private Types
++ ****************************************************************************/
++
++struct rk3576_dwmmc_dev_s
++{
++  struct sdio_dev_s dev;              /* 必须是第一个成员 */
++  uint8_t          *buffer;           /* 当前事务的数据缓冲区 */
++  size_t            remaining;        /* 待传字节数           */
++  bool              is_write;
++  uint16_t          blocksize;
++  uint16_t          nblocks;
++  sdio_eventset_t   waitevents;
++  uint32_t          waittimeout_ms;
++  bool              widebus;
++  uint32_t          fifo_off;         /* FIFO 数据窗口偏移     */
++  uint32_t          src_hz;           /* 控制器源时钟          */
++
++  /* ★ 上一条命令的结果。recv_r* 必须如实返回它。
++   *
++   *   mmcsd 判定卡类型时取的是 SDIO_RECVR3 的返回值，而不是
++   *   sendcmd/waitresponse 的：
++   *     mmcsd_sendcmdpoll(priv, MMC_CMD1, ...);
++   *     ret = SDIO_RECVR3(priv->dev, MMC_CMD1, &response);
++   *     if (ret != OK) { 不是 MMC，继续试 CMD8 }
++   *
++   *   若 recv_r* 无条件返回 OK，CMD1 超时也会被当成成功 ——
++   *   mmcsd 就认定这是张 MMC 卡，从此走 MMC 分支，CMD8 永远发不出去。
++   *   现象是"一直在发 CMD1"，与根因隔着一整个分支判断。
++   */
++
++  int               last_result;
++};
++
++/****************************************************************************
++ * Private Data
++ ****************************************************************************/
++
++static struct rk3576_dwmmc_dev_s g_dwmmc;
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: dw_update_clk
++ *
++ * Description:
++ *   把 CLKDIV/CLKENA 的改动送进卡时钟域。
++ *
++ *   ★ dw_mmc 与 SDHCI 在这里有本质区别：CLKDIV 和 CLKENA 写完**不会
++ *     立即生效**，必须发一条带 UPD_CLK 位的空命令，由控制器在内部同步。
++ *     漏掉这一步的表现是时钟始终停在上一个值，而寄存器读回却是新值 ——
++ *     读回一致会让人误以为已经生效。
++ *
++ ****************************************************************************/
++
++static int dw_update_clk(void)
++{
++  int us;
++
++  dw_putreg(DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_UPD_CLK |
++                       DWMMC_CMD_PRV_DAT_WAIT);
++
++  for (us = 0; us < 100000; us++)
++    {
++      if ((dw_getreg(DWMMC_CMD) & DWMMC_CMD_START) == 0)
++        {
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  syslog(LOG_ERR, "ERROR: DWMMC 时钟更新超时 CMD=0x%08" PRIx32 "\n",
++         dw_getreg(DWMMC_CMD));
++  return -ETIMEDOUT;
++}
++
++/****************************************************************************
++ * Name: dw_set_clock_hz
++ ****************************************************************************/
++
++static void dw_set_clock_hz(struct rk3576_dwmmc_dev_s *priv, uint32_t hz)
++{
++  uint32_t div;
++
++  /* 先停时钟再改分频 —— 运行中改分频会产生毛刺。 */
++
++  dw_putreg(DWMMC_CLKENA, 0);
++  dw_update_clk();
++
++  if (hz == 0)
++    {
++      return;
++    }
++
++  /* dw_mmc 的 CLKDIV 是**二倍分频**：实际 = src / (2 * div)，div=0 表示
++   * 直通（分频比 1）。按 SDHCI 的 div 语义写会得到一半的时钟。
++   */
++
++  if (hz >= priv->src_hz)
++    {
++      div = 0;
++    }
++  else
++    {
++      div = (priv->src_hz + (hz * 2) - 1) / (hz * 2);
++      if (div > 0xff)
++        {
++          div = 0xff;
++        }
++    }
++
++  dw_putreg(DWMMC_CLKDIV, div);
++  dw_update_clk();
++
++  dw_putreg(DWMMC_CLKENA, DWMMC_CLKENA_ENABLE);
++  dw_update_clk();
++
++  syslog(LOG_INFO,
++         "DW clock() 目标 %" PRIu32 "Hz div=%" PRIu32
++         " 实际 %" PRIu32 "Hz\n",
++         hz, div, div == 0 ? priv->src_hz : priv->src_hz / (2 * div));
++}
++
++/****************************************************************************
++ * Name: dw_fifo_reset
++ ****************************************************************************/
++
++static void dw_fifo_reset(void)
++{
++  uint32_t val = dw_getreg(DWMMC_CTRL);
++  int us;
++
++  dw_putreg(DWMMC_CTRL, val | DWMMC_CTRL_FIFO_RESET);
++
++  for (us = 0; us < 100000; us++)
++    {
++      if ((dw_getreg(DWMMC_CTRL) & DWMMC_CTRL_FIFO_RESET) == 0)
++        {
++          return;
++        }
++
++      up_udelay(1);
++    }
++
++  syslog(LOG_WARNING, "DWMMC: FIFO 复位未自清\n");
++}
++
++/****************************************************************************
++ * Name: dw_wait_while_busy
++ *
++ * Description:
++ *   发带数据的命令之前，先用软件等卡的忙信号清掉。
++ *
++ *   ★ 数据类命令都会带 PRV_DAT_WAIT，让硬件自己等上一次数据结束。但
++ *     Databook 要求软件**另外**再确认一次卡不忙 —— 否则命令会悬在
++ *     控制器里不被受理（CMD 的 START 位一直不清），表现为"命令未被
++ *     受理"，而不是超时或错误。ACMD51（读 SCR，第一条数据命令）正是
++ *     这样卡住的。
++ *
++ *     出处 dw_mci_wait_while_busy()：超时 500ms，仍忙就打日志硬发 ——
++ *     照抄这个行为，宁可发出去看错误码，也不要静默悬住。
++ *
++ ****************************************************************************/
++
++static void dw_wait_while_busy(void)
++{
++  int us;
++
++  /* ★ 两个"忙"要分清：
++   *     bit9  data_busy    —— 卡把 DAT0 拉低表示自己忙
++   *     bit10 mc_busy      —— 控制器的数据状态机在忙
++   *   参考驱动只等前者，但后者卡住时命令同样发不出去（本端口就撞上过：
++   *   一条不该带数据的命令被加了 DAT_EXP，数据状态机就此悬住）。
++   *   两个都等，才不会把"控制器卡住"误判成"卡忙"。
++   */
++
++  for (us = 0; us < 500000; us++)
++    {
++      uint32_t sts = dw_getreg(DWMMC_STATUS);
++
++      if ((sts & (DWMMC_STATUS_BUSY | DWMMC_STATUS_MC_BUSY)) == 0)
++        {
++          return;
++        }
++
++      up_udelay(1);
++    }
++
++  syslog(LOG_WARNING,
++         "DWMMC: 卡持续忙 STATUS=0x%08" PRIx32 "，仍然发出命令\n",
++         dw_getreg(DWMMC_STATUS));
++}
++
++/****************************************************************************
++ * SDIO 接口实现
++ ****************************************************************************/
++
++static void rk3576_dwmmc_reset(struct sdio_dev_s *dev)
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++
++#ifdef CONFIG_RK3576_DWMMC_TRACE
++  syslog(LOG_INFO, "DW reset()\n");
++#endif
++
++  dw_reset_ctrl();
++  dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);
++  dw_putreg(DWMMC_INTMASK, 0);
++  dw_putreg(DWMMC_TMOUT, 0xffffffff);
++  dw_putreg(DWMMC_CTYPE, DWMMC_CTYPE_1BIT);
++
++  priv->buffer     = NULL;
++  priv->remaining  = 0;
++  priv->widebus    = false;
++  priv->waitevents = 0;
++}
++
++static sdio_capset_t rk3576_dwmmc_capabilities(struct sdio_dev_s *dev)
++{
++  UNUSED(dev);
++
++  /* ★ 必须报 4BIT_ONLY。
++   *
++   *   NuttX 的 mmcsd 层在这里不对称：CMD6 切卡的总线宽度要求
++   *   priv->buswidth 带 4BIT 标志，而该标志只在 caps 含
++   *   SDIO_CAPS_4BIT_ONLY 时才置位；但 SDIO_WIDEBUS(true) 只看
++   *   IS_MMC()。报 0 的话会出现"主机 4 位、卡 1 位"的错配 ——
++   *   这个坑在 eMMC 那边踩过一次。
++   */
++
++  /* ★ SDIO_CAPS_DMABEFOREWRITE 决定的是**调用顺序**，与用不用 DMA 无关。
++   *
++   *   NuttX 写单块的默认顺序是：先发 CMD24，再 BLOCKSETUP/SENDSETUP。
++   *   DW 控制器要求发命令之前 BLKSIZ/BYTCNT 已经写好 —— 按默认顺序，
++   *   sendcmd 执行时缓冲区还没挂上，长度寄存器是 0，命令就不带数据阶段，
++   *   随后数据永远传不出去（现象是等 DATA_OVER 超时，而主机侧已传
++   *   字节数为 0）。
++   *
++   *   报上这个标志后，mmcsd 改成先 setup 再发命令，正合 DW 的要求。
++   */
++
++  return SDIO_CAPS_4BIT_ONLY | SDIO_CAPS_DMABEFOREWRITE;
++}
++
++static sdio_statset_t rk3576_dwmmc_status(struct sdio_dev_s *dev)
++{
++  UNUSED(dev);
++
++  /* 用硬件的卡检测脚，而不是恒返回 PRESENT。SD 卡是可插拔的，
++   * 这里说实话才有意义。
++   */
++
++  return DWMMC_CDETECT_PRESENT(dw_getreg(DWMMC_CDETECT)) ?
++         SDIO_STATUS_PRESENT : 0;
++}
++
++static void rk3576_dwmmc_widebus(struct sdio_dev_s *dev, bool wide)
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++
++  priv->widebus = wide;
++  dw_putreg(DWMMC_CTYPE, wide ? DWMMC_CTYPE_4BIT : DWMMC_CTYPE_1BIT);
++}
++
++static void rk3576_dwmmc_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++
++  switch (rate)
++    {
++      case CLOCK_SDIO_DISABLED:
++        dw_set_clock_hz(priv, 0);
++        break;
++
++      case CLOCK_IDMODE:
++        dw_set_clock_hz(priv, 400000);
++        break;
++
++      case CLOCK_MMC_TRANSFER:
++      case CLOCK_SD_TRANSFER_1BIT:
++      case CLOCK_SD_TRANSFER_4BIT:
++      default:
++        dw_set_clock_hz(priv, 25000000);
++        break;
++    }
++}
++
++static int rk3576_dwmmc_attach(struct sdio_dev_s *dev)
++{
++  UNUSED(dev);
++
++  /* 轮询式实现，不接中断。中断版本待后续补。 */
++
++  dw_putreg(DWMMC_INTMASK, 0);
++  return OK;
++}
++
++static int rk3576_dwmmc_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
++                                uint32_t arg)
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++  uint32_t regval = DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG;
++  uint32_t datalen;
++  int us;
++
++  regval |= DWMMC_CMD_INDX(cmd & MMCSD_CMDIDX_MASK);
++
++  switch (cmd & MMCSD_RESPONSE_MASK)
++    {
++      case MMCSD_NO_RESPONSE:
++        break;
++
++      case MMCSD_R2_RESPONSE:
++        regval |= DWMMC_CMD_RESP_EXP | DWMMC_CMD_RESP_LONG |
++                  DWMMC_CMD_RESP_CRC;
++        break;
++
++      case MMCSD_R3_RESPONSE:
++      case MMCSD_R4_RESPONSE:
++        regval |= DWMMC_CMD_RESP_EXP;    /* 这两种响应没有 CRC */
++        break;
++
++      default:
++        regval |= DWMMC_CMD_RESP_EXP | DWMMC_CMD_RESP_CRC;
++        break;
++    }
++
++  /* ★ 是否带数据阶段，必须看**命令字自己的标志**，不能看缓冲区挂没挂。
++   *
++   *   mmcsd 读 SCR 的顺序是：
++   *     SDIO_BLOCKSETUP -> SDIO_RECVSETUP -> CMD55(APP_CMD) -> ACMD51
++   *   缓冲区在 CMD55 之前就挂上了，而数据属于 ACMD51。若按
++   *   "buffer != NULL" 判断，CMD55 也会被加上 DAT_EXP 并写入
++   *   BLKSIZ/BYTCNT —— 控制器于是等一个永远不会到来的数据阶段，
++   *   数据状态机就此卡住（STATUS 的 MC_BUSY 置位且不再清），随后
++   *   真正带数据的 ACMD51 一直无法被受理。
++   *
++   *   现象是 "CMD51 未被受理"，而根因在上一条命令，中间隔了一步。
++   */
++
++  if ((cmd & MMCSD_DATAXFR_MASK) != MMCSD_NODATAXFR &&
++      priv->buffer != NULL && priv->remaining > 0)
++    {
++      regval |= DWMMC_CMD_DAT_EXP | DWMMC_CMD_PRV_DAT_WAIT;
++      if ((cmd & MMCSD_WRXFR) != 0)
++        {
++          regval |= DWMMC_CMD_DAT_WR;
++        }
++
++      datalen = priv->remaining;
++      dw_putreg(DWMMC_BLKSIZ, priv->blocksize);
++      dw_putreg(DWMMC_BYTCNT, datalen);
++    }
++  else
++    {
++      /* 不带数据的命令要把长度清零，否则控制器会沿用上一条的值。 */
++
++      dw_putreg(DWMMC_BLKSIZ, 0);
++      dw_putreg(DWMMC_BYTCNT, 0);
++    }
++
++  /* CMD0 需要带初始化序列（80 个时钟） */
++
++  if ((cmd & MMCSD_CMDIDX_MASK) == 0)
++    {
++      regval |= DWMMC_CMD_INIT;
++    }
++
++  /* 每条命令开始时先置为未完成，避免沿用上一条的结果。 */
++
++  priv->last_result = -EBUSY;
++
++  dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);
++  dw_putreg(DWMMC_CMDARG, arg);
++
++  if (regval & DWMMC_CMD_PRV_DAT_WAIT)
++    {
++      dw_wait_while_busy();
++    }
++
++  dw_putreg(DWMMC_CMD, regval);
++
++  /* 等待命令被控制器接受（START 位自清）。这一步不等于命令完成，
++   * 只是控制器收下了 —— 两者分开，超时时能说清卡在哪一步。
++   */
++
++  for (us = 0; us < 100000; us++)
++    {
++      if ((dw_getreg(DWMMC_CMD) & DWMMC_CMD_START) == 0)
++        {
++#ifdef CONFIG_RK3576_DWMMC_TRACE
++          syslog(LOG_INFO, "DW >CMD%" PRIu32 " 已受理\n",
++                 cmd & MMCSD_CMDIDX_MASK);
++#endif
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  /* ★ 这条出口此前没有 trace，正是盲区所在：命令在这里失败时，
++   * mmcsd_sendcmdpoll() 直接返回错误、不会调 waitresponse，
++   * 于是整次尝试在日志里完全不可见。而 mmcsd 会据此改走别的分支
++   * （例如 CMD8 失败就认定不是 SD 2.0 卡，转去试 MMC 的 CMD1）——
++   * 最终现象是"一直在发 CMD1"，与真正的失败点隔了好几步。
++   */
++
++  syslog(LOG_ERR,
++         "DW >CMD%" PRIu32 " 未被受理 CMD=0x%08" PRIx32
++         " STATUS=0x%08" PRIx32 " RINTSTS=0x%08" PRIx32 "\n",
++         cmd & MMCSD_CMDIDX_MASK, dw_getreg(DWMMC_CMD),
++         dw_getreg(DWMMC_STATUS), dw_getreg(DWMMC_RINTSTS));
++
++  /* 命令根本没发出去，同样要记 —— 否则 recv_* 会返回上一条命令
++   * 遗留的 OK，把"没发成功"报成"成功"。
++   */
++
++  priv->last_result = -ETIMEDOUT;
++  return priv->last_result;
++}
++
++static int rk3576_dwmmc_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++  uint32_t sts;
++  int us;
++
++  for (us = 0; us < 500000; us++)
++    {
++      sts = dw_getreg(DWMMC_RINTSTS);
++
++      if (sts & DWMMC_INT_CMD_ERROR)
++        {
++          /* RTO（响应超时）在探测流程里是正常现象：mmcsd 会先试
++           * SD 的命令再试 MMC 的，不认得的那条必然超时。所以这里
++           * 只在非 RTO 的错误上打日志，避免刷屏掩盖真正的问题。
++           */
++
++#ifdef CONFIG_RK3576_DWMMC_TRACE
++          syslog(LOG_INFO, "DW CMD%" PRIu32 " err sts=0x%08" PRIx32 "\n",
++                 cmd & MMCSD_CMDIDX_MASK, sts);
++#else
++          if ((sts & DWMMC_INT_RTO) == 0)
++            {
++              syslog(LOG_ERR,
++                     "ERROR: DWMMC CMD%" PRIu32 " 响应错误 RINTSTS=0x%08"
++                     PRIx32 "\n", cmd & MMCSD_CMDIDX_MASK, sts);
++            }
++#endif
++
++          dw_putreg(DWMMC_RINTSTS, DWMMC_INT_CMD_ERROR);
++          priv->last_result = (sts & DWMMC_INT_RTO) ? -ETIMEDOUT : -EIO;
++          return priv->last_result;
++        }
++
++      if (sts & DWMMC_INT_CMD_DONE)
++        {
++          dw_putreg(DWMMC_RINTSTS, DWMMC_INT_CMD_DONE);
++#ifdef CONFIG_RK3576_DWMMC_TRACE
++          /* 无响应的命令（如 CMD0）读 RESP0 得到的是上一条命令的残留，
++           * 打出来会误导，所以按响应类型区分。
++           */
++
++          priv->last_result = OK;
++
++          if ((cmd & MMCSD_RESPONSE_MASK) == MMCSD_NO_RESPONSE)
++            {
++              syslog(LOG_INFO, "DW  CMD%" PRIu32 " 完成（无响应）\n",
++                     cmd & MMCSD_CMDIDX_MASK);
++            }
++          else
++            {
++              syslog(LOG_INFO, "DW  CMD%" PRIu32 " 完成 resp=0x%08" PRIx32
++                     "\n", cmd & MMCSD_CMDIDX_MASK,
++                     dw_getreg(DWMMC_RESP0));
++            }
++#endif
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  syslog(LOG_ERR,
++         "DW CMD%" PRIu32 " 无响应 RINTSTS=0x%08" PRIx32
++         " STATUS=0x%08" PRIx32 "\n",
++         cmd & MMCSD_CMDIDX_MASK, dw_getreg(DWMMC_RINTSTS),
++         dw_getreg(DWMMC_STATUS));
++  /* 命令卡在控制器里，后续命令多半也会被拖住。按参考驱动的做法复位
++   * FIFO 与 DMA，把状态机拉回可用。
++   */
++
++  dw_fifo_reset();
++
++  priv->last_result = -ETIMEDOUT;
++  return priv->last_result;
++}
++
++static int rk3576_dwmmc_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
++                                  uint32_t *rshort)
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++
++  UNUSED(cmd);
++
++  /* ★ 必须如实返回上一条命令的结果，不能无条件 OK。原因见
++   * struct rk3576_dwmmc_dev_s 里 last_result 的说明。
++   */
++
++  if (priv->last_result != OK)
++    {
++      return priv->last_result;
++    }
++
++  if (rshort != NULL)
++    {
++      *rshort = dw_getreg(DWMMC_RESP0);
++    }
++
++  return OK;
++}
++
++static int rk3576_dwmmc_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
++                                 uint32_t rlong[4])
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++
++  UNUSED(cmd);
++
++  if (rlong == NULL)
++    {
++      return -EINVAL;
++    }
++
++  if (priv->last_result != OK)
++    {
++      return priv->last_result;
++    }
++
++  /* ★ dw_mmc 的 R2 与 SDHCI 不同，这里不需要移位。
++   *
++   *   SDHCI 把 R[127:8] 放在寄存器里，取值时要整体左移 8 位；
++   *   dw_mmc 的 RESP0..3 已经是对齐的，RESP3 是最高 32 位。
++   *   照搬 SDHCI 的移位会让 CID/CSD 整体错一个字节，表现为
++   *   厂商号读成 0、容量算错 —— eMMC 那边正是这么发现的。
++   */
++
++  rlong[0] = dw_getreg(DWMMC_RESP3);
++  rlong[1] = dw_getreg(DWMMC_RESP2);
++  rlong[2] = dw_getreg(DWMMC_RESP1);
++  rlong[3] = dw_getreg(DWMMC_RESP0);
++  return OK;
++}
++
++#ifdef CONFIG_SDIO_BLOCKSETUP
++static void rk3576_dwmmc_blocksetup(struct sdio_dev_s *dev,
++                                    unsigned int blocklen,
++                                    unsigned int nblocks)
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++
++  priv->blocksize = blocklen;
++  priv->nblocks   = nblocks;
++}
++#endif
++
++static int rk3576_dwmmc_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
++                                  size_t nbytes)
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++
++  dw_fifo_reset();
++  priv->buffer    = buffer;
++  priv->remaining = nbytes;
++  priv->is_write  = false;
++  return OK;
++}
++
++static int rk3576_dwmmc_sendsetup(struct sdio_dev_s *dev,
++                                  const uint8_t *buffer, size_t nbytes)
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++
++  dw_fifo_reset();
++  priv->buffer    = (uint8_t *)buffer;
++  priv->remaining = nbytes;
++  priv->is_write  = true;
++  return OK;
++}
++
++static int rk3576_dwmmc_cancel(struct sdio_dev_s *dev)
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++
++  priv->buffer    = NULL;
++  priv->remaining = 0;
++  dw_fifo_reset();
++  return OK;
++}
++
++/****************************************************************************
++ * Name: dw_pio_transfer
++ *
++ * Description:
++ *   PIO 方式搬数据。RK3576 的 dw_mmc 支持内部 DMA（IDMAC），但先用
++ *   PIO 打通功能，DMA 是提速，不是必需 —— 一次只引入一处不确定性。
++ *
++ ****************************************************************************/
++
++static int dw_pio_transfer(struct rk3576_dwmmc_dev_s *priv)
++{
++  uint32_t *p = (uint32_t *)priv->buffer;
++  size_t words = priv->remaining / 4;
++  size_t done = 0;
++  uint32_t sts;
++  int us;
++
++#ifdef CONFIG_RK3576_DWMMC_TRACE
++  syslog(LOG_INFO,
++         "DW xfer %s remaining=%zu words=%zu blksz=%u BLKSIZ=%" PRIu32
++         " BYTCNT=%" PRIu32 "\n",
++         priv->is_write ? "写" : "读", priv->remaining, words,
++         priv->blocksize, dw_getreg(DWMMC_BLKSIZ),
++         dw_getreg(DWMMC_BYTCNT));
++#endif
++
++  for (us = 0; us < 2000000 && done < words; us++)
++    {
++      sts = dw_getreg(DWMMC_RINTSTS);
++
++      if (sts & DWMMC_INT_DATA_ERROR)
++        {
++          syslog(LOG_ERR,
++                 "ERROR: DWMMC 数据错误 RINTSTS=0x%08" PRIx32
++                 " 已传 %zu/%zu 字\n", sts, done, words);
++          dw_putreg(DWMMC_RINTSTS, DWMMC_INT_DATA_ERROR);
++          return -EIO;
++        }
++
++      if (priv->is_write)
++        {
++          /* FIFO 未满就继续灌 */
++
++          while (done < words &&
++                 (dw_getreg(DWMMC_STATUS) & DWMMC_STATUS_FIFO_FULL) == 0)
++            {
++              dw_putreg(priv->fifo_off, p[done++]);
++            }
++        }
++      else
++        {
++          uint32_t fcnt = DWMMC_GET_FCNT(dw_getreg(DWMMC_STATUS));
++
++          while (done < words && fcnt-- > 0)
++            {
++              p[done++] = dw_getreg(priv->fifo_off);
++            }
++        }
++
++      if (done < words)
++        {
++          up_udelay(1);
++        }
++    }
++
++  if (done < words)
++    {
++      syslog(LOG_ERR,
++             "ERROR: DWMMC 数据传输超时 已传 %zu/%zu 字 STATUS=0x%08"
++             PRIx32 "\n", done, words, dw_getreg(DWMMC_STATUS));
++      return -ETIMEDOUT;
++    }
++
++  /* 等 DATA_OVER —— 数据搬完不等于卡那边结束。 */
++
++  for (us = 0; us < 500000; us++)
++    {
++      if (dw_getreg(DWMMC_RINTSTS) & DWMMC_INT_DATA_OVER)
++        {
++          dw_putreg(DWMMC_RINTSTS, DWMMC_INT_DATA_OVER);
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  /* ★ TBBCNT 与 TCBCNT 是两个独立的计数器，正好把"数据卡在哪一段"
++   * 分开：
++   *     TBBCNT  主机 <-> FIFO 已传字节数
++   *     TCBCNT  FIFO <-> 卡   已传字节数
++   *
++   *   TBBCNT 够而 TCBCNT 为 0  -> FIFO 没有往卡里排，问题在卡时钟或
++   *                               FIFO 水位配置
++   *   两者都够但没有 DATA_OVER -> 数据已送达，卡还没给出结束信号
++   *   TBBCNT 不够              -> 我们自己没把数据推完
++   */
++
++  syslog(LOG_ERR,
++         "ERROR: DWMMC 等 DATA_OVER 超时 RINTSTS=0x%08" PRIx32
++         " STATUS=0x%08" PRIx32 " 主机侧=%" PRIu32 " 卡侧=%" PRIu32
++         " 字节（应为 %zu）\n",
++         dw_getreg(DWMMC_RINTSTS), dw_getreg(DWMMC_STATUS),
++         dw_getreg(DWMMC_TBBCNT), dw_getreg(DWMMC_TCBCNT),
++         words * 4);
++  return -ETIMEDOUT;
++}
++
++static void rk3576_dwmmc_waitenable(struct sdio_dev_s *dev,
++                                    sdio_eventset_t eventset,
++                                    uint32_t timeout)
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++
++  priv->waitevents     = eventset;
++  priv->waittimeout_ms = timeout;
++}
++
++static sdio_eventset_t rk3576_dwmmc_eventwait(struct sdio_dev_s *dev)
++{
++  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
++  int ret;
++
++  if (priv->buffer == NULL || priv->remaining == 0)
++    {
++      priv->waitevents = 0;
++      return SDIOWAIT_TRANSFERDONE;
++    }
++
++  ret = dw_pio_transfer(priv);
++
++  priv->buffer     = NULL;
++  priv->remaining  = 0;
++  priv->waitevents = 0;
++
++  return (ret == OK) ? SDIOWAIT_TRANSFERDONE : SDIOWAIT_ERROR;
++}
++
++static void rk3576_dwmmc_callbackenable(struct sdio_dev_s *dev,
++                                        sdio_eventset_t eventset)
++{
++  UNUSED(dev);
++  UNUSED(eventset);
++}
++
++#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_HPWORK)
++static int rk3576_dwmmc_registercallback(struct sdio_dev_s *dev,
++                                         worker_t callback, void *arg)
++{
++  UNUSED(dev);
++  UNUSED(callback);
++  UNUSED(arg);
++  return OK;
++}
++#endif
++
++#ifdef CONFIG_SDIO_MUXBUS
++static int rk3576_dwmmc_lock(struct sdio_dev_s *dev, bool lock)
++{
++  UNUSED(dev);
++  UNUSED(lock);
++  return OK;
++}
++#endif
++
++static const struct sdio_dev_s g_dwmmc_ops =
++{
++#ifdef CONFIG_SDIO_MUXBUS
++  .lock             = rk3576_dwmmc_lock,
++#endif
++  .reset            = rk3576_dwmmc_reset,
++  .capabilities     = rk3576_dwmmc_capabilities,
++  .status           = rk3576_dwmmc_status,
++  .widebus          = rk3576_dwmmc_widebus,
++  .clock            = rk3576_dwmmc_clock,
++  .attach           = rk3576_dwmmc_attach,
++  .sendcmd          = rk3576_dwmmc_sendcmd,
++#ifdef CONFIG_SDIO_BLOCKSETUP
++  .blocksetup       = rk3576_dwmmc_blocksetup,
++#endif
++  .recvsetup        = rk3576_dwmmc_recvsetup,
++  .sendsetup        = rk3576_dwmmc_sendsetup,
++  .cancel           = rk3576_dwmmc_cancel,
++  .waitresponse     = rk3576_dwmmc_waitresponse,
++  .recv_r1          = rk3576_dwmmc_recvshort,
++  .recv_r2          = rk3576_dwmmc_recvlong,
++  .recv_r3          = rk3576_dwmmc_recvshort,
++  .recv_r4          = rk3576_dwmmc_recvshort,
++  .recv_r5          = rk3576_dwmmc_recvshort,
++  .recv_r6          = rk3576_dwmmc_recvshort,
++  .recv_r7          = rk3576_dwmmc_recvshort,
++  .waitenable       = rk3576_dwmmc_waitenable,
++  .eventwait        = rk3576_dwmmc_eventwait,
++  .callbackenable   = rk3576_dwmmc_callbackenable,
++#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_HPWORK)
++  .registercallback = rk3576_dwmmc_registercallback,
++#endif
++};
++
++/****************************************************************************
++ * Name: rk3576_dwmmc_initialize
++ *
++ * Description:
++ *   返回可交给 mmcsd_slotinitialize() 的 sdio_dev_s。
++ *   必须在 rk3576_dwmmc_probe() 成功之后调用。
++ *
++ ****************************************************************************/
++
++struct sdio_dev_s *rk3576_dwmmc_initialize(void)
++{
++  struct rk3576_dwmmc_dev_s *priv = &g_dwmmc;
++  uint32_t hcon;
++  uint32_t depth;
++
++  priv->dev = g_dwmmc_ops;
++
++  /* FIFO 数据窗口的偏移由 IP 版本决定，不是数据总线宽度（见头文件说明）。
++   * 取错的话数据写进 CDTHRCTL，不报错但一个字节也到不了卡上。
++   */
++
++  hcon = dw_getreg(DWMMC_HCON);
++  UNUSED(hcon);
++
++  priv->fifo_off =
++      (DWMMC_GET_VERID(dw_getreg(DWMMC_VERID)) >= DWMMC_VERID_240A) ?
++      DWMMC_DATA_240A : DWMMC_DATA_OLD;
++
++  /* 源时钟：上面把选源设成了 xin24m、不分频。 */
++
++  priv->src_hz = 24000000;
++
++  /* FIFO 水位：msize=0（1 字突发），收发水位都取深度的一半。
++   *
++   * ★ 深度用 FIFOTH 复位值反推的实测值，不用 dtb 里写的 256。
++   *   复位时 RX 水位是 depth/2-1，所以 depth = (读回值+1)*2；但
++   *   Linux 在有 DT 属性时以 DT 为准，两者对不上时以硬件为准更稳妥 ——
++   *   水位设得超过实际深度，FIFO 永远达不到阈值，数据就排不出去。
++   */
++
++  depth = (((dw_getreg(DWMMC_FIFOTH) >> 16) & 0xfff) + 1);
++  if (depth < 8 || depth > 4096)
++    {
++      depth = 128;
++    }
++  dw_putreg(DWMMC_FIFOTH,
++            DWMMC_SET_FIFOTH(0, depth / 2 - 1, depth / 2));
++
++  dw_putreg(DWMMC_CTRL, DWMMC_CTRL_INT_ENABLE);
++
++  syslog(LOG_INFO,
++         "DWMMC: sdio_dev 就绪 FIFO 窗口=0x%03" PRIx32
++         " 深度=%" PRIu32 " 源时钟=%" PRIu32 "Hz\n",
++         priv->fifo_off, depth, priv->src_hz);
++
++  return &priv->dev;
++}
++
++#endif /* CONFIG_RK3576_DWMMC */
+diff --git a/arch/arm64/src/rk3576/rk3576_dwmmc.h b/arch/arm64/src/rk3576/rk3576_dwmmc.h
+new file mode 100644
+index 00000000..17b8236d
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_dwmmc.h
+@@ -0,0 +1,39 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_dwmmc.h
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_DWMMC_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_DWMMC_H
++
++/****************************************************************************
++ * Public Function Prototypes
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_dwmmc_probe
++ *
++ * Description:
++ *   SD 卡控制器（DesignWare MSHC）前置链路与自检：电源域、两路时钟、
++ *   模块复位、引脚复用，然后用三个互相独立的读数确认状态 ——
++ *   VERID（寄存器块是否响应）、软复位自清（时钟是否真的在跑）、
++ *   CDETECT（卡是否在位）。
++ *
++ *   返回 OK 表示控制器就绪且检测到卡；-ENODEV 表示卡不在位。
++ *
++ ****************************************************************************/
++
++int rk3576_dwmmc_probe(void);
++
++/****************************************************************************
++ * Name: rk3576_dwmmc_initialize
++ *
++ * Description:
++ *   返回可交给 mmcsd_slotinitialize() 的 sdio_dev_s。
++ *   必须在 rk3576_dwmmc_probe() 返回 OK 之后调用。
++ *
++ ****************************************************************************/
++
++struct sdio_dev_s;
++struct sdio_dev_s *rk3576_dwmmc_initialize(void);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_DWMMC_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_fb.c b/arch/arm64/src/rk3576/rk3576_fb.c
+new file mode 100644
+index 00000000..c3ecea15
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_fb.c
+@@ -0,0 +1,167 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_fb.c
++ *
++ * RK3576 VOP2 帧缓冲，接到 NuttX 的 fb 框架上（/dev/fb0）。
++ *
++ * ★ 本驱动**不初始化显示链路**，只接管。
++ *
++ *   出厂 U-Boot 已经完成面板上电、发送厂商初始化序列、配置 D-PHY / DSI /
++ *   VOP2 并在 VP1 上出图。那份面板初始化序列在厂商 dtsi 里，我们拿不到，
++ *   一旦复位面板就无法恢复（表现为背光亮但永远无显示）。
++ *
++ *   因此这里只做三件事：从 VP1 的时序寄存器读出真实分辨率、分配帧缓冲、
++ *   把 ESMART1 图层指过去。时序、DSI、D-PHY、面板一律不碰。
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include <stdint.h>
++#include <inttypes.h>
++#include <string.h>
++#include <errno.h>
++#include <syslog.h>
++
++#include <nuttx/video/fb.h>
++#include <nuttx/kmalloc.h>
++
++#include "arm64_internal.h"
++#include "rk3576_vop2.h"
++
++#ifdef CONFIG_RK3576_FB
++
++/****************************************************************************
++ * Private Data
++ ****************************************************************************/
++
++static struct fb_vtable_s   g_fb_vtable;
++static struct fb_videoinfo_s g_videoinfo;
++static struct fb_planeinfo_s g_planeinfo;
++static void                *g_fbmem;
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static int rk3576_getvideoinfo(struct fb_vtable_s *vtable,
++                               struct fb_videoinfo_s *vinfo)
++{
++  if (vtable == NULL || vinfo == NULL)
++    {
++      return -EINVAL;
++    }
++
++  *vinfo = g_videoinfo;
++  return OK;
++}
++
++static int rk3576_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
++                               struct fb_planeinfo_s *pinfo)
++{
++  if (vtable == NULL || pinfo == NULL || planeno != 0)
++    {
++      return -EINVAL;
++    }
++
++  *pinfo = g_planeinfo;
++  return OK;
++}
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++int up_fbinitialize(int display)
++{
++  uint32_t width;
++  uint32_t height;
++  uint32_t stride;
++  size_t   fbsize;
++  int      ret;
++
++  if (display != 0)
++    {
++      return -ENODEV;
++    }
++
++  if (g_fbmem != NULL)
++    {
++      return OK;              /* 已初始化 */
++    }
++
++  /* 分辨率从 VP1 的时序寄存器读，不写死 —— 那是 U-Boot 按厂商 dtsi
++   * 配好的值，比文档可靠。
++   */
++
++  ret = rk3576_vop2_get_mode(&width, &height);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "ERROR: 读不到显示模式: %d\n", ret);
++      return ret;
++    }
++
++  /* U-Boot 用的是 ARGB8888，沿用之，避免改格式牵连一串寄存器。 */
++
++  stride = width * 4;
++  fbsize = (size_t)stride * height;
++
++  g_fbmem = kmm_memalign(256, fbsize);
++  if (g_fbmem == NULL)
++    {
++      syslog(LOG_ERR, "ERROR: 帧缓冲分配失败 %zu 字节\n", fbsize);
++      return -ENOMEM;
++    }
++
++  memset(g_fbmem, 0, fbsize);
++  up_flush_dcache((uintptr_t)g_fbmem, (uintptr_t)g_fbmem + fbsize);
++
++  ret = rk3576_vop2_fb_setup((uintptr_t)g_fbmem, width, height, stride);
++  if (ret < 0)
++    {
++      kmm_free(g_fbmem);
++      g_fbmem = NULL;
++      return ret;
++    }
++
++  g_videoinfo.fmt     = FB_FMT_RGB32;
++  g_videoinfo.xres    = width;
++  g_videoinfo.yres    = height;
++  g_videoinfo.nplanes = 1;
++
++  g_planeinfo.fbmem   = g_fbmem;
++  g_planeinfo.fblen   = fbsize;
++  g_planeinfo.stride  = stride;
++  g_planeinfo.display = display;
++  g_planeinfo.bpp     = 32;
++
++  g_fb_vtable.getvideoinfo = rk3576_getvideoinfo;
++  g_fb_vtable.getplaneinfo = rk3576_getplaneinfo;
++
++  syslog(LOG_INFO,
++         "FB: %" PRIu32 "x%" PRIu32 " ARGB8888 %zu 字节 @%p\n",
++         width, height, fbsize, g_fbmem);
++  return OK;
++}
++
++struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
++{
++  if (display != 0 || vplane != 0 || g_fbmem == NULL)
++    {
++      return NULL;
++    }
++
++  return &g_fb_vtable;
++}
++
++void up_fbuninitialize(int display)
++{
++  UNUSED(display);
++
++  /* 不释放帧缓冲，也不关显示 —— 关掉之后无法重新初始化面板。 */
++}
++
++#endif /* CONFIG_RK3576_FB */
+diff --git a/arch/arm64/src/rk3576/rk3576_reboot.c b/arch/arm64/src/rk3576/rk3576_reboot.c
+new file mode 100644
+index 00000000..6435fcb0
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_reboot.c
+@@ -0,0 +1,107 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_reboot.c
++ *
++ * 复位与「重启进下载模式」。
++ *
++ * ★ 为什么值得单独做这件事：
++ *
++ *   每烧一次固件都要手按 recovery 键让板子进 loader 模式，一轮调试
++ *   下来要按几十次。Rockchip 的引导器本来就支持软件触发 —— 往一个
++ *   复位后仍保留的寄存器写魔数，U-Boot 启动时读到就进下载模式。
++ *
++ *   依据来自原厂 dtb 的 syscon-reboot-mode 节点：
++ *
++ *     syscon@26024000   compatible = "rockchip,rk3576-pmu0-grf"
++ *     reboot-mode { offset = <64>;              // 0x40
++ *                   mode-normal   = <0x5242C300>;
++ *                   mode-loader   = <0x5242C301>;
++ *                   mode-recovery = <0x5242C303>; ... }
++ *
++ *   复位手段用 CRU 的全局软复位（TRM Part1）：
++ *     CRU_GLB_SRST_FST_VAL  0x0C08，写 0xfdb9 触发
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include <stdint.h>
++#include <syslog.h>
++
++#include "arm64_internal.h"
++#include "rk3576_reboot.h"
++#include "hardware/rk3576_memorymap.h"
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* PMU0 GRF 里的重启原因寄存器。这个寄存器的内容在软复位后保留，
++ * 引导器据此决定进哪种模式。
++ */
++
++#define RK3576_PMU0_GRF_ADDR      0x26024000
++#define RK3576_REBOOT_MODE_OFF    0x40
++
++#define RK3576_REBOOT_NORMAL      0x5242c300
++#define RK3576_REBOOT_LOADER      0x5242c301
++#define RK3576_REBOOT_RECOVERY    0x5242c303
++
++/* CRU 全局软复位。写入 0xfdb9 触发第一级全局复位。 */
++
++#define RK3576_CRU_GLB_SRST_FST   0x0c08
++#define RK3576_GLB_SRST_MAGIC     0xfdb9
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static void rk3576_do_reset(uint32_t mode)
++{
++  putreg32(mode, RK3576_PMU0_GRF_ADDR + RK3576_REBOOT_MODE_OFF);
++
++  /* 读回确认写进去了。这个寄存器要跨复位保留，写不进去的话下面复位
++   * 完就是一次普通重启，而不是进下载模式 —— 两者现象差别很大，
++   * 事先确认比事后猜省事。
++   */
++
++  syslog(LOG_INFO, "重启模式寄存器 = 0x%08lx（期望 0x%08lx）\n",
++         (unsigned long)getreg32(RK3576_PMU0_GRF_ADDR +
++                                 RK3576_REBOOT_MODE_OFF),
++         (unsigned long)mode);
++
++  /* 让串口把上面这行发完再复位 */
++
++  up_mdelay(50);
++
++  putreg32(RK3576_GLB_SRST_MAGIC,
++           RK3576_CRU_ADDR + RK3576_CRU_GLB_SRST_FST);
++
++  /* 复位是异步的，这里等它发生 */
++
++  for (; ; )
++    {
++      up_udelay(1000);
++    }
++}
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++void rk3576_reboot_loader(void)
++{
++  syslog(LOG_INFO,
++         "即将重启进下载模式，无需按 recovery 键。\n"
++         "USB 会断开重连，之后可直接用 rkdeveloptool 烧写。\n");
++  rk3576_do_reset(RK3576_REBOOT_LOADER);
++}
++
++void rk3576_reboot_normal(void)
++{
++  syslog(LOG_INFO, "正在重启\n");
++  rk3576_do_reset(RK3576_REBOOT_NORMAL);
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_reboot.h b/arch/arm64/src/rk3576/rk3576_reboot.h
+new file mode 100644
+index 00000000..6b32e9be
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_reboot.h
+@@ -0,0 +1,33 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_reboot.h
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_REBOOT_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_REBOOT_H
++
++/****************************************************************************
++ * Public Function Prototypes
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_reboot_loader
++ *
++ * Description:
++ *   写下载模式标志并全局软复位，让引导器启动时进 rockusb 下载模式。
++ *   免去每次烧写都要手按 recovery 键。本函数不返回。
++ *
++ ****************************************************************************/
++
++void rk3576_reboot_loader(void);
++
++/****************************************************************************
++ * Name: rk3576_reboot_normal
++ *
++ * Description:
++ *   普通重启。本函数不返回。
++ *
++ ****************************************************************************/
++
++void rk3576_reboot_normal(void);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_REBOOT_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_vop2.c b/arch/arm64/src/rk3576/rk3576_vop2.c
+index 5e4c0b3e..956115a4 100644
+--- a/arch/arm64/src/rk3576/rk3576_vop2.c
++++ b/arch/arm64/src/rk3576/rk3576_vop2.c
+@@ -66,6 +66,7 @@
+ 
+ #define VOP2_BASE       RK3576_VOP2_ADDR
+ #define VP0(off)        (RK3576_VOP2_VP0_BASE + (off))
++#define VP1(off)        (RK3576_VOP2_VP1_BASE + (off))
+ 
+ /* 时钟。出处：clk-rk3576.c
+  *   COMPOSITE(ACLK_VOP_ROOT, ... CLKGATE_CON(61), 0)
+@@ -102,13 +103,27 @@ static inline void vop_putreg(uint32_t off, uint32_t val)
+  * Name: vop_cfg_done
+  *
+  * Description:
+- *   提交影子寄存器。VOP2 的配置写入后不立即生效，必须写这一下。
++ *   提交影子寄存器。
++ *
++ *   ★ 提交是**按视频端口分别生效**的，必须指定端口号；而且低位的数据
++ *     还要配上高 16 位的写使能掩码：
++ *
++ *       drivers/gpu/drm/rockchip/rockchip_drm_vop2.h vop2_cfg_done()
++ *         val = GLB_CFG_DONE_EN | BIT(vp->id) | (BIT(vp->id) << 16);
++ *
++ *     此前这里写死了 GLB_EN | 1 —— 提交的是 VP0，掩码位也没给。而本板
++ *     的画面在 VP1 上（U-Boot 的配置），于是图层寄存器写进了影子寄存器
++ *     却从未被提交，帧缓冲地址改了也毫无效果。
++ *
++ *     GLB_CFG_DONE_EN 本身没有掩码位，直接写。
+  *
+  ****************************************************************************/
+ 
+-static void vop_cfg_done(void)
++static void vop_cfg_done(int vp)
+ {
+-  vop_putreg(RK3576_VOP2_REG_CFG_DONE, RK3576_VOP2_CFG_DONE_GLB_EN | 1);
++  vop_putreg(RK3576_VOP2_REG_CFG_DONE,
++             RK3576_VOP2_CFG_DONE_GLB_EN |
++             (1u << vp) | (1u << (vp + 16)));
+ }
+ 
+ /****************************************************************************
+@@ -170,7 +185,7 @@ int rk3576_vop2_colorbar(const struct rk3576_vop2_timing_s *t, bool enable)
+       vop_putreg(VP0(RK3576_VP_DSP_CTRL),
+                  vop_getreg(VP0(RK3576_VP_DSP_CTRL)) |
+                  RK3576_VP_DSP_CTRL_STANDBY);
+-      vop_cfg_done();
++      vop_cfg_done(0);
+       return OK;
+     }
+ 
+@@ -231,7 +246,7 @@ int rk3576_vop2_colorbar(const struct rk3576_vop2_timing_s *t, bool enable)
+ 
+   vop_putreg(VP0(RK3576_VP_COLOR_BAR_CTRL), 1);
+ 
+-  vop_cfg_done();
++  vop_cfg_done(0);
+ 
+   syslog(LOG_INFO,
+          "VOP2: 彩条已开 %ux%u htotal=%" PRIu32 " vtotal=%" PRIu32
+@@ -371,7 +386,12 @@ int rk3576_vop2_takeover(uintptr_t buffer, uint32_t *width, uint32_t *height,
+ 
+       vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_YRGB_MST,
+                  (uint32_t)buffer);
+-      vop_cfg_done();
++
++      /* ★ ESMART1 归 VP1 所有（OVL_LAYER_SEL_VP1=0xfff2，U-Boot 的配置），
++       * 必须提交到 VP1。提交到 VP0 的话寄存器停在影子里，画面不变。
++       */
++
++      vop_cfg_done(RK3576_VOP2_MIPI_VP);
+ 
+       syslog(LOG_INFO,
+              "VOP2: 帧缓冲已切到 0x%08lx\n", (unsigned long)buffer);
+@@ -386,6 +406,109 @@ int rk3576_vop2_takeover(uintptr_t buffer, uint32_t *width, uint32_t *height,
+   return OK;
+ }
+ 
++/****************************************************************************
++ * Name: rk3576_vop2_fb_setup
++ *
++ * Description:
++ *   把 ESMART1 图层扩成全屏并指向我们自己的帧缓冲。
++ *
++ *   仍然沿用 U-Boot 建立的一切：面板初始化、DSI、D-PHY、VP1 的时序与
++ *   MIPI 接口路由。只改图层的几何、跨距和地址。
++ *
++ *   ★ 图层的显示起点 DSP_ST 是相对于**整帧**的，也就是要把消隐段算进去。
++ *     全屏摆放时起点就等于 VP 的有效区起点，直接从 VP1 的
++ *     HACT_ST_END / VACT_ST_END 里读，不去写死数值 —— 时序换了也不会错。
++ *
++ ****************************************************************************/
++
++int rk3576_vop2_fb_setup(uintptr_t buffer, uint32_t width, uint32_t height,
++                         uint32_t stride_bytes)
++{
++  uint32_t hact;
++  uint32_t vact;
++  uint32_t hact_st;
++  uint32_t vact_st;
++  uint32_t ctrl;
++
++  if (buffer == 0 || width == 0 || height == 0)
++    {
++      return -EINVAL;
++    }
++
++  hact = vop_getreg(VP1(RK3576_VP_DSP_HACT_ST_END));
++  vact = vop_getreg(VP1(RK3576_VP_DSP_VACT_ST_END));
++
++  hact_st = (hact >> 16) & 0xffff;
++  vact_st = (vact >> 16) & 0xffff;
++
++  syslog(LOG_INFO,
++         "VOP2: VP%d 有效区起点 h=%" PRIu32 " v=%" PRIu32
++         "，图层将铺满 %" PRIu32 "x%" PRIu32 "\n",
++         RK3576_VOP2_MIPI_VP, hact_st, vact_st, width, height);
++
++  /* ACT/DSP_INFO 存的是 (h-1)<<16 | (w-1) */
++
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_ACT_INFO,
++             ((height - 1) << 16) | (width - 1));
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_DSP_INFO,
++             ((height - 1) << 16) | (width - 1));
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_DSP_ST,
++             (vact_st << 16) | hact_st);
++
++  /* VIR 的单位是 4 字节 */
++
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_VIR,
++             stride_bytes / 4);
++
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_YRGB_MST,
++             (uint32_t)buffer);
++
++  /* 保持 U-Boot 设好的格式与使能位不动，只确认使能仍在。 */
++
++  ctrl = vop_getreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_CTRL);
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_CTRL,
++             ctrl | RK3576_SMART_REGION0_CTRL_EN);
++
++  vop_cfg_done(RK3576_VOP2_MIPI_VP);
++
++  syslog(LOG_INFO,
++         "VOP2: 帧缓冲 %" PRIu32 "x%" PRIu32 " 跨距 %" PRIu32
++         " 字节 @0x%08lx 已生效\n",
++         width, height, stride_bytes, (unsigned long)buffer);
++  return OK;
++}
++
++/****************************************************************************
++ * Name: rk3576_vop2_get_mode
++ *
++ * Description:
++ *   从 VP1 的时序寄存器读出面板的实际分辨率。不写死数值 —— 这些值是
++ *   U-Boot 按厂商 dtsi 配好的，比任何文档都准。
++ *
++ ****************************************************************************/
++
++int rk3576_vop2_get_mode(uint32_t *width, uint32_t *height)
++{
++  uint32_t hact = vop_getreg(VP1(RK3576_VP_DSP_HACT_ST_END));
++  uint32_t vact = vop_getreg(VP1(RK3576_VP_DSP_VACT_ST_END));
++
++  uint32_t w = (hact & 0xffff) - ((hact >> 16) & 0xffff);
++  uint32_t h = (vact & 0xffff) - ((vact >> 16) & 0xffff);
++
++  if (w == 0 || h == 0 || w > 4096 || h > 4096)
++    {
++      syslog(LOG_ERR,
++             "ERROR: VP%d 时序读出的分辨率不合理 %" PRIu32 "x%" PRIu32
++             "（HACT=0x%08" PRIx32 " VACT=0x%08" PRIx32 "）\n",
++             RK3576_VOP2_MIPI_VP, w, h, hact, vact);
++      return -EIO;
++    }
++
++  if (width  != NULL) *width  = w;
++  if (height != NULL) *height = h;
++  return OK;
++}
++
+ /****************************************************************************
+  * Name: rk3576_vop2_dump_uboot_state
+  *
+diff --git a/arch/arm64/src/rk3576/rk3576_vop2.h b/arch/arm64/src/rk3576/rk3576_vop2.h
+index f8333cb5..d841ebfb 100644
+--- a/arch/arm64/src/rk3576/rk3576_vop2.h
++++ b/arch/arm64/src/rk3576/rk3576_vop2.h
+@@ -111,6 +111,28 @@ int rk3576_vop2_check_scanning(int vp);
+ int rk3576_vop2_takeover(uintptr_t buffer, uint32_t *width, uint32_t *height,
+                          uint32_t *stride_bytes, uint32_t *bpp);
+ 
++/****************************************************************************
++ * Name: rk3576_vop2_get_mode
++ *
++ * Description:
++ *   从 VP1 的时序寄存器读出面板实际分辨率（U-Boot 按厂商 dtsi 配好的）。
++ *
++ ****************************************************************************/
++
++int rk3576_vop2_get_mode(uint32_t *width, uint32_t *height);
++
++/****************************************************************************
++ * Name: rk3576_vop2_fb_setup
++ *
++ * Description:
++ *   把 ESMART1 图层扩成全屏并指向 buffer。沿用 U-Boot 建立的面板、DSI、
++ *   D-PHY 与 VP1 时序，只改图层几何、跨距与地址。
++ *
++ ****************************************************************************/
++
++int rk3576_vop2_fb_setup(uintptr_t buffer, uint32_t width, uint32_t height,
++                         uint32_t stride_bytes);
++
+ void rk3576_vop2_dump_uboot_state(void);
+ 
  #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_VOP2_H */
 -- 
 2.43.0

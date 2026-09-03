@@ -110,7 +110,7 @@ def cond_true(cond, enabled):
     return cond in enabled
 
 
-def emit(entries, existing, enabled):
+def emit(entries, existing, enabled, values):
     lines = []
     for name, ctype, val, cond, depends in entries:
         key = "CONFIG_" + name
@@ -129,6 +129,18 @@ def emit(entries, existing, enabled):
             elif val == "n":
                 lines.append("# %s is not set" % key)
             # 其它取值（如引用别的符号）跳过
+        elif ctype in ("int", "hex") and not re.match(r"^-?[0-9]", val):
+            # ★ 默认值可以引用另一个符号（如 default DEFAULT_TASK_STACKSIZE）。
+            #
+            #   原样写出去，config.h 里就是
+            #     #define CONFIG_X DEFAULT_TASK_STACKSIZE
+            #   而那个标识符并不存在（存在的是 CONFIG_DEFAULT_TASK_STACKSIZE），
+            #   编译期报 "undeclared here"。能解引用就解，解不开就跳过 ——
+            #   跳过只是少写一项，写错会直接编译失败。
+            ref = "CONFIG_" + val.strip()
+            if ref in values:
+                lines.append("%s=%s" % (key, values[ref]))
+            continue
         elif ctype == "string" and val in ('""', "''"):
             # ★ 默认值是空字符串的，一律不写。
             #
@@ -154,18 +166,20 @@ def main():
     for cfg in sys.argv[2:]:
         existing = set()
         enabled = set()          # 值为 y 的符号，去掉 CONFIG_ 前缀
+        values = {}              # 已有符号的取值，供解引用
         with open(cfg, encoding="utf-8", errors="replace") as fh:
             for line in fh:
                 line = line.strip()
                 if line.startswith("CONFIG_") and "=" in line:
                     k, v = line.split("=", 1)
                     existing.add(k)
+                    values[k] = v
                     if v == "y":
                         enabled.add(k[len("CONFIG_"):])
                 elif line.startswith("# CONFIG_") and line.endswith(" is not set"):
                     existing.add(line.split()[1])
 
-        new = emit(entries, existing, enabled)
+        new = emit(entries, existing, enabled, values)
         if not new:
             print("  %s：无新增" % cfg)
             continue
