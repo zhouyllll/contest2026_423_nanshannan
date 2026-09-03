@@ -25,8 +25,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/boardctl.h>
 #include <stdint.h>
 #include <nuttx/board.h>
+#include <errno.h>
+
+#include "arm64_internal.h"
+#include "hardware/rk3576_memorymap.h"
 #include "kickpi_k7.h"
 
 /****************************************************************************
@@ -82,3 +87,56 @@ void board_late_initialize(void)
   /* Perform board initialization */
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */
+
+#ifdef CONFIG_BOARDCTL_RESET_CAUSE
+/****************************************************************************
+ * Name: board_reset_cause
+ *
+ * Description:
+ *   报告本次启动的复位原因。
+ *
+ *   依据 TRM Part1 的 CRU_GLBRST_ST（0x27200000 + 0x0C04）：
+ *     bit15 PMU_WDT   bit14 NPU_WDT  bit13 WDT_S
+ *     bit12 WDT_NS    bit11 BUS_WDT  bit10 DDR_WDT
+ *     bit6  由看门狗复位（细分看 [15:11]）
+ *     bit5  看门狗的第二级复位
+ *   全 0 表示是上电复位（POR）。
+ *
+ *   ★ 读完要清，否则下一次启动仍会看到上一次的原因 —— xTS 的看门狗
+ *     用例正是靠"上电时是 POR、看门狗触发后是 WDT"这个变化来判定的，
+ *     不清的话第二次判断必然错。清除用 GLBRST_ST 写 1 清。
+ *
+ ****************************************************************************/
+
+int board_reset_cause(FAR struct boardioc_reset_cause_s *cause)
+{
+  uint32_t st;
+
+  if (cause == NULL)
+    {
+      return -EINVAL;
+    }
+
+  st = getreg32(RK3576_CRU_ADDR + 0x0c04);
+
+  if (st & ((1u << 6) | (1u << 5) | (0x1fu << 11)))
+    {
+      cause->cause = BOARDIOC_RESETCAUSE_SYS_RWDT;
+    }
+  else if (st == 0)
+    {
+      cause->cause = BOARDIOC_RESETCAUSE_SYS_CHIPPOR;
+    }
+  else
+    {
+      cause->cause = BOARDIOC_RESETCAUSE_UNKOWN;
+    }
+
+  cause->flag = st;
+
+  /* 写 1 清，供下次启动区分 */
+
+  putreg32(st, RK3576_CRU_ADDR + 0x0c04);
+  return OK;
+}
+#endif

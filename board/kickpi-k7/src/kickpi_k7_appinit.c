@@ -49,6 +49,7 @@
 #include "rk3576_dcphy.h"
 #include "rk3576_dsi2.h"
 #include "rk3576_dwmmc.h"
+#include "rk3576_wdt.h"
 #include "rk3576_gmac.h"
 #include "rk3576_vop2.h"
 #include "rk3576_sdhci.h"
@@ -436,6 +437,18 @@ int board_app_initialize(uintptr_t arg)
                 }
             }
         }
+    }
+#endif
+
+#ifdef CONFIG_RK3576_WDT
+  ret = rk3576_wdt_initialize("/dev/watchdog0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 看门狗初始化失败: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "看门狗: /dev/watchdog0 就绪（未启动）\n");
     }
 #endif
 

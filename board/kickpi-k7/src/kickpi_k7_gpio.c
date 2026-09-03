@@ -353,6 +353,19 @@ int kickpi_k7_gpio_initialize(void)
 
       rk3576_pinmux_set(p->bank, p->pin, RK3576_PINMUX_GPIO);
 
+      /* ★ 必须给内部上拉。
+       *
+       *   这一脚在 40 针扩展口上、没有接任何器件，也就没有外部上下拉 ——
+       *   悬空输入会随环境噪声抖动。测试用例把它配成双边沿中断后，
+       *   抖动就变成持续的中断风暴，把 CPU 占满，现象是整块板子失去
+       *   响应（既不报错也不复位），很容易误判成驱动挂死。
+       *
+       *   "选一个没接器件的引脚"解决了占用冲突，却引入了悬空问题 ——
+       *   空闲和悬空是两回事。
+       */
+
+      rk3576_pinmux_setpull(p->bank, p->pin, RK3576_PULL_UP);
+
       ret = rk3576_gpio_setdir(p->bank, p->pin, false);
       if (ret < 0)
         {
