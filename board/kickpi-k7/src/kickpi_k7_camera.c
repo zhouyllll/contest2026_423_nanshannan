@@ -40,6 +40,8 @@
 #include "rk3576_i2c.h"
 #include <arch/board/board.h>
 #include "kickpi_k7.h"
+#include "rk3576_csidphy.h"
+#include "rk3576_csihost.h"
 #include "imx415_regs.h"
 
 #ifdef CONFIG_RK3576_I2C
@@ -464,3 +466,57 @@ int kickpi_k7_camera_initialize(void)
 }
 
 #endif /* CONFIG_RK3576_I2C */
+
+/****************************************************************************
+ * Name: kickpi_camera_receiver
+ *
+ * Description:
+ *   打开取图链路的接收端：D-PHY RX + CSI-2 host。
+ *
+ *   ★ 与出流分开下令，不是图省事
+ *
+ *     两端同时打开的话，接收端在发送端还没稳定时就开始收，会记下一批
+ *     启动瞬态造成的错误 —— 那些错误是假的，但和真错误在寄存器里长得
+ *     一模一样。分开下令，中间留出时间，读到的错误才有意义。
+ *
+ *   本板摄像头挂在 csi2_dphy3 -> mipi3_csi2，出处厂商
+ *   rk3576-kickpi-k7-cam3.dtsi。
+ *
+ ****************************************************************************/
+
+#define KICKPI_CAM_DPHY_INDEX  3
+#define KICKPI_CAM_CSI_HOST    3
+
+int kickpi_camera_receiver(bool on)
+{
+  int ret;
+
+  if (!on)
+    {
+      rk3576_csihost_stop(KICKPI_CAM_CSI_HOST);
+      rk3576_csidphy_stop(KICKPI_CAM_DPHY_INDEX);
+      return OK;
+    }
+
+  /* 先 PHY 后 host：host 放开复位时 PHY 应当已经在跟踪信号了，
+   * 顺序反过来 host 会在 PHY 还没锁住时就开始判包。
+   */
+
+  ret = rk3576_csidphy_start(KICKPI_CAM_DPHY_INDEX, IMX415_MODE_LANES,
+                             IMX415_MODE_MBPS);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return rk3576_csihost_start(KICKPI_CAM_CSI_HOST, IMX415_MODE_LANES);
+}
+
+/****************************************************************************
+ * Name: kickpi_camera_status
+ ****************************************************************************/
+
+int kickpi_camera_status(void)
+{
+  return rk3576_csihost_status(KICKPI_CAM_CSI_HOST);
+}

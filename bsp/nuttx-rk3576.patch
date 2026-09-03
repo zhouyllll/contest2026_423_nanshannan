@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 01/29] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 01/31] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 02/29] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 02/31] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1363,7 +1363,7 @@ index 559489f6..d2fb5605 100644
 From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:38:15 +0800
-Subject: [PATCH 03/29] arm64/rk3576: clear U-Boot's leftover
+Subject: [PATCH 03/31] arm64/rk3576: clear U-Boot's leftover
  HCR_EL2.{IMO,FMO,AMO}; fix load address
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1490,7 +1490,7 @@ index d2fb5605..128e8a22 100644
 From 1a226e049212fce50e0724ee37b6671ac0f23e23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:50:02 +0800
-Subject: [PATCH 04/29] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
+Subject: [PATCH 04/31] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
  =?UTF-8?q?=5FEL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
  =?UTF-8?q?=E4=B8=81=E7=9A=84=E5=85=B3=E7=B3=BB?=
 MIME-Version: 1.0
@@ -1535,7 +1535,7 @@ index 128e8a22..f76d45cb 100644
 From 509d2fa1a06f4560ce252d7cc6a4d507ea7bd6dc Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 23:18:55 +0800
-Subject: [PATCH 05/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
+Subject: [PATCH 05/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
  =?UTF-8?q?=20=E9=A9=B1=E5=8A=A8=EF=BC=88Rockchip=20GPIO=20v2=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1989,7 +1989,7 @@ index 00000000..2fe55c92
 From 895f1f4e4df1ffb6dc7c665adb230ea472f48600 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 00:43:14 +0800
-Subject: [PATCH 06/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
+Subject: [PATCH 06/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
  =?UTF-8?q?=E3=80=81=E5=BC=95=E8=84=9A=E5=A4=8D=E7=94=A8=E4=B8=8E=20I2C=20?=
  =?UTF-8?q?=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
@@ -3602,7 +3602,7 @@ index 00000000..8d4d6561
 From 0efe6a8352599f5b577eda2598ab46844332a791 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:24:26 +0800
-Subject: [PATCH 07/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
+Subject: [PATCH 07/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
  =?UTF-8?q?=20(dwcmshc/SDHCI)=20=E5=91=BD=E4=BB=A4=E9=80=9A=E8=B7=AF?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -4324,7 +4324,7 @@ index 00000000..971084de
 From 19f41551f493da28c0756c5e83a0850a0bcf9aae Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:29:46 +0800
-Subject: [PATCH 08/29] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
+Subject: [PATCH 08/31] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
  =?UTF-8?q?=E9=80=9A=E8=B7=AF=E6=89=93=E9=80=9A=EF=BC=88CMD9/CMD7/CMD17=20?=
  =?UTF-8?q?+=20PIO=20=E8=AF=BB=E5=9D=97=EF=BC=89?=
 MIME-Version: 1.0
@@ -4534,7 +4534,7 @@ index cd0d10dc..99c4ecc0 100644
 From 98b2a2df090330a6d91d6f52c098751b1697768a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 13:13:58 +0800
-Subject: [PATCH 09/29] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
+Subject: [PATCH 09/31] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
  =?UTF-8?q?=20sdio=5Fdev=5Fs=EF=BC=8C/dev/mmcsd0=20=E5=8F=AF=E7=94=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -5263,7 +5263,7 @@ index 971084de..c0f64978 100644
 From 3a65d6b63b5febca4827bd7fecd8d2145adb51a0 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:07:47 +0800
-Subject: [PATCH 10/29] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
+Subject: [PATCH 10/31] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
  =?UTF-8?q?=E5=A4=87=E8=AF=BB=E9=80=9A=EF=BC=881=20=E4=BD=8D=20@50MHz?=
  =?UTF-8?q?=EF=BC=89=EF=BC=8C4=20=E4=BD=8D=E5=BE=85=E4=BF=AE?=
 MIME-Version: 1.0
@@ -5486,7 +5486,7 @@ index a3b84e47..a2996f1a 100644
 From 84d0c755aa873b306fefd87a20e4c2e0abccf064 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:14:24 +0800
-Subject: [PATCH 11/29] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
+Subject: [PATCH 11/31] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
  =?UTF-8?q?=E6=80=BB=E7=BA=BF=E6=89=93=E9=80=9A=EF=BC=8850MHz=EF=BC=89?=
  =?UTF-8?q?=EF=BC=8C=E6=A0=B9=E5=9B=A0=E6=98=AF=E8=83=BD=E5=8A=9B=E5=A3=B0?=
  =?UTF-8?q?=E6=98=8E?=
@@ -5587,7 +5587,7 @@ index a2996f1a..2206c8ab 100644
 From 5250326bc4b5ede69c28dea6feaf51d0ae74e46a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:27:58 +0800
-Subject: [PATCH 12/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
+Subject: [PATCH 12/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F(PMU)=E4=B8=8E=20GPIO=20=E4=B8=AD?=
  =?UTF-8?q?=E6=96=AD=EF=BC=8C=E4=B8=BA=E6=98=BE=E7=A4=BA=E4=B8=8E=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E9=93=BA=E8=B7=AF?=
@@ -6294,7 +6294,7 @@ index 00000000..80545549
 From 40634c8959141615d593598f97b5c70597d2039d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:41:21 +0800
-Subject: [PATCH 13/29] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
+Subject: [PATCH 13/31] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F=E7=BC=96=E5=8F=B7=E4=B8=8E=E6=AF=8F?=
  =?UTF-8?q?=E5=9F=9F=E7=9A=84=20req=20=E5=81=8F=E7=A7=BB?=
 MIME-Version: 1.0
@@ -6451,7 +6451,7 @@ index 80545549..84de6b0f 100644
 From d632b41753c213abee75ccaedbe6a88659d68b89 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:59:50 +0800
-Subject: [PATCH 14/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
+Subject: [PATCH 14/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
  =?UTF-8?q?=20=E9=9F=B3=E9=A2=91=E6=8E=A5=E5=8F=A3=E9=A9=B1=E5=8A=A8?=
  =?UTF-8?q?=EF=BC=88PIO=20=E5=8F=91=E9=80=81=EF=BC=89?=
 MIME-Version: 1.0
@@ -7201,7 +7201,7 @@ index 00000000..4c5ceb1c
 From 945dc74f703bb97d7c2331a2eb40df1bc888eb23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:26:44 +0800
-Subject: [PATCH 15/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
+Subject: [PATCH 15/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
  =?UTF-8?q?=20=E6=98=BE=E7=A4=BA=E6=8E=A7=E5=88=B6=E5=99=A8=EF=BC=88?=
  =?UTF-8?q?=E8=87=AA=E6=A3=80=20+=20=E5=86=85=E7=BD=AE=E5=BD=A9=E6=9D=A1?=
  =?UTF-8?q?=EF=BC=89?=
@@ -7744,7 +7744,7 @@ index 00000000..d59f5f55
 From e19fbf3e1dcfc9bd8c9cac919da3591de3b6bdb5 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:38:18 +0800
-Subject: [PATCH 16/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 16/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20DSI2=20=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8360,7 +8360,7 @@ index 00000000..b4cf8682
 From 506a2907cd27c7244a478ced9cc2e03e3e02ff77 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:44:28 +0800
-Subject: [PATCH 17/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 17/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20D/C-PHY=20=E9=A9=B1=E5=8A=A8=EF=BC=88D-PHY=20PLL=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8813,7 +8813,7 @@ index 00000000..6183bd51
 From 67474c8ffe832b715faa83734a71a32b80b33da6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:54:26 +0800
-Subject: [PATCH 18/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
+Subject: [PATCH 18/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
  =?UTF-8?q?=20=E5=89=8D=E7=BD=AE=E9=93=BE=E8=B7=AF=E4=B8=8E=20MDIO?=
  =?UTF-8?q?=EF=BC=88DWMAC=204.20a=EF=BC=89?=
 MIME-Version: 1.0
@@ -9314,7 +9314,7 @@ index 00000000..92991a43
 From 474c4a000e75319ecee875dffde4a0e7342ba12d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:07:45 +0800
-Subject: [PATCH 19/29] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
+Subject: [PATCH 19/31] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
  =?UTF-8?q?=E9=93=BE=E8=B7=AF=E5=85=AD=E9=A1=B9=E9=85=8D=E9=BD=90=EF=BC=8C?=
  =?UTF-8?q?DMA=20=E8=BD=AF=E5=A4=8D=E4=BD=8D=E4=BB=8D=E6=9C=AA=E5=AE=8C?=
  =?UTF-8?q?=E6=88=90?=
@@ -9867,7 +9867,7 @@ index 6f8e5f23..5afaf918 100644
 From 51d98edc4f4ae78ed5d33d08d8b5fdf85719c59b Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:24:18 +0800
-Subject: [PATCH 20/29] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
+Subject: [PATCH 20/31] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
  =?UTF-8?q?=E5=88=B0=E4=B8=83=E6=9D=A1=E6=80=BB=E7=BA=BF=EF=BC=88=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E5=AE=9A=E4=BD=8D=E7=94=A8=EF=BC=89?=
 MIME-Version: 1.0
@@ -9974,7 +9974,7 @@ index f57a2bfa..43f2313e 100644
 From 7a968bf8c6c3d85daf2dc81619a2800cf4bf89c4 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 11:12:37 +0800
-Subject: [PATCH 21/29] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
+Subject: [PATCH 21/31] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
  =?UTF-8?q?=E8=B7=AF=E4=BF=AE=E6=AD=A3=20+=20I2C0(PMU=20=E5=9F=9F)=20+=20?=
  =?UTF-8?q?=E5=BC=95=E8=84=9A=E4=B8=8A=E4=B8=8B=E6=8B=89=20API?=
 MIME-Version: 1.0
@@ -10837,7 +10837,7 @@ index d59f5f55..8c0f10a3 100644
 From c8d3eeab1d0eb34c8c9922e7a7fb4fa48df7c057 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 12:05:26 +0800
-Subject: [PATCH 22/29] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
+Subject: [PATCH 22/31] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
  =?UTF-8?q?=E6=AD=A3=20sizeof=20=E7=9A=84=E6=A0=BC=E5=BC=8F=E4=B8=B2?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -11173,7 +11173,7 @@ index be5db167..34eb7303 100644
 From abf918d9dedc4458cf1505937f86a90791fd1681 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 00:31:04 +0800
-Subject: [PATCH 23/29] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
+Subject: [PATCH 23/31] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
  =?UTF-8?q?=E5=9D=97=E8=AF=BB=E5=86=99=E3=80=81=E6=91=84=E5=83=8F=E5=A4=B4?=
  =?UTF-8?q?=20MCLK=E3=80=81=E5=85=8D=20recovery=20=E9=87=8D=E5=90=AF?=
 MIME-Version: 1.0
@@ -13336,7 +13336,7 @@ index f8333cb5..d841ebfb 100644
 From 2d8fa26231ab76705ef1144e445f76f2a8959934 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 12:01:05 +0800
-Subject: [PATCH 24/29] =?UTF-8?q?drivers/timers:=20=E6=96=B0=E5=A2=9E=20HY?=
+Subject: [PATCH 24/31] =?UTF-8?q?drivers/timers:=20=E6=96=B0=E5=A2=9E=20HY?=
  =?UTF-8?q?M8563=20I2C=20RTC=20=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -14153,7 +14153,7 @@ index 00000000..b597148d
 From d170765c4ab997d9f7dc6270211cbdfe3a18cd5b Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 13:34:59 +0800
-Subject: [PATCH 25/29] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=20DesignWare?=
+Subject: [PATCH 25/31] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=20DesignWare?=
  =?UTF-8?q?=20=E7=9C=8B=E9=97=A8=E7=8B=97=E9=A9=B1=E5=8A=A8=EF=BC=88xTS=20?=
  =?UTF-8?q?1.3.15=EF=BC=89?=
 MIME-Version: 1.0
@@ -14648,7 +14648,7 @@ index f8845b62..8609631b 100644
 From b5d7ce5c4d828ecac48a28c26d3327828b2d3645 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 13:46:09 +0800
-Subject: [PATCH 26/29] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=E7=A1=AC?=
+Subject: [PATCH 26/31] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=E7=A1=AC?=
  =?UTF-8?q?=E4=BB=B6=E9=9A=8F=E6=9C=BA=E6=95=B0=E9=A9=B1=E5=8A=A8=20/dev/r?=
  =?UTF-8?q?andom=EF=BC=88xTS=201.3.16=EF=BC=89?=
 MIME-Version: 1.0
@@ -14993,7 +14993,7 @@ index 00000000..70e4a877
 From a4e9b7be465cd44bd2299b7d3a9c79d9b8c4340d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 15:38:11 +0800
-Subject: [PATCH 27/29] arch/arm64/rk3576: add polled SPI master driver (SPI4)
+Subject: [PATCH 27/31] arch/arm64/rk3576: add polled SPI master driver (SPI4)
 
 Synopsys DesignWare SSI, Rockchip variant (rockchip,rk3066-spi).
 Register layout differs from stock DW SSI: data ports are split
@@ -16029,7 +16029,7 @@ index 00000000..f37ca9d6
 From e4e27eaa165c6013754cd3144e86a3e6257e7fd6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 15:46:28 +0800
-Subject: [PATCH 28/29] arch/arm64/rk3576: guard against GPIO interrupt storms
+Subject: [PATCH 28/31] arch/arm64/rk3576: guard against GPIO interrupt storms
 
 A pin can re-enter its handler without bound in two ways, neither of
 which reports an error -- the board simply stops responding, with no
@@ -16134,7 +16134,7 @@ index edb7a4ee..c7125d96 100644
 From 2e21784235ae6149b8dd14e3a4922174f500e29f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 19:12:28 +0800
-Subject: [PATCH 29/29] arch/arm64/rk3576: bound the SPI transfer loop, add
+Subject: [PATCH 29/31] arch/arm64/rk3576: bound the SPI transfer loop, add
  pulls and pull readback
 
 The push/pop loop had no exit.  With no serial clock (gate off, module
@@ -16459,6 +16459,930 @@ index 9b983e82..23d6a976 100644
  
    return (struct spi_dev_s *)priv;
  }
+-- 
+2.43.0
+
+
+From 74c7a2d63af08db7e49610ddf66b0f19f9abccc7 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Thu, 3 Sep 2026 20:06:48 +0800
+Subject: [PATCH 30/31] arch/arm64/rk3576: add MIPI CSI-2 D-PHY receiver
+
+First stage of the camera capture path.  This is different hardware
+from rk3576_dcphy.c, not a direction flag on it: the display side is a
+Samsung DCPHY transmitter, this is an Innosilicon receiver, and the two
+register sets do not overlap.  Reference implementations are
+phy-rockchip-samsung-dcphy.c and phy-rockchip-csi2-dphy-hw.c
+respectively.
+
+The dtb exposes csi2_dphy0..5 but there are only two physical blocks
+(0x2b030000 and 0x2b070000); index < 3 uses the first, >= 3 the second.
+The board's sensor is on csi2_dphy3.
+
+THS-SETTLE is the one value that must track the link rate: the receiver
+waits it out after a lane leaves LP before it starts sampling.  Getting
+it wrong yields data with corrupt packets rather than no data at all,
+so the two symptoms must not be confused.  A rate past the end of the
+table falls back to the top entry and says so -- silently running the
+fastest setting produces exactly that corrupt-packet symptom, which is
+hard to trace back to an out-of-range rate.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FBQkQQFX3kTDP3AzvLzDGx
+---
+ arch/arm64/src/rk3576/Kconfig          |  13 +
+ arch/arm64/src/rk3576/Make.defs        |   4 +
+ arch/arm64/src/rk3576/rk3576_csidphy.c | 334 +++++++++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_csidphy.h |  50 ++++
+ 4 files changed, 401 insertions(+)
+ create mode 100644 arch/arm64/src/rk3576/rk3576_csidphy.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_csidphy.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index c7cdc066..fc86aa91 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -22,6 +22,19 @@ config RK3576_UART0_IS_CONSOLE
+ 		已由 KICKPI 官方 Armbian 源码的 U-Boot defconfig 确认：
+ 		CONFIG_DEBUG_UART_BASE=0x2ad40000，即 UART0。
+ 
++config RK3576_CSIDPHY
++	bool "MIPI CSI-2 D-PHY 接收端"
++	default n
++	---help---
++		摄像头取图链路的第一级。与 RK3576_DCPHY（屏用的 Samsung
++		DCPHY 发送端）是**完全不同的硬件**，寄存器组毫无交集：
++		参考实现分别是 phy-rockchip-csi2-dphy-hw.c 与
++		phy-rockchip-samsung-dcphy.c。
++
++		dtb 里有 csi2_dphy0..5 六个逻辑 PHY，物理块只有两套
++		（@0x2b030000 与 @0x2b070000）：索引 <3 走前者，>=3 走后者。
++		本板摄像头挂在 csi2_dphy3。
++
+ config RK3576_SPI
+ 	bool "SPI 主机（轮询式）"
+ 	default n
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index fec2f2c2..4c8ffcc3 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -76,6 +76,10 @@ ifeq ($(CONFIG_RK3576_I2C),y)
+ CHIP_CSRCS += rk3576_i2c.c
+ endif
+ 
++ifeq ($(CONFIG_RK3576_CSIDPHY),y)
++CHIP_CSRCS += rk3576_csidphy.c
++endif
++
+ ifeq ($(CONFIG_RK3576_SPI),y)
+ CHIP_CSRCS += rk3576_spi.c
+ endif
+diff --git a/arch/arm64/src/rk3576/rk3576_csidphy.c b/arch/arm64/src/rk3576/rk3576_csidphy.c
+new file mode 100644
+index 00000000..98a6bedc
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_csidphy.c
+@@ -0,0 +1,334 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_csidphy.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* RK3576 MIPI CSI-2 D-PHY 接收端。
++ *
++ * ★ 这是接收方向，与 rk3576_dcphy.c 完全不同的硬件
++ *
++ *   屏用的 rk3576_dcphy.c 是 Samsung DCPHY 的**发送**端（DSI TX）。
++ *   摄像头这条是 Innosilicon 的**接收**端，寄存器组毫无交集 —— 参考
++ *   实现分别是 phy-rockchip-samsung-dcphy.c 和
++ *   phy-rockchip-csi2-dphy-hw.c 两个文件。想拿 DSI 那份改是走不通的。
++ *
++ * ★ 六个逻辑 PHY 只有两套物理硬件
++ *
++ *   dtb 里有 csi2-dphy0..5，物理块却只有 csi2-dphy0-hw@2b030000 与
++ *   csi2-dphy1-hw@2b070000。厂商驱动按 phy_index 分：< 3 走 PHY0，
++ *   >= 3 走 PHY1。本板摄像头挂在 csi2_dphy3，所以用 PHY1。
++ *
++ *   分法还与"整用/拆用"有关：FULL 模式一颗 PHY 的 4 条通道全给一路
++ *   传感器；SPLIT 模式拆成 0-1 和 2-3 两组给两路。本板只有一路在用，
++ *   走 FULL，这也是最简单的一档。
++ *
++ * ★ 唯一需要按速率整定的量：THS-SETTLE
++ *
++ *   接收端要在数据通道从 LP 切到 HS 之后、等信号稳定了再开始采样。
++ *   这个等待时间就是 THS-SETTLE，必须按链路速率给。给错的现象是
++ *   "有数据但全是错包"，而不是"没数据" —— 两者要分清。
++ *
++ *   速率到档位的换算表照抄厂商的 rk3568 表（RK3576 复用同一张）。
++ *   594Mbps 落在 500~599 档，档位值 0x0e。
++ */
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <debug.h>
++#include <errno.h>
++#include <inttypes.h>
++#include <stdbool.h>
++#include <stdint.h>
++#include <syslog.h>
++
++#include <nuttx/arch.h>
++
++#include "arm64_internal.h"
++#include "rk3576_csidphy.h"
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* 两套物理 PHY 的基址，出处 dtb 的 csi2-dphy{0,1}-hw 节点 */
++
++#define CSIDPHY0_BASE            0x2b030000
++#define CSIDPHY1_BASE            0x2b070000
++
++/* MIPI D-PHY GRF。dtb 里两个 rockchip,rk3576-mipi-dphy-grf 节点，
++ * 分别配给两套 PHY。
++ */
++
++#define CSIDPHY0_GRF_BASE        0x2603a000
++#define CSIDPHY1_GRF_BASE        0x2604c000
++
++/* SYS GRF —— 通道整用/拆用的选择位在这里，不在 dphy GRF 里。
++ * 厂商代码用 write_sys_grf_reg() 与 write_grf_reg() 区分这两组。
++ */
++
++#define SYS_GRF_BASE             0x2600a000
++#define SYS_GRF_SOC_CON5         0x0014
++
++/* PHY 寄存器偏移，出处 phy-rockchip-csi2-dphy-hw.c 的
++ * rk3588_csi2dphy_regs（RK3576 复用同一组）
++ */
++
++#define DPHY_CTRL_LANE_ENABLE    0x0000
++#define DPHY_DUAL_CAL_EN         0x0080
++#define DPHY_CLK_CONTINUE_MODE   0x0128
++#define DPHY_CLK_THS_SETTLE      0x0160
++#define DPHY_LANE0_THS_SETTLE    0x01e0
++#define DPHY_LANE1_THS_SETTLE    0x0260
++#define DPHY_LANE2_THS_SETTLE    0x02e0
++#define DPHY_LANE3_THS_SETTLE    0x0360
++
++#define DPHY_DATALANE_EN_SHIFT   2
++#define DPHY_CLKLANE_EN_SHIFT    6
++#define DPHY_CLK_CONTINUE_MASK   0x30
++
++/* GRF_DPHY_CON0 里的位域 */
++
++#define GRF_DPHY_CON0            0x0000
++#define GRF_FORCERXMODE_SHIFT    0
++#define GRF_FORCERXMODE_MASK     0xf
++#define GRF_DATALANE_EN_SHIFT    4
++#define GRF_DATALANE_EN_MASK     0xf
++#define GRF_CLKLANE_EN_SHIFT     8
++#define GRF_CLKLANE_EN_MASK      0x1
++
++/* SYS_GRF_SOC_CON5 里的通道选择位 */
++
++#define SYS_GRF_PHY0_LANE_SEL_SHIFT  1
++#define SYS_GRF_PHY1_LANE_SEL_SHIFT  2
++
++/****************************************************************************
++ * Private Types
++ ****************************************************************************/
++
++struct hsfreq_range_s
++{
++  uint16_t range_h;   /* 该档覆盖到的最高 Mbps */
++  uint8_t  cfg;       /* 写进 THS_SETTLE 低 7 位的档位值 */
++};
++
++/****************************************************************************
++ * Private Data
++ ****************************************************************************/
++
++/* 速率 -> THS-SETTLE 档位。必须按 range_h 升序，查找取第一个不小于
++ * 目标速率的档。照抄厂商 rk3568_csi2_dphy_hw_hsfreq_ranges，
++ * RK3576 的 drv_data 直接复用了这张表。
++ */
++
++static const struct hsfreq_range_s g_hsfreq[] =
++{
++  {  109, 0x02 }, {  149, 0x03 }, {  199, 0x06 }, {  249, 0x06 },
++  {  299, 0x06 }, {  399, 0x08 }, {  499, 0x0b }, {  599, 0x0e },
++  {  699, 0x10 }, {  799, 0x12 }, {  999, 0x16 }, { 1199, 0x1e },
++  { 1399, 0x23 }, { 1599, 0x2d }, { 1799, 0x32 }, { 1999, 0x37 },
++  { 2199, 0x3c }, { 2399, 0x41 }, { 2499, 0x46 }
++};
++
++#define NHSFREQ (sizeof(g_hsfreq) / sizeof(g_hsfreq[0]))
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uintptr_t phy_base(int index)
++{
++  return (index < 3) ? CSIDPHY0_BASE : CSIDPHY1_BASE;
++}
++
++static inline uintptr_t phy_grf(int index)
++{
++  return (index < 3) ? CSIDPHY0_GRF_BASE : CSIDPHY1_GRF_BASE;
++}
++
++/****************************************************************************
++ * Name: grf_update
++ *
++ * Description:
++ *   写 GRF 的一个位域。Rockchip 的 GRF 一律是高 16 位写使能掩码、
++ *   低 16 位数据；不带掩码写等于没写。
++ *
++ ****************************************************************************/
++
++static void grf_update(uintptr_t base, uint32_t off, uint32_t mask,
++                       uint32_t shift, uint32_t value)
++{
++  putreg32(((mask << shift) << 16) | ((value & mask) << shift), base + off);
++}
++
++/****************************************************************************
++ * Name: dphy_ths_settle
++ *
++ * Description:
++ *   给一条通道写 THS-SETTLE 档位。只改低 7 位，其余位保持 ——
++ *   这个寄存器里还有别的控制位，整字写会把它们抹掉。
++ *
++ ****************************************************************************/
++
++static void dphy_ths_settle(uintptr_t base, uint32_t off, uint8_t cfg)
++{
++  uint32_t val = getreg32(base + off);
++
++  putreg32((val & ~0x7fu) | cfg, base + off);
++}
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_csidphy_start
++ ****************************************************************************/
++
++int rk3576_csidphy_start(int index, int lanes, unsigned int mbps)
++{
++  uintptr_t base = phy_base(index);
++  uintptr_t grf  = phy_grf(index);
++  uint32_t lane_mask;
++  uint32_t val;
++  uint8_t cfg;
++  int i;
++
++  if (index < 0 || index > 5 || lanes < 1 || lanes > 4)
++    {
++      return -EINVAL;
++    }
++
++  lane_mask = (1u << lanes) - 1;
++
++  /* 1) 复位数字部分。两次写是厂商的做法：先给 0x1e 让复位生效，
++   *    再给 0x1f 释放。少写一次的话内部状态机停在上次的残留上。
++   */
++
++  putreg32(0x1e, base + DPHY_DUAL_CAL_EN);
++  putreg32(0x1f, base + DPHY_DUAL_CAL_EN);
++
++  /* 2) 使能通道。读改写：这个寄存器在 SPLIT 模式下由两路共用，
++   *    整字写会把另一路的使能位抹掉。本板只有一路，但保持读改写
++   *    是为了将来接第二路时不必回头改。
++   */
++
++  val  = getreg32(base + DPHY_CTRL_LANE_ENABLE);
++  val |= (lane_mask << DPHY_DATALANE_EN_SHIFT) |
++         (1u << DPHY_CLKLANE_EN_SHIFT);
++  putreg32(val, base + DPHY_CTRL_LANE_ENABLE);
++
++  /* 3) 连续时钟模式。IMX415 默认是连续时钟（不在行间把时钟通道
++   *    落回 LP），接收端要跟着配，否则每行开头都要重新同步。
++   */
++
++  val = getreg32(base + DPHY_CLK_CONTINUE_MODE);
++  putreg32((val & ~(uint32_t)DPHY_CLK_CONTINUE_MASK) | 0x30,
++           base + DPHY_CLK_CONTINUE_MODE);
++
++  /* 4) GRF：通道数与时钟通道使能 */
++
++  grf_update(grf, GRF_DPHY_CON0, GRF_DATALANE_EN_MASK,
++             GRF_DATALANE_EN_SHIFT, lane_mask);
++  grf_update(grf, GRF_DPHY_CON0, GRF_CLKLANE_EN_MASK,
++             GRF_CLKLANE_EN_SHIFT, 1);
++
++  /* 5) SYS GRF：整用而不是拆用（0 = FULL） */
++
++  grf_update(SYS_GRF_BASE, SYS_GRF_SOC_CON5, 0x1,
++             (index < 3) ? SYS_GRF_PHY0_LANE_SEL_SHIFT :
++                           SYS_GRF_PHY1_LANE_SEL_SHIFT, 0);
++
++  /* 6) 退出强制接收模式，让 PHY 按真实的 LP/HS 跳变工作 */
++
++  grf_update(grf, GRF_DPHY_CON0, GRF_FORCERXMODE_MASK,
++             GRF_FORCERXMODE_SHIFT, 0);
++
++  /* 7) THS-SETTLE。查表取第一个覆盖到目标速率的档；速率超出表尾时
++   *    退到最后一档并明确告警 —— 静默按最高档跑会得到"有数据但全是
++   *    错包"，那种现象很难往"速率超范围"上想。
++   */
++
++  for (i = 0; i < (int)NHSFREQ; i++)
++    {
++      if (mbps <= g_hsfreq[i].range_h)
++        {
++          break;
++        }
++    }
++
++  if (i >= (int)NHSFREQ)
++    {
++      i = NHSFREQ - 1;
++      syslog(LOG_WARNING,
++             "CSI D-PHY%d: %uMbps 超出档位表上限 %u，按最高档处理\n",
++             index, mbps, g_hsfreq[i].range_h);
++    }
++
++  cfg = g_hsfreq[i].cfg;
++
++  dphy_ths_settle(base, DPHY_CLK_THS_SETTLE, cfg);
++  if (lanes > 0)
++    {
++      dphy_ths_settle(base, DPHY_LANE0_THS_SETTLE, cfg);
++    }
++
++  if (lanes > 1)
++    {
++      dphy_ths_settle(base, DPHY_LANE1_THS_SETTLE, cfg);
++    }
++
++  if (lanes > 2)
++    {
++      dphy_ths_settle(base, DPHY_LANE2_THS_SETTLE, cfg);
++    }
++
++  if (lanes > 3)
++    {
++      dphy_ths_settle(base, DPHY_LANE3_THS_SETTLE, cfg);
++    }
++
++  syslog(LOG_INFO,
++         "CSI D-PHY%d: PHY%d@0x%08lx %d lane %uMbps THS_SETTLE=0x%02x "
++         "LANE_EN=0x%08" PRIx32 "\n",
++         index, (index < 3) ? 0 : 1, (unsigned long)base, lanes, mbps, cfg,
++         getreg32(base + DPHY_CTRL_LANE_ENABLE));
++
++  return OK;
++}
++
++/****************************************************************************
++ * Name: rk3576_csidphy_stop
++ ****************************************************************************/
++
++int rk3576_csidphy_stop(int index)
++{
++  uintptr_t base = phy_base(index);
++
++  if (index < 0 || index > 5)
++    {
++      return -EINVAL;
++    }
++
++  putreg32(0, base + DPHY_CTRL_LANE_ENABLE);
++  return OK;
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_csidphy.h b/arch/arm64/src/rk3576/rk3576_csidphy.h
+new file mode 100644
+index 00000000..02138656
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_csidphy.h
+@@ -0,0 +1,50 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_csidphy.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_CSIDPHY_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_CSIDPHY_H
++
++#include <nuttx/config.h>
++
++/****************************************************************************
++ * Name: rk3576_csidphy_start
++ *
++ * Description:
++ *   打开一路 MIPI CSI-2 D-PHY 接收端。
++ *
++ * Input Parameters:
++ *   index - 逻辑 PHY 号 0..5（dtb 的 csi2_dphyN）。0..2 走物理 PHY0，
++ *           3..5 走物理 PHY1。
++ *   lanes - 数据通道数 1..4
++ *   mbps  - 每通道链路速率，用来查 THS-SETTLE 档位
++ *
++ ****************************************************************************/
++
++int rk3576_csidphy_start(int index, int lanes, unsigned int mbps);
++
++/****************************************************************************
++ * Name: rk3576_csidphy_stop
++ ****************************************************************************/
++
++int rk3576_csidphy_stop(int index);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_CSIDPHY_H */
+-- 
+2.43.0
+
+
+From bc209e7ff21891788202f179086f89fe52d03e78 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Thu, 3 Sep 2026 20:27:35 +0800
+Subject: [PATCH 31/31] arch/arm64/rk3576: add MIPI CSI-2 host controller
+
+Second stage of the capture path, and the first point in it that can be
+observed at all.  The sensor can only be confirmed over I2C and the
+D-PHY has no status registers, so until now nothing could answer
+whether data was actually on the wire.  PHY_STATE shows per-lane
+stopstate and clock-lane activity; ERR1/ERR2 count SoT, ECC and CRC
+failures.
+
+That distinction matters because "no data" and "data arriving
+corrupt" both look like a blank screen but need opposite next steps.
+The status helper reports which one it is rather than printing raw
+values.
+
+Verified on hardware: with the sensor streaming, PHY_STATE reads
+0x2f0 and both error registers are zero; with the sensor in standby it
+reads 0x0f.  The changing bits identify [3:0] as per-lane stopstate and
+bit 9 as clock-lane HS activity.  The vendor driver never reads this
+register, so the bit meanings come from that comparison rather than
+from documentation -- and zero errors alone would not have settled it,
+since no packets also produces no errors.
+
+Gate selection uses the register/bit from the CRU driver table, not the
+dt-bindings clock index: the binding header here disagrees with the
+board dtb about index 379, so indices are not trustworthy.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FBQkQQFX3kTDP3AzvLzDGx
+---
+ arch/arm64/src/rk3576/Kconfig          |  12 +
+ arch/arm64/src/rk3576/Make.defs        |   4 +
+ arch/arm64/src/rk3576/rk3576_csihost.c | 301 +++++++++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_csihost.h |  55 +++++
+ 4 files changed, 372 insertions(+)
+ create mode 100644 arch/arm64/src/rk3576/rk3576_csihost.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_csihost.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index fc86aa91..034fbcbc 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -22,6 +22,18 @@ config RK3576_UART0_IS_CONSOLE
+ 		已由 KICKPI 官方 Armbian 源码的 U-Boot defconfig 确认：
+ 		CONFIG_DEBUG_UART_BASE=0x2ad40000，即 UART0。
+ 
++config RK3576_CSIHOST
++	bool "MIPI CSI-2 主机控制器"
++	default n
++	select RK3576_CSIDPHY
++	---help---
++		取图链路的第二级，解析 CSI-2 协议。
++
++		它同时是链路上**第一个可观测点**：PHY_STATE 能看各通道是否
++		还停在空闲态，ERR1/ERR2 能看 SoT/ECC/CRC 错误。即使后面的
++		CIF 还没写完拿不到图，靠这一级也能分清「线上没数据」和
++		「有数据但收错」—— 两者都表现为看不到图，下一步却完全不同。
++
+ config RK3576_CSIDPHY
+ 	bool "MIPI CSI-2 D-PHY 接收端"
+ 	default n
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index 4c8ffcc3..0aa65fbe 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -76,6 +76,10 @@ ifeq ($(CONFIG_RK3576_I2C),y)
+ CHIP_CSRCS += rk3576_i2c.c
+ endif
+ 
++ifeq ($(CONFIG_RK3576_CSIHOST),y)
++CHIP_CSRCS += rk3576_csihost.c
++endif
++
+ ifeq ($(CONFIG_RK3576_CSIDPHY),y)
+ CHIP_CSRCS += rk3576_csidphy.c
+ endif
+diff --git a/arch/arm64/src/rk3576/rk3576_csihost.c b/arch/arm64/src/rk3576/rk3576_csihost.c
+new file mode 100644
+index 00000000..09c8f03a
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_csihost.c
+@@ -0,0 +1,301 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_csihost.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* RK3576 MIPI CSI-2 主机控制器（Synopsys CSI-2 host）。
++ *
++ * 取图链路的第二级：D-PHY 把差分信号还原成字节流之后，由它解析
++ * CSI-2 协议 —— 拆包、按数据类型分流、校验 ECC/CRC。
++ *
++ * ★ 这一级的真正价值是**可观测性**
++ *
++ *   链路上前两级（传感器出流、D-PHY 收）都没有任何可读的状态：
++ *   传感器只能靠 I2C 回读确认"配置进去了"，D-PHY 连状态寄存器都没有。
++ *   到了这里才第一次有东西可看：
++ *
++ *     PHY_STATE  各通道的 stopstate 与时钟通道是否在跑
++ *     ERR1/ERR2  SoT 同步错、ECC 错、CRC 错、行/帧边界错……
++ *
++ *   所以即使 CIF 还没写完、拿不到图像，这一级也能回答那个最关键的
++ *   问题：**线上到底有没有数据，数据是不是完整的**。
++ *
++ *   这两者要分开看：
++ *     - PHY_STATE 全是 stopstate、ERR 全 0  -> 线上没数据，问题在发送端
++ *     - PHY_STATE 有活动、ERR1 里 CRC/ECC 非 0 -> 有数据但收错了，
++ *       多半是 THS-SETTLE 档位不对
++ *   没有这一级的读数，这两种情况的表现都是"看不到图"。
++ *
++ * 寄存器与使能序列出处：厂商
++ * drivers/media/platform/rockchip/cif/mipi-csi2.{c,h}
++ */
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <debug.h>
++#include <errno.h>
++#include <inttypes.h>
++#include <stdint.h>
++#include <syslog.h>
++
++#include <nuttx/arch.h>
++
++#include "arm64_internal.h"
++#include "rk3576_cru.h"
++#include "rk3576_csihost.h"
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* 五个 CSI-2 host，基址等距排列。出处 dtb 的 mipiN-csi2-hw 节点：
++ * mipi0 @0x27c80000 ... mipi4 @0x27cc0000
++ */
++
++#define CSIHOST_BASE(n)          (0x27c80000 + (n) * 0x10000)
++#define CSIHOST_NHOSTS           5
++
++/* PCLK_CSI_HOST_n 的门控。出处 clk-rk3576.c 的
++ *   GATE(PCLK_CSI_HOST_0, ... RK3576_CLKGATE_CON(54), 4)
++ * 五个连续排列，host0 在 bit4。
++ *
++ * ★ 用 CRU 驱动里的寄存器/位，不用 dt-bindings 的时钟索引 ——
++ *   手上这份 binding 头与板子 dtb 的索引对不上（dtb 写 379，头里
++ *   379 是别的时钟），索引这条路不可靠；寄存器表是直接的。
++ */
++
++#define CSIHOST_GATE_CON         54
++#define CSIHOST_GATE_BIT(n)      (4 + (n))
++
++/* 寄存器偏移 */
++
++#define CSIHOST_N_LANES          0x04
++#define CSIHOST_DPHY_SHUTDOWNZ   0x08
++#define CSIHOST_PHY_RSTZ         0x0c
++#define CSIHOST_RESETN           0x10
++#define CSIHOST_PHY_STATE        0x14
++#define CSIHOST_ERR1             0x20
++#define CSIHOST_ERR2             0x24
++#define CSIHOST_MSK1             0x28
++#define CSIHOST_MSK2             0x2c
++#define CSIHOST_CONTROL          0x40
++
++/* CONTROL 位域 */
++
++#define SW_CPHY_EN(x)            ((x) << 0)
++#define SW_DSI_EN(x)             ((x) << 4)
++#define SW_DATATYPE_FS(x)        ((x) << 8)
++#define SW_DATATYPE_FE(x)        ((x) << 14)
++#define SW_DATATYPE_LS(x)        ((x) << 20)
++#define SW_DATATYPE_LE(x)        ((x) << 26)
++
++/* ERR1 里的分组，报错时按组说明比给一个裸数值有用 */
++
++#define ERR1_SOT_SYNC            0x0000000f   /* SoT 同步失败 */
++#define ERR1_BNDRY_MATCH         0x000000f0   /* 帧边界不匹配 */
++#define ERR1_SEQ                 0x00000f00   /* 帧序号错 */
++#define ERR1_FRM_DATA            0x0000f000   /* 帧数据错 */
++#define ERR1_CTRL                0x000f0000   /* 控制错 */
++#define ERR1_CRC                 0x0f000000   /* 载荷 CRC 错 */
++#define ERR1_ECC2                0x10000000   /* 包头两位 ECC 错（不可纠）*/
++
++#define ERR2_ESC                 0x0000000f   /* 转义序列错 */
++#define ERR2_SOT_HS              0x000000f0   /* HS 起始错 */
++#define ERR2_ECC_CORRECTED       0x00000f00   /* ECC 已纠正（可容忍）*/
++#define ERR2_ERR_ID              0x0000f000   /* 未知数据类型 */
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_csihost_start
++ ****************************************************************************/
++
++int rk3576_csihost_start(int host, int lanes)
++{
++  uintptr_t base;
++  uint32_t ctrl;
++
++  if (host < 0 || host >= CSIHOST_NHOSTS || lanes < 1 || lanes > 4)
++    {
++      return -EINVAL;
++    }
++
++  base = CSIHOST_BASE(host);
++
++  rk3576_clk_gate(CSIHOST_GATE_CON, CSIHOST_GATE_BIT(host), true);
++
++  /* 1) 先关干净。RESETN=0 期间寄存器才可改；把中断全屏蔽掉是因为
++   *    我们用轮询读 ERR1/ERR2，不挂中断服务程序 —— 不屏蔽的话
++   *    错误一来就是没人处理的悬挂中断。
++   */
++
++  putreg32(0, base + CSIHOST_RESETN);
++  putreg32(0xffffffff, base + CSIHOST_MSK1);
++  putreg32(0xffffffff, base + CSIHOST_MSK2);
++
++  /* 2) 通道数。寄存器里放的是"通道数 - 1"。 */
++
++  putreg32((uint32_t)(lanes - 1), base + CSIHOST_N_LANES);
++
++  /* 3) CONTROL。D-PHY（不是 C-PHY）、相机模式（不是 DSI 回环），
++   *    四个同步短包的数据类型按 CSI-2 规范给：
++   *      FS=0x00 帧开始  FE=0x01 帧结束  LS=0x02 行开始  LE=0x03 行结束
++   */
++
++  ctrl = SW_CPHY_EN(0) | SW_DSI_EN(0) |
++         SW_DATATYPE_FS(0x00) | SW_DATATYPE_FE(0x01) |
++         SW_DATATYPE_LS(0x02) | SW_DATATYPE_LE(0x03);
++  putreg32(ctrl, base + CSIHOST_CONTROL);
++
++  /* 4) 错误掩码。厂商在相机模式下用 MSK1=0、MSK2=0xf000 ——
++   *    放开大部分错误上报，只屏蔽 ERR2 的"未知数据类型"那一组：
++   *    传感器除图像外还会发嵌入数据行，那些数据类型本就不认识，
++   *    不屏蔽会被无意义的错误刷屏。
++   */
++
++  putreg32(0x0, base + CSIHOST_MSK1);
++  putreg32(0xf000, base + CSIHOST_MSK2);
++
++  /* 5) 放开复位，开始收 */
++
++  putreg32(1, base + CSIHOST_RESETN);
++
++  syslog(LOG_INFO,
++         "CSI host%d: @0x%08lx %d lane CONTROL=0x%08" PRIx32 "\n",
++         host, (unsigned long)base, lanes, ctrl);
++
++  return OK;
++}
++
++/****************************************************************************
++ * Name: rk3576_csihost_stop
++ ****************************************************************************/
++
++int rk3576_csihost_stop(int host)
++{
++  uintptr_t base;
++
++  if (host < 0 || host >= CSIHOST_NHOSTS)
++    {
++      return -EINVAL;
++    }
++
++  base = CSIHOST_BASE(host);
++  putreg32(0, base + CSIHOST_RESETN);
++  putreg32(0xffffffff, base + CSIHOST_MSK1);
++  putreg32(0xffffffff, base + CSIHOST_MSK2);
++  return OK;
++}
++
++/****************************************************************************
++ * Name: rk3576_csihost_status
++ *
++ * Description:
++ *   打印这一级看得到的全部状态，并给出**结论**而不只是数值。
++ *
++ *   之所以要给结论：PHY_STATE 和 ERR1/ERR2 单看都不足以判断问题在哪，
++ *   要两个一起看 ——「没数据」和「有数据但收错」需要不同的下一步，
++ *   而它们在屏幕上的表现是一样的（都看不到图）。
++ *
++ * Returned Value:
++ *   0 表示看起来正常；正数表示检出的错误位；-EINVAL 参数错。
++ *
++ ****************************************************************************/
++
++int rk3576_csihost_status(int host)
++{
++  uintptr_t base;
++  uint32_t state;
++  uint32_t err1;
++  uint32_t err2;
++  bool active;
++
++  if (host < 0 || host >= CSIHOST_NHOSTS)
++    {
++      return -EINVAL;
++    }
++
++  base = CSIHOST_BASE(host);
++
++  state = getreg32(base + CSIHOST_PHY_STATE);
++  err1  = getreg32(base + CSIHOST_ERR1);
++  err2  = getreg32(base + CSIHOST_ERR2);
++
++  syslog(LOG_INFO,
++         "CSI host%d: PHY_STATE=0x%08" PRIx32 " ERR1=0x%08" PRIx32
++         " ERR2=0x%08" PRIx32 "\n", host, state, err1, err2);
++
++  /* PHY_STATE 的低位是各通道的 stopstate：置位 = 该通道停在 LP-11
++   * 空闲态。四条数据通道全停、且没有任何错误计数，说明线上根本没有
++   * 高速数据 —— 这时候查接收端是白费力气，问题在发送端或走线。
++   */
++
++  active = (state & 0xf) != 0xf || err1 != 0 || err2 != 0;
++
++  if (!active)
++    {
++      syslog(LOG_WARNING,
++             "CSI host%d: 所有数据通道都停在空闲态且无任何错误计数 —— "
++             "线上没有高速数据，应查传感器是否真在出流\n", host);
++      return 0;
++    }
++
++  if (err1 & ERR1_SOT_SYNC)
++    {
++      syslog(LOG_ERR, "  SoT 同步失败 —— THS-SETTLE 档位多半不对\n");
++    }
++
++  if (err1 & ERR1_ECC2)
++    {
++      syslog(LOG_ERR, "  包头 ECC 两位错（不可纠）—— 信号完整性问题\n");
++    }
++
++  if (err1 & ERR1_CRC)
++    {
++      syslog(LOG_ERR, "  载荷 CRC 错 —— 数据在传输中被破坏\n");
++    }
++
++  if (err1 & (ERR1_BNDRY_MATCH | ERR1_SEQ | ERR1_FRM_DATA))
++    {
++      syslog(LOG_ERR, "  帧结构错（边界/序号/数据）\n");
++    }
++
++  if (err2 & ERR2_SOT_HS)
++    {
++      syslog(LOG_ERR, "  HS 起始错\n");
++    }
++
++  if (err2 & ERR2_ECC_CORRECTED)
++    {
++      syslog(LOG_INFO, "  （ECC 已纠正若干，少量可容忍）\n");
++    }
++
++  if (err1 == 0 && (err2 & ~ERR2_ECC_CORRECTED) == 0)
++    {
++      syslog(LOG_INFO, "  通道有活动且无实质错误 —— 收流正常\n");
++    }
++
++  return (int)(err1 | (err2 & ~ERR2_ECC_CORRECTED));
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_csihost.h b/arch/arm64/src/rk3576/rk3576_csihost.h
+new file mode 100644
+index 00000000..a4001926
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_csihost.h
+@@ -0,0 +1,55 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_csihost.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_CSIHOST_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_CSIHOST_H
++
++#include <nuttx/config.h>
++
++/****************************************************************************
++ * Name: rk3576_csihost_start
++ *
++ * Description:
++ *   打开一路 MIPI CSI-2 主机控制器。host 0..4 对应 dtb 的 mipiN_csi2。
++ *
++ ****************************************************************************/
++
++int rk3576_csihost_start(int host, int lanes);
++
++/****************************************************************************
++ * Name: rk3576_csihost_stop
++ ****************************************************************************/
++
++int rk3576_csihost_stop(int host);
++
++/****************************************************************************
++ * Name: rk3576_csihost_status
++ *
++ * Description:
++ *   打印通道状态与错误计数，并区分「线上没数据」与「有数据但收错」。
++ *   这是取图链路上第一个可观测点。
++ *
++ ****************************************************************************/
++
++int rk3576_csihost_status(int host);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_CSIHOST_H */
 -- 
 2.43.0
 

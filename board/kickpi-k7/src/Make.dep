@@ -676,4 +676,7 @@ kickpi_k7_camera.o: kickpi_k7_camera.c \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_pinmux.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_i2c.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/board/board.h \
- kickpi_k7.h
+ kickpi_k7.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_csidphy.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_csihost.h \
+ imx415_regs.h
