@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 01/28] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 01/29] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 02/28] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 02/29] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1363,7 +1363,7 @@ index 559489f6..d2fb5605 100644
 From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:38:15 +0800
-Subject: [PATCH 03/28] arm64/rk3576: clear U-Boot's leftover
+Subject: [PATCH 03/29] arm64/rk3576: clear U-Boot's leftover
  HCR_EL2.{IMO,FMO,AMO}; fix load address
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1490,7 +1490,7 @@ index d2fb5605..128e8a22 100644
 From 1a226e049212fce50e0724ee37b6671ac0f23e23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:50:02 +0800
-Subject: [PATCH 04/28] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
+Subject: [PATCH 04/29] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
  =?UTF-8?q?=5FEL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
  =?UTF-8?q?=E4=B8=81=E7=9A=84=E5=85=B3=E7=B3=BB?=
 MIME-Version: 1.0
@@ -1535,7 +1535,7 @@ index 128e8a22..f76d45cb 100644
 From 509d2fa1a06f4560ce252d7cc6a4d507ea7bd6dc Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 23:18:55 +0800
-Subject: [PATCH 05/28] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
+Subject: [PATCH 05/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
  =?UTF-8?q?=20=E9=A9=B1=E5=8A=A8=EF=BC=88Rockchip=20GPIO=20v2=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1989,7 +1989,7 @@ index 00000000..2fe55c92
 From 895f1f4e4df1ffb6dc7c665adb230ea472f48600 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 00:43:14 +0800
-Subject: [PATCH 06/28] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
+Subject: [PATCH 06/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
  =?UTF-8?q?=E3=80=81=E5=BC=95=E8=84=9A=E5=A4=8D=E7=94=A8=E4=B8=8E=20I2C=20?=
  =?UTF-8?q?=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
@@ -3602,7 +3602,7 @@ index 00000000..8d4d6561
 From 0efe6a8352599f5b577eda2598ab46844332a791 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:24:26 +0800
-Subject: [PATCH 07/28] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
+Subject: [PATCH 07/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
  =?UTF-8?q?=20(dwcmshc/SDHCI)=20=E5=91=BD=E4=BB=A4=E9=80=9A=E8=B7=AF?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -4324,7 +4324,7 @@ index 00000000..971084de
 From 19f41551f493da28c0756c5e83a0850a0bcf9aae Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:29:46 +0800
-Subject: [PATCH 08/28] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
+Subject: [PATCH 08/29] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
  =?UTF-8?q?=E9=80=9A=E8=B7=AF=E6=89=93=E9=80=9A=EF=BC=88CMD9/CMD7/CMD17=20?=
  =?UTF-8?q?+=20PIO=20=E8=AF=BB=E5=9D=97=EF=BC=89?=
 MIME-Version: 1.0
@@ -4534,7 +4534,7 @@ index cd0d10dc..99c4ecc0 100644
 From 98b2a2df090330a6d91d6f52c098751b1697768a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 13:13:58 +0800
-Subject: [PATCH 09/28] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
+Subject: [PATCH 09/29] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
  =?UTF-8?q?=20sdio=5Fdev=5Fs=EF=BC=8C/dev/mmcsd0=20=E5=8F=AF=E7=94=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -5263,7 +5263,7 @@ index 971084de..c0f64978 100644
 From 3a65d6b63b5febca4827bd7fecd8d2145adb51a0 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:07:47 +0800
-Subject: [PATCH 10/28] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
+Subject: [PATCH 10/29] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
  =?UTF-8?q?=E5=A4=87=E8=AF=BB=E9=80=9A=EF=BC=881=20=E4=BD=8D=20@50MHz?=
  =?UTF-8?q?=EF=BC=89=EF=BC=8C4=20=E4=BD=8D=E5=BE=85=E4=BF=AE?=
 MIME-Version: 1.0
@@ -5486,7 +5486,7 @@ index a3b84e47..a2996f1a 100644
 From 84d0c755aa873b306fefd87a20e4c2e0abccf064 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:14:24 +0800
-Subject: [PATCH 11/28] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
+Subject: [PATCH 11/29] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
  =?UTF-8?q?=E6=80=BB=E7=BA=BF=E6=89=93=E9=80=9A=EF=BC=8850MHz=EF=BC=89?=
  =?UTF-8?q?=EF=BC=8C=E6=A0=B9=E5=9B=A0=E6=98=AF=E8=83=BD=E5=8A=9B=E5=A3=B0?=
  =?UTF-8?q?=E6=98=8E?=
@@ -5587,7 +5587,7 @@ index a2996f1a..2206c8ab 100644
 From 5250326bc4b5ede69c28dea6feaf51d0ae74e46a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:27:58 +0800
-Subject: [PATCH 12/28] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
+Subject: [PATCH 12/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F(PMU)=E4=B8=8E=20GPIO=20=E4=B8=AD?=
  =?UTF-8?q?=E6=96=AD=EF=BC=8C=E4=B8=BA=E6=98=BE=E7=A4=BA=E4=B8=8E=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E9=93=BA=E8=B7=AF?=
@@ -6294,7 +6294,7 @@ index 00000000..80545549
 From 40634c8959141615d593598f97b5c70597d2039d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:41:21 +0800
-Subject: [PATCH 13/28] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
+Subject: [PATCH 13/29] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F=E7=BC=96=E5=8F=B7=E4=B8=8E=E6=AF=8F?=
  =?UTF-8?q?=E5=9F=9F=E7=9A=84=20req=20=E5=81=8F=E7=A7=BB?=
 MIME-Version: 1.0
@@ -6451,7 +6451,7 @@ index 80545549..84de6b0f 100644
 From d632b41753c213abee75ccaedbe6a88659d68b89 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:59:50 +0800
-Subject: [PATCH 14/28] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
+Subject: [PATCH 14/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
  =?UTF-8?q?=20=E9=9F=B3=E9=A2=91=E6=8E=A5=E5=8F=A3=E9=A9=B1=E5=8A=A8?=
  =?UTF-8?q?=EF=BC=88PIO=20=E5=8F=91=E9=80=81=EF=BC=89?=
 MIME-Version: 1.0
@@ -7201,7 +7201,7 @@ index 00000000..4c5ceb1c
 From 945dc74f703bb97d7c2331a2eb40df1bc888eb23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:26:44 +0800
-Subject: [PATCH 15/28] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
+Subject: [PATCH 15/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
  =?UTF-8?q?=20=E6=98=BE=E7=A4=BA=E6=8E=A7=E5=88=B6=E5=99=A8=EF=BC=88?=
  =?UTF-8?q?=E8=87=AA=E6=A3=80=20+=20=E5=86=85=E7=BD=AE=E5=BD=A9=E6=9D=A1?=
  =?UTF-8?q?=EF=BC=89?=
@@ -7744,7 +7744,7 @@ index 00000000..d59f5f55
 From e19fbf3e1dcfc9bd8c9cac919da3591de3b6bdb5 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:38:18 +0800
-Subject: [PATCH 16/28] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 16/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20DSI2=20=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8360,7 +8360,7 @@ index 00000000..b4cf8682
 From 506a2907cd27c7244a478ced9cc2e03e3e02ff77 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:44:28 +0800
-Subject: [PATCH 17/28] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 17/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20D/C-PHY=20=E9=A9=B1=E5=8A=A8=EF=BC=88D-PHY=20PLL=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8813,7 +8813,7 @@ index 00000000..6183bd51
 From 67474c8ffe832b715faa83734a71a32b80b33da6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:54:26 +0800
-Subject: [PATCH 18/28] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
+Subject: [PATCH 18/29] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
  =?UTF-8?q?=20=E5=89=8D=E7=BD=AE=E9=93=BE=E8=B7=AF=E4=B8=8E=20MDIO?=
  =?UTF-8?q?=EF=BC=88DWMAC=204.20a=EF=BC=89?=
 MIME-Version: 1.0
@@ -9314,7 +9314,7 @@ index 00000000..92991a43
 From 474c4a000e75319ecee875dffde4a0e7342ba12d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:07:45 +0800
-Subject: [PATCH 19/28] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
+Subject: [PATCH 19/29] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
  =?UTF-8?q?=E9=93=BE=E8=B7=AF=E5=85=AD=E9=A1=B9=E9=85=8D=E9=BD=90=EF=BC=8C?=
  =?UTF-8?q?DMA=20=E8=BD=AF=E5=A4=8D=E4=BD=8D=E4=BB=8D=E6=9C=AA=E5=AE=8C?=
  =?UTF-8?q?=E6=88=90?=
@@ -9867,7 +9867,7 @@ index 6f8e5f23..5afaf918 100644
 From 51d98edc4f4ae78ed5d33d08d8b5fdf85719c59b Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:24:18 +0800
-Subject: [PATCH 20/28] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
+Subject: [PATCH 20/29] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
  =?UTF-8?q?=E5=88=B0=E4=B8=83=E6=9D=A1=E6=80=BB=E7=BA=BF=EF=BC=88=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E5=AE=9A=E4=BD=8D=E7=94=A8=EF=BC=89?=
 MIME-Version: 1.0
@@ -9974,7 +9974,7 @@ index f57a2bfa..43f2313e 100644
 From 7a968bf8c6c3d85daf2dc81619a2800cf4bf89c4 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 11:12:37 +0800
-Subject: [PATCH 21/28] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
+Subject: [PATCH 21/29] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
  =?UTF-8?q?=E8=B7=AF=E4=BF=AE=E6=AD=A3=20+=20I2C0(PMU=20=E5=9F=9F)=20+=20?=
  =?UTF-8?q?=E5=BC=95=E8=84=9A=E4=B8=8A=E4=B8=8B=E6=8B=89=20API?=
 MIME-Version: 1.0
@@ -10837,7 +10837,7 @@ index d59f5f55..8c0f10a3 100644
 From c8d3eeab1d0eb34c8c9922e7a7fb4fa48df7c057 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 12:05:26 +0800
-Subject: [PATCH 22/28] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
+Subject: [PATCH 22/29] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
  =?UTF-8?q?=E6=AD=A3=20sizeof=20=E7=9A=84=E6=A0=BC=E5=BC=8F=E4=B8=B2?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -11173,7 +11173,7 @@ index be5db167..34eb7303 100644
 From abf918d9dedc4458cf1505937f86a90791fd1681 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 00:31:04 +0800
-Subject: [PATCH 23/28] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
+Subject: [PATCH 23/29] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
  =?UTF-8?q?=E5=9D=97=E8=AF=BB=E5=86=99=E3=80=81=E6=91=84=E5=83=8F=E5=A4=B4?=
  =?UTF-8?q?=20MCLK=E3=80=81=E5=85=8D=20recovery=20=E9=87=8D=E5=90=AF?=
 MIME-Version: 1.0
@@ -13336,7 +13336,7 @@ index f8333cb5..d841ebfb 100644
 From 2d8fa26231ab76705ef1144e445f76f2a8959934 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 12:01:05 +0800
-Subject: [PATCH 24/28] =?UTF-8?q?drivers/timers:=20=E6=96=B0=E5=A2=9E=20HY?=
+Subject: [PATCH 24/29] =?UTF-8?q?drivers/timers:=20=E6=96=B0=E5=A2=9E=20HY?=
  =?UTF-8?q?M8563=20I2C=20RTC=20=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -14153,7 +14153,7 @@ index 00000000..b597148d
 From d170765c4ab997d9f7dc6270211cbdfe3a18cd5b Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 13:34:59 +0800
-Subject: [PATCH 25/28] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=20DesignWare?=
+Subject: [PATCH 25/29] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=20DesignWare?=
  =?UTF-8?q?=20=E7=9C=8B=E9=97=A8=E7=8B=97=E9=A9=B1=E5=8A=A8=EF=BC=88xTS=20?=
  =?UTF-8?q?1.3.15=EF=BC=89?=
 MIME-Version: 1.0
@@ -14648,7 +14648,7 @@ index f8845b62..8609631b 100644
 From b5d7ce5c4d828ecac48a28c26d3327828b2d3645 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 13:46:09 +0800
-Subject: [PATCH 26/28] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=E7=A1=AC?=
+Subject: [PATCH 26/29] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=E7=A1=AC?=
  =?UTF-8?q?=E4=BB=B6=E9=9A=8F=E6=9C=BA=E6=95=B0=E9=A9=B1=E5=8A=A8=20/dev/r?=
  =?UTF-8?q?andom=EF=BC=88xTS=201.3.16=EF=BC=89?=
 MIME-Version: 1.0
@@ -14993,7 +14993,7 @@ index 00000000..70e4a877
 From a4e9b7be465cd44bd2299b7d3a9c79d9b8c4340d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 15:38:11 +0800
-Subject: [PATCH 27/28] arch/arm64/rk3576: add polled SPI master driver (SPI4)
+Subject: [PATCH 27/29] arch/arm64/rk3576: add polled SPI master driver (SPI4)
 
 Synopsys DesignWare SSI, Rockchip variant (rockchip,rk3066-spi).
 Register layout differs from stock DW SSI: data ports are split
@@ -16029,7 +16029,7 @@ index 00000000..f37ca9d6
 From e4e27eaa165c6013754cd3144e86a3e6257e7fd6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 15:46:28 +0800
-Subject: [PATCH 28/28] arch/arm64/rk3576: guard against GPIO interrupt storms
+Subject: [PATCH 28/29] arch/arm64/rk3576: guard against GPIO interrupt storms
 
 A pin can re-enter its handler without bound in two ways, neither of
 which reports an error -- the board simply stops responding, with no
@@ -16127,6 +16127,338 @@ index edb7a4ee..c7125d96 100644
      }
  
    return OK;
+-- 
+2.43.0
+
+
+From 2e21784235ae6149b8dd14e3a4922174f500e29f Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Thu, 3 Sep 2026 19:12:28 +0800
+Subject: [PATCH 29/29] arch/arm64/rk3576: bound the SPI transfer loop, add
+ pulls and pull readback
+
+The push/pop loop had no exit.  With no serial clock (gate off, module
+in reset, SER clear) the TX FIFO fills, RX stays empty and to_pop never
+decreases -- the loop spins holding the CPU, so the board stops
+responding instead of reporting an error.  Debugging is exactly when
+that configuration is likely, so bound it: count only rounds that make
+no progress, and give up after a limit.
+
+Configure pull-ups on clk/mosi/miso to match the vendor pinctrl
+(pcfg_pull_up_drv_level_1).  It matters most for MISO: with nothing on
+the header the pin floats, and an unstable read makes "no wire" look
+like "wrong data".
+
+Add rk3576_pinmux_getpull() and log the readback.  Writing a pull does
+not prove it landed -- a wrong offset writes somewhere else without
+error, and the only symptom is a pin reading 0 instead of 1.  set and
+get now share one offset calculation so the two cannot drift apart.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FBQkQQFX3kTDP3AzvLzDGx
+---
+ arch/arm64/src/rk3576/rk3576_pinmux.c | 78 +++++++++++++++++++----
+ arch/arm64/src/rk3576/rk3576_pinmux.h | 11 ++++
+ arch/arm64/src/rk3576/rk3576_spi.c    | 92 ++++++++++++++++++++++++++-
+ 3 files changed, 165 insertions(+), 16 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_pinmux.c b/arch/arm64/src/rk3576/rk3576_pinmux.c
+index 76297d2f..6aa8a53c 100644
+--- a/arch/arm64/src/rk3576/rk3576_pinmux.c
++++ b/arch/arm64/src/rk3576/rk3576_pinmux.c
+@@ -175,13 +175,19 @@ int rk3576_pinmux_get(int bank, int pin)
+  *
+  ****************************************************************************/
+ 
+-int rk3576_pinmux_setpull(int bank, int pin, unsigned int pull)
+-{
+-  uint32_t off;
+-  int shift;
++/****************************************************************************
++ * Name: pull_reg
++ *
++ * Description:
++ *   算出某引脚的上下拉寄存器偏移与位移。set 与 get 共用同一份计算 ——
++ *   分成两份写迟早会漂移，那种错读回来是"一致"的，最难发现。
++ *
++ ****************************************************************************/
+ 
++static int pull_reg(int bank, int pin, uint32_t *off, int *shift)
++{
+   if (bank < 0 || bank >= RK3576_PINMUX_NBANKS ||
+-      pin  < 0 || pin  >= RK3576_PINMUX_NPINS  || pull > 3)
++      pin  < 0 || pin  >= RK3576_PINMUX_NPINS)
+     {
+       return -EINVAL;
+     }
+@@ -189,29 +195,48 @@ int rk3576_pinmux_setpull(int bank, int pin, unsigned int pull)
+   switch (bank)
+     {
+       case 0:
+-        off = (pin < 12) ? 0x20 : (0x2028 - 0x4);
++        *off = (pin < 12) ? 0x20 : (0x2028 - 0x4);
+         break;
+ 
+       case 1:
+-        off = 0x6110;
++        *off = 0x6110;
+         break;
+ 
+       case 2:
+-        off = 0x6120;
++        *off = 0x6120;
+         break;
+ 
+       case 3:
+-        off = 0x6130;
++        *off = 0x6130;
+         break;
+ 
+       default:  /* bank 4 也分三段 */
+-        off = (pin < 16) ? 0x6140 :
+-              (pin < 24) ? (0xa148 - 0x8) : (0xb14c - 0xc);
++        *off = (pin < 16) ? 0x6140 :
++               (pin < 24) ? (0xa148 - 0x8) : (0xb14c - 0xc);
+         break;
+     }
+ 
+-  off  += (pin / 8) * 4;
+-  shift = (pin % 8) * 2;
++  *off  += (pin / 8) * 4;
++  *shift = (pin % 8) * 2;
++  return OK;
++}
++
++int rk3576_pinmux_setpull(int bank, int pin, unsigned int pull)
++{
++  uint32_t off;
++  int shift;
++  int ret;
++
++  if (pull > 3)
++    {
++      return -EINVAL;
++    }
++
++  ret = pull_reg(bank, pin, &off, &shift);
++  if (ret < 0)
++    {
++      return ret;
++    }
+ 
+   /* 高 16 位写使能掩码，单次写即原子。 */
+ 
+@@ -219,3 +244,30 @@ int rk3576_pinmux_setpull(int bank, int pin, unsigned int pull)
+            RK3576_IOC_GRF_ADDR + off);
+   return OK;
+ }
++
++/****************************************************************************
++ * Name: rk3576_pinmux_getpull
++ *
++ * Description:
++ *   读回上下拉设置。写进去不等于生效 —— 偏移算错时写入不报错、
++ *   读回来却是别处的值，只有把设与读配对才能证明这一环成立。
++ *
++ * Returned Value:
++ *   0=关 1=上拉 2=下拉 3=保持；参数非法返回负值。
++ *
++ ****************************************************************************/
++
++int rk3576_pinmux_getpull(int bank, int pin)
++{
++  uint32_t off;
++  int shift;
++  int ret;
++
++  ret = pull_reg(bank, pin, &off, &shift);
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  return (getreg32(RK3576_IOC_GRF_ADDR + off) >> shift) & 0x3;
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_pinmux.h b/arch/arm64/src/rk3576/rk3576_pinmux.h
+index 4cb456f9..723ac11d 100644
+--- a/arch/arm64/src/rk3576/rk3576_pinmux.h
++++ b/arch/arm64/src/rk3576/rk3576_pinmux.h
+@@ -105,6 +105,17 @@ int rk3576_pinmux_setpull(int bank, int pin, unsigned int pull);
+ 
+ int rk3576_pinmux_get(int bank, int pin);
+ 
++/****************************************************************************
++ * Name: rk3576_pinmux_getpull
++ *
++ * Description:
++ *   读回引脚的上下拉设置：0=关 1=上拉 2=下拉 3=保持。
++ *   与 setpull 配对使用，用来证明写入确实落到了目标寄存器。
++ *
++ ****************************************************************************/
++
++int rk3576_pinmux_getpull(int bank, int pin);
++
+ #undef EXTERN
+ #if defined(__cplusplus)
+ }
+diff --git a/arch/arm64/src/rk3576/rk3576_spi.c b/arch/arm64/src/rk3576/rk3576_spi.c
+index 9b983e82..23d6a976 100644
+--- a/arch/arm64/src/rk3576/rk3576_spi.c
++++ b/arch/arm64/src/rk3576/rk3576_spi.c
+@@ -89,6 +89,12 @@
+ 
+ #define SPI_BUSY_TIMEOUT_US   100000
+ 
++/* 收发循环里"毫无进展"的连续轮数上限，每轮等 1us。
++ * 按最慢的 SCLK 算一帧也用不了 1ms，10 万轮是纯兜底。
++ */
++
++#define SPI_XFER_STALL_LIMIT  100000
++
+ /* 默认参数，与厂商 dtsi 里 spidev 的 spi-max-frequency 一致 */
+ 
+ #define SPI_DEFAULT_FREQ_HZ   24000000
+@@ -373,6 +379,7 @@ static void spi_transfer(struct rk3576_spi_priv_s *priv,
+   size_t   to_pop  = nwords;
+   size_t   inflight;
+   uint32_t room;
++  uint32_t stall;
+ 
+   if (nwords == 0)
+     {
+@@ -386,8 +393,12 @@ static void spi_transfer(struct rk3576_spi_priv_s *priv,
+   spi_putreg(priv, RK3576_SPI_DMACR, 0);
+   spi_enable(priv, true);
+ 
++  stall = 0;
++
+   while (to_pop > 0)
+     {
++      size_t before = to_pop;
++
+       /* 压入：三个上限取最小 */
+ 
+       inflight = to_pop - to_push;             /* 已压未取 */
+@@ -440,6 +451,39 @@ static void spi_transfer(struct rk3576_spi_priv_s *priv,
+ 
+           to_pop--;
+         }
++
++      /* ★ 循环必须有出口。
++       *
++       *   若控制器不产生时钟（时钟没使能、模块仍在复位、SER 没置位），
++       *   TX FIFO 压满之后 RX 永远是空的，to_pop 不再减少 —— 这个循环
++       *   会一直转下去，占着 CPU 不放，现象是整块板子失去响应而不是
++       *   报错。调试期正是最容易撞上这种配置的时候，不能靠"配置对了
++       *   就不会发生"来免责。
++       *
++       *   只在一轮下来毫无进展时才累加，有进展就清零：长传输本来就要
++       *   转很多轮，按总轮数设限会误伤。
++       */
++
++      if (to_pop == before)
++        {
++          if (++stall > SPI_XFER_STALL_LIMIT)
++            {
++              spierr("ERROR: SPI%d 传输停滞，剩 %zu 帧未收 "
++                     "(SR=0x%08" PRIx32 " TXFLR=%" PRIu32
++                     " RXFLR=%" PRIu32 ")\n",
++                     priv->cfg->port, to_pop,
++                     spi_getreg(priv, RK3576_SPI_SR),
++                     spi_getreg(priv, RK3576_SPI_TXFLR),
++                     spi_getreg(priv, RK3576_SPI_RXFLR));
++              break;
++            }
++
++          up_udelay(1);
++        }
++      else
++        {
++          stall = 0;
++        }
+     }
+ 
+   spi_wait_idle(priv);
+@@ -672,6 +716,22 @@ struct spi_dev_s *rk3576_spibus_initialize(int port)
+   rk3576_clk_gate(cfg->gate_con, cfg->gate_pclk, true);
+   rk3576_clk_gate(cfg->gate_con, cfg->gate_clk, true);
+ 
++  /* ★ 不撤销模块复位。
++   *
++   *   一度怀疑 SPI4 上电后压在复位里（它在基础 dtb 里是 disabled，
++   *   U-Boot 从没碰过），加过 rk3576_reset() 撤复位。撤掉了，原因有二：
++   *
++   *   1. 当初的依据不成立 —— "SPI4 没出现"那次烧的是过期镜像，
++   *      里面根本没有这个驱动，那个观测证明不了任何事。
++   *   2. dt-bindings 的 SRST_* 是**连续序号**（…95, 96, 97, 98…），
++   *      是查表索引；而 rk3576_reset() 按 id/16、id%16 当成
++   *      "寄存器号 × 16 + 位号"来算。两者对不上时，复位的就是
++   *      别的模块 —— 不报错，后果还未必立刻显现。
++   *
++   *   要用复位，得先从厂商的 rk3576_rst_init() 拿到真正的映射表。
++   */
++
++
+   /* 2) 引脚复用。CS 那根走 GPIO：先拉高（不选中）再设成输出，
+    *    顺序反了会在设成输出的一瞬间输出上一次的残留电平，
+    *    对从机就是一次伪片选。
+@@ -681,6 +741,16 @@ struct spi_dev_s *rk3576_spibus_initialize(int port)
+   rk3576_pinmux_set(cfg->mosi_bank, cfg->mosi_pin, cfg->pin_func);
+   rk3576_pinmux_set(cfg->miso_bank, cfg->miso_pin, cfg->pin_func);
+ 
++  /* 上拉。厂商 pinctrl 给 spi4m2 这一组配的是 pcfg_pull_up_drv_level_1，
++   * 照做。对 MISO 尤其有意义：排针上没接从机时它是悬空的，没有上拉就
++   * 随噪声浮动，读回来的值不稳定 —— 排查时会把"没接线"误当成"数据错"。
++   * 有上拉，空载读回的是稳定的 0xff，一眼能认出是空载。
++   */
++
++  rk3576_pinmux_setpull(cfg->clk_bank,  cfg->clk_pin,  RK3576_PULL_UP);
++  rk3576_pinmux_setpull(cfg->mosi_bank, cfg->mosi_pin, RK3576_PULL_UP);
++  rk3576_pinmux_setpull(cfg->miso_bank, cfg->miso_pin, RK3576_PULL_UP);
++
+   rk3576_gpio_write(cfg->cs_bank, cfg->cs_pin, true);
+   rk3576_pinmux_set(cfg->cs_bank, cfg->cs_pin, 0);
+   rk3576_gpio_setdir(cfg->cs_bank, cfg->cs_pin, true);
+@@ -701,8 +771,17 @@ struct spi_dev_s *rk3576_spibus_initialize(int port)
+ 
+   if (readback != 8)
+     {
++      /* 只读的 VERSION 一并报出来，让这条日志能区分两种情况：
++       *   VERSION 也是 0  -> 整个寄存器块没响应（基址错 / 时钟没开 /
++       *                      仍在复位），写和读都到不了硬件。
++       *   VERSION 有值    -> 块是活的，只是 BAUDR 没写进去 —— 那就是
++       *                      写入时机不对（控制器没关干净）。
++       * 少了这一个读数，两种情况的现象一模一样，只能靠猜。
++       */
++
+       spierr("ERROR: SPI%d BAUDR 写 8 读回 0x%08" PRIx32
+-             " —— 寄存器块无响应\n", port, readback);
++             "，VERSION=0x%08" PRIx32 "\n",
++             port, readback, spi_getreg(priv, RK3576_SPI_VERSION));
+       return NULL;
+     }
+ 
+@@ -725,11 +804,18 @@ struct spi_dev_s *rk3576_spibus_initialize(int port)
+ 
+   priv->initialized = true;
+ 
++  /* 上下拉读回来核对。写进去不等于生效：偏移算错时写入不报错，
++   * 而现象只是"MISO 空载读到 0 而不是 1"，很容易被当成没接线放过去。
++   */
++
+   syslog(LOG_INFO,
+          "SPI%d: 版本 0x%08" PRIx32 " FIFO %" PRIu32 " 源 %" PRIu32
+-         "MHz SCLK %" PRIu32 "Hz\n",
++         "MHz SCLK %" PRIu32 "Hz 上拉(clk/mosi/miso)=%d/%d/%d\n",
+          port, version, priv->fifo_len, priv->src_hz / 1000000,
+-         priv->actual);
++         priv->actual,
++         rk3576_pinmux_getpull(cfg->clk_bank,  cfg->clk_pin),
++         rk3576_pinmux_getpull(cfg->mosi_bank, cfg->mosi_pin),
++         rk3576_pinmux_getpull(cfg->miso_bank, cfg->miso_pin));
+ 
+   return (struct spi_dev_s *)priv;
+ }
 -- 
 2.43.0
 

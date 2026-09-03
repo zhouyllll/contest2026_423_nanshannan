@@ -10,6 +10,7 @@
 
   <project path="contest2026_423_nanshannan" name="contest2026_423_nanshannan">
     <linkfile src="app/hello_app" dest="packages/demos/contest2026_423_hello_app"/>
+    <linkfile src="app/spi_selftest" dest="packages/demos/contest2026_423_spi_selftest"/>
     <linkfile src="quickapp/hello_quickapp" dest="packages/apps/contest2026_423_hello_quickapp"/>
     <linkfile src="board/kickpi-k7" dest="vendor/openvela/boards/contest2026_423_board"/>
   </project>
