@@ -40,6 +40,7 @@
 #include "rk3576_i2c.h"
 #include <arch/board/board.h>
 #include "kickpi_k7.h"
+#include "imx415_regs.h"
 
 #ifdef CONFIG_RK3576_I2C
 
@@ -189,6 +190,13 @@ static int imx415_read8(struct i2c_master_s *i2c, uint16_t reg, uint8_t *val)
  *
  ****************************************************************************/
 
+/* 探测成功的那一路。出流要用同一条 I2C 与同一个传感器，
+ * 分开记比每次重新遍历可靠 —— 遍历会把已经配好的那颗再唤醒一遍。
+ */
+
+static const struct cam_port_s *g_cam_found;
+static struct i2c_master_s     *g_cam_i2c;
+
 static int cam_probe_port(const struct cam_port_s *port)
 {
   struct i2c_master_s *i2c;
@@ -279,15 +287,152 @@ static int cam_probe_port(const struct cam_port_s *port)
          "摄像头: IMX415 已识别 %s @I2C%d:0x%02x 型号=0x%03x（4 lane）\n",
          port->name, port->bus, CAM_I2C_ADDR, info & 0xfff);
 
-  /* 放回待机 —— 取图通路（CSI2/CIF/ISP）尚未实现，让它一直工作没有意义。 */
+  /* 放回待机。取图通路还没通，让它一直出流只是白耗电、白发热；
+   * 真要取图时由 kickpi_camera_stream() 重新配置。
+   */
 
   imx415_write8(i2c, IMX415_REG_MODE, IMX415_MODE_STBY);
+
+  g_cam_found = port;
+  g_cam_i2c   = i2c;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cam_write_array
+ *
+ * Description:
+ *   顺序写一张寄存器表。任何一条失败都立刻停下并报出**是哪一条** ——
+ *   一张表上百条，只说"配置失败"等于没说。
+ *
+ ****************************************************************************/
+
+static int cam_write_array(struct i2c_master_s *i2c,
+                           const struct imx415_reg_s *regs, size_t n,
+                           const char *tag)
+{
+  size_t i;
+  int ret;
+
+  for (i = 0; i < n; i++)
+    {
+      ret = imx415_write8(i2c, regs[i].addr, regs[i].val);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: 摄像头 %s 表第 %zu/%zu 条失败 "
+                 "(0x%04x=0x%02x): %d\n",
+                 tag, i, n, regs[i].addr, regs[i].val, ret);
+          return ret;
+        }
+    }
+
   return OK;
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: kickpi_camera_stream
+ *
+ * Description:
+ *   让已识别的 IMX415 开始或停止在 MIPI 上输出图像。
+ *
+ *   ★ 这一步单独拿出来，是因为它是整条取图链路里**唯一现在就能验证**
+ *     的一级。接收端（D-PHY RX → CSI-2 host → CIF）还没写，所以拿不到
+ *     图像；但"传感器有没有按要求配置好并开始推数据"这件事，可以只靠
+ *     I2C 回读确认，不依赖接收端。
+ *
+ *     先把这一级坐实，后面调接收端时就不必再怀疑发送端 —— 否则两端
+ *     同时不确定，任何现象都有两个解释。
+ *
+ * Input Parameters:
+ *   on - true 出流，false 回待机
+ *
+ ****************************************************************************/
+
+int kickpi_camera_stream(bool on)
+{
+  uint8_t v;
+  int ret;
+
+  if (g_cam_found == NULL || g_cam_i2c == NULL)
+    {
+      syslog(LOG_ERR, "摄像头: 没有识别到传感器，无法出流\n");
+      return -ENODEV;
+    }
+
+  if (!on)
+    {
+      return imx415_write8(g_cam_i2c, IMX415_REG_MODE, IMX415_MODE_STBY);
+    }
+
+  /* 先退待机再写表：待机状态下部分寄存器写不进去。 */
+
+  ret = imx415_write8(g_cam_i2c, IMX415_REG_MODE, IMX415_MODE_OPER);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  up_mdelay(80);
+
+  /* global 在前、mode 在后 —— 反了会被 global 覆盖。 */
+
+  ret = cam_write_array(g_cam_i2c, g_imx415_global,
+                        sizeof(g_imx415_global) /
+                        sizeof(g_imx415_global[0]), "global");
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = cam_write_array(g_cam_i2c, g_imx415_mode_1932x1096,
+                        sizeof(g_imx415_mode_1932x1096) /
+                        sizeof(g_imx415_mode_1932x1096[0]), "mode");
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* ★ 回读核对，不能只看写返回值。
+   *
+   *   I2C 写返回成功只说明从机应答了地址与数据，不说明寄存器接受了这个
+   *   值 —— 传感器在错误的状态下会静默丢弃写入。挑模式表里一条有代表性
+   *   的（0x3024 是 VMAX 低字节，这一档是 0x5D）读回来对一下，写没生效
+   *   时能当场发现，而不是等到接收端收不到数据再回头猜。
+   */
+
+  ret = imx415_read8(g_cam_i2c, 0x3024, &v);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (v != 0x5d)
+    {
+      syslog(LOG_ERR,
+             "ERROR: 摄像头 VMAX 回读 0x%02x，期望 0x5d —— "
+             "寄存器没写进去\n", v);
+      return -EIO;
+    }
+
+  /* MODE=0 才真正开始推数据 */
+
+  ret = imx415_write8(g_cam_i2c, IMX415_REG_MODE, IMX415_MODE_OPER);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  syslog(LOG_INFO,
+         "摄像头: 已出流 %dx%d RAW%d %d lane %dMbps/lane，单帧 %d 字节\n",
+         IMX415_MODE_WIDTH, IMX415_MODE_HEIGHT, IMX415_MODE_BPP,
+         IMX415_MODE_LANES, IMX415_MODE_MBPS, IMX415_FRAME_BYTES);
+  return OK;
+}
 
 int kickpi_k7_camera_initialize(void)
 {
