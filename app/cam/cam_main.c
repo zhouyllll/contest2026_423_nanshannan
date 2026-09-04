@@ -43,6 +43,7 @@
 
 #include <nuttx/config.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <arch/board/board.h>
@@ -57,7 +58,11 @@ int main(int argc, char *argv[])
 
   if (argc < 2)
     {
-      printf("用法: cam on|off|rx|stat\n");
+      printf("用法: cam on|off|rx|cap|show|white|black|bars|half|vhalf|line|box\n");
+      printf("      cam ub <0-2>     还原 U-Boot 窗口并写图案\n");
+      printf("      cam morph <0-6>  从 U-Boot 参数出发逐个变量地改\n");
+      printf("      cam regs         打印 ESMART1/VP1 寄存器现状\n");
+      printf("      cam fbinfo|stat\n");
       return 1;
     }
 
@@ -72,6 +77,64 @@ int main(int argc, char *argv[])
   else if (strcmp(argv[1], "rx") == 0)
     {
       ret = kickpi_camera_receiver(true);
+    }
+  else if (strcmp(argv[1], "cap") == 0)
+    {
+      ret = kickpi_camera_capture();
+    }
+  else if (strcmp(argv[1], "show") == 0)
+    {
+      ret = kickpi_camera_show();
+    }
+  else if (strcmp(argv[1], "white") == 0)
+    {
+      ret = kickpi_camera_fbtest(0);
+    }
+  else if (strcmp(argv[1], "black") == 0)
+    {
+      ret = kickpi_camera_fbtest(1);
+    }
+  else if (strcmp(argv[1], "bars") == 0)
+    {
+      ret = kickpi_camera_fbtest(2);
+    }
+  else if (strcmp(argv[1], "half") == 0)
+    {
+      ret = kickpi_camera_fbtest(3);
+    }
+  else if (strcmp(argv[1], "vhalf") == 0)
+    {
+      ret = kickpi_camera_fbtest(4);
+    }
+  else if (strcmp(argv[1], "line") == 0)
+    {
+      ret = kickpi_camera_fbtest(5);
+    }
+  else if (strcmp(argv[1], "box") == 0)
+    {
+      ret = kickpi_camera_fbtest(6);
+    }
+  else if (strcmp(argv[1], "ub") == 0)
+    {
+      ret = kickpi_camera_ubtest(argc > 2 ? atoi(argv[2]) : 0);
+    }
+  else if (strcmp(argv[1], "morph") == 0)
+    {
+      if (argc < 3)
+        {
+          printf("morph 要一个步骤号 0~6\n");
+          return 1;
+        }
+
+      ret = kickpi_camera_morph(atoi(argv[2]));
+    }
+  else if (strcmp(argv[1], "regs") == 0)
+    {
+      ret = kickpi_camera_regs();
+    }
+  else if (strcmp(argv[1], "fbinfo") == 0)
+    {
+      ret = kickpi_camera_fbinfo();
     }
   else if (strcmp(argv[1], "stat") == 0)
     {

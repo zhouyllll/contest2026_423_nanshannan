@@ -29,7 +29,13 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <nuttx/video/fb.h>
 #include <syslog.h>
+#include <stdlib.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/cache.h>
 
 #include <nuttx/i2c/i2c_master.h>
 
@@ -40,6 +46,8 @@
 #include "rk3576_i2c.h"
 #include <arch/board/board.h>
 #include "kickpi_k7.h"
+#include "rk3576_cif.h"
+#include "rk3576_vop2.h"
 #include "rk3576_csidphy.h"
 #include "rk3576_csihost.h"
 #include "imx415_regs.h"
@@ -519,4 +527,834 @@ int kickpi_camera_receiver(bool on)
 int kickpi_camera_status(void)
 {
   return rk3576_csihost_status(KICKPI_CAM_CSI_HOST);
+}
+
+/****************************************************************************
+ * 取图缓冲
+ ****************************************************************************/
+
+/* 非压缩 RAW12：每像素 16 位 */
+
+#define CAM_FRAME_BYTES  (IMX415_MODE_WIDTH * IMX415_MODE_HEIGHT * 2)
+
+/* DMA 缓冲要按缓存行对齐。不对齐时失效缓存会连带影响相邻数据 ——
+ * 那种破坏是随机的、事后极难定位。
+ */
+
+#define CAM_BUF_ALIGN    64
+
+static uint8_t *g_cam_buf[2];
+
+/* 最近一帧的动态范围，显示时用来做线性拉伸 */
+
+static uint16_t g_cam_min;
+static uint16_t g_cam_max;
+
+/****************************************************************************
+ * Name: kickpi_camera_capture
+ *
+ * Description:
+ *   启动 CIF 把图像写进 DDR，并报告一帧的统计特征。
+ *
+ *   ★ 为什么报统计而不是直接送屏
+ *
+ *     "有没有取到真实图像"和"显示对不对"是两个问题。先用统计量回答
+ *     第一个：全 0 说明 DMA 没动，全同一个值说明取到的是常量而不是
+ *     图像，有合理的动态范围才说明是真数据。这一步过了再谈显示，
+ *     否则屏上一片黑时分不清是没取到图还是显示环节错了。
+ *
+ ****************************************************************************/
+
+int kickpi_camera_capture(void)
+{
+  uint32_t stat;
+  uint64_t sum = 0;   /* 211 万个像素，32 位会溢出 */
+  uint16_t mn = 0xffff;
+  uint16_t mx = 0;
+  uint16_t *p;
+  size_t npix = IMX415_MODE_WIDTH * IMX415_MODE_HEIGHT;
+  size_t i;
+  int ret;
+
+  if (g_cam_buf[0] == NULL)
+    {
+      /* 两个都要分配：硬件在 FRM0/FRM1 之间乒乓，只给一个的话
+       * 第二帧会写到地址 0，把 DDR 起始处冲掉且不报错。
+       */
+
+      g_cam_buf[0] = kmm_memalign(CAM_BUF_ALIGN, CAM_FRAME_BYTES);
+      g_cam_buf[1] = kmm_memalign(CAM_BUF_ALIGN, CAM_FRAME_BYTES);
+
+      if (g_cam_buf[0] == NULL || g_cam_buf[1] == NULL)
+        {
+          syslog(LOG_ERR, "摄像头: 取图缓冲分配失败（每个 %d 字节）\n",
+                 CAM_FRAME_BYTES);
+          return -ENOMEM;
+        }
+    }
+
+  memset(g_cam_buf[0], 0, CAM_FRAME_BYTES);
+  up_clean_dcache((uintptr_t)g_cam_buf[0],
+                  (uintptr_t)g_cam_buf[0] + CAM_FRAME_BYTES);
+
+  ret = rk3576_cif_start(KICKPI_CAM_CSI_HOST,
+                         (uintptr_t)g_cam_buf[0], (uintptr_t)g_cam_buf[1],
+                         IMX415_MODE_WIDTH, IMX415_MODE_HEIGHT);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* 一帧的时间。1932x1096 这一档标称 30fps 上下，等 300ms 足够
+   * 收到好几帧，不必精确对齐帧边界。
+   */
+
+  up_mdelay(300);
+
+  stat = rk3576_cif_status(KICKPI_CAM_CSI_HOST);
+
+  /* ★ 读之前必须失效缓存。CIF 是绕过 CPU 缓存直接写 DDR 的，
+   *   不失效的话读到的是写入前留在缓存里的旧内容（这里就是全 0），
+   *   会得出"一个字节都没收到"的错误结论。
+   */
+
+  up_invalidate_dcache((uintptr_t)g_cam_buf[0],
+                       (uintptr_t)g_cam_buf[0] + CAM_FRAME_BYTES);
+
+  p = (uint16_t *)g_cam_buf[0];
+  for (i = 0; i < npix; i++)
+    {
+      uint16_t v = p[i];
+
+      sum += v;
+      if (v < mn)
+        {
+          mn = v;
+        }
+
+      if (v > mx)
+        {
+          mx = v;
+        }
+    }
+
+  syslog(LOG_INFO,
+         "摄像头: 取图 %dx%d INTSTAT=0x%08" PRIx32
+         " 像素 min=%u max=%u 均值=%u\n",
+         IMX415_MODE_WIDTH, IMX415_MODE_HEIGHT, stat,
+         mn, mx, (unsigned)(sum / npix));
+
+  g_cam_min = mn;
+  g_cam_max = mx;
+
+  if (mx == 0)
+    {
+      syslog(LOG_WARNING,
+             "  全 0 —— DMA 没有写入，查 CIF 输入时钟与地址配置\n");
+    }
+  else if (mn == mx)
+    {
+      syslog(LOG_WARNING,
+             "  全部是同一个值 0x%04x —— 取到的是常量不是图像\n", mn);
+    }
+  else
+    {
+      syslog(LOG_INFO, "  动态范围正常，看起来是真实图像\n");
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: kickpi_camera_show
+ *
+ * Description:
+ *   把最近取到的一帧送到 /dev/fb0 显示。
+ *
+ *   ★ 只做灰度，不做去马赛克
+ *
+ *     传感器出的是 Bayer 阵列，正确还原颜色需要去马赛克 —— 那是画质
+ *     问题。当前要回答的是"这条链路搬回来的是不是真实图像"，灰度足够
+ *     回答，而且少一个环节就少一处可能出错的地方。彩色留到链路确认
+ *     无误之后。
+ *
+ *   ★ 按实测动态范围做线性拉伸
+ *
+ *     默认曝光下 12 位像素只占到 196~299 这一小段，直接取高 8 位得到的
+ *     是 12~18，屏上几乎全黑 —— 那会让"取到了图"看起来像"没取到图"。
+ *     用上一帧实测的 min/max 拉伸到 0~255，图像才看得出来。这是显示
+ *     处理，不改动原始数据。
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: kickpi_camera_fbinfo
+ *
+ * Description:
+ *   只读出帧缓冲参数并打印，不做任何写入。
+ *
+ *   ★ 为什么要单独一个命令
+ *
+ *     上一版把参数打印和像素写入放在同一个函数里，结果崩溃时那条
+ *     syslog 一个字都没出来 —— 串口是中断发送的，排队中的内容在异常
+ *     里丢掉了。于是"参数对不对"和"写入越不越界"这两件事全都看不到。
+ *
+ *     拆开之后，这个命令只读、立刻返回，无论如何都能把参数带回来。
+ *
+ ****************************************************************************/
+
+int kickpi_camera_fbinfo(void)
+{
+  struct fb_videoinfo_s vinfo;
+  struct fb_planeinfo_s pinfo;
+  int fd;
+
+  fd = open("/dev/fb0", O_RDWR);
+  if (fd < 0)
+    {
+      syslog(LOG_ERR, "摄像头: 打不开 /dev/fb0: %d\n", errno);
+      return -errno;
+    }
+
+  memset(&vinfo, 0, sizeof(vinfo));
+  memset(&pinfo, 0, sizeof(pinfo));
+
+  if (ioctl(fd, FBIOGET_VIDEOINFO, (unsigned long)&vinfo) < 0)
+    {
+      syslog(LOG_ERR, "摄像头: VIDEOINFO 失败 %d\n", errno);
+      close(fd);
+      return -errno;
+    }
+
+  syslog(LOG_INFO, "摄像头: vinfo %ux%u fmt=%u\n",
+         vinfo.xres, vinfo.yres, vinfo.fmt);
+
+  if (ioctl(fd, FBIOGET_PLANEINFO, (unsigned long)&pinfo) < 0)
+    {
+      syslog(LOG_ERR, "摄像头: PLANEINFO 失败 %d\n", errno);
+      close(fd);
+      return -errno;
+    }
+
+  syslog(LOG_INFO,
+         "摄像头: pinfo mem=%p len=%zu stride=%u bpp=%u disp=%u\n",
+         pinfo.fbmem, (size_t)pinfo.fblen, (unsigned)pinfo.stride,
+         pinfo.bpp, pinfo.display);
+
+  close(fd);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: kickpi_camera_fbtest
+ *
+ * Description:
+ *   往帧缓冲填固定图案，不涉及任何摄像头数据。
+ *
+ *   ★ 它把两件事分开
+ *
+ *     "屏上不对"可能是显示通路的问题（fb 地址、跨距、缓存刷回、VOP2
+ *     扫描的是不是这块内存），也可能是图像处理的问题（缩放、Bayer、
+ *     对比拉伸）。盯着一幅暗淡或花乱的图像，这两者分不开。
+ *
+ *     填一个已知图案就分开了：图案正确显示 -> 通路全对，问题在处理；
+ *     图案也不对 -> 处理再改也没用，先修通路。
+ *
+ * Input Parameters:
+ *   pattern - 0 纯白、1 纯黑、2 竖条纹（能同时暴露跨距算错）
+ *
+ ****************************************************************************/
+
+int kickpi_camera_fbtest(int pattern)
+{
+  struct fb_videoinfo_s vinfo;
+  struct fb_planeinfo_s pinfo;
+  uint32_t *fb;
+  uint32_t rowpix;
+  int fd;
+  int dx;
+  int dy;
+
+  fd = open("/dev/fb0", O_RDWR);
+  if (fd < 0)
+    {
+      return -errno;
+    }
+
+  memset(&vinfo, 0, sizeof(vinfo));
+  memset(&pinfo, 0, sizeof(pinfo));
+
+  if (ioctl(fd, FBIOGET_VIDEOINFO, (unsigned long)&vinfo) < 0 ||
+      ioctl(fd, FBIOGET_PLANEINFO, (unsigned long)&pinfo) < 0)
+    {
+      close(fd);
+      return -errno;
+    }
+
+  fb     = (uint32_t *)pinfo.fbmem;
+  rowpix = pinfo.stride / 4;
+
+  if (fb == NULL || rowpix == 0)
+    {
+      close(fd);
+      return -EINVAL;
+    }
+
+  for (dy = 0; dy < (int)vinfo.yres; dy++)
+    {
+      if (((uint32_t)dy * rowpix + vinfo.xres) * 4 > pinfo.fblen)
+        {
+          break;
+        }
+
+      for (dx = 0; dx < (int)vinfo.xres; dx++)
+        {
+          uint32_t c;
+
+          switch (pattern)
+            {
+              case 1:
+                c = 0xff000000u;                       /* 黑 */
+                break;
+
+              case 2:
+                /* 32 像素宽的竖条纹。跨距若算错，条纹会倾斜 ——
+                 * 纯色图案看不出跨距问题，条纹能。
+                 */
+
+                c = ((dx / 32) & 1) ? 0xffffffffu : 0xff000000u;
+                break;
+
+              case 3:
+                /* 上半白、下半黑。
+                 *
+                 * ★ 这个图案不需要细看就能判断，而且能一次分清三种情况：
+                 *     上白下黑 -> 行映射正确，问题在别处
+                 *     左白右黑 -> 缓冲被按列扫描，行列搞反了
+                 *     斜分界   -> 硬件每行的像素数与我写的不一致，
+                 *                 分界线的斜率直接给出差值
+                 *   竖条纹要判断"倾斜多少度"，这个只要说白色在哪半边。
+                 */
+
+                c = (dy < (int)vinfo.yres / 2) ? 0xffffffffu : 0xff000000u;
+                break;
+
+              case 4:
+                /* 左半白、右半黑 —— 与图案 3 配对，专测**列**映射。
+                 *
+                 * ★ 为什么不用 32 像素竖条纹来测
+                 *
+                 *   细图案的判读要靠估计角度，而角度受任何轻微的缩放、
+                 *   偏移影响都会变；一条粗分界线只要回答"白色在左还是
+                 *   在右、分界是直的还是斜的"，不需要估角度。
+                 *   先用粗图案定性，确认无误后再用细图案看精度。
+                 */
+
+                c = (dx < (int)vinfo.xres / 2) ? 0xffffffffu : 0xff000000u;
+                break;
+
+              case 5:
+                /* 只把缓冲的**第一行**（前 xres 个像素）涂白，其余全黑。
+                 *
+                 * ★ 这个图案能直接量出硬件每行的像素数 R
+                 *
+                 *   我写进去的是连续 720 个白像素，从缓冲偏移 0 开始。
+                 *   屏幕把缓冲当成每行 R 像素来扫：
+                 *     R = 720 -> 顶部整行全白
+                 *     R > 720 -> 只有顶行左边一段白，白段占屏宽的 720/R
+                 *     R < 720 -> 顶行全白，且溢出到第二行左边一段
+                 *
+                 *   前面的半屏图案分辨不出 R（上白下黑只取决于缓冲是否
+                 *   被完整扫描），细条纹又要估角度。这个只要看白段占了
+                 *   多长，就能反推 R。
+                 */
+
+                c = (dy == 0) ? 0xffffffffu : 0xff000000u;
+                break;
+
+              case 6:
+                /* 缓冲左上区域的一个 100x100 白方块（行 100~200、列 100~200），
+                 * 其余全黑。
+                 *
+                 * ★ 为什么改用方块而不是条纹
+                 *
+                 *   条纹类图案只能看出"斜不斜"，要靠估角度，而且同一个
+                 *   现象可以由好几种映射产生。方块给的是**位置**：它出现
+                 *   在屏幕哪里，直接就是缓冲坐标到屏幕坐标的映射结果。
+                 *
+                 *     出现在左上、大小不变 -> 映射正确，只差整体偏移
+                 *     被拉成一条横条      -> 一行的像素被摊到多行上
+                 *     出现在别处/分裂多块 -> 行长与我写的不一致，
+                 *                            位置差值直接给出偏差
+                 */
+
+                c = (dy >= 100 && dy < 200 && dx >= 100 && dx < 200) ?
+                    0xffffffffu : 0xff000000u;
+                break;
+
+              default:
+                c = 0xffffffffu;                       /* 白 */
+                break;
+            }
+
+          fb[dy * rowpix + dx] = c;
+        }
+    }
+
+  /* 与 show 一样，必须刷回 DDR，否则 VOP2 看不到。 */
+
+  up_flush_dcache((uintptr_t)fb, (uintptr_t)fb + pinfo.fblen);
+  close(fd);
+
+  syslog(LOG_INFO, "摄像头: 已填图案 %d 到 %ux%u\n",
+         pattern, vinfo.xres, vinfo.yres);
+  return OK;
+}
+
+int kickpi_camera_show(void)
+{
+  struct fb_videoinfo_s vinfo;
+  struct fb_planeinfo_s pinfo;
+  uint32_t *fb;
+  uint16_t *src;
+  uint32_t span;
+  int fd;
+  int dx;
+  int dy;
+
+  if (g_cam_buf[0] == NULL)
+    {
+      syslog(LOG_ERR, "摄像头: 还没有取过图，先跑 cam cap\n");
+      return -ENODATA;
+    }
+
+  fd = open("/dev/fb0", O_RDWR);
+  if (fd < 0)
+    {
+      syslog(LOG_ERR, "摄像头: 打不开 /dev/fb0: %d\n", errno);
+      return -errno;
+    }
+
+  /* ★ 这两个结构体必须先清零。
+   *
+   *   fb_planeinfo_s 的 display 字段是**输入**（要查哪一个显示器），
+   *   不是输出。不清零就等于拿栈上的垃圾当显示器编号传进去，驱动照着
+   *   索引，取回一个野指针 —— 崩溃发生在 ioctl 内部，调用方连一行日志
+   *   都来不及打，看起来像是"一进函数就挂"。
+   *
+   *   教训是：传给内核的结构体，即使自己只关心输出字段，也要整体清零。
+   */
+
+  memset(&vinfo, 0, sizeof(vinfo));
+  memset(&pinfo, 0, sizeof(pinfo));
+
+  if (ioctl(fd, FBIOGET_VIDEOINFO, (unsigned long)&vinfo) < 0 ||
+      ioctl(fd, FBIOGET_PLANEINFO, (unsigned long)&pinfo) < 0)
+    {
+      close(fd);
+      return -errno;
+    }
+
+  fb  = (uint32_t *)pinfo.fbmem;
+  src = (uint16_t *)g_cam_buf[0];
+
+  /* ★ 先把拿到的参数打出来再用。
+   *
+   *   上一版直接照着 pinfo 写，板子当场重启 —— 没有任何信息能说明是
+   *   指针不对、跨距不对，还是越界。ioctl 返回成功只说明调用没出错，
+   *   不保证填回来的值可用。
+   */
+
+  syslog(LOG_INFO,
+         "摄像头: fb %ux%u bpp=%u fmt=%u mem=%p len=%zu stride=%u\n",
+         vinfo.xres, vinfo.yres, pinfo.bpp, vinfo.fmt,
+         pinfo.fbmem, (size_t)pinfo.fblen, pinfo.stride);
+
+  if (fb == NULL || pinfo.fblen == 0 || pinfo.stride == 0 ||
+      pinfo.bpp != 32)
+    {
+      syslog(LOG_ERR,
+             "摄像头: 帧缓冲参数不可用，放弃送屏（只支持 32bpp）\n");
+      close(fd);
+      return -EINVAL;
+    }
+
+  /* 拉伸的分母。min==max 时（全黑或全白）退回直接取高 8 位，
+   * 否则会除以 0。
+   */
+
+  span = (g_cam_max > g_cam_min) ? (uint32_t)(g_cam_max - g_cam_min) : 0;
+
+  /* 最近邻缩放。摄像头是横向 1932x1096、屏是竖向 720x1280，
+   * 这里按宽度等比缩放，画在屏幕上半部分，不做旋转 —— 旋转是取向
+   * 问题，跟"链路通不通"无关，先不引入。
+   */
+
+  {
+    uint32_t maxpix = (uint32_t)(pinfo.fblen / 4);
+    uint32_t rowpix = pinfo.stride / 4;
+
+  for (dy = 0; dy < (int)vinfo.yres; dy++)
+    {
+      /* ★ 纵向要用纵向比例。
+       *
+       *   上一版这里误用了 IMX415_MODE_WIDTH/xres —— 拿横向的比例去缩
+       *   纵向，图像被拉伸成原来的近三倍高，绝大部分行落到源图之外，
+       *   只有顶上一小条有内容。等比缩放要用同一个比例因子，这里按
+       *   宽度定标，高度随之。
+       */
+
+      int sy = dy * (int)IMX415_MODE_WIDTH / (int)vinfo.xres;
+
+      if ((uint32_t)dy * rowpix + vinfo.xres > maxpix)
+        {
+          syslog(LOG_WARNING,
+                 "摄像头: 第 %d 行会越过帧缓冲末尾，提前停止\n", dy);
+          break;
+        }
+
+      for (dx = 0; dx < (int)vinfo.xres; dx++)
+        {
+          int sx = dx * (int)IMX415_MODE_WIDTH / (int)vinfo.xres;
+          uint32_t g;
+          uint32_t acc;
+
+          /* 源图之外画黑，不要读越界 */
+
+          if (sy + 1 >= IMX415_MODE_HEIGHT || sx + 1 >= IMX415_MODE_WIDTH)
+            {
+              fb[dy * rowpix + dx] = 0xff000000u;
+              continue;
+            }
+
+          /* ★ 按 2x2 Bayer 单元取平均，而不是取单个像素。
+           *
+           *   传感器出的是 Bayer 阵列：相邻像素分别盖着 R/G/B 滤镜，
+           *   同样光照下响应差很多。直接当灰度显示，再叠加下面的对比
+           *   拉伸，棋盘格会被放大成满屏噪点 —— 看起来像"花屏"，很容易
+           *   被误判成链路出了问题，其实数据是好的。
+           *
+           *   一个 2x2 单元恰好含 R、G、G、B 各一，取平均就消掉了滤镜
+           *   差异，得到接近亮度的值。这不是去马赛克（分辨率减半、也不
+           *   还原颜色），但足以让画面可辨。
+           */
+
+          acc = (uint32_t)src[(sy)     * IMX415_MODE_WIDTH + sx]     +
+                (uint32_t)src[(sy)     * IMX415_MODE_WIDTH + sx + 1] +
+                (uint32_t)src[(sy + 1) * IMX415_MODE_WIDTH + sx]     +
+                (uint32_t)src[(sy + 1) * IMX415_MODE_WIDTH + sx + 1];
+          acc >>= 2;
+
+          if (span != 0)
+            {
+              g = (acc > g_cam_min) ?
+                  ((acc - g_cam_min) * 255u) / span : 0;
+            }
+          else
+            {
+              g = acc >> 8;
+            }
+
+          if (g > 255)
+            {
+              g = 255;
+            }
+
+          fb[dy * rowpix + dx] =
+            0xff000000u | (g << 16) | (g << 8) | g;
+        }
+    }
+  }
+
+  /* ★ 必须把缓存刷回 DDR。
+   *
+   *   CPU 写的是缓存，VOP2 是直接从 DDR 扫描的 —— 两者不经过同一条
+   *   路径。不刷的话像素停在缓存里，屏上看到的还是初始化时那片 0，
+   *   现象是"日志说送屏成功，屏幕却全黑"，而且完全不报错。
+   *
+   *   取图那侧我做了 invalidate（读 DMA 写入的数据前先失效），这侧是
+   *   反方向：写完要 clean。两个方向都要管，漏一个就是单向失效。
+   *
+   *   不需要 FBIO_UPDATE —— VOP2 持续扫描这块内存，数据到了 DDR 就会
+   *   被下一帧扫出去。那个 ioctl 是给需要显式刷新的面板用的。
+   */
+
+  up_flush_dcache((uintptr_t)fb, (uintptr_t)fb + pinfo.fblen);
+
+  close(fd);
+
+  syslog(LOG_INFO,
+         "摄像头: 已送屏 %ux%u（灰度，按 %u~%u 线性拉伸）\n",
+         vinfo.xres, vinfo.yres, g_cam_min, g_cam_max);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: kickpi_camera_ubtest
+ *
+ * Description:
+ *   恢复 U-Boot 的窗口配置，然后直接往它的帧缓冲写图案。
+ *
+ *   ★ 这一步要回答的问题
+ *
+ *     我们自己配的窗口，VOP2 取出来的画面是错乱的：纯色填充正常，
+ *     按行变化的图案正常，按列变化的图案却变成斜纹，100x100 的方块
+ *     变成断续的横带。这几个现象在任何单一的线性寻址模型下都无法同时
+ *     成立，说明问题不在"跨距算错"这一层。
+ *
+ *     U-Boot 那组参数是**唯一被实测证明可用的**（它把 logo 正常显示了
+ *     出来）。恢复它、再往它的缓冲里写：
+ *       画面正确 -> 显示通路没问题，问题出在我们改的某个寄存器上，
+ *                   而且立刻就有了一条能用的出图通路
+ *       仍然错乱 -> 问题在写入侧或缓存，与 VOP2 配置无关
+ *
+ *     无论哪种结果，嫌疑范围都被砍掉一半，这是当前信息量最大的一步。
+ *
+ ****************************************************************************/
+
+int kickpi_camera_ubtest(int pattern)
+{
+  uintptr_t fbaddr;
+  uint32_t  w;
+  uint32_t  h;
+  uint32_t  stride;
+  uint32_t *fb;
+  uint32_t  rowpix;
+  int ret;
+  int x;
+  int y;
+
+  ret = rk3576_vop2_restore_uboot(&fbaddr, &w, &h, &stride);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "摄像头: 没有 U-Boot 窗口备份: %d\n", ret);
+      return ret;
+    }
+
+  fb     = (uint32_t *)fbaddr;
+  rowpix = stride / 4;
+
+  for (y = 0; y < (int)h; y++)
+    {
+      for (x = 0; x < (int)w; x++)
+        {
+          uint32_t c;
+
+          switch (pattern)
+            {
+              case 1:
+                c = 0xff000000u;                        /* 全黑 */
+                break;
+
+              case 2:
+                /* 竖条纹 —— 检验列方向映射 */
+
+                c = ((x / 32) & 1) ? 0xffffffffu : 0xff000000u;
+                break;
+
+              default:
+                c = 0xffffffffu;                        /* 全白 */
+                break;
+            }
+
+          fb[y * rowpix + x] = c;
+        }
+    }
+
+  /* VOP2 直接从 DDR 扫描，CPU 写的是缓存，必须刷回。 */
+
+  up_flush_dcache(fbaddr, fbaddr + (uintptr_t)stride * h);
+
+  syslog(LOG_INFO,
+         "摄像头: 已往 U-Boot 缓冲写图案 %d，%" PRIu32 "x%" PRIu32
+         " 跨距 %" PRIu32 " @0x%08lx\n",
+         pattern, w, h, stride, (unsigned long)fbaddr);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: kickpi_camera_morph
+ *
+ * Description:
+ *   从 U-Boot 那组已知可用的窗口参数出发，一次只改一个变量，然后画
+ *   竖条纹。第一个出斜纹的步骤就指名了元凶。
+ *
+ *   ★ 为什么要做成"一次烧写、七次实验"
+ *
+ *     `cam ub 2` 已经证明：用 U-Boot 的地址 + 654x270 + 跨距 2616，
+ *     竖条纹是正的。也就是说显示通路、写入侧、缓存刷回全都没问题，
+ *     错的一定是 fb_setup 相对 U-Boot 改动的那几项之一。
+ *
+ *     但 fb_setup 一次改了五样：地址、宽、高、跨距、显示起点。这五样
+ *     里任何一样错了，屏上都是"斜纹 + 断续横带"，看现象分不出是哪一个。
+ *     唯一的办法是每次只挪一个。
+ *
+ *     把它做成带参数的 nsh 子命令，而不是改代码重烧 —— 重烧一次几分钟，
+ *     敲一条命令一秒钟，而这里要试的组合有七个。
+ *
+ *   ★ 步骤是有序的，不要跳着做
+ *
+ *     后面的步骤默认前面的结论成立（比如第 2 步之后才敢在放大的几何
+ *     上继续加变量）。哪一步先出斜纹，就停在那一步。
+ *
+ *       0  U-Boot 地址 654x270 U-Boot 起点     基线，应当是正的竖条纹
+ *       1  我们的地址 654x270 U-Boot 起点     只换内存
+ *       2  U-Boot 地址 720x270 U-Boot 起点     只换宽（跨距随之 2880）
+ *       3  U-Boot 地址 654x1280 U-Boot 起点    只换高
+ *       4  U-Boot 地址 720x1280 U-Boot 起点    整个几何
+ *       5  U-Boot 地址 720x1280 有效区原点     再加显示起点
+ *       6  我们的地址 720x1280 有效区原点      等价于当前的 fb_setup
+ *
+ *   ★ 放大后的窗口一律写进 U-Boot 那块帧缓冲（0xfdf00000 起 4MB，
+ *     已在 MMU 表里映射）。720x1280x4 = 3.69MB，装得下 —— 这样"换内存"
+ *     和"换几何"才是两个独立的变量，不会一起动。
+ *
+ ****************************************************************************/
+
+int kickpi_camera_morph(int step)
+{
+  /* 与上表一一对应。ourbuf 为 true 表示用 /dev/fb0 的缓冲，
+   * 否则用 U-Boot 的；宽高为 0 表示沿用 U-Boot 的。
+   */
+
+  static const struct
+  {
+    bool     ourbuf;
+    uint32_t width;
+    uint32_t height;
+    int      origin;
+    const char *what;
+  }
+  steps[] =
+  {
+    { false,   0,    0, 0, "基线：U-Boot 原样"        },
+    { true,    0,    0, 0, "只换帧缓冲地址"           },
+    { false, 720,    0, 0, "只把宽改成 720"           },
+    { false,   0, 1280, 0, "只把高改成 1280"          },
+    { false, 720, 1280, 0, "几何改成全屏"             },
+    { false, 720, 1280, 1, "再把显示起点移到有效区原点" },
+    { true,  720, 1280, 1, "全部改完，等价于 fb_setup" },
+  };
+
+  struct fb_planeinfo_s pinfo;
+  uintptr_t  fbaddr;
+  uintptr_t  ourfb = 0;
+  size_t     ourlen = 0;
+  uint32_t   w;
+  uint32_t   h;
+  uint32_t   stride;
+  uint32_t  *fb;
+  uint32_t   rowpix;
+  size_t     limit;
+  int ret;
+  int x;
+  int y;
+
+  if (step < 0 || step >= (int)(sizeof(steps) / sizeof(steps[0])))
+    {
+      syslog(LOG_ERR, "摄像头: 步骤号要在 0~%d 之间\n",
+             (int)(sizeof(steps) / sizeof(steps[0])) - 1);
+      return -EINVAL;
+    }
+
+  /* 只在需要时才去问 /dev/fb0 要地址 —— 不需要的步骤不该因为帧缓冲
+   * 没初始化而失败。
+   */
+
+  if (steps[step].ourbuf)
+    {
+      int fd = open("/dev/fb0", O_RDWR);
+
+      if (fd < 0)
+        {
+          syslog(LOG_ERR, "摄像头: 打不开 /dev/fb0: %d\n", errno);
+          return -errno;
+        }
+
+      memset(&pinfo, 0, sizeof(pinfo));
+
+      if (ioctl(fd, FBIOGET_PLANEINFO, (unsigned long)&pinfo) < 0)
+        {
+          close(fd);
+          return -errno;
+        }
+
+      close(fd);
+
+      ourfb  = (uintptr_t)pinfo.fbmem;
+      ourlen = pinfo.fblen;
+
+      if (ourfb == 0 || ourlen == 0)
+        {
+          syslog(LOG_ERR, "摄像头: /dev/fb0 没给出可用的缓冲\n");
+          return -EINVAL;
+        }
+    }
+
+  syslog(LOG_INFO, "摄像头: 第 %d 步 —— %s\n", step, steps[step].what);
+
+  ret = rk3576_vop2_try_window(ourfb, steps[step].width, steps[step].height,
+                               steps[step].origin,
+                               &fbaddr, &w, &h, &stride);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "摄像头: 配窗口失败 %d（要先启动过帧缓冲）\n", ret);
+      return ret;
+    }
+
+  /* ★ 越界保护要按实际那块内存的大小来算。
+   *
+   *   U-Boot 那块是 MMU 表里映射的 4MB；我们自己那块是 fblen。写过头
+   *   在前者是踩别的外设、在后者是踩堆 —— 两种都是难查的随机故障，
+   *   而这里只是个调试命令，不值得冒这个险。
+   */
+
+  limit = steps[step].ourbuf ? ourlen : (size_t)0x400000;
+
+  fb     = (uint32_t *)fbaddr;
+  rowpix = stride / 4;
+
+  for (y = 0; y < (int)h; y++)
+    {
+      if (((size_t)y * rowpix + w) * 4 > limit)
+        {
+          syslog(LOG_WARNING, "摄像头: 第 %d 行越界，提前停止\n", y);
+          break;
+        }
+
+      for (x = 0; x < (int)w; x++)
+        {
+          /* 32 像素宽的竖条纹。硬件每行取的像素数若与 stride 不符，
+           * 条纹每行都会横移固定的距离，叠起来就是一条斜纹 —— 斜率
+           * 直接给出差了多少像素，比"图像不对"这种描述可用得多。
+           */
+
+          fb[(size_t)y * rowpix + x] =
+            ((x / 32) & 1) ? 0xffffffffu : 0xff000000u;
+        }
+    }
+
+  up_flush_dcache(fbaddr, fbaddr + (uintptr_t)stride * h);
+
+  syslog(LOG_INFO,
+         "摄像头: 已写竖条纹 %" PRIu32 "x%" PRIu32 " 跨距 %" PRIu32
+         " @0x%08lx\n", w, h, stride, (unsigned long)fbaddr);
+
+  rk3576_vop2_dump_win();
+  return OK;
+}
+
+/****************************************************************************
+ * Name: kickpi_camera_regs
+ *
+ * Description:
+ *   只读打印 ESMART1 与 VP1 的寄存器，不写任何东西。
+ *
+ ****************************************************************************/
+
+int kickpi_camera_regs(void)
+{
+  rk3576_vop2_dump_win();
+  return OK;
 }
