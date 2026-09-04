@@ -545,6 +545,21 @@ int kickpi_camera_status(void)
 
 static uint8_t *g_cam_buf[2];
 
+/* 直方图与百分位。直方图放静态区而不是栈上 —— 1KB 的局部数组对
+ * 板级初始化任务的栈来说不算小，而这个函数一次只跑一遍，没必要省。
+ */
+
+static uint32_t g_cam_hist[256];
+
+/* 刚写完的是哪一个乒乓缓冲。统计和送屏都要读这一个，读另一个就是在读
+ * 正被 DMA 改写的内存。
+ */
+
+static int g_cam_ready;
+static uint16_t g_cam_p1;
+static uint16_t g_cam_p50;
+static uint16_t g_cam_p99;
+
 /* 最近一帧的动态范围，显示时用来做线性拉伸 */
 
 static uint16_t g_cam_min;
@@ -573,6 +588,8 @@ int kickpi_camera_capture(void)
   uint16_t mx = 0;
   uint16_t *p;
   size_t npix = IMX415_MODE_WIDTH * IMX415_MODE_HEIGHT;
+  size_t zeros = 0;
+  size_t last = 0;
   size_t i;
   int ret;
 
@@ -593,9 +610,20 @@ int kickpi_camera_capture(void)
         }
     }
 
+  /* ★ 两个缓冲都要清。
+   *
+   *   硬件在 FRM0/FRM1 之间乒乓，先写完哪一个事先并不知道。只清 0 号的
+   *   话，一旦这次等到的是 1 号，"零像素占比"这个判据读的就是上一轮
+   *   残留的数据 —— 一个用来判断"DMA 有没有写满整帧"的指标，本身却
+   *   依赖于内存是干净的。
+   */
+
   memset(g_cam_buf[0], 0, CAM_FRAME_BYTES);
+  memset(g_cam_buf[1], 0, CAM_FRAME_BYTES);
   up_clean_dcache((uintptr_t)g_cam_buf[0],
                   (uintptr_t)g_cam_buf[0] + CAM_FRAME_BYTES);
+  up_clean_dcache((uintptr_t)g_cam_buf[1],
+                  (uintptr_t)g_cam_buf[1] + CAM_FRAME_BYTES);
 
   ret = rk3576_cif_start(KICKPI_CAM_CSI_HOST,
                          (uintptr_t)g_cam_buf[0], (uintptr_t)g_cam_buf[1],
@@ -605,13 +633,28 @@ int kickpi_camera_capture(void)
       return ret;
     }
 
-  /* 一帧的时间。1932x1096 这一档标称 30fps 上下，等 300ms 足够
-   * 收到好几帧，不必精确对齐帧边界。
+  /* ★ 等帧结束标志，不再盲等固定时长。
+   *
+   *   原来是 mdelay(300) 之后直接读。问题不在于 300ms 够不够 —— 而在于
+   *   读到的可能是写了一半的一帧，撕裂的画面很像图像处理写错了，会把
+   *   排查引到完全无关的地方。等标志则是确定的：置位就说明整帧已落盘。
+   *
+   *   顺带解决了另一件事：硬件在 FRM0/FRM1 之间乒乓，等待函数会告诉
+   *   我们刚写完的是**哪一个**，避免去读正在被 DMA 改写的那块。
+   *
+   *   超时给 500ms，30fps 下一帧 33ms，足够容下启动瞬态。
    */
 
-  up_mdelay(300);
+  ret = rk3576_cif_wait_frame(KICKPI_CAM_CSI_HOST, 0, 500, &stat);
+  if (ret < 0)
+    {
+      rk3576_cif_stop(KICKPI_CAM_CSI_HOST);
+      syslog(LOG_ERR,
+             "摄像头: 没等到帧结束，INTSTAT=0x%08" PRIx32 "\n", stat);
+      return ret;
+    }
 
-  stat = rk3576_cif_status(KICKPI_CAM_CSI_HOST);
+  g_cam_ready = ret;
 
   /* ★ 取够了就把 DMA 停掉。
    *
@@ -636,6 +679,22 @@ int kickpi_camera_capture(void)
   up_invalidate_dcache((uintptr_t)g_cam_buf[0],
                        (uintptr_t)g_cam_buf[0] + CAM_FRAME_BYTES);
 
+  /* ★ 直方图 + "最后一个非零像素"，比 min/max/均值 有用得多。
+   *
+   *   min/max 只反映**两个**像素，一个亮点加一个暗点就能撑出"动态范围
+   *   正常"的假象；均值又被大片零拉低。这次屏幕全黑而 min=0 max=65520
+   *   均值=6958，光看这三个数根本分不清是
+   *     (a) 场景确实暗、拉伸没做够
+   *     (b) DMA 只填了一部分，剩下全是 memset 留下的 0
+   *   而这两种情况要改的地方毫无关系。
+   *
+   *   记 last —— 最后一个非零像素的下标 —— 就把 (b) 直接判掉了：
+   *   它除以行宽就是 DMA 实际写到了第几行。
+   */
+
+  memset(g_cam_hist, 0, sizeof(g_cam_hist));
+  last = 0;
+
   p = (uint16_t *)g_cam_buf[0];
   for (i = 0; i < npix; i++)
     {
@@ -651,6 +710,17 @@ int kickpi_camera_capture(void)
         {
           mx = v;
         }
+
+      if (v == 0)
+        {
+          zeros++;
+        }
+      else
+        {
+          last = i;
+        }
+
+      g_cam_hist[v >> 8]++;
     }
 
   syslog(LOG_INFO,
@@ -659,8 +729,75 @@ int kickpi_camera_capture(void)
          IMX415_MODE_WIDTH, IMX415_MODE_HEIGHT, stat,
          mn, mx, (unsigned)(sum / npix));
 
-  g_cam_min = mn;
-  g_cam_max = mx;
+  syslog(LOG_INFO,
+         "  零像素 %lu/%lu（%lu%%），最后一个非零像素在第 %lu 行/%d\n",
+         (unsigned long)zeros, (unsigned long)npix,
+         (unsigned long)(zeros * 100 / npix),
+         (unsigned long)(last / IMX415_MODE_WIDTH), IMX415_MODE_HEIGHT);
+
+  /* 百分位。用 256 桶的直方图求，够精度，也不用排序两百万个数。 */
+
+  {
+    size_t acc2 = 0;
+    int    b;
+
+    g_cam_p1 = 0;
+    g_cam_p50 = 0;
+    g_cam_p99 = 65535;
+
+    for (b = 0; b < 256; b++)
+      {
+        size_t prev = acc2;
+
+        acc2 += g_cam_hist[b];
+
+        if (prev < npix / 100 && acc2 >= npix / 100)
+          {
+            g_cam_p1 = (uint16_t)(b << 8);
+          }
+
+        if (prev < npix / 2 && acc2 >= npix / 2)
+          {
+            g_cam_p50 = (uint16_t)(b << 8);
+          }
+
+        if (prev < npix - npix / 100 && acc2 >= npix - npix / 100)
+          {
+            g_cam_p99 = (uint16_t)(b << 8);
+          }
+      }
+  }
+
+  syslog(LOG_INFO, "  百分位 p1=%u p50=%u p99=%u\n",
+         g_cam_p1, g_cam_p50, g_cam_p99);
+
+  /* 直方图只打非空的桶，否则 256 行刷屏还看不出重点。 */
+
+  {
+    int b;
+
+    for (b = 0; b < 256; b++)
+      {
+        if (g_cam_hist[b] * 1000 / npix > 0)
+          {
+            syslog(LOG_INFO, "  桶[%3d] %5u.. 占 %lu%%\n",
+                   b, (unsigned)(b << 8),
+                   (unsigned long)(g_cam_hist[b] * 100 / npix));
+            up_mdelay(2);
+          }
+      }
+  }
+
+  /* ★ 拉伸用 p1~p99，不用 min~max。
+   *
+   *   min/max 是两个极值像素说了算的：一个坏点归零、一个高光饱和，
+   *   span 就撑满了整个量程，"线性拉伸"退化成右移 8 位 —— 正是这次
+   *   屏幕全黑的直接原因（均值 6958 映射过去只有 27/255）。
+   *   百分位由大多数像素决定，个别极值动不了它。
+   */
+
+  g_cam_min = g_cam_p1;
+  g_cam_max = g_cam_p99;
 
   if (mx == 0)
     {
@@ -671,6 +808,11 @@ int kickpi_camera_capture(void)
     {
       syslog(LOG_WARNING,
              "  全部是同一个值 0x%04x —— 取到的是常量不是图像\n", mn);
+    }
+  else if (zeros * 10 > npix)
+    {
+      syslog(LOG_WARNING,
+             "  零像素超过一成 —— DMA 很可能没写满整帧，看上面的行号\n");
     }
   else
     {
@@ -937,7 +1079,7 @@ int kickpi_camera_show(void)
   int dx;
   int dy;
 
-  if (g_cam_buf[0] == NULL)
+  if (g_cam_buf[g_cam_ready] == NULL)
     {
       syslog(LOG_ERR, "摄像头: 还没有取过图，先跑 cam cap\n");
       return -ENODATA;
@@ -971,7 +1113,7 @@ int kickpi_camera_show(void)
     }
 
   fb  = (uint32_t *)pinfo.fbmem;
-  src = (uint16_t *)g_cam_buf[0];
+  src = (uint16_t *)g_cam_buf[g_cam_ready];
 
   /* ★ 先把拿到的参数打出来再用。
    *
@@ -1381,5 +1523,103 @@ int kickpi_camera_morph(int step)
 int kickpi_camera_regs(void)
 {
   rk3576_vop2_dump_win();
+  return OK;
+}
+
+/****************************************************************************
+ * Name: kickpi_camera_gain
+ *
+ * Description:
+ *   设置 IMX415 的模拟增益，并可选地改快门。
+ *
+ *   ★ 为什么要做成运行时可调
+ *
+ *     取图通路打通之后，直方图显示 68% 的像素挤在一个桶里、12 位值只有
+ *     196~478 —— 亮度不够。但"不够"到底是曝光、增益、镜头，还是现场光线
+ *     太暗，光看一组数字判断不了，而每换一个值就重编一次固件的话，
+ *     一次扫描要花掉一个下午。
+ *
+ *     做成命令就能连续扫：增益从 0 一路加上去，看直方图往哪边走、什么
+ *     时候开始饱和。这比任何一次性的"填个经验值"都更能说明问题。
+ *
+ *   ★ 增益寄存器不在模式表里
+ *
+ *     板级那份 IMX415 模式表里没有 0x3090/0x3091，所以模拟增益一直停在
+ *     复位值 0 dB。这类"配置表里缺了一项、于是硬件用默认值"的问题不会
+ *     报任何错，只会让画面暗得莫名其妙。
+ *
+ * Input Parameters:
+ *   gain - GAIN_PCG_0 的原始值，0~240，每级 0.3dB（0 = 0dB，240 = 72dB）
+ *   shr  - SHR0 快门值；传 -1 表示不动。曝光行数 = VMAX - SHR0，
+ *          所以这个值**越小曝光越长**，最小 8。
+ *
+ ****************************************************************************/
+
+int kickpi_camera_gain(int gain, int shr)
+{
+  uint8_t v;
+  int ret;
+
+  if (g_cam_i2c == NULL)
+    {
+      syslog(LOG_ERR, "摄像头: I2C 未初始化\n");
+      return -ENODEV;
+    }
+
+  if (gain < 0 || gain > 240)
+    {
+      syslog(LOG_ERR, "摄像头: 增益要在 0~240 之间（每级 0.3dB）\n");
+      return -EINVAL;
+    }
+
+  ret = imx415_write8(g_cam_i2c, 0x3090, (uint8_t)(gain & 0xff));
+  if (ret >= 0)
+    {
+      ret = imx415_write8(g_cam_i2c, 0x3091, (uint8_t)((gain >> 8) & 0x07));
+    }
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "摄像头: 写增益失败 %d\n", ret);
+      return ret;
+    }
+
+  if (shr >= 8)
+    {
+      ret = imx415_write8(g_cam_i2c, 0x3050, (uint8_t)(shr & 0xff));
+      if (ret >= 0)
+        {
+          ret = imx415_write8(g_cam_i2c, 0x3051,
+                              (uint8_t)((shr >> 8) & 0xff));
+        }
+
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "摄像头: 写快门失败 %d\n", ret);
+          return ret;
+        }
+    }
+
+  /* 回读核对 —— 与模式表那里同样的理由：写返回成功不代表寄存器接受了。
+   * 传感器在出流状态下对某些寄存器是有写保护的，静默丢弃。
+   */
+
+  ret = imx415_read8(g_cam_i2c, 0x3090, &v);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (v != (uint8_t)(gain & 0xff))
+    {
+      syslog(LOG_ERR,
+             "摄像头: 增益回读 0x%02x，期望 0x%02x —— 没写进去\n",
+             v, (uint8_t)(gain & 0xff));
+      return -EIO;
+    }
+
+  syslog(LOG_INFO, "摄像头: 增益 %d（%d.%d dB）%s\n",
+         gain, gain * 3 / 10, (gain * 3) % 10,
+         shr >= 8 ? "，快门已改" : "");
   return OK;
 }

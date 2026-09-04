@@ -334,6 +334,20 @@ int kickpi_camera_morph(int step);
 
 int kickpi_camera_regs(void);
 
+/****************************************************************************
+ * Name: kickpi_camera_gain
+ *
+ * Description:
+ *   设置 IMX415 的模拟增益（GAIN_PCG_0，0~240，每级 0.3dB），可选地同时
+ *   改快门 SHR0（传 -1 不动；曝光行数 = VMAX - SHR0，值越小曝光越长）。
+ *
+ *   板级模式表里没有 0x3090/0x3091，增益一直是复位的 0dB。做成命令是为了
+ *   能连续扫一遍看直方图怎么走，而不是每试一个值重编一次固件。
+ *
+ ****************************************************************************/
+
+int kickpi_camera_gain(int gain, int shr);
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* __VENDOR_ROCKCHIP_BOARDS_RK3576_KICKPI_K7_INCLUDE_BOARD_H */
