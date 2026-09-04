@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 01/31] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 01/33] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 02/31] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 02/33] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1363,7 +1363,7 @@ index 559489f6..d2fb5605 100644
 From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:38:15 +0800
-Subject: [PATCH 03/31] arm64/rk3576: clear U-Boot's leftover
+Subject: [PATCH 03/33] arm64/rk3576: clear U-Boot's leftover
  HCR_EL2.{IMO,FMO,AMO}; fix load address
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1490,7 +1490,7 @@ index d2fb5605..128e8a22 100644
 From 1a226e049212fce50e0724ee37b6671ac0f23e23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:50:02 +0800
-Subject: [PATCH 04/31] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
+Subject: [PATCH 04/33] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
  =?UTF-8?q?=5FEL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
  =?UTF-8?q?=E4=B8=81=E7=9A=84=E5=85=B3=E7=B3=BB?=
 MIME-Version: 1.0
@@ -1535,7 +1535,7 @@ index 128e8a22..f76d45cb 100644
 From 509d2fa1a06f4560ce252d7cc6a4d507ea7bd6dc Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 23:18:55 +0800
-Subject: [PATCH 05/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
+Subject: [PATCH 05/33] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
  =?UTF-8?q?=20=E9=A9=B1=E5=8A=A8=EF=BC=88Rockchip=20GPIO=20v2=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1989,7 +1989,7 @@ index 00000000..2fe55c92
 From 895f1f4e4df1ffb6dc7c665adb230ea472f48600 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 00:43:14 +0800
-Subject: [PATCH 06/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
+Subject: [PATCH 06/33] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
  =?UTF-8?q?=E3=80=81=E5=BC=95=E8=84=9A=E5=A4=8D=E7=94=A8=E4=B8=8E=20I2C=20?=
  =?UTF-8?q?=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
@@ -3602,7 +3602,7 @@ index 00000000..8d4d6561
 From 0efe6a8352599f5b577eda2598ab46844332a791 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:24:26 +0800
-Subject: [PATCH 07/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
+Subject: [PATCH 07/33] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
  =?UTF-8?q?=20(dwcmshc/SDHCI)=20=E5=91=BD=E4=BB=A4=E9=80=9A=E8=B7=AF?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -4324,7 +4324,7 @@ index 00000000..971084de
 From 19f41551f493da28c0756c5e83a0850a0bcf9aae Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:29:46 +0800
-Subject: [PATCH 08/31] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
+Subject: [PATCH 08/33] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
  =?UTF-8?q?=E9=80=9A=E8=B7=AF=E6=89=93=E9=80=9A=EF=BC=88CMD9/CMD7/CMD17=20?=
  =?UTF-8?q?+=20PIO=20=E8=AF=BB=E5=9D=97=EF=BC=89?=
 MIME-Version: 1.0
@@ -4534,7 +4534,7 @@ index cd0d10dc..99c4ecc0 100644
 From 98b2a2df090330a6d91d6f52c098751b1697768a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 13:13:58 +0800
-Subject: [PATCH 09/31] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
+Subject: [PATCH 09/33] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
  =?UTF-8?q?=20sdio=5Fdev=5Fs=EF=BC=8C/dev/mmcsd0=20=E5=8F=AF=E7=94=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -5263,7 +5263,7 @@ index 971084de..c0f64978 100644
 From 3a65d6b63b5febca4827bd7fecd8d2145adb51a0 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:07:47 +0800
-Subject: [PATCH 10/31] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
+Subject: [PATCH 10/33] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
  =?UTF-8?q?=E5=A4=87=E8=AF=BB=E9=80=9A=EF=BC=881=20=E4=BD=8D=20@50MHz?=
  =?UTF-8?q?=EF=BC=89=EF=BC=8C4=20=E4=BD=8D=E5=BE=85=E4=BF=AE?=
 MIME-Version: 1.0
@@ -5486,7 +5486,7 @@ index a3b84e47..a2996f1a 100644
 From 84d0c755aa873b306fefd87a20e4c2e0abccf064 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:14:24 +0800
-Subject: [PATCH 11/31] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
+Subject: [PATCH 11/33] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
  =?UTF-8?q?=E6=80=BB=E7=BA=BF=E6=89=93=E9=80=9A=EF=BC=8850MHz=EF=BC=89?=
  =?UTF-8?q?=EF=BC=8C=E6=A0=B9=E5=9B=A0=E6=98=AF=E8=83=BD=E5=8A=9B=E5=A3=B0?=
  =?UTF-8?q?=E6=98=8E?=
@@ -5587,7 +5587,7 @@ index a2996f1a..2206c8ab 100644
 From 5250326bc4b5ede69c28dea6feaf51d0ae74e46a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:27:58 +0800
-Subject: [PATCH 12/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
+Subject: [PATCH 12/33] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F(PMU)=E4=B8=8E=20GPIO=20=E4=B8=AD?=
  =?UTF-8?q?=E6=96=AD=EF=BC=8C=E4=B8=BA=E6=98=BE=E7=A4=BA=E4=B8=8E=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E9=93=BA=E8=B7=AF?=
@@ -6294,7 +6294,7 @@ index 00000000..80545549
 From 40634c8959141615d593598f97b5c70597d2039d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:41:21 +0800
-Subject: [PATCH 13/31] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
+Subject: [PATCH 13/33] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F=E7=BC=96=E5=8F=B7=E4=B8=8E=E6=AF=8F?=
  =?UTF-8?q?=E5=9F=9F=E7=9A=84=20req=20=E5=81=8F=E7=A7=BB?=
 MIME-Version: 1.0
@@ -6451,7 +6451,7 @@ index 80545549..84de6b0f 100644
 From d632b41753c213abee75ccaedbe6a88659d68b89 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:59:50 +0800
-Subject: [PATCH 14/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
+Subject: [PATCH 14/33] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
  =?UTF-8?q?=20=E9=9F=B3=E9=A2=91=E6=8E=A5=E5=8F=A3=E9=A9=B1=E5=8A=A8?=
  =?UTF-8?q?=EF=BC=88PIO=20=E5=8F=91=E9=80=81=EF=BC=89?=
 MIME-Version: 1.0
@@ -7201,7 +7201,7 @@ index 00000000..4c5ceb1c
 From 945dc74f703bb97d7c2331a2eb40df1bc888eb23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:26:44 +0800
-Subject: [PATCH 15/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
+Subject: [PATCH 15/33] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
  =?UTF-8?q?=20=E6=98=BE=E7=A4=BA=E6=8E=A7=E5=88=B6=E5=99=A8=EF=BC=88?=
  =?UTF-8?q?=E8=87=AA=E6=A3=80=20+=20=E5=86=85=E7=BD=AE=E5=BD=A9=E6=9D=A1?=
  =?UTF-8?q?=EF=BC=89?=
@@ -7744,7 +7744,7 @@ index 00000000..d59f5f55
 From e19fbf3e1dcfc9bd8c9cac919da3591de3b6bdb5 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:38:18 +0800
-Subject: [PATCH 16/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 16/33] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20DSI2=20=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8360,7 +8360,7 @@ index 00000000..b4cf8682
 From 506a2907cd27c7244a478ced9cc2e03e3e02ff77 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:44:28 +0800
-Subject: [PATCH 17/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 17/33] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20D/C-PHY=20=E9=A9=B1=E5=8A=A8=EF=BC=88D-PHY=20PLL=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8813,7 +8813,7 @@ index 00000000..6183bd51
 From 67474c8ffe832b715faa83734a71a32b80b33da6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:54:26 +0800
-Subject: [PATCH 18/31] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
+Subject: [PATCH 18/33] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
  =?UTF-8?q?=20=E5=89=8D=E7=BD=AE=E9=93=BE=E8=B7=AF=E4=B8=8E=20MDIO?=
  =?UTF-8?q?=EF=BC=88DWMAC=204.20a=EF=BC=89?=
 MIME-Version: 1.0
@@ -9314,7 +9314,7 @@ index 00000000..92991a43
 From 474c4a000e75319ecee875dffde4a0e7342ba12d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:07:45 +0800
-Subject: [PATCH 19/31] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
+Subject: [PATCH 19/33] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
  =?UTF-8?q?=E9=93=BE=E8=B7=AF=E5=85=AD=E9=A1=B9=E9=85=8D=E9=BD=90=EF=BC=8C?=
  =?UTF-8?q?DMA=20=E8=BD=AF=E5=A4=8D=E4=BD=8D=E4=BB=8D=E6=9C=AA=E5=AE=8C?=
  =?UTF-8?q?=E6=88=90?=
@@ -9867,7 +9867,7 @@ index 6f8e5f23..5afaf918 100644
 From 51d98edc4f4ae78ed5d33d08d8b5fdf85719c59b Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:24:18 +0800
-Subject: [PATCH 20/31] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
+Subject: [PATCH 20/33] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
  =?UTF-8?q?=E5=88=B0=E4=B8=83=E6=9D=A1=E6=80=BB=E7=BA=BF=EF=BC=88=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E5=AE=9A=E4=BD=8D=E7=94=A8=EF=BC=89?=
 MIME-Version: 1.0
@@ -9974,7 +9974,7 @@ index f57a2bfa..43f2313e 100644
 From 7a968bf8c6c3d85daf2dc81619a2800cf4bf89c4 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 11:12:37 +0800
-Subject: [PATCH 21/31] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
+Subject: [PATCH 21/33] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
  =?UTF-8?q?=E8=B7=AF=E4=BF=AE=E6=AD=A3=20+=20I2C0(PMU=20=E5=9F=9F)=20+=20?=
  =?UTF-8?q?=E5=BC=95=E8=84=9A=E4=B8=8A=E4=B8=8B=E6=8B=89=20API?=
 MIME-Version: 1.0
@@ -10837,7 +10837,7 @@ index d59f5f55..8c0f10a3 100644
 From c8d3eeab1d0eb34c8c9922e7a7fb4fa48df7c057 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 12:05:26 +0800
-Subject: [PATCH 22/31] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
+Subject: [PATCH 22/33] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
  =?UTF-8?q?=E6=AD=A3=20sizeof=20=E7=9A=84=E6=A0=BC=E5=BC=8F=E4=B8=B2?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -11173,7 +11173,7 @@ index be5db167..34eb7303 100644
 From abf918d9dedc4458cf1505937f86a90791fd1681 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 00:31:04 +0800
-Subject: [PATCH 23/31] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
+Subject: [PATCH 23/33] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
  =?UTF-8?q?=E5=9D=97=E8=AF=BB=E5=86=99=E3=80=81=E6=91=84=E5=83=8F=E5=A4=B4?=
  =?UTF-8?q?=20MCLK=E3=80=81=E5=85=8D=20recovery=20=E9=87=8D=E5=90=AF?=
 MIME-Version: 1.0
@@ -13336,7 +13336,7 @@ index f8333cb5..d841ebfb 100644
 From 2d8fa26231ab76705ef1144e445f76f2a8959934 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 12:01:05 +0800
-Subject: [PATCH 24/31] =?UTF-8?q?drivers/timers:=20=E6=96=B0=E5=A2=9E=20HY?=
+Subject: [PATCH 24/33] =?UTF-8?q?drivers/timers:=20=E6=96=B0=E5=A2=9E=20HY?=
  =?UTF-8?q?M8563=20I2C=20RTC=20=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -14153,7 +14153,7 @@ index 00000000..b597148d
 From d170765c4ab997d9f7dc6270211cbdfe3a18cd5b Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 13:34:59 +0800
-Subject: [PATCH 25/31] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=20DesignWare?=
+Subject: [PATCH 25/33] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=20DesignWare?=
  =?UTF-8?q?=20=E7=9C=8B=E9=97=A8=E7=8B=97=E9=A9=B1=E5=8A=A8=EF=BC=88xTS=20?=
  =?UTF-8?q?1.3.15=EF=BC=89?=
 MIME-Version: 1.0
@@ -14648,7 +14648,7 @@ index f8845b62..8609631b 100644
 From b5d7ce5c4d828ecac48a28c26d3327828b2d3645 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 13:46:09 +0800
-Subject: [PATCH 26/31] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=E7=A1=AC?=
+Subject: [PATCH 26/33] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=E7=A1=AC?=
  =?UTF-8?q?=E4=BB=B6=E9=9A=8F=E6=9C=BA=E6=95=B0=E9=A9=B1=E5=8A=A8=20/dev/r?=
  =?UTF-8?q?andom=EF=BC=88xTS=201.3.16=EF=BC=89?=
 MIME-Version: 1.0
@@ -14993,7 +14993,7 @@ index 00000000..70e4a877
 From a4e9b7be465cd44bd2299b7d3a9c79d9b8c4340d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 15:38:11 +0800
-Subject: [PATCH 27/31] arch/arm64/rk3576: add polled SPI master driver (SPI4)
+Subject: [PATCH 27/33] arch/arm64/rk3576: add polled SPI master driver (SPI4)
 
 Synopsys DesignWare SSI, Rockchip variant (rockchip,rk3066-spi).
 Register layout differs from stock DW SSI: data ports are split
@@ -16029,7 +16029,7 @@ index 00000000..f37ca9d6
 From e4e27eaa165c6013754cd3144e86a3e6257e7fd6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 15:46:28 +0800
-Subject: [PATCH 28/31] arch/arm64/rk3576: guard against GPIO interrupt storms
+Subject: [PATCH 28/33] arch/arm64/rk3576: guard against GPIO interrupt storms
 
 A pin can re-enter its handler without bound in two ways, neither of
 which reports an error -- the board simply stops responding, with no
@@ -16134,7 +16134,7 @@ index edb7a4ee..c7125d96 100644
 From 2e21784235ae6149b8dd14e3a4922174f500e29f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 19:12:28 +0800
-Subject: [PATCH 29/31] arch/arm64/rk3576: bound the SPI transfer loop, add
+Subject: [PATCH 29/33] arch/arm64/rk3576: bound the SPI transfer loop, add
  pulls and pull readback
 
 The push/pop loop had no exit.  With no serial clock (gate off, module
@@ -16466,7 +16466,7 @@ index 9b983e82..23d6a976 100644
 From 74c7a2d63af08db7e49610ddf66b0f19f9abccc7 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 20:06:48 +0800
-Subject: [PATCH 30/31] arch/arm64/rk3576: add MIPI CSI-2 D-PHY receiver
+Subject: [PATCH 30/33] arch/arm64/rk3576: add MIPI CSI-2 D-PHY receiver
 
 First stage of the camera capture path.  This is different hardware
 from rk3576_dcphy.c, not a direction flag on it: the display side is a
@@ -16940,7 +16940,7 @@ index 00000000..02138656
 From bc209e7ff21891788202f179086f89fe52d03e78 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 20:27:35 +0800
-Subject: [PATCH 31/31] arch/arm64/rk3576: add MIPI CSI-2 host controller
+Subject: [PATCH 31/33] arch/arm64/rk3576: add MIPI CSI-2 host controller
 
 Second stage of the capture path, and the first point in it that can be
 observed at all.  The sensor can only be confirmed over I2C and the
@@ -17383,6 +17383,1239 @@ index 00000000..a4001926
 +int rk3576_csihost_status(int host);
 +
 +#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_CSIHOST_H */
+-- 
+2.43.0
+
+
+From 86a2c46526107c38f6f8ff54d86ea5ff8629c6f9 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Fri, 4 Sep 2026 22:55:50 +0800
+Subject: [PATCH 32/33] arch/arm64/rk3576: add CIF capture controller, log GPIO
+ interrupt storms
+
+CIF is the last stage of the camera path (sensor -> D-PHY -> CSI-2 host
+-> CIF -> DDR).  It takes the CSI-2 stream into a caller-supplied
+buffer, so a frame can be inspected in memory before anything is
+displayed -- keeping "did we capture" separate from "did we render".
+
+Also switch the GPIO interrupt-storm guard from gpioerr() to syslog().
+gpioerr() compiles away unless GPIO debug is enabled, so the guard was
+masking a pin without leaving any record: a loud failure quietly became
+a silent one, which is strictly harder to diagnose.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/Kconfig       |  14 ++
+ arch/arm64/src/rk3576/Make.defs     |   4 +
+ arch/arm64/src/rk3576/rk3576_cif.c  | 325 ++++++++++++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_cif.h  |  62 ++++++
+ arch/arm64/src/rk3576/rk3576_gpio.c |  16 +-
+ 5 files changed, 418 insertions(+), 3 deletions(-)
+ create mode 100644 arch/arm64/src/rk3576/rk3576_cif.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_cif.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index 034fbcbc..726e3a30 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -22,6 +22,20 @@ config RK3576_UART0_IS_CONSOLE
+ 		已由 KICKPI 官方 Armbian 源码的 U-Boot defconfig 确认：
+ 		CONFIG_DEBUG_UART_BASE=0x2ad40000，即 UART0。
+ 
++config RK3576_CIF
++	bool "VICAP/CIF 取图"
++	default n
++	select RK3576_CSIHOST
++	---help---
++		取图链路的最后一级：把 CSI-2 收到的像素写进 DDR。
++
++		五路 CSI 输入共用一套寄存器，按 csi_host_idx 加偏移区分，
++		而且前两路间距 0x200、之后是 0x100 —— 不是等差数列，
++		按等差算会写到隔壁那一路上，不报错。
++
++		输出用非压缩 RAW12（每像素 16 位）：显示时取高字节即灰度，
++		省掉位解包一环。
++
+ config RK3576_CSIHOST
+ 	bool "MIPI CSI-2 主机控制器"
+ 	default n
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index 0aa65fbe..cf9c0ef9 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -76,6 +76,10 @@ ifeq ($(CONFIG_RK3576_I2C),y)
+ CHIP_CSRCS += rk3576_i2c.c
+ endif
+ 
++ifeq ($(CONFIG_RK3576_CIF),y)
++CHIP_CSRCS += rk3576_cif.c
++endif
++
+ ifeq ($(CONFIG_RK3576_CSIHOST),y)
+ CHIP_CSRCS += rk3576_csihost.c
+ endif
+diff --git a/arch/arm64/src/rk3576/rk3576_cif.c b/arch/arm64/src/rk3576/rk3576_cif.c
+new file mode 100644
+index 00000000..d62ebb8b
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_cif.c
+@@ -0,0 +1,325 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_cif.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* RK3576 VICAP/CIF —— 取图链路的最后一级：把 CSI-2 收到的像素写进 DDR。
++ *
++ * ★ 五路输入共用一套寄存器，靠偏移区分
++ *
++ *   dtb 里有 rkcif_mipi_lvds0..4 五个节点，硬件却只有一个 CIF
++ *   @0x27c10000。厂商驱动按 csi_host_idx 加偏移：
++ *
++ *     idx < 2 : off = idx * 0x200
++ *     idx >= 2: off = 0x100 + idx * 0x100
++ *
++ *   注意前两路的间距是 0x200、之后是 0x100，不是一条等差数列 ——
++ *   按等差算的话 idx=3 会差 0x100，写到隔壁那一路上去，不报错。
++ *   本板传感器在 mipi3，偏移 0x400。
++ *
++ * ★ 选非压缩（UNCOMPACT）而不是压缩格式
++ *
++ *   压缩 RAW12 把两个像素塞进三字节，省 1/4 内存；非压缩每像素占满
++ *   16 位。首次点亮选非压缩：显示时取高字节就是灰度，不需要位解包。
++ *   少一个环节就少一个可能出错的地方，而 4.2MB 与 3.2MB 的差别在
++ *   63MB 的系统里无关紧要。等确认能出图，再谈省内存。
++ *
++ * ★ 乒乓缓冲两个地址都要给
++ *
++ *   硬件在 FRM0/FRM1 之间轮换。只配 FRM0 的话第二帧会写到地址 0 ——
++ *   那是 DDR 起始，会把别的东西冲掉，而且不报错。即便只想要一帧，
++ *   两个地址也都要填成合法值。
++ *
++ * 寄存器与配置流程出处：厂商
++ * drivers/media/platform/rockchip/cif/{regs.h,capture.c,dev.c,hw.c}
++ */
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <debug.h>
++#include <errno.h>
++#include <inttypes.h>
++#include <stdint.h>
++#include <syslog.h>
++
++#include <nuttx/arch.h>
++
++#include "arm64_internal.h"
++#include "rk3576_cru.h"
++#include "rk3576_cif.h"
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++#define CIF_BASE                 0x27c10000
++
++/* MIPI0 那一组的寄存器偏移，其余各路在此基础上加 csi_offset */
++
++#define CIF_MIPI_ID0_CTRL0       0x100
++#define CIF_MIPI_ID0_CTRL1       0x104
++#define CIF_MIPI_CTRL            0x120
++#define CIF_MIPI_FRM0_ADDR_Y_ID0 0x124
++#define CIF_MIPI_FRM1_ADDR_Y_ID0 0x128
++#define CIF_MIPI_VLW_ID0         0x134
++#define CIF_MIPI_INTEN           0x174
++#define CIF_MIPI_INTSTAT         0x178
++
++/* ID0_CTRL0 位域 —— 出处 RK3576 TRM 6.4 VICAP_MIPIn_ID0_CTRL0。
++ *
++ * ★ 不能照抄厂商驱动里那套 CSI_* 宏
++ *
++ *   那套宏是老芯片的位布局，RK3576 重排过。照抄的后果不是编不过，
++ *   而是**每一位都落在别的字段上**：第一版我把 bit2 置了 1，老布局里
++ *   那是数据格式的一部分，RK3576 上却是 sw_drop_frame_en —— 等于命令
++ *   硬件把每一帧都丢掉，且不报任何错。parse_type 也因此填成了 raw10。
++ */
++
++#define CIF_ID_CAP_EN            (1u << 0)    /* sw_cap_en_id0        */
++#define CIF_ID_CROP_EN           (1u << 1)    /* sw_crop_en_id0       */
++#define CIF_ID_DROP_FRAME_EN     (1u << 2)    /* sw_drop_frame_en_id0 */
++#define CIF_ID_DMA_EN            (1u << 3)    /* sw_dma_en_id0        */
++#define CIF_ID_PARSE_SHIFT       4            /* sw_parse_type_id0    */
++#define CIF_ID_PARSE_RAW12       0x2
++#define CIF_ID_WRDDR_SHIFT       8            /* sw_wrddr_type_id0    */
++#define CIF_ID_WRDDR_UNCOMPACT   0x1
++#define CIF_ID_ALIGN_HIGH        (1u << 11)   /* raw12 落在 [15:4]    */
++
++/* ID0_CTRL1 位域。★ 它**不是**宽高寄存器。
++ *
++ *   厂商驱动里有一句 write(CTRL1, width | height << 16)，那是老芯片的
++ *   布局。RK3576 的 CTRL1 是虚通道(1:0)与数据类型(7:2)；把宽高写进去
++ *   等于设了个乱数据类型、还顺手开了 HDR 模式。
++ *
++ *   RK3576 压根没有宽高寄存器 —— GLB_CTRL 的 sw_dma_adapt_en 复位即为
++ *   1，DMA 按数据流的实际尺寸搬运，只需给跨距(VLW)和缓冲地址。
++ */
++
++#define CIF_ID_VC_SHIFT          0            /* sw_vc_id0, 2 位 */
++#define CIF_ID_DT_SHIFT          2            /* sw_dt_id0, 6 位 */
++
++/* 通路级控制 VICAP_MIPIn_CTRL：bit0 是这条通路的总开关，复位为 0。
++ * 不置位的话各 id 自己的 cap_en 都不起作用。
++ */
++
++#define CIF_PATH_CAP_EN          (1u << 0)
++
++/* VLW：低 20 位是跨距，bit31 是地址强制更新（自清）。 */
++
++#define CIF_VLW_MASK             0x000fffffu
++#define CSI_ALL_ERROR_INTEN      (0x1f << 16)
++
++/* MIPI CSI-2 标准数据类型 */
++
++#define MIPI_CSI2_DT_RAW12       0x2c
++
++/* 时钟门控，逐条对着 clk-rk3576.c 抄：
++ *
++ *   GATE(ACLK_VICAP,      ... CLKGATE_CON(53), 7)
++ *   GATE(HCLK_VICAP,      ... CLKGATE_CON(53), 8)
++ *   GATE(CLK_VICAP_I0CLK, ... CLKGATE_CON(59), 1)   ← 每路一个，
++ *   GATE(CLK_VICAP_I1CLK, ... CLKGATE_CON(59), 2)      从 bit1 起顺排
++ *   ...
++ *   GATE(CLK_VICAP_I4CLK, ... CLKGATE_CON(59), 5)
++ *
++ * ★ 总线时钟和输入时钟不在同一个 CON 里，别想当然。
++ *   开错路的输入时钟，现象是"配置全对但一帧不来"，与"线上没数据"
++ *   完全一样，事后分不开。
++ */
++
++#define CIF_BUS_GATE_CON         53
++#define CIF_BUS_GATE_ACLK        7
++#define CIF_BUS_GATE_HCLK        8
++#define CIF_ICLK_GATE_CON        59
++#define CIF_ICLK_GATE_BIT(n)     (1 + (n))
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: cif_csi_offset
++ *
++ * Description:
++ *   某一路 CSI 输入在 CIF 寄存器空间里的偏移。
++ *   ★ 前两路间距 0x200、之后 0x100，不是等差数列。
++ *
++ ****************************************************************************/
++
++static uint32_t cif_csi_offset(int host)
++{
++  return (host < 2) ? (uint32_t)host * 0x200
++                    : 0x100 + (uint32_t)host * 0x100;
++}
++
++static inline void cif_putreg(uint32_t off, uint32_t val)
++{
++  putreg32(val, CIF_BASE + off);
++}
++
++static inline uint32_t cif_getreg(uint32_t off)
++{
++  return getreg32(CIF_BASE + off);
++}
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_cif_start
++ ****************************************************************************/
++
++int rk3576_cif_start(int host, uintptr_t buf0, uintptr_t buf1,
++                     int width, int height)
++{
++  uint32_t off;
++  uint32_t ctrl0;
++  uint32_t stride;
++
++  if (host < 0 || host > 4 || width <= 0 || height <= 0 ||
++      buf0 == 0 || buf1 == 0)
++    {
++      return -EINVAL;
++    }
++
++  off = cif_csi_offset(host);
++
++  /* 1) 时钟：VICAP 的总线时钟 + 这一路对应的输入时钟。
++   *    输入时钟按路分（i0clk..i4clk），开错路的现象是"配置都对但
++   *    一帧都不来" —— 与"没数据"分不开，所以这里按 host 号来开。
++   */
++
++  rk3576_clk_gate(CIF_BUS_GATE_CON, CIF_BUS_GATE_ACLK, true);
++  rk3576_clk_gate(CIF_BUS_GATE_CON, CIF_BUS_GATE_HCLK, true);
++  rk3576_clk_gate(CIF_ICLK_GATE_CON, CIF_ICLK_GATE_BIT(host), true);
++
++  /* 2) 非压缩 RAW12：每像素 16 位，行跨距 width*2。 */
++
++  stride = (uint32_t)width * 2;
++  if ((stride & ~CIF_VLW_MASK) != 0)
++    {
++      return -EINVAL;
++    }
++
++  /* 3) 乒乓的两个地址都要给，见文件头说明。TRM 要求双字对齐。 */
++
++  cif_putreg(off + CIF_MIPI_FRM0_ADDR_Y_ID0, (uint32_t)buf0);
++  cif_putreg(off + CIF_MIPI_FRM1_ADDR_Y_ID0, (uint32_t)buf1);
++  cif_putreg(off + CIF_MIPI_VLW_ID0, stride);
++
++  /* 4) 虚通道与数据类型。RAW12 的 CSI-2 数据类型是 0x2c。
++   *    这里没有宽高要配，原因见 CIF_ID_VC_SHIFT 上方的说明。
++   */
++
++  cif_putreg(off + CIF_MIPI_ID0_CTRL1,
++             (0u << CIF_ID_VC_SHIFT) |
++             ((uint32_t)MIPI_CSI2_DT_RAW12 << CIF_ID_DT_SHIFT));
++
++  /* 5) 错误中断使能。不挂 ISR、靠轮询读 INTSTAT，但使能位必须打开，
++   *    否则状态位不会置起来，读到的永远是 0，会被当成"没有错误"。
++   */
++
++  cif_putreg(off + CIF_MIPI_INTEN, CSI_ALL_ERROR_INTEN);
++
++  /* 6) 先配 id0 的格式，再开通路总开关。反过来的话通路已经在收，
++   *    而 id0 的格式还没配好，头几帧会按错误格式落盘。
++   */
++
++  ctrl0 = CIF_ID_CAP_EN | CIF_ID_DMA_EN | CIF_ID_ALIGN_HIGH |
++          ((uint32_t)CIF_ID_PARSE_RAW12     << CIF_ID_PARSE_SHIFT) |
++          ((uint32_t)CIF_ID_WRDDR_UNCOMPACT << CIF_ID_WRDDR_SHIFT);
++
++  cif_putreg(off + CIF_MIPI_ID0_CTRL0, ctrl0);
++  cif_putreg(off + CIF_MIPI_CTRL, CIF_PATH_CAP_EN);
++
++  /* ★ 这里不做回读。
++   *
++   *   TRM 把 VICAP 这批寄存器全部标注为 "W"（只写），读回来的值没有
++   *   意义。我一开始加了回读，看到 CTRL1 高 16 位是 0 就断定"高度没写
++   *   进去" —— 那个结论是假的，读到的根本不是我写进去的内容，差点顺着
++   *   这条错线索去查 DMA。
++   *
++   *   只写寄存器只能靠**行为**（有没有数据落盘）来验证，不能靠回读。
++   */
++
++  syslog(LOG_INFO,
++         "CIF: host%d off=0x%03" PRIx32 " %dx%d stride=%" PRIu32
++         " buf=0x%08lx/0x%08lx CTRL0=0x%08" PRIx32 "\n",
++         host, off, width, height, stride,
++         (unsigned long)buf0, (unsigned long)buf1, ctrl0);
++
++  return OK;
++}
++
++/****************************************************************************
++ * Name: rk3576_cif_stop
++ ****************************************************************************/
++
++int rk3576_cif_stop(int host)
++{
++  uint32_t off;
++
++  if (host < 0 || host > 4)
++    {
++      return -EINVAL;
++    }
++
++  off = cif_csi_offset(host);
++  cif_putreg(off + CIF_MIPI_ID0_CTRL0, 0);
++  cif_putreg(off + CIF_MIPI_INTEN, 0);
++  return OK;
++}
++
++/****************************************************************************
++ * Name: rk3576_cif_status
++ *
++ * Description:
++ *   读中断状态并清掉。返回值是清掉之前的原值。
++ *
++ *   ★ 读完就清，是为了让下一次读反映的是"这段时间内"的情况。
++ *     不清的话状态位一直挂着，第二次读还是那个值，会误以为错误在
++ *     持续发生。
++ *
++ ****************************************************************************/
++
++uint32_t rk3576_cif_status(int host)
++{
++  uint32_t off;
++  uint32_t stat;
++
++  if (host < 0 || host > 4)
++    {
++      return 0;
++    }
++
++  off  = cif_csi_offset(host);
++  stat = cif_getreg(off + CIF_MIPI_INTSTAT);
++  cif_putreg(off + CIF_MIPI_INTSTAT, stat);
++
++  syslog(LOG_INFO, "CIF: host%d INTSTAT=0x%08" PRIx32 "%s\n",
++         host, stat,
++         (stat & CSI_ALL_ERROR_INTEN) ? "（含错误位）" : "");
++
++  return stat;
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_cif.h b/arch/arm64/src/rk3576/rk3576_cif.h
+new file mode 100644
+index 00000000..ea01350b
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_cif.h
+@@ -0,0 +1,62 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_cif.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_CIF_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_CIF_H
++
++#include <nuttx/config.h>
++#include <stdint.h>
++
++/****************************************************************************
++ * Name: rk3576_cif_start
++ *
++ * Description:
++ *   让 CIF 把某一路 CSI 输入的像素写进 DDR。输出为非压缩 RAW12，
++ *   每像素 16 位，行跨距 width*2。
++ *
++ * Input Parameters:
++ *   host       - CSI 输入号 0..4（对应 dtb 的 mipiN_csi2）
++ *   buf0,buf1  - 乒乓缓冲的两个物理地址，**都必须给**
++ *   width,height - 帧尺寸
++ *
++ ****************************************************************************/
++
++int rk3576_cif_start(int host, uintptr_t buf0, uintptr_t buf1,
++                     int width, int height);
++
++/****************************************************************************
++ * Name: rk3576_cif_stop
++ ****************************************************************************/
++
++int rk3576_cif_stop(int host);
++
++/****************************************************************************
++ * Name: rk3576_cif_status
++ *
++ * Description:
++ *   读并清中断状态，返回清除前的原值。
++ *
++ ****************************************************************************/
++
++uint32_t rk3576_cif_status(int host);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_CIF_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_gpio.c b/arch/arm64/src/rk3576/rk3576_gpio.c
+index c7125d96..4b064f5c 100644
+--- a/arch/arm64/src/rk3576/rk3576_gpio.c
++++ b/arch/arm64/src/rk3576/rk3576_gpio.c
+@@ -47,6 +47,7 @@
+ #include <debug.h>
+ #include <errno.h>
+ #include <inttypes.h>
++#include <syslog.h>
+ #include <stdbool.h>
+ #include <stdint.h>
+ 
+@@ -191,9 +192,18 @@ static int rk3576_gpio_interrupt(int irq, void *context, void *arg)
+           rk3576_gpio_wr16(base, RK3576_GPIO_INT_EN_L, pin, false);
+           rk3576_gpio_wr16(base, RK3576_GPIO_INT_MASK_L, pin, true);
+ 
+-          gpioerr("ERROR: GPIO%d_%d 中断失控（已进入 %" PRIu32
+-                  " 次），已屏蔽该引脚\n",
+-                  bank, pin, g_gpio_isr[bank][pin].count);
++          /* ★ 用 syslog 而不是 gpioerr。
++           *
++           *   gpioerr 在未开 GPIO 调试时是空宏 —— 真发生风暴时引脚被
++           *   静默屏蔽，一行记录都没有，事后只能看到"某个中断突然不
++           *   工作了"，根本联想不到这里。保护措施如果不留证据，等于
++           *   把一个响亮的故障换成一个安静的故障，更难查。
++           */
++
++          syslog(LOG_ERR,
++                 "GPIO%d_%d 中断失控（已进入 %" PRIu32 " 次），"
++                 "已屏蔽该引脚\n",
++                 bank, pin, g_gpio_isr[bank][pin].count);
+         }
+     }
+ 
+-- 
+2.43.0
+
+
+From cd8377e58146260ddcbc237196d79bc01eaff599 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Fri, 4 Sep 2026 22:56:07 +0800
+Subject: [PATCH 33/33] arch/arm64/rk3576: bisect the VOP2 window against
+ U-Boot's known-good one
+
+Our own full-screen ESMART1 window renders incorrectly: solid fills and
+row-varying patterns look right, but column-varying patterns shear and a
+100x100 box breaks into scattered horizontal bands.  Guessing at the
+registers one at a time costs a flash cycle per guess, and the guesses
+are not independent -- changing the format also changes what the stride
+means, so a single change moves two variables at once.
+
+The factory firmware displays a logo on this panel, so the values it
+leaves behind (MST=0xfdf00000 VIR=654 ACT=654x270) are the one
+configuration with measured backing.  Save them before the driver
+overwrites anything, and add a way back:
+
+  - rk3576_vop2_restore_uboot() returns to that state and hands back the
+    buffer address and geometry, so pixels can be written to it directly
+  - map 0xfdf00000+4MB in the MMU table; U-Boot's framebuffer sits
+    outside NuttX's 64MB, so the CPU could not otherwise write to it
+  - rk3576_vop2_try_window() takes those values as the origin and moves
+    exactly one variable -- buffer, width, height, or display origin
+  - rk3576_vop2_dump_win() dumps the whole ESMART1 block plus VP1
+    timing, decoded, callable at any time (shadow registers only latch
+    on the next VSYNC, so an immediate read-back shows stale values)
+
+Restoring U-Boot's window and painting stripes into its buffer renders
+correctly, which clears the display path, the write side and the cache
+flush all at once: the fault is in one of the registers fb_setup
+changes.  try_window turns the remaining five candidates into seven
+runtime experiments off a single flash.
+
+Two candidates are already ruled out against TRM Part2: U-Boot's format
+is ARGB8888, not RGB888 (for RGB888 vir_stride would be (w*3/4)+(w%3),
+not the 654 observed for a 654-wide window), and every offset and field
+position in the header matches the ESMART0 register tables.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/hardware/rk3576_vop2.h |  54 ++-
+ arch/arm64/src/rk3576/rk3576_boot.c          |  17 +
+ arch/arm64/src/rk3576/rk3576_vop2.c          | 485 ++++++++++++++++++-
+ arch/arm64/src/rk3576/rk3576_vop2.h          |  41 ++
+ 4 files changed, 590 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_vop2.h b/arch/arm64/src/rk3576/hardware/rk3576_vop2.h
+index 53d28792..4dca1f64 100644
+--- a/arch/arm64/src/rk3576/hardware/rk3576_vop2.h
++++ b/arch/arm64/src/rk3576/hardware/rk3576_vop2.h
+@@ -142,13 +142,63 @@
+ #define RK3576_SMART_REGION0_DSP_INFO 0x24  /* 显示尺寸                */
+ #define RK3576_SMART_REGION0_DSP_ST  0x28   /* 显示起点                */
+ 
++/* ★ RK3576 专有：图层归属哪个视频口，由窗口自己的这个寄存器决定，
++ * 不是 RK3568/3588 的 OVL_LAYER_SEL。低 2 位是视频口号。
++ * 名字里的 IMD = immediate，它不走影子寄存器，写下去立即生效。
++ *
++ * 这一条搞错的后果很隐蔽：VOP2 的影子寄存器是**按视频口**提交的，
++ * 图层若不归你提交的那个口，CFG_DONE 不会刷新它的影子 —— 所有配置
++ * 写进去都停在影子里，回读全是旧值，屏幕纹丝不动，且不报任何错。
++ */
++
++/* 缩放器。出处厂商 rockchip_drm_vop2.h：
++ *   SCL_CTRL bit[1:0] 水平模式、bit[5:4] 垂直模式，0 = 不缩放
++ *   SCL_FACTOR_YRGB 低 16 位 X、高 16 位 Y，1:1 时为 0x1000
++ *
++ * 改了 ACT_INFO/DSP_INFO 却不管缩放器，硬件会拿旧系数去采样新的源图。
++ * 即使当前是旁路，也显式写一遍 —— 从 U-Boot 继承下来的状态里，
++ * 每一个没被显式设定的寄存器都是一个未知量。
++ */
++
++#define RK3576_SMART_REGION0_SCL_CTRL        0x30
++#define RK3576_SMART_REGION0_SCL_FACTOR_YRGB 0x34
++#define RK3576_SMART_SCL_FACTOR_1TO1         0x1000
++
++/* ESMART_AXI_CTRL_IMD —— 出处 RK3576 TRM
++ *   「ESMART0_ESMART_AXI_CTRL_IMD, Base(0x27D01800) + offset(0x0008)」
++ *
++ * ★ bit2 esmart_mmu_bypass 复位为 0，也就是**默认走 VOP2 自己的 IOMMU**。
++ *
++ *   不旁路的话，写进 YRGB_MST 的地址会被 IOMMU 按页表翻译一遍。页表是
++ *   U-Boot 为它自己那块帧缓冲建的，我们给的地址翻译过去落到零散的页
++ *   上 —— 现象非常具有迷惑性：
++ *     纯色填充   看起来完全正常（每一页都是同一个颜色）
++ *     粗粒度图案 大致正确（页粒度 4KB ≈ 1.4 行，行方向的变化还看得出）
++ *     细节图案   彻底打乱（竖条纹变斜纹、方块变成断续的横带）
++ *   于是"整屏填白正常"会让人误以为地址和跨距都对，实际上根本没读对。
++ *
++ *   名字里的 IMD = immediate，写下去立即生效，不需要 CFG_DONE。
++ */
++
++#define RK3576_SMART_AXI_CTRL_IMD    0x08
++#define RK3576_SMART_MMU_BYPASS      (1u << 2)
++
++#define RK3576_SMART_PORT_SEL_IMD    0xf4
++#define RK3576_SMART_PORT_SEL_MASK   0x3
++
+ #define RK3576_SMART_REGION0_CTRL_EN (1 << 0)
+ #define RK3576_SMART_REGION0_CTRL_FORMAT_SHIFT 1
+ 
+ /* 像素格式（REGION0_CTRL 的 bit[5:1]） */
+ 
++/* 出处 RK3576 TRM「ESMART0_REGION0_CTL」的 region0_data_fmt（bit[5:1]）。
++ * ★ 原来 RGB888 写成 2、RGB565 写成 3，是照搬别的芯片的编码，错的。
++ *   ARGB8888=0 碰巧一致，所以当前用法没暴露问题 —— 这种"错了但没现象"
++ *   的常量最危险，等哪天真去设 RGB565 才会发现。
++ */
++
+ #define RK3576_VOP2_FMT_ARGB8888     0
+-#define RK3576_VOP2_FMT_RGB888       2
+-#define RK3576_VOP2_FMT_RGB565       3
++#define RK3576_VOP2_FMT_RGB888       1
++#define RK3576_VOP2_FMT_RGB565       2
+ 
+ #endif /* __ARCH_ARM64_SRC_RK3576_HARDWARE_RK3576_VOP2_H */
+diff --git a/arch/arm64/src/rk3576/rk3576_boot.c b/arch/arm64/src/rk3576/rk3576_boot.c
+index f76d45cb..808dc1b5 100644
+--- a/arch/arm64/src/rk3576/rk3576_boot.c
++++ b/arch/arm64/src/rk3576/rk3576_boot.c
+@@ -79,6 +79,23 @@ static const struct arm_mmu_region g_mmu_regions[] =
+   MMU_REGION_FLAT_ENTRY("DRAM0_S0",
+                         CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
+                         MT_NORMAL | MT_RW | MT_SECURE),
++
++  /* U-Boot 的帧缓冲。
++   *
++   * ★ 为什么要额外映射这一段
++   *
++   *   它在 0xfdf00000，落在 NuttX 的 64MB 之外，CPU 默认访问不到。
++   *   而这块内存有个别处没有的优点：**U-Boot 用它把 logo 正常显示出来
++   *   过**，也就是说"VOP2 能从这里正确取数"是被实测验证过的，不是假设。
++   *
++   *   我们自己在堆里分配的缓冲，VOP2 取出来的内容是错乱的，原因尚未
++   *   查清。与其继续猜，不如先用这块已知可用的内存把画面显示出来 ——
++   *   把"能不能显示"和"能不能用任意内存显示"拆成两个问题。
++   */
++
++  MMU_REGION_FLAT_ENTRY("UBOOT_FB",
++                        0xfdf00000, 0x400000,
++                        MT_NORMAL | MT_RW | MT_SECURE),
+ };
+ 
+ const struct arm_mmu_config g_mmu_config =
+diff --git a/arch/arm64/src/rk3576/rk3576_vop2.c b/arch/arm64/src/rk3576/rk3576_vop2.c
+index 956115a4..f6dc42bb 100644
+--- a/arch/arm64/src/rk3576/rk3576_vop2.c
++++ b/arch/arm64/src/rk3576/rk3576_vop2.c
+@@ -421,6 +421,26 @@ int rk3576_vop2_takeover(uintptr_t buffer, uint32_t *width, uint32_t *height,
+  *
+  ****************************************************************************/
+ 
++/* U-Boot 留下的窗口配置。
++ *
++ * ★ 在覆盖之前存下来，因为它是**唯一一组被实测验证过能正常显示**的
++ *   参数 —— U-Boot 用它把 logo 显示出来了。我们自己配的参数取出来的
++ *   画面是错乱的，原因未明；有了这份备份，就能随时退回一个已知可用的
++ *   状态，把"显示通路本身有没有问题"和"我的配置对不对"分开验证。
++ */
++
++static struct
++{
++  uint32_t mst;
++  uint32_t vir;
++  uint32_t act;
++  uint32_t dsp;
++  uint32_t dsp_st;
++  uint32_t ctrl;
++  bool     valid;
++}
++g_uboot_win;
++
+ int rk3576_vop2_fb_setup(uintptr_t buffer, uint32_t width, uint32_t height,
+                          uint32_t stride_bytes)
+ {
+@@ -435,6 +455,64 @@ int rk3576_vop2_fb_setup(uintptr_t buffer, uint32_t width, uint32_t height,
+       return -EINVAL;
+     }
+ 
++  /* ★ 先把两个 ESMART 的归属和地址都读出来。
++   *
++   *   之前默认 ESMART1 归 VP1（照搬 RK3568/3588 的 OVL_LAYER_SEL 思路），
++   *   结果所有配置都停在影子里 —— RK3576 是每个窗口自己一个
++   *   PORT_SEL_IMD。先看清楚现状，再决定动哪个窗口。
++   */
++
++  {
++    uint32_t s0 = vop_getreg(RK3576_VOP2_ESMART0_BASE +
++                             RK3576_SMART_PORT_SEL_IMD);
++    uint32_t s1 = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                             RK3576_SMART_PORT_SEL_IMD);
++
++    syslog(LOG_INFO,
++           "VOP2: ESMART0 归VP%" PRIu32 " CTRL=0x%08" PRIx32
++           " MST=0x%08" PRIx32 " VIR=%" PRIu32 "\n",
++           s0 & RK3576_SMART_PORT_SEL_MASK,
++           vop_getreg(RK3576_VOP2_ESMART0_BASE +
++                      RK3576_SMART_REGION0_CTRL),
++           vop_getreg(RK3576_VOP2_ESMART0_BASE +
++                      RK3576_SMART_REGION0_YRGB_MST),
++           vop_getreg(RK3576_VOP2_ESMART0_BASE +
++                      RK3576_SMART_REGION0_VIR));
++
++    syslog(LOG_INFO,
++           "VOP2: ESMART1 归VP%" PRIu32 " CTRL=0x%08" PRIx32
++           " MST=0x%08" PRIx32 " VIR=%" PRIu32 "\n",
++           s1 & RK3576_SMART_PORT_SEL_MASK,
++           vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                      RK3576_SMART_REGION0_CTRL),
++           vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                      RK3576_SMART_REGION0_YRGB_MST),
++           vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                      RK3576_SMART_REGION0_VIR));
++  }
++
++  if (!g_uboot_win.valid)
++    {
++      g_uboot_win.mst    = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                                      RK3576_SMART_REGION0_YRGB_MST);
++      g_uboot_win.vir    = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                                      RK3576_SMART_REGION0_VIR);
++      g_uboot_win.act    = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                                      RK3576_SMART_REGION0_ACT_INFO);
++      g_uboot_win.dsp    = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                                      RK3576_SMART_REGION0_DSP_INFO);
++      g_uboot_win.dsp_st = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                                      RK3576_SMART_REGION0_DSP_ST);
++      g_uboot_win.ctrl   = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                                      RK3576_SMART_REGION0_CTRL);
++      g_uboot_win.valid  = true;
++
++      syslog(LOG_INFO,
++             "VOP2: 已备份 U-Boot 窗口 MST=0x%08" PRIx32 " VIR=%" PRIu32
++             " ACT=0x%08" PRIx32 "\n",
++             g_uboot_win.mst, g_uboot_win.vir, g_uboot_win.act);
++    }
++
+   hact = vop_getreg(VP1(RK3576_VP_DSP_HACT_ST_END));
+   vact = vop_getreg(VP1(RK3576_VP_DSP_VACT_ST_END));
+ 
+@@ -455,6 +533,47 @@ int rk3576_vop2_fb_setup(uintptr_t buffer, uint32_t width, uint32_t height,
+   vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_DSP_ST,
+              (vact_st << 16) | hact_st);
+ 
++  /* ★ 先旁路 ESMART 的 IOMMU。
++   *
++   *   VOP2 取帧缓冲默认经过它自己的 MMU（bit2 复位为 0）。页表是
++   *   U-Boot 建的，只覆盖它自己那块缓冲；我们换了地址却没换页表，
++   *   读到的就是按旧映射拼出来的零散页面。
++   *
++   *   我们用的是 kmm 分配的物理连续内存，本来就不需要 MMU，直接旁路。
++   */
++
++  {
++    uint32_t axi = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                              RK3576_SMART_AXI_CTRL_IMD);
++
++    syslog(LOG_INFO,
++           "VOP2: ESMART1 AXI_CTRL=0x%08" PRIx32 " MMU %s\n",
++           axi, (axi & RK3576_SMART_MMU_BYPASS) ? "已旁路" : "生效中");
++
++    /* ★ 不改这一位 —— 置 1 去旁路会让屏幕彻底变黑，连整屏填白
++     * 都读不到。U-Boot 正是用 bit2=0 显示了自己的 logo，说明
++     * 这条路径本就是直通的，动它反而破坏取数。这条负面结论
++     * 留在这里，下次不必重走一遍。
++     */
++  }
++
++  /* ★ 缩放器必须一起设成 1:1。
++   *
++   *   ACT_INFO(源尺寸) 和 DSP_INFO(显示尺寸) 改了，缩放系数却还是
++   *   U-Boot 为它那张 654x270 logo 留下的值 —— 硬件会按旧系数去采样
++   *   新的源图，输出是被错误重采样的内容，看起来像"图像被剪切/重复"。
++   *
++   *   本例里 U-Boot 的 ACT 与 DSP 相同（没缩放），所以大概率本来就是
++   *   旁路；但"大概率"不是依据。从 U-Boot 继承来的状态里，每一个没被
++   *   显式设定的寄存器都是一个未知量，显式写一遍才能把它从嫌疑名单里
++   *   划掉。
++   */
++
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_SCL_CTRL, 0);
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_SCL_FACTOR_YRGB,
++             (RK3576_SMART_SCL_FACTOR_1TO1 << 16) |
++             RK3576_SMART_SCL_FACTOR_1TO1);
++
+   /* VIR 的单位是 4 字节 */
+ 
+   vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_VIR,
+@@ -463,18 +582,93 @@ int rk3576_vop2_fb_setup(uintptr_t buffer, uint32_t width, uint32_t height,
+   vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_YRGB_MST,
+              (uint32_t)buffer);
+ 
+-  /* 保持 U-Boot 设好的格式与使能位不动，只确认使能仍在。 */
++  /* ★ 必须显式设成 ARGB8888，不能沿用 U-Boot 的格式。
++   *
++   *   原来这里写的是"保持 U-Boot 设好的格式不动"，只补一个使能位。
++   *   但上层 rk3576_fb.c 是**硬编码**按 32 位 ARGB8888 对外声明的
++   *   （fmt=FB_FMT_RGB32、bpp=32）。两边一旦不一致，就出现这种故障：
++   *
++   *     U-Boot 用 RGB888(3 字节/像素) -> 硬件按 3 字节读，
++   *     应用按 4 字节写 -> 每行错开 720/3=240 像素，
++   *     竖条纹在屏上变成近乎水平的斜纹。
++   *
++   *   而且不报任何错 —— 地址、跨距、缓存刷回全都对，只有格式对不上。
++   *
++   *   与其让上层去迁就硬件里一个不确定的值，不如在这里把硬件设成上层
++   *   声明的那一种。格式是本函数的职责，它决定了 stride_bytes 的含义。
++   */
+ 
+   ctrl = vop_getreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_CTRL);
++
++  syslog(LOG_INFO, "VOP2: 原格式 %" PRIu32 "（0=ARGB8888 2=RGB888 3=RGB565）\n",
++         (ctrl >> RK3576_SMART_REGION0_CTRL_FORMAT_SHIFT) & 0x1f);
++
++  ctrl &= ~(0x1fu << RK3576_SMART_REGION0_CTRL_FORMAT_SHIFT);
++  ctrl |= (uint32_t)RK3576_VOP2_FMT_ARGB8888 <<
++          RK3576_SMART_REGION0_CTRL_FORMAT_SHIFT;
++
+   vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_CTRL,
+              ctrl | RK3576_SMART_REGION0_CTRL_EN);
+ 
+   vop_cfg_done(RK3576_VOP2_MIPI_VP);
+ 
+-  syslog(LOG_INFO,
+-         "VOP2: 帧缓冲 %" PRIu32 "x%" PRIu32 " 跨距 %" PRIu32
+-         " 字节 @0x%08lx 已生效\n",
+-         width, height, stride_bytes, (unsigned long)buffer);
++  /* ★ 回读硬件实际在用的值。
++   *
++   *   写进去不等于生效：VOP2 是影子寄存器，CFG_DONE 没提交到正确的
++   *   视频口就停在影子里；VIR 的单位若理解错，写 720 硬件可能按 180
++   *   行宽去取。这些错误的共同现象是"图像倾斜"，而地址、缓存、格式
++   *   全都正确 —— 光看写入值一个也发现不了。
++   *
++   *   把回读值和意图值一起打出来，对不上时一眼可见。
++   */
++
++  /* ★ 必须等一帧再回读。
++   *
++   *   VOP2 是影子寄存器：写入先进影子，CFG_DONE 只是"请求提交"，真正
++   *   latch 发生在下一个 VSYNC。紧接着回读，读到的还是**旧的活动值** ——
++   *   看起来像"写入没生效"，实际只是还没到时候。
++   *
++   *   我第一次读到 MST 仍是 U-Boot 的 0xfdf00000，据此判断配置没落地，
++   *   方向就偏了。60Hz 下一帧约 17ms，等 50ms 足够覆盖。
++   */
++
++  up_mdelay(50);
++
++  {
++    uint32_t rb_act = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                                 RK3576_SMART_REGION0_ACT_INFO);
++    uint32_t rb_dsp = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                                 RK3576_SMART_REGION0_DSP_INFO);
++    uint32_t rb_vir = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                                 RK3576_SMART_REGION0_VIR);
++    uint32_t rb_mst = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                                 RK3576_SMART_REGION0_YRGB_MST);
++    uint32_t rb_ctl = vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                                 RK3576_SMART_REGION0_CTRL);
++
++    syslog(LOG_INFO,
++           "VOP2: 帧缓冲 %" PRIu32 "x%" PRIu32 " 跨距 %" PRIu32
++           " 字节 @0x%08lx\n",
++           width, height, stride_bytes, (unsigned long)buffer);
++
++    syslog(LOG_INFO,
++           "VOP2: 回读 ACT=0x%08" PRIx32 "(%" PRIu32 "x%" PRIu32 ")"
++           " DSP=0x%08" PRIx32 " VIR=%" PRIu32 " MST=0x%08" PRIx32
++           " CTRL=0x%08" PRIx32 "\n",
++           rb_act, (rb_act & 0xffff) + 1, ((rb_act >> 16) & 0xffff) + 1,
++           rb_dsp, rb_vir, rb_mst, rb_ctl);
++
++    syslog(LOG_INFO,
++           "VOP2: 回读 SCL_CTRL=0x%08" PRIx32 " SCL_FACTOR=0x%08" PRIx32
++           " DSP_ST=0x%08" PRIx32 "\n",
++           vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                      RK3576_SMART_REGION0_SCL_CTRL),
++           vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                      RK3576_SMART_REGION0_SCL_FACTOR_YRGB),
++           vop_getreg(RK3576_VOP2_ESMART1_BASE +
++                      RK3576_SMART_REGION0_DSP_ST));
++  }
++
+   return OK;
+ }
+ 
+@@ -593,3 +787,284 @@ void rk3576_vop2_dump_uboot_state(void)
+       up_mdelay(3);
+     }
+ }
++
++/****************************************************************************
++ * Name: rk3576_vop2_restore_uboot
++ *
++ * Description:
++ *   把 ESMART1 恢复成 U-Boot 留下的配置，并返回它的帧缓冲地址与几何。
++ *
++ *   ★ 这是一个"退回已知可用状态"的手段
++ *
++ *     我们自己配的窗口，VOP2 取出来的画面是错乱的（纯色正常、细节乱），
++ *     根因尚未定位。U-Boot 那组参数则被实测证明可用。恢复之后往它的
++ *     缓冲里写像素，如果画面正确，就说明显示通路本身没问题、问题出在
++ *     我们改的某个寄存器上 —— 这一步把两件事分开了，而且顺带得到一条
++ *     马上能用的出图通路。
++ *
++ ****************************************************************************/
++
++int rk3576_vop2_restore_uboot(uintptr_t *buffer, uint32_t *width,
++                              uint32_t *height, uint32_t *stride_bytes)
++{
++  if (!g_uboot_win.valid)
++    {
++      return -ENODATA;
++    }
++
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_YRGB_MST,
++             g_uboot_win.mst);
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_VIR,
++             g_uboot_win.vir);
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_ACT_INFO,
++             g_uboot_win.act);
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_DSP_INFO,
++             g_uboot_win.dsp);
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_DSP_ST,
++             g_uboot_win.dsp_st);
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_CTRL,
++             g_uboot_win.ctrl);
++
++  vop_cfg_done(RK3576_VOP2_MIPI_VP);
++  up_mdelay(50);
++
++  if (buffer != NULL)
++    {
++      *buffer = g_uboot_win.mst;
++    }
++
++  if (width != NULL)
++    {
++      *width = (g_uboot_win.act & 0xffff) + 1;
++    }
++
++  if (height != NULL)
++    {
++      *height = ((g_uboot_win.act >> 16) & 0xffff) + 1;
++    }
++
++  if (stride_bytes != NULL)
++    {
++      *stride_bytes = g_uboot_win.vir * 4;
++    }
++
++  syslog(LOG_INFO,
++         "VOP2: 已恢复 U-Boot 窗口 %" PRIu32 "x%" PRIu32
++         " 跨距 %" PRIu32 " @0x%08" PRIx32 "\n",
++         (g_uboot_win.act & 0xffff) + 1,
++         ((g_uboot_win.act >> 16) & 0xffff) + 1,
++         g_uboot_win.vir * 4, g_uboot_win.mst);
++  return OK;
++}
++
++/****************************************************************************
++ * Name: rk3576_vop2_dump_win
++ *
++ * Description:
++ *   把 ESMART1 图层的整个寄存器块和 VP1 的时序原样打出来。
++ *
++ *   ★ 与开机那次 dump 的区别：这个可以在 nsh 里随时敲。
++ *
++ *     影子寄存器要等一个 VSYNC 才 latch，"写完立刻回读"读到的是旧值；
++ *     而配置出错时最需要知道的恰恰是**硬件此刻在用什么**。做成随时可
++ *     调用的命令，就能在改完、等一会儿之后再看，把"写进去了"和
++ *     "生效了"分开。
++ *
++ ****************************************************************************/
++
++void rk3576_vop2_dump_win(void)
++{
++  static const struct
++  {
++    const char *name;
++    uint32_t    off;
++  }
++  regs[] =
++  {
++    { "ESMART_CTRL0",      RK3576_SMART_CTRL0 },
++    { "ESMART_CTRL1",      RK3576_SMART_CTRL1 },
++    { "AXI_CTRL_IMD",      RK3576_SMART_AXI_CTRL_IMD },
++    { "REGION0_MST_CTL",   RK3576_SMART_REGION0_CTRL },
++    { "REGION0_MST_YRGB",  RK3576_SMART_REGION0_YRGB_MST },
++    { "REGION0_MST_CBCR",  0x18 },
++    { "REGION0_VIR",       RK3576_SMART_REGION0_VIR },
++    { "REGION0_ACT_INFO",  RK3576_SMART_REGION0_ACT_INFO },
++    { "REGION0_DSP_INFO",  RK3576_SMART_REGION0_DSP_INFO },
++    { "REGION0_DSP_OFFSET", RK3576_SMART_REGION0_DSP_ST },
++    { "REGION0_SCL_CTRL",  RK3576_SMART_REGION0_SCL_CTRL },
++    { "REGION0_SCL_FACTOR", RK3576_SMART_REGION0_SCL_FACTOR_YRGB },
++    { "REGION0_SCL_OFFSET", 0x3c },
++    { "REGION1_MST_CTL",   0x40 },
++    { "PORT_SEL_IMD",      RK3576_SMART_PORT_SEL_IMD },
++  };
++
++  uint32_t vir;
++  uint32_t act;
++  uint32_t dsp;
++  uint32_t off;
++  int i;
++
++  syslog(LOG_INFO, "==== ESMART1 当前寄存器 ====\n");
++
++  for (i = 0; i < (int)(sizeof(regs) / sizeof(regs[0])); i++)
++    {
++      syslog(LOG_INFO, "  %-20s 0x%08" PRIx32 "\n", regs[i].name,
++             vop_getreg(RK3576_VOP2_ESMART1_BASE + regs[i].off));
++
++      /* 串口连续刷屏会丢字节，dump 读不全就白读了。 */
++
++      up_mdelay(3);
++    }
++
++  /* 把编码过的字段翻成人看的数字。地址、跨距、尺寸三者是否自洽，
++   * 是判断"图像倾斜"类故障的第一现场 —— 光看十六进制要心算。
++   */
++
++  vir = vop_getreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_VIR);
++  act = vop_getreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_ACT_INFO);
++  dsp = vop_getreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_DSP_INFO);
++  off = vop_getreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_DSP_ST);
++
++  syslog(LOG_INFO,
++         "  解码: 源 %" PRIu32 "x%" PRIu32 " 显示 %" PRIu32 "x%" PRIu32
++         " 起点 (%" PRIu32 ",%" PRIu32 ") 跨距 %" PRIu32 " 字节\n",
++         (act & 0x1fff) + 1, ((act >> 16) & 0x1fff) + 1,
++         (dsp & 0x1fff) + 1, ((dsp >> 16) & 0x1fff) + 1,
++         off & 0x1fff, (off >> 16) & 0x1fff,
++         (vir & 0xffff) * 4);
++
++  up_mdelay(3);
++
++  syslog(LOG_INFO,
++         "  VP1: HACT=0x%08" PRIx32 " VACT=0x%08" PRIx32
++         " HTOTAL=0x%08" PRIx32 " VTOTAL=0x%08" PRIx32
++         " DSP_CTRL=0x%08" PRIx32 "\n",
++         vop_getreg(VP1(RK3576_VP_DSP_HACT_ST_END)),
++         vop_getreg(VP1(RK3576_VP_DSP_VACT_ST_END)),
++         vop_getreg(VP1(RK3576_VP_DSP_HTOTAL_HS_END)),
++         vop_getreg(VP1(RK3576_VP_DSP_VTOTAL_VS_END)),
++         vop_getreg(VP1(RK3576_VP_DSP_CTRL)));
++}
++
++/****************************************************************************
++ * Name: rk3576_vop2_try_window
++ *
++ * Description:
++ *   从 U-Boot 那组已知可用的窗口参数出发，只改指定的几项，其余原样保留。
++ *
++ *   ★ 为什么要这么一个函数
++ *
++ *     fb_setup 一次改了五样东西：帧缓冲地址、宽、高、跨距、显示起点。
++ *     结果画面错乱，而这五样里任何一样错了现象都差不多 —— 一次实验
++ *     排除不掉任何一个。反过来，U-Boot 的那组参数已被实测证明可用
++ *     （`cam ub 2` 出的是正的竖条纹），它就是一个可靠的原点。
++ *
++ *     每次只从这个原点挪动一个变量，第一个出错的那次就直接指名了元凶。
++ *     代价是每次都要重配一遍窗口，但这是纯寄存器写，比重新烧一版固件
++ *     便宜几个数量级 —— 一次烧写换来七次实验。
++ *
++ *   ★ 帧缓冲一律按 ARGB8888 处理。
++ *
++ *     U-Boot 的 VIR=654 而窗口宽正是 654，按 TRM 的编码（ARGB8888 的
++ *     vir_stride 就等于像素宽）只能是 ARGB8888。所以"强制 ARGB8888"
++ *     和"缩放器设 1:1"这两项与 U-Boot 原状一致，不必再单独做成一步。
++ *
++ * Input Parameters:
++ *   buffer - 帧缓冲物理地址，0 表示沿用 U-Boot 的
++ *   width  - 窗口宽，0 表示沿用 U-Boot 的
++ *   height - 窗口高，0 表示沿用 U-Boot 的
++ *   origin - 0 沿用 U-Boot 的显示起点；1 改成 VP1 有效区原点（全屏）
++ *
++ * Returned Value:
++ *   OK，并通过出参返回最终生效的地址与几何，供调用方照着写像素。
++ *
++ ****************************************************************************/
++
++int rk3576_vop2_try_window(uintptr_t buffer, uint32_t width, uint32_t height,
++                           int origin, uintptr_t *out_buffer,
++                           uint32_t *out_width, uint32_t *out_height,
++                           uint32_t *out_stride)
++{
++  uint32_t stride;
++  uint32_t dsp_st;
++  uint32_t ctrl;
++
++  if (!g_uboot_win.valid)
++    {
++      return -ENODATA;
++    }
++
++  /* 先整体退回 U-Boot 的原状，再往上加改动 —— 否则上一次实验留下的
++   * 残留会混进这一次，"只改了一个变量"就不成立了。
++   */
++
++  if (buffer == 0)
++    {
++      buffer = g_uboot_win.mst;
++    }
++
++  if (width == 0)
++    {
++      width = (g_uboot_win.act & 0x1fff) + 1;
++    }
++
++  if (height == 0)
++    {
++      height = ((g_uboot_win.act >> 16) & 0x1fff) + 1;
++    }
++
++  stride = width * 4;
++
++  if (origin != 0)
++    {
++      uint32_t hact = vop_getreg(VP1(RK3576_VP_DSP_HACT_ST_END));
++      uint32_t vact = vop_getreg(VP1(RK3576_VP_DSP_VACT_ST_END));
++
++      dsp_st = (((vact >> 16) & 0xffff) << 16) | ((hact >> 16) & 0xffff);
++    }
++  else
++    {
++      dsp_st = g_uboot_win.dsp_st;
++    }
++
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_ACT_INFO,
++             ((height - 1) << 16) | (width - 1));
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_DSP_INFO,
++             ((height - 1) << 16) | (width - 1));
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_DSP_ST,
++             dsp_st);
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_SCL_CTRL, 0);
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_SCL_FACTOR_YRGB,
++             (RK3576_SMART_SCL_FACTOR_1TO1 << 16) |
++             RK3576_SMART_SCL_FACTOR_1TO1);
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_VIR,
++             stride / 4);
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_YRGB_MST,
++             (uint32_t)buffer);
++
++  ctrl = g_uboot_win.ctrl;
++  ctrl &= ~(0x1fu << RK3576_SMART_REGION0_CTRL_FORMAT_SHIFT);
++  ctrl |= (uint32_t)RK3576_VOP2_FMT_ARGB8888 <<
++          RK3576_SMART_REGION0_CTRL_FORMAT_SHIFT;
++
++  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_CTRL,
++             ctrl | RK3576_SMART_REGION0_CTRL_EN);
++
++  vop_cfg_done(RK3576_VOP2_MIPI_VP);
++
++  /* 等一帧，让影子寄存器 latch 完再让调用方去看回读值。 */
++
++  up_mdelay(50);
++
++  if (out_buffer != NULL) *out_buffer = buffer;
++  if (out_width  != NULL) *out_width  = width;
++  if (out_height != NULL) *out_height = height;
++  if (out_stride != NULL) *out_stride = stride;
++
++  syslog(LOG_INFO,
++         "VOP2: 试配窗口 %" PRIu32 "x%" PRIu32 " 跨距 %" PRIu32
++         " 起点 0x%08" PRIx32 " @0x%08lx\n",
++         width, height, stride, dsp_st, (unsigned long)buffer);
++
++  return OK;
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_vop2.h b/arch/arm64/src/rk3576/rk3576_vop2.h
+index d841ebfb..ec9f5595 100644
+--- a/arch/arm64/src/rk3576/rk3576_vop2.h
++++ b/arch/arm64/src/rk3576/rk3576_vop2.h
+@@ -135,4 +135,45 @@ int rk3576_vop2_fb_setup(uintptr_t buffer, uint32_t width, uint32_t height,
+ 
+ void rk3576_vop2_dump_uboot_state(void);
+ 
++/****************************************************************************
++ * Name: rk3576_vop2_restore_uboot
++ *
++ * Description:
++ *   把 ESMART1 恢复成 U-Boot 留下的窗口配置（那是唯一一组实测可用的
++ *   参数），并返回其帧缓冲地址与几何，供直接写像素使用。
++ *
++ ****************************************************************************/
++
++int rk3576_vop2_restore_uboot(uintptr_t *buffer, uint32_t *width,
++                              uint32_t *height, uint32_t *stride_bytes);
++
++/****************************************************************************
++ * Name: rk3576_vop2_dump_win
++ *
++ * Description:
++ *   打印 ESMART1 图层的整个寄存器块与 VP1 时序，并把编码字段解码成
++ *   尺寸/跨距/起点。可在 nsh 里随时调用 —— 影子寄存器要等 VSYNC 才
++ *   latch，"写完立刻回读"读到的是旧值，隔一会儿再看才是硬件在用的。
++ *
++ ****************************************************************************/
++
++void rk3576_vop2_dump_win(void);
++
++/****************************************************************************
++ * Name: rk3576_vop2_try_window
++ *
++ * Description:
++ *   以 U-Boot 那组已知可用的窗口参数为原点，只改指定的几项。传 0 的
++ *   参数沿用原值，origin 为 1 时把显示起点改成 VP1 有效区原点。
++ *
++ *   用来一次只挪动一个变量：fb_setup 同时改了地址、宽、高、跨距、起点
++ *   五样，任何一样错了现象都一样，一次实验排除不掉任何一个。
++ *
++ ****************************************************************************/
++
++int rk3576_vop2_try_window(uintptr_t buffer, uint32_t width, uint32_t height,
++                           int origin, uintptr_t *out_buffer,
++                           uint32_t *out_width, uint32_t *out_height,
++                           uint32_t *out_stride);
++
+ #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_VOP2_H */
 -- 
 2.43.0
 
