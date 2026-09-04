@@ -481,18 +481,6 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_RK3576_WDT
-  ret = rk3576_wdt_initialize("/dev/watchdog0");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: 看门狗初始化失败: %d\n", ret);
-    }
-  else
-    {
-      syslog(LOG_INFO, "看门狗: /dev/watchdog0 就绪（未启动）\n");
-    }
-#endif
-
 #ifdef CONFIG_ONESHOT
   /* 注册 /dev/oneshot（xTS 1.3.13/14 的 cmocka_driver_oneshot 需要它）。
    *
@@ -569,6 +557,32 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_RK3576_WDT
+  /* ★ 看门狗**必须最后注册**。
+   *
+   *   开了 CONFIG_WATCHDOG_AUTOMONITOR 之后，watchdog_register() 当场
+   *   就把看门狗跑起来并开始自动喂。注册得早，本函数后面任何一处初始化
+   *   卡住都会被判成"系统失控"而复位 —— 而复位之后又会走同一条初始化
+   *   路径再卡住，于是变成**每 90 秒重启一次的死循环**。
+   *
+   *   那比原本的"挂死不动"更难救：挂死至少还能断电重来，启动死循环连
+   *   nsh 提示符都进不去，`flash.sh` 靠串口敲 loader 的免 recovery 路子
+   *   就用不了了。
+   *
+   *   放到最后，被看着的就只有"启动完成之后"这一段 —— 那正是我们想要
+   *   的范围：跑测试跑挂了，自己回来。
+   */
+
+  ret = rk3576_wdt_initialize("/dev/watchdog0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 看门狗初始化失败: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "看门狗: /dev/watchdog0 就绪\n");
+    }
+#endif
 
   return OK;
 }
