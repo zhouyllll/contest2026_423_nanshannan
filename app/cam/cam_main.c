@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     {
       printf("用法: cam on|off|rx|cap|show|white|black|bars|half|vhalf|line|box\n");
       printf("      cam ub <0-2>     还原 U-Boot 窗口并写图案\n");
-      printf("      cam morph <0-6>  从 U-Boot 参数出发逐个变量地改\n");
+      printf("      cam morph <0-7>  从 U-Boot 参数出发逐个变量地改（7 复现故障）\n");
       printf("      cam regs         打印 ESMART1/VP1 寄存器现状\n");
       printf("      cam fbinfo|stat\n");
       return 1;
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     {
       if (argc < 3)
         {
-          printf("morph 要一个步骤号 0~6\n");
+          printf("morph 要一个步骤号 0~7\n");
           return 1;
         }
 
