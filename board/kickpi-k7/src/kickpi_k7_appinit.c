@@ -77,6 +77,41 @@ int board_app_initialize(uintptr_t arg)
   int ret;
 #endif
 
+#ifdef CONFIG_FS_TMPFS
+  /* xTS 的 cmocka 用例（syscall / fs / kv）都在
+   * CONFIG_TESTS_TESTSUITES_MOUNT_DIR 下建文件，缺这个目录会在第一个
+   * 用例就报 "Failed to switch the mount dir"。用 tmpfs 提供，不占用
+   * eMMC，也不依赖存储先就绪。
+   *
+   * ★ 这一段原来嵌在 CONFIG_FS_PROCFS 的 #ifdef 里面。
+   *
+   *   两者毫无关系，一旦有人关掉 procfs，tmpfs 会跟着一起消失，而现象
+   *   出现在很远的地方 —— cmocka 用例报 "Failed to switch the mount dir"。
+   *   条件编译的嵌套错误不会有任何编译期提示，只能靠看出来。
+   */
+
+  ret = mount(NULL, CONFIG_TESTS_TESTSUITES_MOUNT_DIR, "tmpfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 挂载 tmpfs 到 %s 失败: %d\n",
+             CONFIG_TESTS_TESTSUITES_MOUNT_DIR, ret);
+    }
+
+  /* /tmp 也给一块 tmpfs。
+   *
+   * xTS 1.3.2 的命令是 `fstest -n 10 -m /tmp` —— 用例名字叫"RAM 读写"，
+   * 实际测的是在**内存文件系统**上反复建删文件、校验内容。挂载点是写死
+   * 在用例命令里的，板子上没有 /tmp 就直接失败，且报的是文件系统错误，
+   * 看不出缺的只是一个挂载点。
+   */
+
+  ret = mount(NULL, "/tmp", "tmpfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 挂载 tmpfs 到 /tmp 失败: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* 挂载 procfs。
    *
@@ -87,21 +122,6 @@ int board_app_initialize(uintptr_t arg)
    * 挂载失败不作为致命错误：procfs 只是观察窗口，缺了它系统其余部分
    * 照常工作，因此仅记录日志、继续初始化后面的外设。
    */
-
-#ifdef CONFIG_FS_TMPFS
-  /* xTS 的 cmocka 用例（syscall / fs / kv）都在
-   * CONFIG_TESTS_TESTSUITES_MOUNT_DIR 下建文件，缺这个目录会在第一个
-   * 用例就报 "Failed to switch the mount dir"。用 tmpfs 提供，不占用
-   * eMMC，也不依赖存储先就绪。
-   */
-
-  ret = mount(NULL, CONFIG_TESTS_TESTSUITES_MOUNT_DIR, "tmpfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: 挂载 tmpfs 到 %s 失败: %d\n",
-             CONFIG_TESTS_TESTSUITES_MOUNT_DIR, ret);
-    }
-#endif
 
   ret = mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)

@@ -13,9 +13,13 @@
 
 注意：**WiFi 属于选测**，不在及格线内。方案 B 的 `ai_agent` 联网是加分项，不是必需项。
 
-## 当前进度总表（截至 2026-09-03）
+## 当前进度总表（截至 2026-09-04）
 
-必测 35 项：**通过 18、部分通过 3、不可行 3、待做 9、阻塞 1、需对端设备 1**。
+必测 35 项：**通过 18、部分通过 3、不可行 3、已编入待实测 8、待做 1、
+阻塞 1、需对端设备 1**。
+
+"已编入待实测"= 配置已开、程序已进 `builtin_list.h`、编译通过，只差在
+板子上敲一遍。命令见文末《一次烧写要跑完的命令清单》。
 
 | # | 用例 | 状态 | 依据 / 卡在哪 |
 |---|---|---|---|
@@ -26,27 +30,27 @@
 | 1.1.5 | Kernel-getprime | ✅ | |
 | 1.1.6 | Kernel-mm | ✅ | TEST COMPLETE |
 | 1.1.7 | Kernel-scanftest | ⚠️ | 85 通过 / 11 失败 |
-| 1.1.8 | Kernel-C | ☐ | 待做 |
+| 1.1.8 | Kernel-C | ◆ | `CONFIG_EXAMPLES_HELLO` 早已开，`hello` 直接可跑 |
 | 1.1.9 | Kernel-Cxx | ❌ | 需先接入 C++ 标准库（LIBCXX/UCLIBCXX/ETL） |
 | 1.1.10 | Kernel-popen | ❌ | 本 libc 无 popen 实现 |
 | 1.1.11 | Kernel-pipe | ✅ | PASSED（含重定向） |
-| 1.1.12 | Kernel-md5 | ☐ | crypto 框架已编入（`crypto/md5.c`），待上板验证 |
+| 1.1.12 | Kernel-md5 | ◆ | `md5_test` 已编入（tests 仓 `FS_TEST_EDONLY`），待实测 |
 | 1.1.13 | Kernel-C++ 功能 | ❌ | 同 1.1.9 |
 | 1.3.1 | 烧写测试 | ✅ | `scripts/flash.sh` 一条命令，串口触发 loader，**无需按 recovery** |
-| 1.3.2 | RAM 读写 | ☐ | `memstress` / `mem_*_perf_test` 待跑 |
-| 1.3.3 | RAM 读写性能 | ☐ | 同上 |
-| 1.3.4 | RAM 随机读写 | ☐ | 同上 |
+| 1.3.2 | RAM 读写 | ◆ | `fstest` 已编入，`/tmp` 已挂 tmpfs，待实测 |
+| 1.3.3 | RAM 读写性能 | ◆ | `ramtest` 早已编入，待实测 |
+| 1.3.4 | RAM 随机读写 | ◆ | `mkrd` + `cmocka_driver_block` 均已就绪，待实测 |
 | 1.3.5 | Flash 功能 | ⛔ | 阻塞：SD 卡仅在开 trace 编译选项时工作，根因未定位。**不能对 eMMC 跑**（见下文） |
 | 1.3.6 | GPIO 功能 | ⚠️ | 3/4。中断子项要求输入/输出两脚**物理短接**（已备好 GPIO4_A7 ↔ GPIO4_B3，同 1.8V 域） |
 | 1.3.7 | I2C / SPI 功能 | ◐ | **xTS 用例需对端板子**，单板不可能通过（见下文）。SPI 驱动已用计时法证实时钟真在跑；I2C 由板上真实器件（RTC@0x51、触摸@0x38）证实 |
 | 1.3.10 | UART 串口功能 | ✅ | `cmocka_driver_uart` 1/1 |
-| 1.3.11 | UART 文件传输 | ☐ | 待做 |
+| 1.3.11 | UART 文件传输 | ◆ | ymodem 的 `sb`/`rb` 已编入，待实测 |
 | 1.3.12 | RTC 时钟 | ✅ | HYM8563 读写 + 掉电后时间保持 |
 | 1.3.13 | Timer 定时器 | ✅ | `cmocka_driver_oneshot` 1/1 |
-| 1.3.14 | 时间一致性 | ☐ | 待做 |
+| 1.3.14 | 时间一致性 | ◆ | 无需配置，`date` 即可；要静置 24h |
 | 1.3.15 | Watchdog | ✅ | 实测触发系统复位并恢复 |
 | 1.3.16 | RNG | ✅ | 自检两批不同；`hexdump /dev/random` 读数随机 |
-| 1.3.17 | Crypto | ☐ | `/dev/crypto` 已存在（软件实现），待跑验证 |
+| 1.3.17 | Crypto | ◆ | 八个算法用例全部编入（见下），待实测 |
 | 1.2.1 | Reboot 启动异常 | ✅ | 10/10 |
 | 1.2.2 | Cold boot 启动异常 | ✅ | 5/5（口径见 `notes/xts-stability.md`） |
 | 1.2.3 | 系统 RAM 占用 | ✅ | 3.5MB / 63MB，5.6% |
@@ -90,11 +94,11 @@
 | 1.1.5 | Kernel-getprime | `getprime` | ✅ |
 | 1.1.6 | Kernel-mm 内存 | `mm` | ✅ TEST COMPLETE |
 | 1.1.7 | Kernel-scanftest | `scanftest` | ⚠️ 85 通过 / 11 失败 |
-| 1.1.8 | Kernel-C | | 待做 |
+| 1.1.8 | Kernel-C | `hello` | ◆ 已编入，待实测 |
 | 1.1.9 | Kernel-Cxx | `helloxx` | ❌ 需先接 C++ 标准库 |
 | 1.1.10 | Kernel-popen | `popen` | ❌ 本 libc 无 popen 实现 |
 | 1.1.11 | Kernel-pipe | `pipe` | ✅ PASSED（含重定向） |
-| 1.1.12 | Kernel-md5 | | 待做 |
+| 1.1.12 | Kernel-md5 | `md5_test -f /tmp/1.txt -c 100` | ◆ 已编入，待实测 |
 | 1.1.13 | Kernel-C++ 功能 | `cxxtest` | ❌ 同 1.1.9 |
 
 公共前提配置：
@@ -148,21 +152,21 @@ eMMC 第 0 扇区往后是引导器与启动镜像，跑一次就把板子写坏
 
 | # | 用例 | 依赖的驱动 | 状态 |
 |---|---|---|---|
-| 1.3.1 | 烧写测试 | 启动链路 / 烧录流程 | ☐ |
-| 1.3.2 | RAM 读写 | DDR + MMU | ☐ |
-| 1.3.3 | RAM 读写性能 | 同上 | ☐ |
-| 1.3.4 | RAM 随机读写 | 同上 | ☐ |
-| 1.3.5 | Flash 功能 | eMMC / SPI Flash + MTD | ☐ |
+| 1.3.1 | 烧写测试 | 启动链路 / 烧录流程 | ✅ |
+| 1.3.2 | RAM 读写 | `fstest` + tmpfs | ◆ 已编入 |
+| 1.3.3 | RAM 读写性能 | `ramtest` | ◆ 已编入 |
+| 1.3.4 | RAM 随机读写 | `mkrd` + `cmocka_driver_block` | ◆ 已编入 |
+| 1.3.5 | Flash 功能 | eMMC / SPI Flash + MTD | ⛔ 阻塞，见上 |
 | 1.3.6 | **GPIO 功能** | `cmocka_driver_gpio` | ⚠️ 3/4，中断子项挂死，未定位（案例 14） |
-| 1.3.7 | **I2C / SPI 功能** | I2C、SPI 驱动 | ☐ |
-| 1.3.10 | **UART 串口功能** | DW 8250 串口 | ☐ |
-| 1.3.11 | UART 文件传输 | 串口 + 文件系统 | ☐ |
-| 1.3.12 | RTC 时钟 | RTC 驱动 | ☐ |
+| 1.3.7 | **I2C / SPI 功能** | I2C、SPI 驱动 | ◐ 需对端板子，见上 |
+| 1.3.10 | **UART 串口功能** | DW 8250 串口 | ✅ 1/1 |
+| 1.3.11 | UART 文件传输 | ymodem `sb`/`rb` | ◆ 已编入 |
+| 1.3.12 | RTC 时钟 | HYM8563 | ✅ |
 | 1.3.13 | **Timer 定时器** | `cmocka_driver_oneshot` | ✅ 1/1（注册 /dev/oneshot） |
-| 1.3.14 | 时间一致性 | 同上 | ☐ |
+| 1.3.14 | 时间一致性 | `date` + RTC | ◆ 需静置 24h |
 | 1.3.15 | Watchdog | `cmocka_driver_watchdog` | ✅ 实测触发系统复位并恢复 |
 | 1.3.16 | RNG | `hexdump /dev/random` | ✅ 自检两批不同，实测读数随机 |
-| 1.3.17 | Crypto | 加解密引擎 | ☐ |
+| 1.3.17 | Crypto | 软件 cryptodev | ◆ 八项已编入 |
 
 已知的 cmocka 驱动测试命令：
 `cmocka_driver_gpio` `cmocka_driver_uart` `cmocka_driver_rtc` `cmocka_driver_oneshot`
@@ -191,6 +195,86 @@ eMMC 第 0 扇区往后是引导器与启动镜像，跑一次就把板子写坏
 | Audio / Video / GUI / LVGL / Framebuffer | 约 25 项 | 无屏方案暂不涉及 |
 | OTA 全包升级 | 若干 | 暂不涉及 |
 | NetApp（curl / ftpd / scp） | 若干 | 联网后顺带 |
+
+## 一次烧写要跑完的命令清单
+
+下面八项的配置都已经开好、程序都已编进镜像，剩下的只是在 nsh 里敲。
+按顺序跑完，进度表上的 ◆ 就能换成 ✅ 或写明失败原因。
+
+```sh
+# 1.1.8  Kernel-C —— 期望打印 Hello, World!!
+hello
+
+# 1.1.12 Kernel-md5 —— 期望 100 个 md5 值且完全一致
+echo openvela-rk3576 > /tmp/1.txt
+md5_test -f /tmp/1.txt -c 100
+
+# 1.3.2  RAM 读写 —— 期望 PASS
+fstest -n 10 -m /tmp
+
+# 1.3.3  RAM 读写性能 —— 先用 free 看 largest，再把它填进 -s
+free
+ramtest -w -s <largest>
+
+# 1.3.4  RAM 随机读写 —— 先造一块 10MB 的内存盘再对它跑块设备用例
+mkrd -m 10 -s 1000 1024
+ls /dev
+cmocka_driver_block -m /dev/ram10
+
+# 1.3.11 UART 文件传输 —— 板端发/收，PC 端用 minicom 的 ymodem 收/发
+sb /tmp/1.txt
+rb
+
+# 1.3.17 Crypto —— 八个算法各跑一遍，全部 PASS
+cmocka_des3cbc
+cmocka_aescbc
+cmocka_aesctr
+cmocka_aesxts
+cmocka_hmac
+cmocka_hash
+cmocka_crc32
+cmocka_ecdsa
+
+# 1.3.14 时间一致性 —— 设成 PC 当前时间，之后每 6h 看一次，共四次
+date -s "..."
+date
+```
+
+### ★ 用例的实际命令名与文档不一致
+
+xTS 文档 1.3.17 写的是"在 nsh 中输入 `des3cbc`"，实际编出来的名字带
+`cmocka_` 前缀（`CONFIG_TESTING_CRYPTO_*` 走的是 cmocka 框架）。文档里
+其余几处也有类似出入。**以 `builtin_list.h` 里注册的名字为准**，敲不出来
+时先 `help` 看一眼，不要以为是没编进去。
+
+### ★ 1.3.2 名叫"RAM 读写"，测的是内存文件系统
+
+用例命令是 `fstest -n 10 -m /tmp`，挂载点写死在命令里。板子上没有 `/tmp`
+就直接失败，而且报的是文件系统错误，看不出缺的只是一个挂载点 —— 所以
+在 `kickpi_k7_appinit.c` 里补挂了一块 tmpfs 到 `/tmp`。
+
+顺带修掉一处条件编译的嵌套错误：原来 `/data` 那块 tmpfs 的挂载代码嵌在
+`#ifdef CONFIG_FS_PROCFS` 里面，两者毫无关系，关掉 procfs 会让 tmpfs 跟着
+消失，而现象出现在很远的地方（cmocka 用例报 `Failed to switch the mount
+dir`）。这类错误没有任何编译期提示。
+
+### ★ 又两处 tests 仓的 Makefile 缺陷
+
+与前面记过的 `CONFIG_CM_*_TEST` 那批同一类 —— Makefile 里的分支引用了
+本仓根本没发布的目录：
+
+- `CONFIG_FS_TEST` 展开成 `include $(CURDIR)/fs_test/fs_test.mk`，
+  而发布出来的目录叫 `vela_fs_test/`（`fs_test.mk` 内部用的正是这个名字）
+- `block_device_test` / `libc_test` / `spi_slave_test` / `http_test` 四个
+  目录被**无条件** include，目录不存在，make 直接停在 context 阶段
+
+已按 `testsuites/Makefile` 里已有的 `$(wildcard ...)` 写法给九处无条件
+include 补上"文件存在"的条件，并把 `fs_test/` 改成 `vela_fs_test/`。
+
+两个 Makefile 的改动一起归档在 `bsp/tests-xts-makefile.patch`，
+在一份全新的 `repo sync` 上用 `git -C src/tests apply` 还原 —— `tests`
+是公共仓，改动不能提交上去，不归档就会在下一次同步时消失。
+（`tests/Kconfig` 里那处绝对路径是构建时自动生成的，不属于修改，不归档。）
 
 ## 里程碑映射
 

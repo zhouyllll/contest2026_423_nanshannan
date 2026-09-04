@@ -1,0 +1,141 @@
+diff --git a/testcases/Makefile b/testcases/Makefile
+index c5b6f3c..ed4fae4 100644
+--- a/testcases/Makefile
++++ b/testcases/Makefile
+@@ -40,9 +40,9 @@ ifneq ($(CONFIG_KVDB_TEST),)
+ endif
+ 
+ ifneq ($(CONFIG_FS_TEST),)
+-	include $(CURDIR)/fs_test/fs_test.mk
++	include $(CURDIR)/vela_fs_test/fs_test.mk
+ 	CFLAGS += -I$(APPDIR)/nshlib
+-	CFLAGS += -I$(CURDIR)/fs_test/fs/include
++	CFLAGS += -I$(CURDIR)/vela_fs_test/fs/include
+ endif
+ 
+ ifneq ($(CONFIG_SOCKET_RPMSG_TEST),)
+@@ -134,23 +134,41 @@ ifneq ($(CONFIG_VIBRATOR_TEST),)
+ 	CFLAGS += -I${APPDIR}/frameworks/vibrator/include
+ endif
+ 
++ifneq ($(wildcard $(CURDIR)/flash_rw/flash_rw.mk),)
+ include $(CURDIR)/flash_rw/flash_rw.mk
++endif
+ 
++ifneq ($(wildcard $(CURDIR)/abnormal_test/abnormal_test.mk),)
+ include $(CURDIR)/abnormal_test/abnormal_test.mk
++endif
+ 
++ifneq ($(wildcard $(CURDIR)/block_device_test/block_test.mk),)
+ include $(CURDIR)/block_device_test/block_test.mk
++endif
+ 
++ifneq ($(wildcard $(CURDIR)/libc_test/libc_test.mk),)
+ include $(CURDIR)/libc_test/libc_test.mk
++endif
+ 
++ifneq ($(wildcard $(CURDIR)/spi_slave_test/spi_slave_test.mk),)
+ include $(CURDIR)/spi_slave_test/spi_slave_test.mk
++endif
+ 
++ifneq ($(wildcard $(CURDIR)/smp_test/smp_test.mk),)
+ include $(CURDIR)/smp_test/smp_test.mk
++endif
+ 
++ifneq ($(wildcard $(CURDIR)/http_test/http_test.mk),)
+ include $(CURDIR)/http_test/http_test.mk
++endif
+ 
++ifneq ($(wildcard $(CURDIR)/repeat/repeat.mk),)
+ include $(CURDIR)/repeat/repeat.mk
++endif
+ 
++ifneq ($(wildcard $(CURDIR)/graphics_test/graphics_test.mk),)
+ include $(CURDIR)/graphics_test/graphics_test.mk
++endif
+ 
+ ifneq ($(CONFIG_BINDER_AIDL_TEST),)
+ 	include $(CURDIR)/binder_test/binder_test.mk
+diff --git a/testsuites/Makefile b/testsuites/Makefile
+index cb5f0f1..32cfdc3 100644
+--- a/testsuites/Makefile
++++ b/testsuites/Makefile
+@@ -19,10 +19,15 @@ PRIORITY = $(CONFIG_TESTS_TESTSUITES_PRIORITY)
+ STACKSIZE = $(CONFIG_TESTS_TESTSUITES_STACKSIZE)
+ MODULE = $(CONFIG_TESTS_TESTSUITES)
+ 
++# 本仓只发布了一部分用例目录，其余同名的 CONFIG_CM_*_TEST 由
++# apps/testing/testsuites 提供并在那里编译。若只判断 CONFIG，这里会为
++# 本仓不存在的用例登记 MAINSRC，make 报 "No rule to make target"。
++# 因此每个分支同时要求主源文件确实存在。
++
+ # treat all warning as error
+ CFLAGS += -Werror
+ 
+-ifneq ($(CONFIG_CM_SCHED_TEST),)
++ifneq ($(and $(CONFIG_CM_SCHED_TEST),$(wildcard $(CURDIR)/kernel/sched/cmocka_sched_test.c)),)
+ CFLAGS += -I$(CURDIR)/kernel/sched/include
+ CSRCS += $(wildcard kernel/sched/cases/*.c)
+ CSRCS += $(wildcard kernel/sched/common/*.c)
+@@ -30,7 +35,7 @@ PROGNAME += cmocka_sched_test
+ MAINSRC += $(CURDIR)/kernel/sched/cmocka_sched_test.c
+ endif
+ 
+-ifneq ($(CONFIG_CM_SYSCALL_TEST),)
++ifneq ($(and $(CONFIG_CM_SYSCALL_TEST),$(wildcard $(CURDIR)/kernel/syscall/cmocka_syscall_test.c)),)
+ CFLAGS += -I$(CURDIR)/kernel/syscall/include
+ CFLAGS += -I$(APPDIR)/nshlib
+ CSRCS += $(wildcard kernel/syscall/cases/*.c)
+@@ -39,7 +44,7 @@ PROGNAME += cmocka_syscall_test
+ MAINSRC += $(CURDIR)/kernel/syscall/cmocka_syscall_test.c
+ endif
+ 
+-ifneq ($(CONFIG_CM_KVDB_TEST),)
++ifneq ($(and $(CONFIG_CM_KVDB_TEST),$(wildcard $(CURDIR)/kernel/kv/cmocka_kv_test.c)),)
+ CFLAGS += ${INCDIR_PREFIX}$(APPDIR)/frameworks/kvdb
+ CFLAGS += -I$(CURDIR)/kernel/kv/include
+ CSRCS += $(wildcard kernel/kv/cases/*.c)
+@@ -48,14 +53,14 @@ PROGNAME += cmocka_kv_test
+ MAINSRC += $(CURDIR)/kernel/kv/cmocka_kv_test.c
+ endif
+ 
+-ifneq ($(CONFIG_CM_TIME_TEST),)
++ifneq ($(and $(CONFIG_CM_TIME_TEST),$(wildcard $(CURDIR)/kernel/time/cmocka_time_test.c)),)
+ CFLAGS += -I$(CURDIR)/kernel/time/include
+ CSRCS += $(wildcard kernel/time/cases/*.c)
+ PROGNAME += cmocka_time_test
+ MAINSRC += $(CURDIR)/kernel/time/cmocka_time_test.c
+ endif
+ 
+-ifneq ($(CONFIG_CM_PTHREAD_TEST),)
++ifneq ($(and $(CONFIG_CM_PTHREAD_TEST),$(wildcard $(CURDIR)/kernel/pthread/cmocka_pthread_test.c)),)
+ CFLAGS += -I$(CURDIR)/kernel/pthread/include
+ CSRCS += $(wildcard kernel/pthread/cases/*.c)
+ CSRCS += $(wildcard kernel/pthread/common/*.c)
+@@ -63,7 +68,7 @@ PROGNAME += cmocka_pthread_test
+ MAINSRC += $(CURDIR)/kernel/pthread/cmocka_pthread_test.c
+ endif
+ 
+-ifneq ($(CONFIG_CM_MUTEX_TEST),)
++ifneq ($(and $(CONFIG_CM_MUTEX_TEST),$(wildcard $(CURDIR)/kernel/mutex/cmocka_mutex_test.c)),)
+ CFLAGS += -I$(CURDIR)/kernel/mutex/include
+ CSRCS += $(wildcard kernel/mutex/cases/*.c)
+ CSRCS += $(wildcard kernel/mutex/common/*.c)
+@@ -71,7 +76,7 @@ PROGNAME += cmocka_mutex_test
+ MAINSRC += $(CURDIR)/kernel/mutex/cmocka_mutex_test.c
+ endif
+ 
+-ifneq ($(CONFIG_TEST_TELEPHONY),)
++ifneq ($(and $(CONFIG_TEST_TELEPHONY),$(wildcard $(CURDIR)/kernel/telephony/cmocka_telephony_test.c)),)
+ 	CFLAGS += -I$(APPDIR)/frameworks/telephony/include
+ 	CFLAGS += -I$(APPDIR)/testing/cmocka/cmocka/include
+ 	CSRCS += $(CURDIR)/kernel/telephony/telephony_sim_test.c \
+@@ -88,7 +93,7 @@ depend::
+ 	$(Q) touch $(MAINSRC)
+ endif
+ 
+-ifneq ($(CONFIG_CM_DFX_TEST),)
++ifneq ($(and $(CONFIG_CM_DFX_TEST),$(wildcard $(CURDIR)/kernel/dfx/cmocka_dfx_test.c)),)
+ CFLAGS += -I$(CURDIR)/kernel/dfx/include
+ CFLAGS += -I$(APPDIR)/frameworks/dfx/include
+ CSRCS += $(wildcard kernel/dfx/cases/*.c)
