@@ -26,11 +26,11 @@
 |---|---|---|---|
 | 1.1.1 | 系统内存管理 | ✅ | `cmocka_mm_test` 8/8 |
 | 1.1.2 | 系统调度 | ✅ | `cmocka_sched_test` 16/16（9 pthread + 7 task） |
-| 1.1.3 | 系统调用 | ⚠️ | 68/74；6 项失败是 tmpfs 能力限制（symlink、truncate），非移植缺陷 |
+| 1.1.3 | 系统调用 | ✅ | **74/74**。此前 68/74 的判断（"tmpfs 不支持 symlink/truncate"）是错的，根因是 `CONFIG_NAME_MAX=32`（见下）|
 | 1.1.4 | Kernel-ostest | ✅ | `ostest` 24 个套件 |
 | 1.1.5 | Kernel-getprime | ✅ | |
 | 1.1.6 | Kernel-mm | ✅ | TEST COMPLETE |
-| 1.1.7 | Kernel-scanftest | ⚠️ | 85 通过 / 11 失败 |
+| 1.1.7 | Kernel-scanftest | ⚠️ | **146 通过 / 18 失败**（旧记录 85/11 已过时）。失败集中在 #10、#28-31、#35-38、#49 等格式说明符边界用例，属 libc 一致性，非移植缺陷 |
 | 1.1.8 | Kernel-C | ✅ | `hello` 打印 Hello, World!! |
 | 1.1.9 | Kernel-Cxx | ✅ | `helloxx` 三种实例（动态/栈上/静态构造）全部打印。用**工具链自带**的 libstdc++/libsupc++，不下载源码 |
 | 1.1.10 | Kernel-popen | ✅ | `popen` 实测：`popen("help")` 的输出经管道回来、`pclose()` 正常。之前"libc 无 popen"的判断是错的 —— 实现在 `apps/system/popen/popen.c` |
@@ -45,7 +45,7 @@
 | 1.3.6 | GPIO 功能 | ⚠️ | 3/4。中断子项要求输入/输出两脚**物理短接**（已备好 GPIO4_A7 ↔ GPIO4_B3，同 1.8V 域） |
 | 1.3.7 | I2C / SPI 功能 | ◐ | **xTS 用例需对端板子**，单板不可能通过（见下文）。SPI 驱动已用计时法证实时钟真在跑；I2C 由板上真实器件（RTC@0x51、触摸@0x38）证实 |
 | 1.3.10 | UART 串口功能 | ✅ | `cmocka_driver_uart` 1/1 |
-| 1.3.11 | UART 文件传输 | ◐ | 板端 `sb` 发出的 YMODEM 头块经 CRC 校验正确（文件名 `a.txt`、大小 9）。完整传输需 PC 端 minicom 的 YMODEM，我临时写的接收端跟不上 `sb` 的握手超时 |
+| 1.3.11 | UART 文件传输 | ◐ | **接收方向已完整验证**：主机 `sb --ymodem` → 板端 `rb -f /mnt`，`Transfer complete`，板上 `cat` 出的内容与源文件逐字节一致。发送方向（板端 `sb` → 主机 `rb`）能收到正确的头块（文件名对），数据块被 lrzsz 拒收，未定位 |
 | 1.3.12 | RTC 时钟 | ✅ | HYM8563 读写 + 掉电后时间保持 |
 | 1.3.13 | Timer 定时器 | ✅ | `cmocka_driver_oneshot` OK。改用**独立的** RK3576 TIMER（CH0 闹钟 + CH1 计数），不再碰调度器的 ARM 通用定时器；同时 `sleep 3/8` 实测 3.3/8.4 s、静置 120 s 零自发复位 |
 | 1.3.14 | 时间一致性 | ◐ | `date -s` / `date` 实测正常（设 15:03:47，随后读到 15:03:50 / :54 / 04:13，与间隔一致）。已对时，24h 后复读比对漂移 |
@@ -90,11 +90,11 @@
 |---|---|---|---|
 | 1.1.1 | 系统内存管理 | `cmocka_mm_test` | ✅ 8/8 |
 | 1.1.2 | 系统调度 | `cmocka_sched_test` | ✅ 16/16（9 pthread + 7 task） |
-| 1.1.3 | 系统调用 | `cmocka_syscall_test` | 74 个用例，需 tmpfs 挂到 `/data`（已加，待复测） |
+| 1.1.3 | 系统调用 | `cmocka_syscall_test` | ✅ 74/74 |
 | 1.1.4 | Kernel-ostest | `ostest` | ✅ 24 个套件 |
 | 1.1.5 | Kernel-getprime | `getprime` | ✅ |
 | 1.1.6 | Kernel-mm 内存 | `mm` | ✅ TEST COMPLETE |
-| 1.1.7 | Kernel-scanftest | `scanftest` | ⚠️ 85 通过 / 11 失败 |
+| 1.1.7 | Kernel-scanftest | `scanftest` | ⚠️ 146 通过 / 18 失败 |
 | 1.1.8 | Kernel-C | `hello` | ◆ 已编入，待实测 |
 | 1.1.9 | Kernel-Cxx | `helloxx` | ✅ 工具链自带 libstdc++ |
 | 1.1.10 | Kernel-popen | `popen` | ✅ 实现在 apps/system/popen |
@@ -471,6 +471,51 @@ tcsetattr(ctx->recvfd, TCSANOW, &term);   /* 传输期间关回显 */
 脚本方式的难点是两者共用一条控制台、握手窗口很窄。**用 minicom 的内置
 YMODEM（Ctrl-A R）最省事**，xTS 文档对这一项本来也是让用 PC 端终端做。
 板端 `sb` 已验证正确：抓到的头块经 CRC 校验通过，文件名 `a.txt`、大小 9 都对。
+
+## ★ 1.1.3 满分：根因是 CONFIG_NAME_MAX，不是文件系统能力
+
+此前记的是"6 项失败是 tmpfs 能力限制（symlink、truncate）"。**这个判断
+是错的**，而且错得有代表性 —— 它听起来很合理，于是没人再去验。
+
+实测：tmpfs 的 `truncate` 是好用的（`truncate -s 100 /data/t.txt` 后
+`ls -l` 显示文件确实被截到 100 字节）。真正的原因是用例用 `__func__`
+拼文件名：
+
+```
+test_nuttx_syscall_close03_dir100   → 33 字符
+test_nuttx_syscall_write03_file.wav → 35 字符
+test_nuttx_syscall_truncate01_file  → 34 字符
+```
+
+而 `CONFIG_NAME_MAX=32`，`open()` 直接返回 ENAMETOOLONG，用例只好报
+"打不开文件"。`close03` 最能说明问题：它循环建 100 个文件，`_dir1`~
+`_dir99` 都是 ≤32 字符全部成功，**只有 `_dir100` 那一个超长**。
+
+改成 `CONFIG_NAME_MAX=64`（`CONFIG_FAT_MAXFNAME` 要跟着改，它不能超过
+NAME_MAX，否则 fs_fat32.h 会 `#warning` 而 -Werror 直接编不过）之后
+**74/74 全过，symlink 两项也过了** —— 它们同样是名字太长，与符号链接
+支持无关。
+
+**教训：把"看起来合理的解释"写进文档，等于给后来的人立了一块路障。**
+这条记录挡了很久，直到有人真的去看那 6 项到底报什么错。
+
+## ★ 1.3.11 的正确用法
+
+板端 `rb` 的目标目录是 `-f`，不是 `-p`（`-p` 是"去掉文件名前缀"）。
+
+```sh
+# 接收方向（已完整验证）
+#   板: rb -f /mnt
+#   PC: sb --ymodem <文件> < /dev/ttyUSB0 > /dev/ttyUSB0
+
+# 发送方向（头块正确，数据块 lrzsz 拒收，未定位）
+#   板: sb /mnt/send.txt
+#   PC: rb --ymodem < /dev/ttyUSB0 > /dev/ttyUSB0
+```
+
+前提是 `CONFIG_SERIAL_TERMIOS=y` —— `apps/system/ymodem/ymodem.c` 本来就
+调了 `cfmakeraw()` + `tcsetattr()` 关回显，但没开这个选项时 `tcsetattr`
+是空操作，控制台照样回显，写进去的字节原样回来混进数据流。
 
 ## 里程碑映射
 
