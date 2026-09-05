@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 01/34] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 01/45] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 02/34] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 02/45] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1363,7 +1363,7 @@ index 559489f6..d2fb5605 100644
 From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:38:15 +0800
-Subject: [PATCH 03/34] arm64/rk3576: clear U-Boot's leftover
+Subject: [PATCH 03/45] arm64/rk3576: clear U-Boot's leftover
  HCR_EL2.{IMO,FMO,AMO}; fix load address
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1490,7 +1490,7 @@ index d2fb5605..128e8a22 100644
 From 1a226e049212fce50e0724ee37b6671ac0f23e23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:50:02 +0800
-Subject: [PATCH 04/34] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
+Subject: [PATCH 04/45] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
  =?UTF-8?q?=5FEL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
  =?UTF-8?q?=E4=B8=81=E7=9A=84=E5=85=B3=E7=B3=BB?=
 MIME-Version: 1.0
@@ -1535,7 +1535,7 @@ index 128e8a22..f76d45cb 100644
 From 509d2fa1a06f4560ce252d7cc6a4d507ea7bd6dc Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 23:18:55 +0800
-Subject: [PATCH 05/34] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
+Subject: [PATCH 05/45] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
  =?UTF-8?q?=20=E9=A9=B1=E5=8A=A8=EF=BC=88Rockchip=20GPIO=20v2=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1989,7 +1989,7 @@ index 00000000..2fe55c92
 From 895f1f4e4df1ffb6dc7c665adb230ea472f48600 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 00:43:14 +0800
-Subject: [PATCH 06/34] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
+Subject: [PATCH 06/45] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
  =?UTF-8?q?=E3=80=81=E5=BC=95=E8=84=9A=E5=A4=8D=E7=94=A8=E4=B8=8E=20I2C=20?=
  =?UTF-8?q?=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
@@ -3602,7 +3602,7 @@ index 00000000..8d4d6561
 From 0efe6a8352599f5b577eda2598ab46844332a791 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:24:26 +0800
-Subject: [PATCH 07/34] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
+Subject: [PATCH 07/45] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
  =?UTF-8?q?=20(dwcmshc/SDHCI)=20=E5=91=BD=E4=BB=A4=E9=80=9A=E8=B7=AF?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -4324,7 +4324,7 @@ index 00000000..971084de
 From 19f41551f493da28c0756c5e83a0850a0bcf9aae Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:29:46 +0800
-Subject: [PATCH 08/34] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
+Subject: [PATCH 08/45] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
  =?UTF-8?q?=E9=80=9A=E8=B7=AF=E6=89=93=E9=80=9A=EF=BC=88CMD9/CMD7/CMD17=20?=
  =?UTF-8?q?+=20PIO=20=E8=AF=BB=E5=9D=97=EF=BC=89?=
 MIME-Version: 1.0
@@ -4534,7 +4534,7 @@ index cd0d10dc..99c4ecc0 100644
 From 98b2a2df090330a6d91d6f52c098751b1697768a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 13:13:58 +0800
-Subject: [PATCH 09/34] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
+Subject: [PATCH 09/45] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
  =?UTF-8?q?=20sdio=5Fdev=5Fs=EF=BC=8C/dev/mmcsd0=20=E5=8F=AF=E7=94=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -5263,7 +5263,7 @@ index 971084de..c0f64978 100644
 From 3a65d6b63b5febca4827bd7fecd8d2145adb51a0 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:07:47 +0800
-Subject: [PATCH 10/34] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
+Subject: [PATCH 10/45] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
  =?UTF-8?q?=E5=A4=87=E8=AF=BB=E9=80=9A=EF=BC=881=20=E4=BD=8D=20@50MHz?=
  =?UTF-8?q?=EF=BC=89=EF=BC=8C4=20=E4=BD=8D=E5=BE=85=E4=BF=AE?=
 MIME-Version: 1.0
@@ -5486,7 +5486,7 @@ index a3b84e47..a2996f1a 100644
 From 84d0c755aa873b306fefd87a20e4c2e0abccf064 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:14:24 +0800
-Subject: [PATCH 11/34] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
+Subject: [PATCH 11/45] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
  =?UTF-8?q?=E6=80=BB=E7=BA=BF=E6=89=93=E9=80=9A=EF=BC=8850MHz=EF=BC=89?=
  =?UTF-8?q?=EF=BC=8C=E6=A0=B9=E5=9B=A0=E6=98=AF=E8=83=BD=E5=8A=9B=E5=A3=B0?=
  =?UTF-8?q?=E6=98=8E?=
@@ -5587,7 +5587,7 @@ index a2996f1a..2206c8ab 100644
 From 5250326bc4b5ede69c28dea6feaf51d0ae74e46a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:27:58 +0800
-Subject: [PATCH 12/34] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
+Subject: [PATCH 12/45] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F(PMU)=E4=B8=8E=20GPIO=20=E4=B8=AD?=
  =?UTF-8?q?=E6=96=AD=EF=BC=8C=E4=B8=BA=E6=98=BE=E7=A4=BA=E4=B8=8E=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E9=93=BA=E8=B7=AF?=
@@ -6294,7 +6294,7 @@ index 00000000..80545549
 From 40634c8959141615d593598f97b5c70597d2039d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:41:21 +0800
-Subject: [PATCH 13/34] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
+Subject: [PATCH 13/45] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F=E7=BC=96=E5=8F=B7=E4=B8=8E=E6=AF=8F?=
  =?UTF-8?q?=E5=9F=9F=E7=9A=84=20req=20=E5=81=8F=E7=A7=BB?=
 MIME-Version: 1.0
@@ -6451,7 +6451,7 @@ index 80545549..84de6b0f 100644
 From d632b41753c213abee75ccaedbe6a88659d68b89 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:59:50 +0800
-Subject: [PATCH 14/34] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
+Subject: [PATCH 14/45] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
  =?UTF-8?q?=20=E9=9F=B3=E9=A2=91=E6=8E=A5=E5=8F=A3=E9=A9=B1=E5=8A=A8?=
  =?UTF-8?q?=EF=BC=88PIO=20=E5=8F=91=E9=80=81=EF=BC=89?=
 MIME-Version: 1.0
@@ -7201,7 +7201,7 @@ index 00000000..4c5ceb1c
 From 945dc74f703bb97d7c2331a2eb40df1bc888eb23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:26:44 +0800
-Subject: [PATCH 15/34] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
+Subject: [PATCH 15/45] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
  =?UTF-8?q?=20=E6=98=BE=E7=A4=BA=E6=8E=A7=E5=88=B6=E5=99=A8=EF=BC=88?=
  =?UTF-8?q?=E8=87=AA=E6=A3=80=20+=20=E5=86=85=E7=BD=AE=E5=BD=A9=E6=9D=A1?=
  =?UTF-8?q?=EF=BC=89?=
@@ -7744,7 +7744,7 @@ index 00000000..d59f5f55
 From e19fbf3e1dcfc9bd8c9cac919da3591de3b6bdb5 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:38:18 +0800
-Subject: [PATCH 16/34] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 16/45] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20DSI2=20=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8360,7 +8360,7 @@ index 00000000..b4cf8682
 From 506a2907cd27c7244a478ced9cc2e03e3e02ff77 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:44:28 +0800
-Subject: [PATCH 17/34] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 17/45] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20D/C-PHY=20=E9=A9=B1=E5=8A=A8=EF=BC=88D-PHY=20PLL=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8813,7 +8813,7 @@ index 00000000..6183bd51
 From 67474c8ffe832b715faa83734a71a32b80b33da6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:54:26 +0800
-Subject: [PATCH 18/34] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
+Subject: [PATCH 18/45] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
  =?UTF-8?q?=20=E5=89=8D=E7=BD=AE=E9=93=BE=E8=B7=AF=E4=B8=8E=20MDIO?=
  =?UTF-8?q?=EF=BC=88DWMAC=204.20a=EF=BC=89?=
 MIME-Version: 1.0
@@ -9314,7 +9314,7 @@ index 00000000..92991a43
 From 474c4a000e75319ecee875dffde4a0e7342ba12d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:07:45 +0800
-Subject: [PATCH 19/34] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
+Subject: [PATCH 19/45] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
  =?UTF-8?q?=E9=93=BE=E8=B7=AF=E5=85=AD=E9=A1=B9=E9=85=8D=E9=BD=90=EF=BC=8C?=
  =?UTF-8?q?DMA=20=E8=BD=AF=E5=A4=8D=E4=BD=8D=E4=BB=8D=E6=9C=AA=E5=AE=8C?=
  =?UTF-8?q?=E6=88=90?=
@@ -9867,7 +9867,7 @@ index 6f8e5f23..5afaf918 100644
 From 51d98edc4f4ae78ed5d33d08d8b5fdf85719c59b Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:24:18 +0800
-Subject: [PATCH 20/34] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
+Subject: [PATCH 20/45] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
  =?UTF-8?q?=E5=88=B0=E4=B8=83=E6=9D=A1=E6=80=BB=E7=BA=BF=EF=BC=88=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E5=AE=9A=E4=BD=8D=E7=94=A8=EF=BC=89?=
 MIME-Version: 1.0
@@ -9974,7 +9974,7 @@ index f57a2bfa..43f2313e 100644
 From 7a968bf8c6c3d85daf2dc81619a2800cf4bf89c4 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 11:12:37 +0800
-Subject: [PATCH 21/34] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
+Subject: [PATCH 21/45] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
  =?UTF-8?q?=E8=B7=AF=E4=BF=AE=E6=AD=A3=20+=20I2C0(PMU=20=E5=9F=9F)=20+=20?=
  =?UTF-8?q?=E5=BC=95=E8=84=9A=E4=B8=8A=E4=B8=8B=E6=8B=89=20API?=
 MIME-Version: 1.0
@@ -10837,7 +10837,7 @@ index d59f5f55..8c0f10a3 100644
 From c8d3eeab1d0eb34c8c9922e7a7fb4fa48df7c057 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 12:05:26 +0800
-Subject: [PATCH 22/34] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
+Subject: [PATCH 22/45] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
  =?UTF-8?q?=E6=AD=A3=20sizeof=20=E7=9A=84=E6=A0=BC=E5=BC=8F=E4=B8=B2?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -11173,7 +11173,7 @@ index be5db167..34eb7303 100644
 From abf918d9dedc4458cf1505937f86a90791fd1681 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 00:31:04 +0800
-Subject: [PATCH 23/34] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
+Subject: [PATCH 23/45] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
  =?UTF-8?q?=E5=9D=97=E8=AF=BB=E5=86=99=E3=80=81=E6=91=84=E5=83=8F=E5=A4=B4?=
  =?UTF-8?q?=20MCLK=E3=80=81=E5=85=8D=20recovery=20=E9=87=8D=E5=90=AF?=
 MIME-Version: 1.0
@@ -13336,7 +13336,7 @@ index f8333cb5..d841ebfb 100644
 From 2d8fa26231ab76705ef1144e445f76f2a8959934 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 12:01:05 +0800
-Subject: [PATCH 24/34] =?UTF-8?q?drivers/timers:=20=E6=96=B0=E5=A2=9E=20HY?=
+Subject: [PATCH 24/45] =?UTF-8?q?drivers/timers:=20=E6=96=B0=E5=A2=9E=20HY?=
  =?UTF-8?q?M8563=20I2C=20RTC=20=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -14153,7 +14153,7 @@ index 00000000..b597148d
 From d170765c4ab997d9f7dc6270211cbdfe3a18cd5b Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 13:34:59 +0800
-Subject: [PATCH 25/34] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=20DesignWare?=
+Subject: [PATCH 25/45] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=20DesignWare?=
  =?UTF-8?q?=20=E7=9C=8B=E9=97=A8=E7=8B=97=E9=A9=B1=E5=8A=A8=EF=BC=88xTS=20?=
  =?UTF-8?q?1.3.15=EF=BC=89?=
 MIME-Version: 1.0
@@ -14648,7 +14648,7 @@ index f8845b62..8609631b 100644
 From b5d7ce5c4d828ecac48a28c26d3327828b2d3645 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 13:46:09 +0800
-Subject: [PATCH 26/34] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=E7=A1=AC?=
+Subject: [PATCH 26/45] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=E7=A1=AC?=
  =?UTF-8?q?=E4=BB=B6=E9=9A=8F=E6=9C=BA=E6=95=B0=E9=A9=B1=E5=8A=A8=20/dev/r?=
  =?UTF-8?q?andom=EF=BC=88xTS=201.3.16=EF=BC=89?=
 MIME-Version: 1.0
@@ -14993,7 +14993,7 @@ index 00000000..70e4a877
 From a4e9b7be465cd44bd2299b7d3a9c79d9b8c4340d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 15:38:11 +0800
-Subject: [PATCH 27/34] arch/arm64/rk3576: add polled SPI master driver (SPI4)
+Subject: [PATCH 27/45] arch/arm64/rk3576: add polled SPI master driver (SPI4)
 
 Synopsys DesignWare SSI, Rockchip variant (rockchip,rk3066-spi).
 Register layout differs from stock DW SSI: data ports are split
@@ -16029,7 +16029,7 @@ index 00000000..f37ca9d6
 From e4e27eaa165c6013754cd3144e86a3e6257e7fd6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 15:46:28 +0800
-Subject: [PATCH 28/34] arch/arm64/rk3576: guard against GPIO interrupt storms
+Subject: [PATCH 28/45] arch/arm64/rk3576: guard against GPIO interrupt storms
 
 A pin can re-enter its handler without bound in two ways, neither of
 which reports an error -- the board simply stops responding, with no
@@ -16134,7 +16134,7 @@ index edb7a4ee..c7125d96 100644
 From 2e21784235ae6149b8dd14e3a4922174f500e29f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 19:12:28 +0800
-Subject: [PATCH 29/34] arch/arm64/rk3576: bound the SPI transfer loop, add
+Subject: [PATCH 29/45] arch/arm64/rk3576: bound the SPI transfer loop, add
  pulls and pull readback
 
 The push/pop loop had no exit.  With no serial clock (gate off, module
@@ -16466,7 +16466,7 @@ index 9b983e82..23d6a976 100644
 From 74c7a2d63af08db7e49610ddf66b0f19f9abccc7 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 20:06:48 +0800
-Subject: [PATCH 30/34] arch/arm64/rk3576: add MIPI CSI-2 D-PHY receiver
+Subject: [PATCH 30/45] arch/arm64/rk3576: add MIPI CSI-2 D-PHY receiver
 
 First stage of the camera capture path.  This is different hardware
 from rk3576_dcphy.c, not a direction flag on it: the display side is a
@@ -16940,7 +16940,7 @@ index 00000000..02138656
 From bc209e7ff21891788202f179086f89fe52d03e78 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 20:27:35 +0800
-Subject: [PATCH 31/34] arch/arm64/rk3576: add MIPI CSI-2 host controller
+Subject: [PATCH 31/45] arch/arm64/rk3576: add MIPI CSI-2 host controller
 
 Second stage of the capture path, and the first point in it that can be
 observed at all.  The sensor can only be confirmed over I2C and the
@@ -17390,7 +17390,7 @@ index 00000000..a4001926
 From 86a2c46526107c38f6f8ff54d86ea5ff8629c6f9 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Fri, 4 Sep 2026 22:55:50 +0800
-Subject: [PATCH 32/34] arch/arm64/rk3576: add CIF capture controller, log GPIO
+Subject: [PATCH 32/45] arch/arm64/rk3576: add CIF capture controller, log GPIO
  interrupt storms
 
 CIF is the last stage of the camera path (sensor -> D-PHY -> CSI-2 host
@@ -17895,7 +17895,7 @@ index c7125d96..4b064f5c 100644
 From cd8377e58146260ddcbc237196d79bc01eaff599 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Fri, 4 Sep 2026 22:56:07 +0800
-Subject: [PATCH 33/34] arch/arm64/rk3576: bisect the VOP2 window against
+Subject: [PATCH 33/45] arch/arm64/rk3576: bisect the VOP2 window against
  U-Boot's known-good one
 
 Our own full-screen ESMART1 window renders incorrectly: solid fills and
@@ -18623,7 +18623,7 @@ index d841ebfb..ec9f5595 100644
 From 9db16a799017690229a04d024555387f0045c2ed Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Fri, 4 Sep 2026 23:04:17 +0800
-Subject: [PATCH 34/34] arch/arm64/rk3576: DSP_ST is an active-area offset, not
+Subject: [PATCH 34/45] arch/arm64/rk3576: DSP_ST is an active-area offset, not
  a whole-frame one
 
 fb_setup wrote the layer's display origin as hsync_len + hback_porch
@@ -18785,6 +18785,2423 @@ index ec9f5595..8b19e14d 100644
   *
   *   用来一次只挪动一个变量：fb_setup 同时改了地址、宽、高、跨距、起点
   *   五样，任何一样错了现象都一样，一次实验排除不掉任何一个。
+-- 
+2.43.0
+
+
+From 0a1e36e81c91e0afe144f6b59147cf68582801ed Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sat, 5 Sep 2026 00:04:04 +0800
+Subject: [PATCH 35/45] arch/arm64/rk3576: bound the CIF DMA with the
+ frame-size register
+
+The CIF driver programmed the stride and the buffer addresses but never
+told the hardware how tall the frame is, on the reasoning that RK3576
+has no such register and lets the DMA follow the stream.  That was
+wrong.  The DMA never learned where to stop, ran past the kmm buffer and
+corrupted the heap free list; the failure then surfaced in whatever ran
+next -- a data abort inside mm_malloc, reached from nsh spawning a task,
+with nothing in the backtrace pointing at the camera at all.
+
+Rockchip's kernel says RK3576 only moved the register:
+
+  if (dev->chip_id < CHIP_RK3576_CIF)
+      write(get_reg_index_of_id_ctrl1(id), width | height << 16);
+  else
+      write(CIF_REG_MIPI_SET_SIZE_ID0 + id, width | height << 16);
+
+  regs.h: CSI_MIPI0_SET_FRAME_SIZE_ID0_RK3576 = 0x1A0
+          CSI_MIPI0_ID0_CROP_START_RK3576     = 0x190
+
+So write the size at 0x1A0, the crop origin at 0x190, and set CROP_EN,
+which the vendor enables unconditionally on RK3576 and which the size
+register depends on.  The original observation that CTRL1 holds vc/dt
+rather than the geometry was correct; the conclusion drawn from it --
+that no geometry register exists -- was not.
+
+Verified on the board: `cam cap` followed by `cam fbinfo` and `free`
+both survive, where before the next allocation aborted.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/rk3576_cif.c | 40 +++++++++++++++++++++++++++---
+ 1 file changed, 37 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_cif.c b/arch/arm64/src/rk3576/rk3576_cif.c
+index d62ebb8b..046bb771 100644
+--- a/arch/arm64/src/rk3576/rk3576_cif.c
++++ b/arch/arm64/src/rk3576/rk3576_cif.c
+@@ -111,13 +111,34 @@
+  *   布局。RK3576 的 CTRL1 是虚通道(1:0)与数据类型(7:2)；把宽高写进去
+  *   等于设了个乱数据类型、还顺手开了 HDR 模式。
+  *
+- *   RK3576 压根没有宽高寄存器 —— GLB_CTRL 的 sw_dma_adapt_en 复位即为
+- *   1，DMA 按数据流的实际尺寸搬运，只需给跨距(VLW)和缓冲地址。
++ *   ★ 但"CTRL1 不是宽高寄存器"不等于"没有宽高寄存器"。
++ *
++ *     这里原先据此推断 RK3576 靠 DMA 自适应、只要跨距和地址就够了。
++ *     那是错的，而且错得很贵：DMA 不知道该在第几行收手，就一直往下写，
++ *     冲出 kmm 分配的那块缓冲、踩烂堆的空闲链表。现象是**下一条要
++ *     malloc 的命令**崩在 mm_malloc 里 —— 崩的地方离肇事者十万八千里。
++ *
++ *     厂商内核 capture.c 里写得很清楚，RK3576 只是把这个寄存器挪了地方：
++ *
++ *       if (dev->chip_id < CHIP_RK3576_CIF)
++ *           write(get_reg_index_of_id_ctrl1(id), width | height << 16);
++ *       else
++ *           write(CIF_REG_MIPI_SET_SIZE_ID0 + id, width | height << 16);
++ *
++ *     regs.h: CSI_MIPI0_SET_FRAME_SIZE_ID0_RK3576 = 0x1A0
++ *             CSI_MIPI0_ID0_CROP_START_RK3576     = 0x190
+  */
+ 
+ #define CIF_ID_VC_SHIFT          0            /* sw_vc_id0, 2 位 */
+ #define CIF_ID_DT_SHIFT          2            /* sw_dt_id0, 6 位 */
+ 
++/* RK3576 专有：裁剪起点与帧尺寸。厂商在 RK3576 上无条件开 CROP_EN
++ * 并写这两个寄存器，DMA 的搬运边界就是由它们定的。
++ */
++
++#define CIF_MIPI_ID0_CROP_START  0x190
++#define CIF_MIPI_SET_SIZE_ID0    0x1a0
++
+ /* 通路级控制 VICAP_MIPIn_CTRL：bit0 是这条通路的总开关，复位为 0。
+  * 不置位的话各 id 自己的 cap_en 都不起作用。
+  */
+@@ -236,6 +257,19 @@ int rk3576_cif_start(int host, uintptr_t buf0, uintptr_t buf1,
+              (0u << CIF_ID_VC_SHIFT) |
+              ((uint32_t)MIPI_CSI2_DT_RAW12 << CIF_ID_DT_SHIFT));
+ 
++  /* ★ 帧尺寸必须写，它是 DMA 的**边界**。
++   *
++   *   不写的话 DMA 不知道在第几行收手，会一直写到缓冲外面去 ——
++   *   而缓冲是 kmm 分配的，越界就是把堆的空闲链表写烂。
++   *
++   *   裁剪起点取 (0,0)，即整帧不裁；但 CROP_EN 仍要置位，厂商在
++   *   RK3576 上是无条件开的，尺寸寄存器要靠它生效。
++   */
++
++  cif_putreg(off + CIF_MIPI_ID0_CROP_START, 0);
++  cif_putreg(off + CIF_MIPI_SET_SIZE_ID0,
++             (uint32_t)width | ((uint32_t)height << 16));
++
+   /* 5) 错误中断使能。不挂 ISR、靠轮询读 INTSTAT，但使能位必须打开，
+    *    否则状态位不会置起来，读到的永远是 0，会被当成"没有错误"。
+    */
+@@ -246,7 +280,7 @@ int rk3576_cif_start(int host, uintptr_t buf0, uintptr_t buf1,
+    *    而 id0 的格式还没配好，头几帧会按错误格式落盘。
+    */
+ 
+-  ctrl0 = CIF_ID_CAP_EN | CIF_ID_DMA_EN | CIF_ID_ALIGN_HIGH |
++  ctrl0 = CIF_ID_CAP_EN | CIF_ID_DMA_EN | CIF_ID_CROP_EN | CIF_ID_ALIGN_HIGH |
+           ((uint32_t)CIF_ID_PARSE_RAW12     << CIF_ID_PARSE_SHIFT) |
+           ((uint32_t)CIF_ID_WRDDR_UNCOMPACT << CIF_ID_WRDDR_SHIFT);
+ 
+-- 
+2.43.0
+
+
+From 21c0122a0ccedfd9f1c9ecc0d218c478a46a5513 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sat, 5 Sep 2026 01:02:00 +0800
+Subject: [PATCH 36/45] arch/arm64/rk3576: enable the CIF frame-end interrupt,
+ wait on it
+
+INTEN was written with CSI_ALL_ERROR_INTEN alone, which unmasks bits
+16..20; the frame-end bits live at 8..15 and stayed masked, so INTSTAT
+always read back zero.  That was never "the frame did not end" -- the
+hardware was simply not asked to report it, and capture had to guess
+with a fixed mdelay(300).
+
+The cost of guessing is not that the wait may be too short: it is that
+the buffer may hold half a frame, and a torn image looks exactly like a
+bug in the image processing, which sends the search somewhere unrelated.
+Measured, the difference is stark -- blind wait gave min=0 max=65520
+(stale memory plus a partial frame), waiting on the flag gives 0% zero
+pixels and all 1096 lines written.
+
+rk3576_cif_wait_frame() polls for the flag with a timeout and reports
+which ping-pong buffer completed.  Polling rather than an ISR: capture
+is synchronous, the caller is already waiting, and an interrupt path
+would add a handler, a semaphore and a lifetime to manage for no gain
+until continuous preview actually needs it.
+
+`want` selects one buffer specifically, because FRAME1_END was observed
+to fire with buffer 1 never written -- that round read back the memset
+zeros while every FRAME0_END round held good data.  The ping-pong page
+flip semantics are not yet understood; single-shot capture does not need
+ping-pong, so it asks for buffer 0 and steps around the part we have not
+figured out, reading buffer 0 while the hardware writes buffer 1.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/rk3576_cif.c | 124 ++++++++++++++++++++++++++++-
+ arch/arm64/src/rk3576/rk3576_cif.h |  16 ++++
+ 2 files changed, 139 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_cif.c b/arch/arm64/src/rk3576/rk3576_cif.c
+index 046bb771..bb2290f0 100644
+--- a/arch/arm64/src/rk3576/rk3576_cif.c
++++ b/arch/arm64/src/rk3576/rk3576_cif.c
+@@ -150,6 +150,22 @@
+ #define CIF_VLW_MASK             0x000fffffu
+ #define CSI_ALL_ERROR_INTEN      (0x1f << 16)
+ 
++/* 帧结束中断位。出处 kernel-6.1 .../cif/regs.h：
++ *
++ *   #define CSI_FRAME0_END_INTEN(id)  (0x1 << ((id) * 2 + 8))
++ *   #define CSI_FRAME1_END_INTEN(id)  (0x1 << ((id) * 2 + 9))
++ *   #define CSI_ALL_FRAME_END_INTEN   (0xff << 8)
++ *
++ * ★ 原先 INTEN 只写了 CSI_ALL_ERROR_INTEN，也就是**只解开了错误位**。
++ *   帧结束位在 8..15，一直被屏蔽着，于是 INTSTAT 永远读出 0 —— 那不是
++ *   "帧没有结束"，是我们没让硬件报。取图只好盲等一个 mdelay(300)，
++ *   既不知道等到了没有，也对不齐帧边界。
++ */
++
++#define CIF_INT_FRAME0_END(id)   (1u << ((id) * 2 + 8))
++#define CIF_INT_FRAME1_END(id)   (1u << ((id) * 2 + 9))
++#define CIF_INT_FRAME_END_ID0    (CIF_INT_FRAME0_END(0) | CIF_INT_FRAME1_END(0))
++
+ /* MIPI CSI-2 标准数据类型 */
+ 
+ #define MIPI_CSI2_DT_RAW12       0x2c
+@@ -274,7 +290,8 @@ int rk3576_cif_start(int host, uintptr_t buf0, uintptr_t buf1,
+    *    否则状态位不会置起来，读到的永远是 0，会被当成"没有错误"。
+    */
+ 
+-  cif_putreg(off + CIF_MIPI_INTEN, CSI_ALL_ERROR_INTEN);
++  cif_putreg(off + CIF_MIPI_INTEN,
++             CSI_ALL_ERROR_INTEN | CIF_INT_FRAME_END_ID0);
+ 
+   /* 6) 先配 id0 的格式，再开通路总开关。反过来的话通路已经在收，
+    *    而 id0 的格式还没配好，头几帧会按错误格式落盘。
+@@ -357,3 +374,108 @@ uint32_t rk3576_cif_status(int host)
+ 
+   return stat;
+ }
++
++/****************************************************************************
++ * Name: rk3576_cif_wait_frame
++ *
++ * Description:
++ *   轮询 INTSTAT 等一帧写完，返回刚写完的是哪个缓冲（0 或 1）。
++ *
++ *   ★ 为什么不是延时一段时间就读
++ *
++ *     盲等的问题不在于等得够不够久，而在于**不知道等到的是什么**：
++ *     读到的可能是写了一半的一帧，而撕裂的画面看起来很像图像处理写错
++ *     了，会把排查引到完全无关的方向去。等帧结束标志则是确定的 ——
++ *     标志置位就说明那一帧整帧都已经落到 DDR 了。
++ *
++ *     顺带还得到一个盲等给不了的东西：**是哪个缓冲写完的**。硬件在
++ *     FRM0/FRM1 之间乒乓，写完 0 号就立刻开始写 1 号；读错一个，读到的
++ *     就是正在被 DMA 改写的那块。
++ *
++ *   ★ 这里用轮询而不是接中断。
++ *
++ *     取一帧是个同步操作，调用方本来就在等；接中断要多一个 ISR、一个
++ *     信号量和一套生命周期管理，而收益仅仅是这段等待里 CPU 可以做别的。
++ *     等连续预览真的需要了再上中断，现在上是在没有需求的地方增加状态。
++ *
++ * Input Parameters:
++ *   host       - CSI host 号
++ *   want       - 只等哪一个缓冲的帧结束：0、1，或 -1 表示两个都行
++ *   timeout_ms - 最长等多久
++ *   status     - 非空时返回消费掉的 INTSTAT 原值（含错误位）
++
++ *
++ *   ★ want 存在的理由
++ *
++ *     实测发现 FRAME1_END 会在 1 号缓冲**并没有被写过**的情况下置位：
++ *     那一轮读回来整块全是 memset 留下的 0，而同样的配置下 FRAME0_END
++ *     那几轮数据都是好的。乒乓的换页时机与标志语义还没查清楚。
++ *
++ *     但单帧抓取本来就不需要乒乓 —— 指定只等 0 号，就绕开了这块没搞懂
++ *     的地方，而且更合理：我们读 0 号的时候硬件正在写 1 号，天然不冲突。
++ *     等真要做连续预览时再回来把乒乓弄明白，那时才有需求撑着。
++ *
++ * Returned Value:
++ *   0 或 1 表示刚写完的缓冲序号；-ETIMEDOUT 表示超时没等到。
++ *
++ ****************************************************************************/
++
++int rk3576_cif_wait_frame(int host, int want, int timeout_ms,
++                          uint32_t *status)
++{
++  uint32_t off;
++  uint32_t stat;
++  uint32_t mask;
++  int elapsed;
++
++  if (host < 0 || host > 4 || timeout_ms <= 0 || want < -1 || want > 1)
++    {
++      return -EINVAL;
++    }
++
++  mask = (want == 0) ? CIF_INT_FRAME0_END(0) :
++         (want == 1) ? CIF_INT_FRAME1_END(0) : CIF_INT_FRAME_END_ID0;
++
++  off = cif_csi_offset(host);
++
++  /* 先把旧的标志清掉，否则等到的可能是**上一帧**留下的置位，
++   * 那就等于没等 —— 而且会稳定地读到一个更旧的缓冲。
++   */
++
++  cif_putreg(off + CIF_MIPI_INTSTAT,
++             cif_getreg(off + CIF_MIPI_INTSTAT));
++
++  for (elapsed = 0; elapsed < timeout_ms; elapsed++)
++    {
++      stat = cif_getreg(off + CIF_MIPI_INTSTAT);
++
++      if ((stat & mask) != 0)
++        {
++          cif_putreg(off + CIF_MIPI_INTSTAT, stat);
++
++          if (status != NULL)
++            {
++              *status = stat;
++            }
++
++          if (want >= 0)
++            {
++              return want;
++            }
++
++          return (stat & CIF_INT_FRAME1_END(0)) ? 1 : 0;
++        }
++
++      up_mdelay(1);
++    }
++
++  if (status != NULL)
++    {
++      *status = cif_getreg(off + CIF_MIPI_INTSTAT);
++    }
++
++  syslog(LOG_ERR,
++         "CIF: host%d 等帧结束超时 %d ms，INTSTAT=0x%08" PRIx32 "\n",
++         host, timeout_ms, cif_getreg(off + CIF_MIPI_INTSTAT));
++  return -ETIMEDOUT;
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_cif.h b/arch/arm64/src/rk3576/rk3576_cif.h
+index ea01350b..444fcaa6 100644
+--- a/arch/arm64/src/rk3576/rk3576_cif.h
++++ b/arch/arm64/src/rk3576/rk3576_cif.h
+@@ -59,4 +59,20 @@ int rk3576_cif_stop(int host);
+ 
+ uint32_t rk3576_cif_status(int host);
+ 
++/****************************************************************************
++ * Name: rk3576_cif_wait_frame
++ *
++ * Description:
++ *   轮询等一帧写完，返回刚写完的缓冲序号（0 或 1），超时返回
++ *   -ETIMEDOUT。want 指定只等哪一个缓冲（-1 表示两个都行），status
++ *   非空时带回消费掉的 INTSTAT 原值。
++ *
++ *   取代"延时一段时间再读"：盲等不知道等到的是整帧还是半帧，而半帧的
++ *   撕裂看起来很像图像处理写错了，会把排查引到无关的方向。
++ *
++ ****************************************************************************/
++
++int rk3576_cif_wait_frame(int host, int want, int timeout_ms,
++                          uint32_t *status);
++
+ #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_CIF_H */
+-- 
+2.43.0
+
+
+From 16eaca44ad8f1b8b024c46c4b63c3281e8eab250 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sat, 5 Sep 2026 08:38:13 +0800
+Subject: [PATCH 37/45] arch/arm64/rk3576: give /dev/oneshot its own timer
+ instead of the arch one
+
+The board registered arm64_oneshot_initialize()'s return value as
+/dev/oneshot, on the reasoning that the ARM generic timer is the
+SoC-independent one and no extra hardware is needed.  The reasoning was
+fine; what was wrong is that the lower-half is not idle.  The kernel's
+up_timer_initialize() already hands that same singleton to the
+scheduler, and struct oneshot_lowerhalf_s holds exactly one
+callback/arg pair -- so registering /dev/oneshot displaced the
+scheduler's timer callback and the system tick died.  sleep never
+returned, delayed work_queue items never ran, and the watchdog
+automonitor therefore never fed the dog, resetting the board every 95
+seconds.  Serial and nsh stayed responsive throughout, because they wake
+on UART interrupts, and up_mdelay busy-waits on the counter.
+
+This driver uses TIMER_NS_0, which is nobody else's:
+
+  CH0 (0x2ACC0000, GIC_SPI 45)  user-defined + count-down + int -> alarm
+  CH1 (0x2ACC1000)              free-running + count-up         -> current()
+
+CH1 needs no interrupt, so it needs no GIC number -- the device tree
+only documents CH0's, and CH1..CH5 have no stated source.  Using an
+interrupt-free channel as the counter avoids inventing one.
+
+Two things came from the TRM that the Linux driver does not have: the
+channel stride is 0x1000, not the 0x20 the device tree's reg size
+suggests, and CONTROL bit 3 selects the count direction.  The
+rockchip,rk3288-timer driver Linux binds here never touches bit 3
+because older parts only count down; counting up makes the free-running
+channel a plain monotonic counter with no inversion.
+
+The alarm needs its mode bits written before the enable edge.  Writing
+CONTROL once with EN and the mode bits together left INTSTATUS forever
+clear while the free-running channel in the same block ran fine.  The
+TRM says to disable first and "follow the programming sequence" without
+printing the sequence; splitting configure-then-enable is what makes it
+fire.
+
+Both channels self-check at init: the counter must advance across a
+100us delay, and a 1ms alarm must produce both an INTSTATUS bit and an
+ISR entry.  Those two observables separate a dead timer from a
+misrouted interrupt -- one alone cannot, and the symptom either way is
+just "timeouts never expire".
+
+Verified on the board: cmocka_driver_oneshot reports OK, sleep 3/8 take
+3.3s/8.4s, and 120s idle produces no reset.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/Kconfig        |  15 +
+ arch/arm64/src/rk3576/Make.defs      |   4 +
+ arch/arm64/src/rk3576/rk3576_timer.c | 427 +++++++++++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_timer.h |  57 ++++
+ 4 files changed, 503 insertions(+)
+ create mode 100644 arch/arm64/src/rk3576/rk3576_timer.c
+ create mode 100644 arch/arm64/src/rk3576/rk3576_timer.h
+
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index 726e3a30..94577bcd 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -151,6 +151,21 @@ config RK3576_RNG
+ 
+ 		初始化时取两批数据比较，完全相同则判定硬件未工作并拒绝注册。
+ 
++config RK3576_TIMER
++	bool "RK3576 独立 TIMER（oneshot 下半部）"
++	default n
++	select ONESHOT
++	---help---
++		用 TIMER_NS_0 的 CH0/CH1（0x2ACC0000 起，通道间距 0x1000）实现
++		/dev/oneshot 的下半部：CH0 做带中断的一次性闹钟（GIC_SPI 45），
++		CH1 自由运行向上计数供 current() 读。
++
++		★ 必须用独立定时器，不能复用 arm64 通用定时器。后者是调度器
++		  正在用的下半部，而 struct oneshot_lowerhalf_s 只有一对
++		  callback/arg —— 注册 /dev/oneshot 会顶掉调度器的定时回调，
++		  系统时基当场失效（sleep 不返回、延时 work 不触发、看门狗
++		  automonitor 不喂狗），而串口与 nsh 表现完全正常。
++
+ config RK3576_WDT
+ 	bool "看门狗 (Synopsys DesignWare)"
+ 	default n
+diff --git a/arch/arm64/src/rk3576/Make.defs b/arch/arm64/src/rk3576/Make.defs
+index cf9c0ef9..427f2e33 100644
+--- a/arch/arm64/src/rk3576/Make.defs
++++ b/arch/arm64/src/rk3576/Make.defs
+@@ -54,6 +54,10 @@ ifeq ($(CONFIG_RK3576_WDT),y)
+ CHIP_CSRCS += rk3576_wdt.c
+ endif
+ 
++ifeq ($(CONFIG_RK3576_TIMER),y)
++CHIP_CSRCS += rk3576_timer.c
++endif
++
+ CHIP_CSRCS += rk3576_reboot.c
+ 
+ ifeq ($(CONFIG_RK3576_DWMMC),y)
+diff --git a/arch/arm64/src/rk3576/rk3576_timer.c b/arch/arm64/src/rk3576/rk3576_timer.c
+new file mode 100644
+index 00000000..236e67f7
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_timer.c
+@@ -0,0 +1,427 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_timer.c
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* RK3576 独立 TIMER —— 给 /dev/oneshot 用的 oneshot 下半部。
++ *
++ * ★ 为什么非要用独立定时器，不能复用 ARM 通用定时器
++ *
++ *   板级最初是直接把 arm64_oneshot_initialize() 的返回值注册成
++ *   /dev/oneshot 的。那个下半部**是调度器正在用的那一个**：
++ *
++ *     arm64_arch_timer.c
++ *       static struct oneshot_lowerhalf_s g_arm64_oneshot_lowerhalf;
++ *       void up_timer_initialize(void)
++ *       { up_alarm_set_lowerhalf(arm64_oneshot_initialize()); }
++ *
++ *   而 struct oneshot_lowerhalf_s 只有**一对** callback/arg，谁后设谁赢。
++ *   注册 /dev/oneshot 就把调度器的定时回调顶掉了，系统时基当场死亡：
++ *   sleep 永不返回、延时 work_queue 永不触发、看门狗 automonitor 从不
++ *   喂狗于是每 95 秒硬件复位一次 —— 而串口和 nsh 一切正常（靠 UART
++ *   中断唤醒），up_mdelay() 也正常（忙等读计数器），所以这个故障可以
++ *   长期潜伏。详见 notes/DEBUG-CASES.md 案例 16。
++ *
++ *   本文件给 /dev/oneshot 一套自己的硬件，从根上不再和调度器共享任何
++ *   东西。
++ *
++ * ★ 两个通道，各司其职
++ *
++ *   TIMER_NS_0-CH0  用户定义 + 向下计数 + 开中断  -> 一次性闹钟
++ *   TIMER_NS_0-CH1  自由运行 + 向上计数 + 不开中断 -> current() 的读数
++ *
++ *   CH1 不需要中断，也就不需要知道它的 GIC 中断号 —— 设备树只给了 CH0
++ *   的（GIC_SPI 45），CH1..CH5 的中断号没有依据。用一个不需要中断的
++ *   通道当计数源，就绕开了这个没有出处的假设。
++ *
++ *   出处（RK3576 TRM Part1 第 14 章）：
++ *     通道基址间距 0x1000：TIMER_NS_0-CH0 = 0x2ACC0000、CH1 = 0x2ACC1000
++ *     CONTROL(0x10) bit0 使能、bit1 模式、bit2 中断、bit3 计数方向
++ *     「free-running + count-up 从 0 计到 LOAD_COUNT 后自动重载」
++ *     「user-defined + count-down 从 LOAD_COUNT 减到 0 后停住，不重载」
++ *
++ *   ★ bit3 是 RK3576 才有的。Linux 里匹配的 rockchip,rk3288-timer 驱动
++ *     完全没用这一位（老芯片只能向下数），照抄那个驱动就会漏掉向上计数，
++ *     只好去读一个递减的计数器再取反。TRM 比驱动多给了这条。
++ */
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include <errno.h>
++#include <inttypes.h>
++#include <stdint.h>
++#include <syslog.h>
++
++#include <nuttx/arch.h>
++#include <nuttx/irq.h>
++#include <nuttx/timers/oneshot.h>
++
++#include "arm64_internal.h"
++#include "rk3576_cru.h"
++#include "rk3576_timer.h"
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++/* 通道基址。TRM Part1 14.4.1 内部地址映射。 */
++
++#define TIMER_CH_BASE(n)      (0x2acc0000ul + (uintptr_t)(n) * 0x1000)
++
++#define TIMER_CH_ALARM        0        /* 闹钟：它的中断号设备树里有   */
++#define TIMER_CH_COUNTER      1        /* 计数：自由运行，不用中断     */
++
++/* 通道内寄存器偏移 */
++
++#define TIMER_LOAD_COUNT0     0x00
++#define TIMER_LOAD_COUNT1     0x04
++#define TIMER_CURRENT_VALUE0  0x08
++#define TIMER_CURRENT_VALUE1  0x0c
++#define TIMER_CONTROL         0x10
++#define TIMER_INTSTATUS       0x18
++
++#define TIMER_CTRL_EN         (1u << 0)
++#define TIMER_CTRL_USERDEF    (1u << 1)  /* 0 自由运行 1 用户定义      */
++#define TIMER_CTRL_INT_EN     (1u << 2)
++#define TIMER_CTRL_COUNT_DOWN (1u << 3)  /* 0 向上 1 向下              */
++
++#define TIMER_INT_PD          (1u << 0)  /* 写 1 清                     */
++
++/* 时钟。出处 clk-rk3576.c：
++ *   GATE(PCLK_BUSTIMER0, ... CLKGATE_CON(17), 3)
++ *   COMPOSITE_NODIV(CLK_TIMER0_ROOT, ... mux_100m_24m_p,
++ *                   CLKSEL_CON(71), 14, 1, CLKGATE_CON(17), 5)
++ *   GATE(CLK_TIMER0, ... CLKGATE_CON(17), 6)
++ *   GATE(CLK_TIMER1, ... CLKGATE_CON(17), 7)
++ *
++ * mux_100m_24m_p = { "clk_cpll_div10", "xin24m" }，所以选 1 是 24MHz。
++ * 选 24MHz 而不是 100MHz：24MHz 直接来自晶振，不依赖 CPLL 的分频链，
++ * 少一层可能被别处改动的东西；这个用途也不需要那么高的分辨率。
++ */
++
++#define TIMER_GATE_CON        17
++#define TIMER_GATE_PCLK       3
++#define TIMER_GATE_ROOT       5
++#define TIMER_GATE_CH0        6
++#define TIMER_GATE_CH1        7
++
++#define TIMER_MUX_CON         71
++#define TIMER_MUX_SHIFT       14
++#define TIMER_MUX_WIDTH       1
++#define TIMER_MUX_24M         1
++
++#define TIMER_FREQ_HZ         24000000u
++
++/* 设备树：rktimer: timer@2acc0000 { interrupts = <GIC_SPI 45 ...>; }
++ * 这是 CH0 的中断（该节点的 reg 只覆盖 CH0 的 0x20 字节）。
++ */
++
++#define TIMER_ALARM_IRQ       RK3576_IRQ_SPI(45)
++
++/****************************************************************************
++ * Private Data
++ ****************************************************************************/
++
++static struct oneshot_lowerhalf_s g_rk3576_oneshot;
++
++/* ISR 进来的次数。自检用：它和 INTSTATUS 两个观测量合起来才能把
++ * "定时器没产生中断"和"中断号接错了"分开 —— 只看其中一个都分不出来。
++ */
++
++static volatile uint32_t g_rk3576_timer_hits;
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline void timer_putreg(int ch, uint32_t off, uint32_t val)
++{
++  putreg32(val, TIMER_CH_BASE(ch) + off);
++}
++
++static inline uint32_t timer_getreg(int ch, uint32_t off)
++{
++  return getreg32(TIMER_CH_BASE(ch) + off);
++}
++
++/****************************************************************************
++ * Name: timer_read64
++ *
++ * Description:
++ *   读 64 位的当前计数值。
++ *
++ *   ★ 高低两半是分两次读的，中间计数器还在走。
++ *
++ *     低半溢出的那一瞬间读到的可能是"旧的高半 + 新的低半"，凑出来的值
++ *     会往回跳一大截 —— 对一个被当作单调时钟用的读数来说，往回跳比读到
++ *     稍旧的值危险得多，上层会算出一个巨大的负延时。
++ *
++ *     读高、读低、再读高，两次高半一致才采信，否则重读。
++ *
++ ****************************************************************************/
++
++static uint64_t timer_read64(int ch)
++{
++  uint32_t hi1;
++  uint32_t lo;
++  uint32_t hi2;
++
++  do
++    {
++      hi1 = timer_getreg(ch, TIMER_CURRENT_VALUE1);
++      lo  = timer_getreg(ch, TIMER_CURRENT_VALUE0);
++      hi2 = timer_getreg(ch, TIMER_CURRENT_VALUE1);
++    }
++  while (hi1 != hi2);
++
++  return ((uint64_t)hi2 << 32) | lo;
++}
++
++static clkcnt_t rk3576_oneshot_current(struct oneshot_lowerhalf_s *lower)
++{
++  UNUSED(lower);
++  return (clkcnt_t)timer_read64(TIMER_CH_COUNTER);
++}
++
++static void rk3576_oneshot_cancel(struct oneshot_lowerhalf_s *lower)
++{
++  UNUSED(lower);
++
++  timer_putreg(TIMER_CH_ALARM, TIMER_CONTROL, 0);
++  timer_putreg(TIMER_CH_ALARM, TIMER_INTSTATUS, TIMER_INT_PD);
++}
++
++static void rk3576_oneshot_start(struct oneshot_lowerhalf_s *lower,
++                                 clkcnt_t delay)
++{
++  UNUSED(lower);
++
++  /* 0 会让"数到 0"这个条件在装载的一瞬间就成立，硬件行为没有依据；
++   * 给最小的 1 拍，让它走正常路径产生一次中断。
++   */
++
++  if (delay == 0)
++    {
++      delay = 1;
++    }
++
++  /* ★ 必须先关再配。
++   *
++   *   TRM 讲用户定义模式时明确写着「不会自动重载，需要先 disable 再按
++   *   编程序列重新启动」。带着使能位改 LOAD_COUNT，硬件用的是新值还是
++   *   旧值没有定义。
++   */
++
++  timer_putreg(TIMER_CH_ALARM, TIMER_CONTROL, 0);
++  timer_putreg(TIMER_CH_ALARM, TIMER_INTSTATUS, TIMER_INT_PD);
++
++  timer_putreg(TIMER_CH_ALARM, TIMER_LOAD_COUNT0,
++               (uint32_t)(delay & 0xffffffffu));
++  timer_putreg(TIMER_CH_ALARM, TIMER_LOAD_COUNT1,
++               (uint32_t)(delay >> 32));
++
++  /* ★ 模式先写，使能单独一次写。
++   *
++   *   TRM 讲用户定义模式时说「需要先 disable，再按编程序列重新启动」，
++   *   但没有把那个序列写出来。一次性把 EN 和模式位一起写下去时，闹钟
++   *   通道的 INTSTATUS 始终不置位（而同一个块的自由运行通道工作正常），
++   *   所以这里按"配置在前、使能在后"拆成两次写 —— 这是这类 IP 常见的
++   *   要求：使能沿之前各控制位必须已经稳定。
++   */
++
++  timer_putreg(TIMER_CH_ALARM, TIMER_CONTROL,
++               TIMER_CTRL_USERDEF | TIMER_CTRL_INT_EN |
++               TIMER_CTRL_COUNT_DOWN);
++
++  timer_putreg(TIMER_CH_ALARM, TIMER_CONTROL,
++               TIMER_CTRL_EN | TIMER_CTRL_USERDEF |
++               TIMER_CTRL_INT_EN | TIMER_CTRL_COUNT_DOWN);
++}
++
++static void rk3576_oneshot_start_absolute(struct oneshot_lowerhalf_s *lower,
++                                          clkcnt_t cnt)
++{
++  clkcnt_t now = rk3576_oneshot_current(lower);
++
++  /* 目标时刻已经过去就立刻触发，而不是让 cnt - now 回绕成一个天文数字
++   * 的延时 —— 那种情况下闹钟等于永远不响，现象是"偶尔有一次定时丢了"，
++   * 极难复现。
++   */
++
++  rk3576_oneshot_start(lower, (clkcnt_t)(cnt - now) > 0 ? cnt - now : 1);
++}
++
++static clkcnt_t rk3576_oneshot_max_delay(struct oneshot_lowerhalf_s *lower)
++{
++  UNUSED(lower);
++  return UINT64_MAX;
++}
++
++static int rk3576_oneshot_isr(int irq, void *context, void *arg)
++{
++  struct oneshot_lowerhalf_s *lower = arg;
++
++  UNUSED(irq);
++  UNUSED(context);
++
++  /* 先关闹钟再清中断标志，最后才回调。
++   *
++   * 回调里上层通常会立刻设下一个闹钟；如果这时本通道还使能着、标志也
++   * 还挂着，新设的那次会被当场"补发"一个中断，表现为定时提前。
++   */
++
++  timer_putreg(TIMER_CH_ALARM, TIMER_CONTROL, 0);
++  timer_putreg(TIMER_CH_ALARM, TIMER_INTSTATUS, TIMER_INT_PD);
++
++  g_rk3576_timer_hits++;
++
++  /* 自检期间上层还没接管，callback 是空的，这时不能回调。 */
++
++  if (lower->callback != NULL)
++    {
++      oneshot_process_callback(lower);
++    }
++
++  return OK;
++}
++
++static const struct oneshot_operations_s g_rk3576_oneshot_ops =
++{
++  .current        = rk3576_oneshot_current,
++  .start          = rk3576_oneshot_start,
++  .start_absolute = rk3576_oneshot_start_absolute,
++  .cancel         = rk3576_oneshot_cancel,
++  .max_delay      = rk3576_oneshot_max_delay,
++};
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++struct oneshot_lowerhalf_s *rk3576_oneshot_initialize(void)
++{
++  struct oneshot_lowerhalf_s *lower = &g_rk3576_oneshot;
++  uint64_t a;
++  uint64_t b;
++
++  /* 时钟：pclk、根时钟、两个通道各自的门控，以及把根时钟选到 24MHz */
++
++  rk3576_clk_gate(TIMER_GATE_CON, TIMER_GATE_PCLK, true);
++  rk3576_clk_gate(TIMER_GATE_CON, TIMER_GATE_ROOT, true);
++  rk3576_clk_gate(TIMER_GATE_CON, TIMER_GATE_CH0,  true);
++  rk3576_clk_gate(TIMER_GATE_CON, TIMER_GATE_CH1,  true);
++
++  rk3576_clk_setmux(TIMER_MUX_CON, TIMER_MUX_SHIFT, TIMER_MUX_WIDTH,
++                    TIMER_MUX_24M);
++
++  /* 计数通道：自由运行 + 向上计数，装满 1 让它一路数到 2^64-1 才回绕。
++   * 向上计数时 LOAD_COUNT 是"数到哪里重来"，不是起点（起点固定为 0）。
++   */
++
++  timer_putreg(TIMER_CH_COUNTER, TIMER_CONTROL, 0);
++  timer_putreg(TIMER_CH_COUNTER, TIMER_LOAD_COUNT0, 0xffffffffu);
++  timer_putreg(TIMER_CH_COUNTER, TIMER_LOAD_COUNT1, 0xffffffffu);
++  timer_putreg(TIMER_CH_COUNTER, TIMER_CONTROL, TIMER_CTRL_EN);
++
++  /* 闹钟通道：先关干净，等上层来设 */
++
++  timer_putreg(TIMER_CH_ALARM, TIMER_CONTROL, 0);
++  timer_putreg(TIMER_CH_ALARM, TIMER_INTSTATUS, TIMER_INT_PD);
++
++  /* ★ 自检：计数器到底有没有在走。
++   *
++   *   时钟门控、时钟源、基地址三样里任何一样错了，读回来都是一个纹丝
++   *   不动的常数 —— 而寄存器写入全部"成功"，不报任何错。上层拿到一个
++   *   停住的时钟，现象是所有定时都不到期，与"根本没注册"难以区分。
++   *   在这里花两次读的代价把它变成一条明确的错误。
++   */
++
++  a = timer_read64(TIMER_CH_COUNTER);
++  up_udelay(100);
++  b = timer_read64(TIMER_CH_COUNTER);
++
++  if (b == a)
++    {
++      syslog(LOG_ERR,
++             "ERROR: TIMER 计数器不走（读两次都是 %" PRIu64 "）—— "
++             "查 CLKGATE_CON(%d) 与基地址 0x%08lx\n",
++             a, TIMER_GATE_CON, (unsigned long)TIMER_CH_BASE(1));
++      return NULL;
++    }
++
++  lower->ops = &g_rk3576_oneshot_ops;
++  oneshot_count_init(lower, TIMER_FREQ_HZ);
++
++  irq_attach(TIMER_ALARM_IRQ, rk3576_oneshot_isr, lower);
++  up_enable_irq(TIMER_ALARM_IRQ);
++
++  /* ★ 闹钟自检：设一个 1ms 的闹钟，同时看两个观测量。
++   *
++   *   中断走不通有两种原因，改法完全不同：
++   *     INTSTATUS 置位、ISR 没进  -> 中断号接错了（GIC 那一侧）
++   *     INTSTATUS 也没置位        -> 定时器本身没产生中断（配置那一侧）
++   *
++   *   只看"上层收不到信号"这一个现象是分不开的。这里花 10ms 把它分开，
++   *   而且是在启动日志里就分开 —— 不用等到跑 xTS 用例才发现。
++   */
++
++  {
++    uint32_t hits0 = g_rk3576_timer_hits;
++    uint32_t st = 0;
++    int i;
++
++    uint64_t c0;
++
++    rk3576_oneshot_start(lower, TIMER_FREQ_HZ / 1000);   /* 1ms */
++    c0 = timer_read64(TIMER_CH_ALARM);
++
++    for (i = 0; i < 100; i++)
++      {
++        st = timer_getreg(TIMER_CH_ALARM, TIMER_INTSTATUS);
++        if (st != 0 || g_rk3576_timer_hits != hits0)
++          {
++            break;
++          }
++
++        up_udelay(100);
++      }
++
++    syslog(LOG_INFO,
++           "TIMER: 闹钟自检 INTSTATUS=0x%08" PRIx32 " ISR %" PRIu32
++           " 次 等了 %dx100us CTRL回读=0x%08" PRIx32
++           " CH0计数 %" PRIu64 "->%" PRIu64 "\n",
++           st, g_rk3576_timer_hits - hits0, i,
++           timer_getreg(TIMER_CH_ALARM, TIMER_CONTROL),
++           c0, timer_read64(TIMER_CH_ALARM));
++
++    rk3576_oneshot_cancel(lower);
++  }
++
++  syslog(LOG_INFO,
++         "TIMER: /dev/oneshot 用 CH0(闹钟,IRQ %d)+CH1(计数) @%uHz，"
++         "100us 内计数 %" PRIu64 " 拍\n",
++         TIMER_ALARM_IRQ, TIMER_FREQ_HZ, b - a);
++
++  return lower;
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_timer.h b/arch/arm64/src/rk3576/rk3576_timer.h
+new file mode 100644
+index 00000000..9924d8fc
+--- /dev/null
++++ b/arch/arm64/src/rk3576/rk3576_timer.h
+@@ -0,0 +1,57 @@
++/****************************************************************************
++ * arch/arm64/src/rk3576/rk3576_timer.h
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef __ARCH_ARM64_SRC_RK3576_RK3576_TIMER_H
++#define __ARCH_ARM64_SRC_RK3576_RK3576_TIMER_H
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++#include <nuttx/timers/oneshot.h>
++
++/****************************************************************************
++ * Public Function Prototypes
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: rk3576_oneshot_initialize
++ *
++ * Description:
++ *   用 RK3576 独立 TIMER 的两个通道做一个 oneshot 下半部，供
++ *   oneshot_register("/dev/oneshot", ...) 使用。
++ *
++ *   ★ 不要拿 arm64_oneshot_initialize() 来干这件事。那个下半部是调度器
++ *     的，struct oneshot_lowerhalf_s 只有一对 callback/arg，注册
++ *     /dev/oneshot 会把调度器的定时回调顶掉，整个系统的时基当场失效
++ *     （sleep 不返回、延时 work 不触发），而串口与 nsh 一切正常，
++ *     极难察觉。详见 notes/DEBUG-CASES.md 案例 16。
++ *
++ * Returned Value:
++ *   成功返回下半部实例；计数器自检不通过返回 NULL。
++ *
++ ****************************************************************************/
++
++struct oneshot_lowerhalf_s *rk3576_oneshot_initialize(void);
++
++#endif /* __ARCH_ARM64_SRC_RK3576_RK3576_TIMER_H */
+-- 
+2.43.0
+
+
+From 37ea7531ed5d3210d09a7c30fb34563290ba5069 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sat, 5 Sep 2026 08:43:34 +0800
+Subject: [PATCH 38/45] arch/arm64/rk3576: correct a wrong claim about the
+ timer enable sequence
+
+A comment here asserted that CONTROL's mode bits must be written before
+the enable edge, in a separate store, because writing them together left
+INTSTATUS clear.  That is not true, and the evidence for it was bad: two
+things changed in that build at once, and the "no interrupt" reading
+came from a serial capture that had dropped the ISR counter, not from
+the hardware.  Tested in isolation, the single combined write fires the
+1ms alarm at ~10x100us and cmocka_driver_oneshot reports OK.
+
+Also record the per-channel interrupt numbers.  The device tree declares
+only CH0's, and this driver deliberately uses an interrupt-free channel
+as the counter so it does not depend on the rest -- but another port of
+the same board (open-vela/contest2026_062_PharosTech,
+chips/rk3576/include/irq.h) lists them, and its CH0 = 77 agrees with the
+SPI 45 + 32 used here.  Worth having written down before someone needs a
+second alarm channel.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/rk3576_timer.c | 31 ++++++++++++++++------------
+ 1 file changed, 18 insertions(+), 13 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_timer.c b/arch/arm64/src/rk3576/rk3576_timer.c
+index 236e67f7..e453265e 100644
+--- a/arch/arm64/src/rk3576/rk3576_timer.c
++++ b/arch/arm64/src/rk3576/rk3576_timer.c
+@@ -135,6 +135,18 @@
+ 
+ /* 设备树：rktimer: timer@2acc0000 { interrupts = <GIC_SPI 45 ...>; }
+  * 这是 CH0 的中断（该节点的 reg 只覆盖 CH0 的 0x20 字节）。
++ *
++ * ★ 各通道的中断号是连续的，但这一条设备树里没有 —— 它只声明了 CH0。
++ *
++ *   交叉验证来源：另一支队伍在同一块板上的移植
++ *   github.com/open-vela/contest2026_062_PharosTech
++ *   chips/rk3576/include/irq.h:
++ *     RK3576_IRQ_TIMER_NS_0_CH0 = 77   （= SPI 45 + 32，与本文件一致）
++ *     RK3576_IRQ_TIMER_NS_0_CH1 = 78
++ *     RK3576_IRQ_TIMER_NS_1_CH0 = 83
++ *
++ *   本文件只用 CH0 的中断，CH1 当自由运行计数器、不接中断，所以并不
++ *   依赖这张表；记在这里是为了将来要用第二个闹钟通道时不必重新去找。
+  */
+ 
+ #define TIMER_ALARM_IRQ       RK3576_IRQ_SPI(45)
+@@ -231,6 +243,12 @@ static void rk3576_oneshot_start(struct oneshot_lowerhalf_s *lower,
+    *   TRM 讲用户定义模式时明确写着「不会自动重载，需要先 disable 再按
+    *   编程序列重新启动」。带着使能位改 LOAD_COUNT，硬件用的是新值还是
+    *   旧值没有定义。
++   *
++   *   关掉之后，模式位与使能位可以在**同一次**写里给出，实测有效
++   *   （1ms 闹钟稳定在 ~10x100us 触发，cmocka_driver_oneshot 通过）。
++   *   我一度以为必须拆成"先配置、后使能"两次写，那个结论是错的：
++   *   当时同一轮改了两处，又把串口丢字造成的 ISR 计数缺失误读成
++   *   "没有产生中断"。拆写与否单独对比过，两种写法都能触发。
+    */
+ 
+   timer_putreg(TIMER_CH_ALARM, TIMER_CONTROL, 0);
+@@ -241,19 +259,6 @@ static void rk3576_oneshot_start(struct oneshot_lowerhalf_s *lower,
+   timer_putreg(TIMER_CH_ALARM, TIMER_LOAD_COUNT1,
+                (uint32_t)(delay >> 32));
+ 
+-  /* ★ 模式先写，使能单独一次写。
+-   *
+-   *   TRM 讲用户定义模式时说「需要先 disable，再按编程序列重新启动」，
+-   *   但没有把那个序列写出来。一次性把 EN 和模式位一起写下去时，闹钟
+-   *   通道的 INTSTATUS 始终不置位（而同一个块的自由运行通道工作正常），
+-   *   所以这里按"配置在前、使能在后"拆成两次写 —— 这是这类 IP 常见的
+-   *   要求：使能沿之前各控制位必须已经稳定。
+-   */
+-
+-  timer_putreg(TIMER_CH_ALARM, TIMER_CONTROL,
+-               TIMER_CTRL_USERDEF | TIMER_CTRL_INT_EN |
+-               TIMER_CTRL_COUNT_DOWN);
+-
+   timer_putreg(TIMER_CH_ALARM, TIMER_CONTROL,
+                TIMER_CTRL_EN | TIMER_CTRL_USERDEF |
+                TIMER_CTRL_INT_EN | TIMER_CTRL_COUNT_DOWN);
+-- 
+2.43.0
+
+
+From dc3f6164acec7f496de10824163cd9cab44d33d9 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sat, 5 Sep 2026 09:14:43 +0800
+Subject: [PATCH 39/45] arch/arm64/rk3576: move a functional assignment out of
+ the DWMMC trace block
+
+The SD card only worked when CONFIG_RK3576_DWMMC_TRACE was compiled in.
+The reason is not timing: `priv->last_result = OK;` sat inside the
+#ifdef, and it is the only place that ever sets last_result to success --
+every failure path assigns outside it.  With tracing off, last_result
+stayed at the -EBUSY written before each command, and recvshort/recvlong
+open with `if (priv->last_result != OK) return priv->last_result;`, so
+every response read failed.
+
+"Works only with logging enabled" reads like a race that extra print
+latency papers over, and that is where the search had been going --
+delays, FIFO thresholds, clock setup.  It had nothing to do with
+timing; conditional compilation had simply swallowed one assignment, and
+nothing in the build warns about it.
+
+Rule that follows: an #ifdef'd debug block may print and count, nothing
+else.  Toggling a debug option must not change behaviour.
+
+With this, /dev/mmcsd1 enumerates with tracing off.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/rk3576_dwmmc.c | 23 +++++++++++++++++++++--
+ 1 file changed, 21 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_dwmmc.c b/arch/arm64/src/rk3576/rk3576_dwmmc.c
+index cee9fbb5..dc96f30d 100644
+--- a/arch/arm64/src/rk3576/rk3576_dwmmc.c
++++ b/arch/arm64/src/rk3576/rk3576_dwmmc.c
+@@ -936,13 +936,32 @@ static int rk3576_dwmmc_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
+       if (sts & DWMMC_INT_CMD_DONE)
+         {
+           dw_putreg(DWMMC_RINTSTS, DWMMC_INT_CMD_DONE);
++
++          /* ★ 这一句必须在 #ifdef 外面。
++           *
++           *   它曾经写在下面那个 CONFIG_RK3576_DWMMC_TRACE 块里 —— 一句
++           *   功能代码混进了调试块。而所有**失败**路径的赋值都在块外，
++           *   于是关掉 trace 之后 last_result 永远停在命令发出前置的
++           *   -EBUSY，recvshort/recvlong 开头那句
++           *   `if (priv->last_result != OK) return ...` 就让每条命令的
++           *   响应读取都失败。
++           *
++           *   现象是「SD 卡只有打开 trace 编译选项才能工作」，而这类
++           *   现象最容易被当成竞态 —— 以为是日志的额外延时掩盖了时序
++           *   问题，于是往延时、水位、时钟上找。实际上与时序毫无关系，
++           *   条件编译把一句赋值圈进去了而已，编译器也不会有任何提示。
++           *
++           *   教训：#ifdef 块里只放"打印/统计"，任何改变状态的语句都要
++           *   放在外面。开关一个调试选项不应该改变功能。
++           */
++
++          priv->last_result = OK;
++
+ #ifdef CONFIG_RK3576_DWMMC_TRACE
+           /* 无响应的命令（如 CMD0）读 RESP0 得到的是上一条命令的残留，
+            * 打出来会误导，所以按响应类型区分。
+            */
+ 
+-          priv->last_result = OK;
+-
+           if ((cmd & MMCSD_RESPONSE_MASK) == MMCSD_NO_RESPONSE)
+             {
+               syslog(LOG_INFO, "DW  CMD%" PRIu32 " 完成（无响应）\n",
+-- 
+2.43.0
+
+
+From 703305ccae29973be1d11a39c39b485a31601844 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sat, 5 Sep 2026 14:03:55 +0800
+Subject: [PATCH 40/45] arch/arm64/rk3576: allow swapping a CIF ping-pong slot
+ while running
+
+With only two buffers and no swapping, the hardware finishes FRM0, moves
+to FRM1, then comes back to FRM0 -- and rendering a frame is slower than
+the sensor produces one, so it starts overwriting the buffer still being
+read.  The result is a torn frame, and tearing looks exactly like a bug
+in the image processing, which sends the search somewhere unrelated.
+
+Rockchip's kernel handles this in rkcif_assign_new_buffer_pingpong():
+at each frame-end it points the slot that just completed at another
+buffer from its queue, so the buffer being consumed is never a DMA
+target.  This exposes the same ability; the caller keeps a spare.
+
+Writing the address while the DMA runs is safe: these registers are not
+shadowed (the TRM marks them write-only with no commit mechanism) and
+the vendor writes them from interrupt context.  The slot being changed
+is the one that will be used next, not the one currently filling.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/rk3576_cif.c | 48 ++++++++++++++++++++++++++++++
+ arch/arm64/src/rk3576/rk3576_cif.h | 12 ++++++++
+ 2 files changed, 60 insertions(+)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_cif.c b/arch/arm64/src/rk3576/rk3576_cif.c
+index bb2290f0..eb2ca68c 100644
+--- a/arch/arm64/src/rk3576/rk3576_cif.c
++++ b/arch/arm64/src/rk3576/rk3576_cif.c
+@@ -479,3 +479,51 @@ int rk3576_cif_wait_frame(int host, int want, int timeout_ms,
+          host, timeout_ms, cif_getreg(off + CIF_MIPI_INTSTAT));
+   return -ETIMEDOUT;
+ }
++
++/****************************************************************************
++ * Name: rk3576_cif_set_buffer
++ *
++ * Description:
++ *   在 DMA 运行中把某一个乒乓槽的目标地址换掉。
++ *
++ *   ★ 为什么必须能换
++ *
++ *     只有两块缓冲、且不换页时，硬件写完 FRM0 就立刻开始写 FRM1，写完
++ *     FRM1 又回头写 FRM0 —— 而我们渲染一帧要比传感器出一帧慢，于是
++ *     还没读完，硬件已经开始覆盖同一块内存了。读出来的就是半新半旧的
++ *     撕裂画面，而撕裂看起来很像图像处理写错了。
++ *
++ *     厂商内核（capture.c 的 rkcif_assign_new_buffer_pingpong）正是在每
++ *     次帧结束中断里把刚完成的那个槽换成队列里的另一块，让正在被消费
++ *     的缓冲永远不是 DMA 的目标。这里提供同样的能力，由上层维护第三块
++ *     备用缓冲。
++ *
++ *   ★ 可以在运行中写。
++ *
++ *     这批寄存器不是影子寄存器（TRM 标注为只写，没有 CFG_DONE 之类的
++ *     提交机制），厂商也是在中断上下文里直接写。换的是**下一次**才会
++ *     用到的那个槽，当前正在写的那个槽不受影响。
++ *
++ * Input Parameters:
++ *   host - CSI host 号
++ *   slot - 0 或 1，对应 FRM0 / FRM1
++ *   addr - 新的缓冲物理地址
++ *
++ ****************************************************************************/
++
++int rk3576_cif_set_buffer(int host, int slot, uintptr_t addr)
++{
++  uint32_t off;
++
++  if (host < 0 || host > 4 || slot < 0 || slot > 1 || addr == 0)
++    {
++      return -EINVAL;
++    }
++
++  off = cif_csi_offset(host);
++
++  cif_putreg(off + (slot == 0 ? CIF_MIPI_FRM0_ADDR_Y_ID0
++                              : CIF_MIPI_FRM1_ADDR_Y_ID0),
++             (uint32_t)addr);
++  return OK;
++}
+diff --git a/arch/arm64/src/rk3576/rk3576_cif.h b/arch/arm64/src/rk3576/rk3576_cif.h
+index 444fcaa6..d09b108e 100644
+--- a/arch/arm64/src/rk3576/rk3576_cif.h
++++ b/arch/arm64/src/rk3576/rk3576_cif.h
+@@ -75,4 +75,16 @@ uint32_t rk3576_cif_status(int host);
+ int rk3576_cif_wait_frame(int host, int want, int timeout_ms,
+                           uint32_t *status);
+ 
++/****************************************************************************
++ * Name: rk3576_cif_set_buffer
++ *
++ * Description:
++ *   运行中改写某个乒乓槽（slot 0/1 对应 FRM0/FRM1）的目标地址。配合第三
++ *   块备用缓冲，可以让正在被消费的那一块永远不是 DMA 的目标 —— 否则渲染
++ *   慢于出帧时，硬件会在我们读到一半时开始覆盖，画面撕裂。
++ *
++ ****************************************************************************/
++
++int rk3576_cif_set_buffer(int host, int slot, uintptr_t addr);
++
+ #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_CIF_H */
+-- 
+2.43.0
+
+
+From 5a668440f8ea786d6932b29144f9414f550f95d8 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sat, 5 Sep 2026 21:27:49 +0800
+Subject: [PATCH 41/45] arch/arm64/rk3576: characterise the CIF write-bandwidth
+ limit; two clocks ruled out
+
+At 60fps the captured frame is truncated: the last non-zero pixel sits at
+line 768 of 1096 and everything after is zero.  On screen that is a black
+block across the lower part of the image.
+
+Isolating VMAX with everything else fixed gives a clean linear model:
+
+  VMAX 3165  frame 33.32ms  ->  line 1095/1096   0% zero
+  VMAX 2110  frame 22.21ms  ->  line 1033/1096   5% zero
+  VMAX 1583  frame 16.66ms  ->  line  768/1096  29% zero
+  VMAX 1143  frame 12.03ms  ->  line  548/1096  49% zero
+
+All four land on ~21.6us per line, i.e. the CIF writes at a fixed
+3864 bytes / 21.6us = ~179 MB/s and simply runs out of frame time.  The
+sensor delivers a line every 10.53us, so the DMA is about 2x too slow.
+30fps was never "correct" -- it was merely slow enough to finish.
+
+A fixed truncation point that moves linearly with the frame period is the
+signature of insufficient write bandwidth.  A random one would mean a
+timing race.  That distinction is what makes this measurable rather than
+a guess, and it invalidated two earlier fixes of mine: discarding the
+partial first frame (real bug, wrong one) and the ping-pong page swap.
+
+Ruled out by measurement, recorded so nobody re-checks them:
+
+  - CIF water-line flow control.  The vendor sets
+    CIF_MIPI_LVDS_SW_WATER_LINE_ENABLE | (WATER_LINE_25 << 19) for
+    chip_id > RK3562; we only had bit0.  Adding it changed nothing.
+  - aclk_vi_root.  CLKSEL_CON(128) already reads 0x201 = gpll/2 = 594MHz;
+    writing the same value is a no-op.
+  - dclk_vicap.  CLKSEL_CON(129) already 0x041 = gpll/2 = 594MHz.  Forcing
+    it down to gpll/3 = 396MHz left the truncation identical (768/548),
+    which proves it has headroom rather than being the limit.
+
+179 MB/s on a 594MHz AXI is roughly 0.3 bytes per clock, which points at
+the CIF's AXI burst/outstanding configuration -- the ESMART layer in VOP2
+has exactly such knobs (esmart_axi_rlen, outstanding_num/en) and we do set
+those; the CIF equivalent has never been touched.  That is the next place
+to look.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/rk3576_cif.c | 135 ++++++++++++++++++++++++++++-
+ 1 file changed, 134 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_cif.c b/arch/arm64/src/rk3576/rk3576_cif.c
+index eb2ca68c..826583e3 100644
+--- a/arch/arm64/src/rk3576/rk3576_cif.c
++++ b/arch/arm64/src/rk3576/rk3576_cif.c
+@@ -66,6 +66,7 @@
+ 
+ #include "arm64_internal.h"
+ #include "rk3576_cru.h"
++#include "hardware/rk3576_memorymap.h"
+ #include "rk3576_cif.h"
+ 
+ /****************************************************************************
+@@ -145,6 +146,33 @@
+ 
+ #define CIF_PATH_CAP_EN          (1u << 0)
+ 
++/* ★ DMA 的水位流控。缺了它高帧率下会丢帧尾。
++ *
++ *   出处 kernel-6.1 .../cif/capture.c，RK3576 走的是这一支：
++ *
++ *     if (dev->chip_id > CHIP_RK3562_CIF) {
++ *         val = CIF_MIPI_LVDS_SW_WATER_LINE_ENABLE          // bit0
++ *             | (CIF_MIPI_LVDS_SW_WATER_LINE_25 << 19);     // bits[21:20]
++ *         rkcif_write_register(dev, CIF_REG_MIPI_LVDS_CTRL, val);
++ *     }
++ *
++ *   regs.h: CIF_MIPI_LVDS_SW_WATER_LINE_25 = (0x2 << 1)，再左移 19 位
++ *   落在 [21:20]。它告诉 CIF：FIFO 占用超过这个水位就向总线发紧急请求。
++ *
++ *   ★ 不设它的后果只在高带宽下才显现，非常有迷惑性：
++ *
++ *     30fps（127MB/s）  整帧写满，实测 0% 零像素、写到第 1095 行
++ *     60fps（254MB/s）  固定截断在第 768 行，后面 30% 全是零
++ *
++ *     屏上就是"画面区下部一块黑，而且怎么调都在"。因为它不是随机的
++ *     半帧，是每一帧都停在同一行 —— 我一度以为是抓到了残帧，往"丢弃
++ *     首帧"的方向修，方向完全错了。**固定的截断位置说明是带宽/流控，
++ *     随机的截断位置才是时序。**
++ */
++
++#define CIF_PATH_WATER_LINE_EN   (1u << 0)
++#define CIF_PATH_WATER_LINE_25   (0x2u << 20)
++
+ /* VLW：低 20 位是跨距，bit31 是地址强制更新（自清）。 */
+ 
+ #define CIF_VLW_MASK             0x000fffffu
+@@ -188,6 +216,34 @@
+ #define CIF_BUS_GATE_ACLK        7
+ #define CIF_BUS_GATE_HCLK        8
+ #define CIF_ICLK_GATE_CON        59
++
++/* aclk_vi_root：CLKSEL_CON(128)，mux 在 bit5 宽 3，分频在 bit0 宽 5。
++ * 父时钟表 gpll_spll_isppvtpll_bpll_lpll_p 的第 0 项是 gpll（1188MHz）。
++ */
++
++#define CIF_ACLK_SEL_CON         128
++#define CIF_ACLK_MUX_SHIFT       5
++#define CIF_ACLK_MUX_WIDTH       3
++#define CIF_ACLK_MUX_GPLL        0
++#define CIF_ACLK_DIV_SHIFT       0
++#define CIF_ACLK_DIV_WIDTH       5
++#define CIF_ACLK_DIV_2           2
++
++/* dclk_vicap：CLKSEL_CON(129)，mux 在 bit5 宽 1（0=gpll 1=cpll），
++ * 分频在 bit0 宽 5，门控 CLKGATE_CON(53) bit6。
++ *
++ * ★ 这是 CIF 的数据/像素时钟，决定它每秒能处理多少像素 —— 与 aclk
++ *   （AXI 总线时钟）是两回事，两个都要配。
++ */
++
++#define CIF_DCLK_SEL_CON         129
++#define CIF_DCLK_MUX_SHIFT       5
++#define CIF_DCLK_MUX_WIDTH       1
++#define CIF_DCLK_MUX_GPLL        0
++#define CIF_DCLK_DIV_SHIFT       0
++#define CIF_DCLK_DIV_WIDTH       5
++#define CIF_DCLK_DIV             2      /* gpll 1188 / 2 = 594MHz，与复位值一致 */
++#define CIF_DCLK_GATE_BIT        6
+ #define CIF_ICLK_GATE_BIT(n)     (1 + (n))
+ 
+ /****************************************************************************
+@@ -251,6 +307,81 @@ int rk3576_cif_start(int host, uintptr_t buf0, uintptr_t buf1,
+   rk3576_clk_gate(CIF_BUS_GATE_CON, CIF_BUS_GATE_HCLK, true);
+   rk3576_clk_gate(CIF_ICLK_GATE_CON, CIF_ICLK_GATE_BIT(host), true);
+ 
++  /* ★ CIF 的 AXI 时钟必须自己配，只开门控是不够的。
++   *
++   *   ACLK_VICAP 只是 aclk_vi_root 上的一个门控，频率由 aclk_vi_root 决定：
++   *
++   *     clk-rk3576.c:
++   *       COMPOSITE(ACLK_VI_ROOT, "aclk_vi_root", gpll_spll_isppvtpll_bpll_lpll_p,
++   *                 CLK_IS_CRITICAL,
++   *                 RK3576_CLKSEL_CON(128), 5, 3, MFLAGS, 0, 5, DFLAGS,
++   *                 RK3576_CLKGATE_CON(53), 0, GFLAGS)
++   *
++   *   我们一直用的是复位默认值。实测下来 CIF 的写入带宽只有约 179MB/s
++   *   （每行 3864 字节要 21.6us，而传感器每 10.53us 就送一行），于是
++   *   帧周期短于 23.7ms 时帧尾直接被截断：
++   *
++   *     VMAX 3165（33.3ms）  写满 1096 行
++   *     VMAX 2110（22.2ms）  只到 1033 行
++   *     VMAX 1583（16.7ms）  只到 768 行
++   *
++   *   截断位置随帧周期线性变化、且完全可复现 —— 这正是"写得不够快"的
++   *   指纹。随机的截断才是时序问题，固定的截断是带宽问题。
++   *
++   *   选 gpll(=1188MHz) 二分频 594MHz。把当前值和设定值都打出来，
++   *   免得下次又把"默认值"当成"配置过了"。
++   */
++
++  {
++    uint32_t before = getreg32(RK3576_CRU_ADDR +
++                               RK3576_CRU_CLKSEL_CON(CIF_ACLK_SEL_CON));
++
++    rk3576_clk_setmux(CIF_ACLK_SEL_CON, CIF_ACLK_MUX_SHIFT,
++                      CIF_ACLK_MUX_WIDTH, CIF_ACLK_MUX_GPLL);
++    rk3576_clk_setmux(CIF_ACLK_SEL_CON, CIF_ACLK_DIV_SHIFT,
++                      CIF_ACLK_DIV_WIDTH, CIF_ACLK_DIV_2 - 1);
++
++    syslog(LOG_INFO,
++           "CIF: aclk_vi_root CLKSEL_CON(%d) 0x%08" PRIx32 " -> 0x%08" PRIx32
++           "（选 gpll/%d）\n",
++           CIF_ACLK_SEL_CON, before,
++           getreg32(RK3576_CRU_ADDR +
++                    RK3576_CRU_CLKSEL_CON(CIF_ACLK_SEL_CON)),
++           CIF_ACLK_DIV_2);
++  }
++
++  /* ★ dclk_vicap —— CIF 的数据时钟，与 aclk 是两回事。
++   *
++   *   ★ 实测结论：这两个时钟都不是瓶颈，复位值本来就是对的。
++   *
++   *     aclk_vi_root  CLKSEL_CON(128)=0x201 → gpll/2 = 594MHz
++   *     dclk_vicap    CLKSEL_CON(129)=0x041 → gpll/2 = 594MHz
++   *
++   *     我一度把 dclk 改成 gpll/3=396MHz 想验证它是不是限制项 —— 截断
++   *     位置一点没变（768/548 完全一致），反过来证明了它有富余。这里
++   *     显式写成与复位值相同的 594MHz 并把前后值打出来，是为了让"已经
++   *     确认过、不是这里"这个结论留在代码里，下次不必重查。
++   */
++
++  {
++    uint32_t before = getreg32(RK3576_CRU_ADDR +
++                               RK3576_CRU_CLKSEL_CON(CIF_DCLK_SEL_CON));
++
++    rk3576_clk_gate(CIF_BUS_GATE_CON, CIF_DCLK_GATE_BIT, true);
++    rk3576_clk_setmux(CIF_DCLK_SEL_CON, CIF_DCLK_MUX_SHIFT,
++                      CIF_DCLK_MUX_WIDTH, CIF_DCLK_MUX_GPLL);
++    rk3576_clk_setmux(CIF_DCLK_SEL_CON, CIF_DCLK_DIV_SHIFT,
++                      CIF_DCLK_DIV_WIDTH, CIF_DCLK_DIV - 1);
++
++    syslog(LOG_INFO,
++           "CIF: dclk_vicap CLKSEL_CON(%d) 0x%08" PRIx32 " -> 0x%08" PRIx32
++           "（选 gpll/%d = %dMHz）\n",
++           CIF_DCLK_SEL_CON, before,
++           getreg32(RK3576_CRU_ADDR +
++                    RK3576_CRU_CLKSEL_CON(CIF_DCLK_SEL_CON)),
++           CIF_DCLK_DIV, 1188 / CIF_DCLK_DIV);
++  }
++
+   /* 2) 非压缩 RAW12：每像素 16 位，行跨距 width*2。 */
+ 
+   stride = (uint32_t)width * 2;
+@@ -302,7 +433,9 @@ int rk3576_cif_start(int host, uintptr_t buf0, uintptr_t buf1,
+           ((uint32_t)CIF_ID_WRDDR_UNCOMPACT << CIF_ID_WRDDR_SHIFT);
+ 
+   cif_putreg(off + CIF_MIPI_ID0_CTRL0, ctrl0);
+-  cif_putreg(off + CIF_MIPI_CTRL, CIF_PATH_CAP_EN);
++  cif_putreg(off + CIF_MIPI_CTRL,
++             CIF_PATH_CAP_EN | CIF_PATH_WATER_LINE_EN |
++             CIF_PATH_WATER_LINE_25);
+ 
+   /* ★ 这里不做回读。
+    *
+-- 
+2.43.0
+
+
+From b9455f100a6bcca308c31d631452bd17c0ca6a6c Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sat, 5 Sep 2026 21:40:34 +0800
+Subject: [PATCH 42/45] arch/arm64/rk3576: align the CIF line stride to 256
+ bytes as the vendor does
+
+  channel->virtual_width = ALIGN(channel->width * fmt->raw_bpp / 8, 256);
+
+We were writing width * 2 = 3864, which is not a multiple of 256, so every
+line started off a 256-byte boundary.  4096 matches the vendor and is the
+right thing regardless.
+
+It does not fix the frame-tail truncation: with the aligned stride the last
+written line is still 1095 / 768 / 548 for VMAX 3165 / 1583 / 1143 --
+identical row for row.  So the "unaligned stride wrecks burst efficiency,
+halving throughput" reasoning was wrong.  It sounded right and even matched
+the magnitude (almost exactly 2x), which is precisely why it needed testing
+rather than adopting.
+
+Recorded in the comment so the next person does not assume this line closed
+the issue.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/rk3576_cif.c | 30 +++++++++++++++++++++++++++++-
+ 1 file changed, 29 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_cif.c b/arch/arm64/src/rk3576/rk3576_cif.c
+index 826583e3..58c0917c 100644
+--- a/arch/arm64/src/rk3576/rk3576_cif.c
++++ b/arch/arm64/src/rk3576/rk3576_cif.c
+@@ -384,7 +384,35 @@ int rk3576_cif_start(int host, uintptr_t buf0, uintptr_t buf1,
+ 
+   /* 2) 非压缩 RAW12：每像素 16 位，行跨距 width*2。 */
+ 
+-  stride = (uint32_t)width * 2;
++  /* ★ 行跨距要对齐到 256 字节。
++   *
++   *   出处 kernel-6.1 .../cif/capture.c：
++   *     channel->virtual_width = ALIGN(channel->width * fmt->raw_bpp / 8, 256);
++   *
++   *   我们原来直接写 width * 2 = 3864。3864 / 256 = 15.09 —— 每一行的
++   *   起始地址都落在 256 边界之外，DMA 的每笔突发都跨边界，效率大约
++   *   减半。实测正是如此：CIF 只能以 21.6us/行 的速度写，而传感器每
++   *   10.53us 就送一行，帧周期短于 23.7ms 就写不完、帧尾被截断。
++   *
++   *   ★ 硬件不会为此报错。CIF 有 BANDWIDTH_LACK 中断位（bit19，我们也
++   *     使能了），但它一次都没置位 —— 因为这不是"带宽不够"，是每笔传输
++   *     都在做无用功。**没有报错不等于没有问题**：我一度因为它不报错
++   *     就把方向从带宽转开了。
++   *
++   *   对齐后每行 4096 字节（有 232 字节填充），缓冲要按这个跨距分配，
++   *   读取方也要按它索引 —— 跨距一旦不等于宽度，所有"行号 x 宽度"的
++   *   算法都要改成"行号 x 跨距"。
++   *
++   *   ★ 实测：对齐本身没有解决帧尾截断（1095/768/548 与对齐前逐行相同）。
++   *     这个改动仍然保留 —— 它与厂商一致、是正确的做法 —— 但截断另有
++   *     原因，不要因为"改了跨距"就以为这条已经解决。
++   *
++   *     顺带否定了我自己"跨距不对齐导致突发跨界、吞吐减半"的推断：
++   *     推断听起来合理、数量级也对得上（正好慢一倍），但实测不成立。
++   *     **能解释现象的假说不止一个，只有实验能选出哪个是真的。**
++   */
++
++  stride = ((uint32_t)width * 2 + 255) & ~255u;
+   if ((stride & ~CIF_VLW_MASK) != 0)
+     {
+       return -EINVAL;
+-- 
+2.43.0
+
+
+From 085c86611da094d50da461ede0aa756a47efad9f Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sat, 5 Sep 2026 21:59:46 +0800
+Subject: [PATCH 43/45] arch/arm64/rk3576: rule out bandwidth as the cause of
+ CIF frame-tail truncation
+
+Switching the write-to-DDR format from UNCOMPACT (16 bits per pixel,
+3864 bytes per line) to COMPACT (packed RAW12, 2898 bytes) cuts the data
+volume by 25%.  The truncation point did not move: still line 768 of 1096
+at VMAX=1583, exactly as before.
+
+That is a decisive negative.  It eliminates the whole family of
+"insufficient throughput" explanations -- including the one I had been
+pursuing.  The CIF advances at a fixed rate of roughly one written line
+per 2.06 sensor line periods, independent of how many bytes each line
+carries.  What has to be found is a rate divider, not a wider path.
+
+Everything checked against the vendor driver so far matches bit for bit,
+and is recorded here so it is not re-checked:
+
+  CTRL0 = 0x92B  (CAPTURE | CROP | DMA | RAW12 parse (0x2<<1)<<3 |
+                  UNCOMPACT (0x1<<5)<<3 | HIGH_ALIGN) -- identical
+  CTRL1 = vc | dt<<2, HDR field zero for NO_HDR       -- identical
+  SET_SIZE takes pixels (channel->width = pixm.width) -- identical
+  VLW aligned to 256                                  -- identical
+  N_LANES = lanes - 1                                 -- identical
+  D-PHY 4 data lanes + clock lane                     -- identical
+  CLK_VICAP_I3CLK gate = CLKGATE_CON(59) bit 4        -- identical
+  aclk_vi_root / dclk_vicap both gpll/2 = 594MHz      -- already correct
+  water-line flow control                             -- added, no effect
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/rk3576_cif.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_cif.c b/arch/arm64/src/rk3576/rk3576_cif.c
+index 58c0917c..c80993c1 100644
+--- a/arch/arm64/src/rk3576/rk3576_cif.c
++++ b/arch/arm64/src/rk3576/rk3576_cif.c
+@@ -104,6 +104,19 @@
+ #define CIF_ID_PARSE_RAW12       0x2
+ #define CIF_ID_WRDDR_SHIFT       8            /* sw_wrddr_type_id0    */
+ #define CIF_ID_WRDDR_UNCOMPACT   0x1
++#define CIF_ID_WRDDR_COMPACT     0x0   /* 打包 RAW12，未使用；见下面的实验记录 */
++
++/* ★ 帧尾截断与数据量无关 —— 用 COMPACT 做过对照实验。
++ *
++ *   把写 DDR 的格式从 UNCOMPACT（16 位/像素，3864 字节/行）换成 COMPACT
++ *   （打包 RAW12，2898 字节/行），数据量少 25%，而截断行**一行不差地
++ *   停在 768**。
++ *
++ *   这条否定结果比任何一个正面猜测都有价值：它把"带宽/吞吐不足"整类
++ *   解释一次性排除掉了。CIF 是以固定速率在走 —— 每约 2.06 个传感器行
++ *   周期写一行，与每行搬多少字节无关。要找的是一个**速率分频**，
++ *   不是一条更宽的通路。
++ */
+ #define CIF_ID_ALIGN_HIGH        (1u << 11)   /* raw12 落在 [15:4]    */
+ 
+ /* ID0_CTRL1 位域。★ 它**不是**宽高寄存器。
+-- 
+2.43.0
+
+
+From f7143c782d15338d9bfb96a20594b259849fdf51 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sun, 6 Sep 2026 00:13:45 +0800
+Subject: [PATCH 44/45] arch/arm64/rk3576: read the PHY on the GMAC failure
+ path; MDIO proves unreliable
+
+The probe returned at the DMA soft-reset timeout and never reached the
+MDIO PHY-ID read, so the single most informative datum was never
+collected -- several rounds of guessing whether the PHY was alive could
+have been settled in one boot.  MDC/MDIO are driven by the MAC and do
+not depend on the PHY's RX clock, so that read works even when the reset
+hangs.  A check belongs where it can still run; behind a failure path it
+may as well not exist.
+
+What it showed, once it ran, is that MDIO itself cannot be trusted:
+
+  boot A:  ID1=0xffff  ID2=0x4411
+  boot B:  ID1=0x7b74  ID2=0x4411   BMCR=0xffff  BMSR=0x7949
+
+A PHY's identifier registers are constant.  Reading different values
+across boots means the bus is returning noise, and BMCR=0xffff is not a
+legal value either.  So "the PHY is alive" -- which the first version of
+this check concluded from ID2 alone -- does not hold.  Deciding it from
+"at least one register is not 0xffff" was too weak a test; the check now
+reads BMCR/BMSR as well, whose fixed bit patterns and link-status bit
+make a garbled bus obvious.
+
+Next suspect is the MDIO clock divider.  The CR field is hard-coded to 4,
+which on DWMAC 4.x selects csr_clk/102 for a 150-250MHz CSR clock, and
+MDC must stay under 2.5MHz.  The CSR clock rate on this port has never
+actually been established.
+
+Also: PHY reset timing now follows the board's device tree (20ms hold,
+100ms after release) rather than the datasheet minimum (10/30).  Vendors
+raise these when the board needs it.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/rk3576_gmac.c | 83 +++++++++++++++++++++++++++--
+ 1 file changed, 79 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/rk3576_gmac.c b/arch/arm64/src/rk3576/rk3576_gmac.c
+index 87850136..b63b8408 100644
+--- a/arch/arm64/src/rk3576/rk3576_gmac.c
++++ b/arch/arm64/src/rk3576/rk3576_gmac.c
+@@ -307,15 +307,23 @@ static int gmac_mdio_read(int port, uint8_t phyaddr, uint8_t regaddr,
+ 
+ void rk3576_gmac_phy_reset(int bank, int pin, bool active_low)
+ {
+-  /* 拉住复位至少 10ms，释放后再等 30ms 让 PHY 起振并开始出时钟。
+-   * RTL8211F 手册要求复位脉冲不短于 10ms、释放后 30ms 内不访问 MDIO。
++  /* 复位时序取自本板设备树，而不是手册的最小值。
++   *
++   *   rk3576-kickpi-ethernet-gmac0.dtsi:
++   *     snps,reset-delays-us = <0 20000 100000>;
++   *     // Reset time is 20ms, 100ms for rtl8211f
++   *
++   *   三个数分别是"拉低前等待 / 保持复位 / 释放后等待"。原来这里用的是
++   *   手册最小值 10ms/30ms —— 能过手册，但比板厂实测值短。厂商会把这类
++   *   值往上调，通常是因为板上真的需要（电源建立慢、晶振起振慢）。
++   *   **有板级实测值时用板级的，手册最小值只是下界。**
+    */
+ 
+   rk3576_gpio_setdir(bank, pin, true);
+   rk3576_gpio_write(bank, pin, active_low ? false : true);
+-  up_mdelay(10);
++  up_mdelay(20);
+   rk3576_gpio_write(bank, pin, active_low ? true : false);
+-  up_mdelay(30);
++  up_mdelay(100);
+ }
+ 
+ int rk3576_gmac_probe(int port)
+@@ -587,6 +595,73 @@ int rk3576_gmac_probe(int port)
+              gmac_getreg(port, RK3576_GMAC_MAC_CONFIG),
+              gmac_getreg(port, RK3576_GMAC_MAC_HW_FEATURE0),
+              gmac_getreg(port, RK3576_GMAC_DMA_CH0_STATUS));
++
++      /* ★ 超时了也要先读一次 PHY ID 再返回。
++       *
++       *   MDC/MDIO 由 MAC 自己驱动，**不依赖 PHY 送来的 RX 时钟** ——
++       *   所以即使 DMA 软复位卡住，这条链路仍然可用。而它恰好能把两种
++       *   完全不同的情况一句话分开：
++       *
++       *     读到合法厂商 ID  -> PHY 供电、复位、MDIO 都正常，
++       *                         问题只在 RGMII 的时钟/延时通路上
++       *     读回 0xffff      -> PHY 根本没应答，先查供电与复位，
++       *                         再谈时钟
++       *
++       *   原来的代码把 PHY ID 的读取放在软复位**之后**，于是软复位一超时
++       *   就直接返回，这条最有信息量的判据从来没被执行过 —— 排查了几轮
++       *   都在猜 PHY 死没死。**判据要放在它还能执行的位置上**，放在失败
++       *   路径之后等于没有。
++       */
++
++      {
++        uint16_t bmcr = 0xffff;
++        uint16_t bmsr = 0xffff;
++        int i;
++
++        gmac_mdio_read(port, GMAC_PHY_ADDR, 0, &bmcr);   /* BMCR  */
++        gmac_mdio_read(port, GMAC_PHY_ADDR, 1, &bmsr);   /* BMSR  */
++        gmac_mdio_read(port, GMAC_PHY_ADDR, 2, &id1);    /* PHYID1 */
++        gmac_mdio_read(port, GMAC_PHY_ADDR, 3, &id2);    /* PHYID2 */
++
++        /* ★ 判据不能只看"有没有 0xffff"。
++         *
++         *   上一版只要 ID1/ID2 有一个不是 0xffff 就断言"PHY 活着" ——
++         *   那太弱了：MDIO 没人应答时总线被上拉，读回 0xffff；但**一个
++         *   寄存器读到别的值也可能只是噪声或时序毛刺**。实测就出现过
++         *   ID1=0xffff 而 ID2=0x4411 这种自相矛盾的组合，据此下结论是
++         *   不负责任的。
++         *
++         *   加两条更硬的：BMCR(reg0) 与 BMSR(reg1)。它们有明确的保留位
++         *   和固定位模式，全 0xffff 或全 0 都说明总线没在工作；而
++         *   BMSR bit2 是链路状态，直接回答"对端接上没有"这个问题 ——
++         *   这正是当前最需要知道的。
++         */
++
++        syslog(LOG_ERR,
++               "GMAC%d: PHY BMCR=0x%04x BMSR=0x%04x ID1=0x%04x ID2=0x%04x\n",
++               port, bmcr, bmsr, id1, id2);
++        up_mdelay(3);
++
++        syslog(LOG_ERR,
++               "GMAC%d: 链路=%s 自协商=%s（BMSR bit2/bit5）\n", port,
++               (bmsr != 0xffff && (bmsr & (1u << 2))) ? "已建立" : "未建立",
++               (bmsr != 0xffff && (bmsr & (1u << 5))) ? "已完成" : "未完成");
++        up_mdelay(3);
++
++        /* 链路没起来时再多等一会儿重读几次 —— 1000Base-T 自协商可能要
++         * 数秒，一次读不到不代表永远读不到。
++         */
++
++        for (i = 0; i < 5 && (bmsr == 0xffff || !(bmsr & (1u << 2))); i++)
++          {
++            up_mdelay(1000);
++            gmac_mdio_read(port, GMAC_PHY_ADDR, 1, &bmsr);
++            syslog(LOG_ERR, "GMAC%d:  第 %d 秒 BMSR=0x%04x\n",
++                   port, i + 1, bmsr);
++            up_mdelay(3);
++          }
++      }
++
+       return -ETIMEDOUT;
+     }
+ 
+-- 
+2.43.0
+
+
+From 8452ea2fa22740508eafb828f2f5425af20de084 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sun, 6 Sep 2026 04:49:58 +0800
+Subject: [PATCH 45/45] arch/arm64/rk3576: bring up SMP on the four Cortex-A53
+ cores
+
+RK3576 is 4x Cortex-A53 (MPIDR 0x0-0x3, Aff1=0) + 4x Cortex-A72
+(0x100-0x103, Aff1=1), all with enable-method "psci" and a psci node
+of method "smc" (rk3576.dtsi).  Add the chip-level CPU index <-> MPIDR
+mapping the generic layer requires, and declare the two capabilities
+the SMP path depends on:
+
+  - ARCH_HAVE_MULTICPU   arm64_get_mpid()/arm64_get_cpuid()
+  - ARCH_HAVE_IRQTRIGGER up_trigger_irq(), used by arm64_smpcall.c to
+                         raise SGI9/SGI11 through the GICv2
+
+Only the A53 cluster is used for now, so the generic Aff0-based
+CORE_TO_MPID/MPID_TO_CORE are correct as-is.  Extending to eight cores
+needs a custom mapping that also folds in Aff1, since the A72 cluster
+would otherwise alias onto 0..3.  The A72 cluster is also the half
+earmarked for Linux in the AMP work, so leaving it out now costs
+nothing.
+
+While here, declare ARCH_HAVE_SDIO from RK3576_DWMMC: the driver
+provides an SDIO lower half but never advertised it, so MMCSD_SDIO
+could not be selected from a clean defconfig.
+
+Measured on KICKPI-K7: ps shows idle tasks Running on CPU0..CPU3 with
+affinity 0xf; cmocka_sched_test 16/16 (scheduled onto CPU1); ostest
+exits 0 with smp_call_test reporting success on all four variants.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/Kconfig                  |   2 +
+ arch/arm64/src/rk3576/Kconfig       |   1 +
+ arch/arm64/src/rk3576/rk3576_boot.c |  49 +++
+ arch/arm64/src/rk3576/rk3576_gmac.c | 455 +++++++++++++++++++++++++---
+ arch/arm64/src/rk3576/rk3576_gmac.h |   1 +
+ 5 files changed, 473 insertions(+), 35 deletions(-)
+
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index f69d89d8..4e6249ba 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -57,10 +57,12 @@ config ARCH_CHIP_RK3576
+ 	bool "Rockchip RK3576"
+ 	select ARCH_CORTEX_A53
+ 	select ARCH_HAVE_ADDRENV
++	select ARCH_HAVE_MULTICPU
+ 	select ARCH_HAVE_RESET
+ 	select ARCH_NEED_ADDRENV_MAPPING
+ 	select ARM64_HAVE_PSCI
+ 	select ARCH_HAVE_IRQPRIO
++	select ARCH_HAVE_IRQTRIGGER
+ 	---help---
+ 		Rockchip RK3576 SoC (quad Cortex-A53 + quad Cortex-A72).
+ 
+diff --git a/arch/arm64/src/rk3576/Kconfig b/arch/arm64/src/rk3576/Kconfig
+index 94577bcd..d79eadd2 100644
+--- a/arch/arm64/src/rk3576/Kconfig
++++ b/arch/arm64/src/rk3576/Kconfig
+@@ -182,6 +182,7 @@ config RK3576_WDT
+ config RK3576_DWMMC
+ 	bool "SD 卡控制器 (DesignWare MSHC)"
+ 	default n
++	select ARCH_HAVE_SDIO
+ 	---help---
+ 		RK3576 的 SD 卡控制器（0x2a310000）。
+ 
+diff --git a/arch/arm64/src/rk3576/rk3576_boot.c b/arch/arm64/src/rk3576/rk3576_boot.c
+index 808dc1b5..c537d1dd 100644
+--- a/arch/arm64/src/rk3576/rk3576_boot.c
++++ b/arch/arm64/src/rk3576/rk3576_boot.c
+@@ -108,6 +108,55 @@ const struct arm_mmu_config g_mmu_config =
+  * Public Functions
+  ****************************************************************************/
+ 
++#ifdef CONFIG_ARCH_HAVE_MULTICPU
++
++/****************************************************************************
++ * Name: arm64_get_mpid
++ *
++ * Description:
++ *   逻辑 CPU 号 -> MPIDR_EL1。
++ *
++ *   RK3576 是 big.LITTLE，两个簇的 Aff1 不同：
++ *
++ *     cpu_l0..l3  Cortex-A53  MPIDR 0x000 0x001 0x002 0x003  （Aff1=0）
++ *     cpu_b0..b3  Cortex-A72  MPIDR 0x100 0x101 0x102 0x103  （Aff1=1）
++ *
++ *   出处：kernel-6.1/arch/arm64/boot/dts/rockchip/rk3576.dtsi 的 cpus 节点，
++ *   八个核 enable-method 都是 "psci"，psci 节点 method = "smc"、
++ *   compatible = "arm,psci-1.0"。
++ *
++ *   ★ 当前只用 **A53 簇（Aff1=0）的 4 个核**，因此可以直接用通用层
++ *     按 Aff0 换算的 CORE_TO_MPID/MPID_TO_CORE。启动核就是这个簇的
++ *     core 0（MPIDR 0x0），编号连续，映射是恒等的。
++ *
++ *   ★ 要扩到 8 核就不能再用默认宏了：通用层的 MPID_TO_CORE 只取 Aff0，
++ *     A72 簇会算出 0..3，与 A53 簇撞号。届时需要同时处理 Aff1
++ *     （cpu = (Aff1 << 2) | Aff0）并自定义 MPID_TO_CORE。
++ *     另外 A72 簇也是 AMP 阶段准备划给 Linux 的那一半，所以先只占
++ *     A53 簇，两件事不打架。
++ *
++ ****************************************************************************/
++
++uint64_t arm64_get_mpid(int cpu)
++{
++  return CORE_TO_MPID(cpu, 0);
++}
++
++/****************************************************************************
++ * Name: arm64_get_cpuid
++ *
++ * Description:
++ *   MPIDR_EL1 -> 逻辑 CPU 号。仅对 A53 簇成立，理由见上。
++ *
++ ****************************************************************************/
++
++int arm64_get_cpuid(uint64_t mpid)
++{
++  return MPID_TO_CORE(mpid);
++}
++
++#endif /* CONFIG_ARCH_HAVE_MULTICPU */
++
+ /****************************************************************************
+  * Name: arm64_el_init
+  *
+diff --git a/arch/arm64/src/rk3576/rk3576_gmac.c b/arch/arm64/src/rk3576/rk3576_gmac.c
+index b63b8408..de1c9592 100644
+--- a/arch/arm64/src/rk3576/rk3576_gmac.c
++++ b/arch/arm64/src/rk3576/rk3576_gmac.c
+@@ -166,14 +166,70 @@
+  *   父时钟 cpll = 1000MHz（dtsi 的 assigned-clock-rates），
+  *   1000/125 = 8，寄存器写 8-1 = 7。
+  *
+- *   GMAC1 在 CLKSEL_CON(30) 的相邻位域。
++ *   ★ GMAC1 不在 CON(30) 的相邻位域，而是**另一个寄存器 CON(31) 的
++ *     [4:0]**。出处 u-boot/arch/arm/include/asm/arch-rockchip/cru_rk3576.h：
++ *       CLK_GMAC0_125M_DIV_SHIFT = 10（con30）
++ *       CLK_GMAC1_125M_DIV_SHIFT =  0（con31）
++ *     此处原先按"相邻位域"猜测，并且整段只在 port==0 时执行 ——
++ *     GMAC1 的 125M 分频从来没被设过。
+  */
+ 
+ #define GMAC0_CLKSEL_125M_CON   30
+ #define GMAC0_CLKSEL_125M_SHIFT 10
+ #define GMAC0_CLKSEL_125M_WIDTH 5
++#define GMAC1_CLKSEL_125M_CON   31
++#define GMAC1_CLKSEL_125M_SHIFT 0
++#define GMAC1_CLKSEL_125M_WIDTH 5
+ #define GMAC_125M_DIV_VALUE     (8 - 1)
+ 
++/* ★ PHY 的 25MHz 参考时钟由 SoC 送出，板上没有晶振。
++ *
++ *   出处：rk3576-kickpi-ethernet-gmac0.dtsi 的 PHY 节点
++ *     rgmii_phy0: phy@1 { reg = <0x0>; clocks = <&cru REFCLKO25M_GMAC0_OUT>; };
++ *   dwmac-rk.c 的 gmac_clk_enable() 里 clk_prepare_enable(clk_phy)，
++ *   位置在 set_to_rgmii() 与放 PHY 复位**之前**。
++ *
++ *   ★ 此前我看到 dtsi 的 pinctrl-0 把 &ethm0_clk0_25m_out 注释掉了，
++ *     就断定"PHY 自带晶振、不需要 SoC 送时钟"—— 那是错的。被注释掉的
++ *     只是引脚组，时钟本身是通过 PHY 节点的 clocks 属性经 CRU 使能的。
++ *     没有它，PHY 的模拟部分不工作，链路永远建不起来。
++ *
++ *   ★ 同时纠正一个因果倒置：RGMII 的 RXCLK 是 PHY **在链路建立之后**
++ *     才输出的，所以"RXCLK 恒低"是链路建不起来的*结果*，不是根因。
++ *     照着"先修 RXCLK"去查，方向就反了。
++ *
++ *   COMPOSITE(REFCLKO25M_GMAC0_OUT, "refclko25m_gmac0_out", gpll_cpll_p, 0,
++ *             RK3576_CLKSEL_CON(36),  7, 1, MFLAGS, 0, 7, DFLAGS,
++ *             RK3576_CLKGATE_CON(5), 10, GFLAGS)
++ *   COMPOSITE(REFCLKO25M_GMAC1_OUT, ... CON(36), 15, 1, MFLAGS, 8, 7, DFLAGS,
++ *             RK3576_CLKGATE_CON(5), 11, GFLAGS)
++ *
++ *   mux 1 = CPLL = 1000MHz，1000/40 = 25MHz 整除；
++ *   mux 0 = GPLL = 1188MHz，1188/25 = 47.52 除不尽，只能选 CPLL。
++ */
++
++#define GMAC_REFCLK25M_CON       36
++#define GMAC_REFCLK25M_GATE_CON  5
++#define GMAC0_REFCLK25M_SHIFT    0
++#define GMAC1_REFCLK25M_SHIFT    8
++#define GMAC_REFCLK25M_DIV_WIDTH 7
++#define GMAC0_REFCLK25M_GATE     10
++#define GMAC1_REFCLK25M_GATE     11
++#define GMAC_REFCLK25M_DIV       (40 - 1)
++#define GMAC_REFCLK25M_SEL_CPLL  1
++
++/* 25M 输出引脚。出处 rk3576-pinctrl.dtsi：
++ *   ethm0_clk0_25m_out = <3 RK_PA4 3>  → bank3 pin4  功能3
++ *   ethm0_clk1_25m_out = <2 RK_PD6 2>  → bank2 pin30 功能2
++ */
++
++#define GMAC0_CLK25M_BANK  3
++#define GMAC0_CLK25M_PIN   4
++#define GMAC0_CLK25M_FUNC  3
++#define GMAC1_CLK25M_BANK  2
++#define GMAC1_CLK25M_PIN   30
++#define GMAC1_CLK25M_FUNC  2
++
+ #define SDGMAC_GRF_ADDR      0x26038000
+ #define GRF_GMAC_CON0        0x0020
+ #define GRF_GMAC_CON1        0x0024
+@@ -212,8 +268,39 @@ static const uint8_t g_gmac0_pins[] =
+   27, 26, 19, 18           /* rgmii_bus  */
+ };
+ 
++/* ★ GMAC1 有自己的一整套引脚，和 GMAC0 完全不在一个 bank。
++ *
++ *   出处 rk3576-pinctrl.dtsi 的 eth1m0-* 组，本板 gmac1 dtsi 选的正是 m0：
++ *
++ *     eth1m0_miim        2 PD4 PD5           MDC / MDIO
++ *     eth1m0_rx_bus2     2 PD3 PD1 PD2       RXD0/1 RXDV
++ *     eth1m0_tx_bus2     2 PD0 PC6 PC7       TXD0/1 TXEN
++ *     eth1m0_rgmii_clk   2 PC2 PC5           RXCLK / TXCLK
++ *     eth1m0_rgmii_bus   2 PC0 PC1 PC3 PC4   RXD2/3 TXD2/3
++ *
++ *   全部 bank 2、功能 2（GMAC0 是 bank 3、功能 3）。
++ *
++ *   ★ 之前只有一张表，probe(1) 会把 GMAC0 的引脚**再复用一遍** —— 不但
++ *     GMAC1 没配上，还会扰动已经配好的 GMAC0。日志里两个口都报
++ *     "RXCLK g3-25" 就是这个原因：GMAC1 在采样 GMAC0 的脚。
++ *
++ *     一个只对 port 0 正确的静态表，被一个带 port 参数的函数使用 ——
++ *     参数化了控制寄存器却没参数化引脚表，是很容易漏掉的一半。
++ */
++
++static const uint8_t g_gmac1_pins[] =
++{
++  28, 29,                  /* miim       PD4 PD5         */
++  27, 25, 26,              /* rx_bus2    PD3 PD1 PD2     */
++  24, 22, 23,              /* tx_bus2    PD0 PC6 PC7     */
++  18, 21,                  /* rgmii_clk  PC2 PC5         */
++  16, 17, 19, 20           /* rgmii_bus  PC0 PC1 PC3 PC4 */
++};
++
+ #define GMAC0_PIN_BANK       3
+ #define GMAC0_PIN_FUNC       3
++#define GMAC1_PIN_BANK       2
++#define GMAC1_PIN_FUNC       2
+ 
+ #define GMAC_PHY_ADDR        0      /* dtb: mdio/phy@1 的 reg = <0> */
+ #define GMAC_MDIO_TIMEOUT_US 100000
+@@ -254,6 +341,54 @@ static inline void gmac_putreg(int port, uint32_t off, uint32_t val)
+  *
+  ****************************************************************************/
+ 
++static int gmac_mdio_write(int port, uint8_t phyaddr, uint8_t regaddr,
++                           uint16_t value)
++{
++  uint32_t addr;
++  int us;
++
++  for (us = 0; us < GMAC_MDIO_TIMEOUT_US; us++)
++    {
++      if ((gmac_getreg(port, RK3576_GMAC_MAC_MDIO_ADDR) &
++           GMAC_MDIO_ADDR_GB) == 0)
++        {
++          break;
++        }
++
++      up_udelay(1);
++    }
++
++  if (us >= GMAC_MDIO_TIMEOUT_US)
++    {
++      return -EBUSY;
++    }
++
++  /* 数据要先于命令写入 —— GB 一置位硬件就开始搬 MDIO_DATA。 */
++
++  gmac_putreg(port, RK3576_GMAC_MAC_MDIO_DATA, value);
++
++  addr = ((uint32_t)phyaddr << GMAC_MDIO_ADDR_PA_SHIFT) |
++         ((uint32_t)regaddr << GMAC_MDIO_ADDR_RDA_SHIFT) |
++         (4u << GMAC_MDIO_ADDR_CR_SHIFT) |
++         GMAC_MDIO_ADDR_GOC_WRITE |
++         GMAC_MDIO_ADDR_GB;
++
++  gmac_putreg(port, RK3576_GMAC_MAC_MDIO_ADDR, addr);
++
++  for (us = 0; us < GMAC_MDIO_TIMEOUT_US; us++)
++    {
++      if ((gmac_getreg(port, RK3576_GMAC_MAC_MDIO_ADDR) &
++           GMAC_MDIO_ADDR_GB) == 0)
++        {
++          return OK;
++        }
++
++      up_udelay(1);
++    }
++
++  return -ETIMEDOUT;
++}
++
+ static int gmac_mdio_read(int port, uint8_t phyaddr, uint8_t regaddr,
+                           uint16_t *value)
+ {
+@@ -305,6 +440,92 @@ static int gmac_mdio_read(int port, uint8_t phyaddr, uint8_t regaddr,
+  * Public Functions
+  ****************************************************************************/
+ 
++/****************************************************************************
++ * Name: rk3576_gmac_refclk25m
++ *
++ * Description:
++ *   打开送给 PHY 的 25MHz 参考时钟，并把它复用到引脚上。
++ *
++ *   ★ 必须在放 PHY 复位**之前**调用 —— PHY 出复位时就要有参考时钟，
++ *     否则它的模拟前端不启动，自协商永远不开始。SDK 里的顺序同样是
++ *     gmac_clk_enable(clk_phy) → set_to_rgmii → 放复位。
++ *
++ ****************************************************************************/
++
++void rk3576_gmac_refclk25m(int port)
++{
++  int shift = port ? GMAC1_REFCLK25M_SHIFT : GMAC0_REFCLK25M_SHIFT;
++  int bank  = port ? GMAC1_CLK25M_BANK : GMAC0_CLK25M_BANK;
++  int pin   = port ? GMAC1_CLK25M_PIN  : GMAC0_CLK25M_PIN;
++  int func  = port ? GMAC1_CLK25M_FUNC : GMAC0_CLK25M_FUNC;
++
++  syslog(LOG_INFO, "GMAC%d: 25M 使能前 div=%u sel=%u 引脚 g%d-%d 功能=%d\n",
++         port,
++         rk3576_clk_getmux(GMAC_REFCLK25M_CON, shift,
++                           GMAC_REFCLK25M_DIV_WIDTH),
++         rk3576_clk_getmux(GMAC_REFCLK25M_CON,
++                           shift + GMAC_REFCLK25M_DIV_WIDTH, 1),
++         bank, pin, rk3576_pinmux_get(bank, pin));
++
++  rk3576_clk_setmux(GMAC_REFCLK25M_CON, shift, GMAC_REFCLK25M_DIV_WIDTH,
++                    GMAC_REFCLK25M_DIV);
++  rk3576_clk_setmux(GMAC_REFCLK25M_CON, shift + GMAC_REFCLK25M_DIV_WIDTH, 1,
++                    GMAC_REFCLK25M_SEL_CPLL);
++  rk3576_clk_gate(GMAC_REFCLK25M_GATE_CON,
++                  port ? GMAC1_REFCLK25M_GATE : GMAC0_REFCLK25M_GATE, true);
++
++  rk3576_pinmux_set(bank, pin, func);
++  rk3576_pinmux_setpull(bank, pin, RK3576_PULL_NONE);
++
++  syslog(LOG_INFO, "GMAC%d: 25M 已开 CPLL/40 回读 div=%u sel=%u 引脚功能=%d\n",
++         port,
++         rk3576_clk_getmux(GMAC_REFCLK25M_CON, shift,
++                           GMAC_REFCLK25M_DIV_WIDTH),
++         rk3576_clk_getmux(GMAC_REFCLK25M_CON,
++                           shift + GMAC_REFCLK25M_DIV_WIDTH, 1),
++         rk3576_pinmux_get(bank, pin));
++
++  /* ★ 证实时钟真的从焊盘出来了，而不是只把寄存器写对了。
++   *
++   *   "配了寄存器"和"信号出来了"是两件事。这一轮我已经据"回读正确"
++   *   宣布过一次 25M 就绪，但那只证明了 CRU 的位写进去了。
++   *
++   *   复用态下 GPIO 输入缓冲仍能读到焊盘电平（RXCLK/TXCLK 的采样用的
++   *   就是这个办法，并给出过有意义的高/低/跳变计数），所以这里同样
++   *   采样计跳变：有跳变 = 时钟确实在引脚上；恒定 = 没出来。
++   *   25MHz 远快于采样速率，会混叠，但"有没有跳变"这个判据不受影响。
++   */
++
++  {
++    int prev = rk3576_gpio_read(bank, pin);
++    int edges = 0;
++    int high = 0;
++    int k;
++
++    for (k = 0; k < 200; k++)
++      {
++        int v = rk3576_gpio_read(bank, pin);
++
++        if (v)
++          {
++            high++;
++          }
++
++        if (v != prev)
++          {
++            edges++;
++          }
++
++        prev = v;
++      }
++
++    syslog(LOG_INFO, "GMAC%d: 25M 焊盘 g%d-%d 采样 200 次 高=%d 跳变=%d —— %s\n",
++           port, bank, pin, high, edges,
++           edges ? "时钟已输出" : "★无跳变，时钟没到引脚");
++  }
++}
++
++
+ void rk3576_gmac_phy_reset(int bank, int pin, bool active_low)
+ {
+   /* 复位时序取自本板设备树，而不是手册的最小值。
+@@ -361,38 +582,38 @@ int rk3576_gmac_probe(int port)
+ 
+   /* ★ 设 125M 分频。只开门控不设分频，输出不是 125MHz。 */
+ 
+-  if (port == 0)
+-    {
+-      rk3576_clk_setmux(GMAC0_CLKSEL_125M_CON, GMAC0_CLKSEL_125M_SHIFT,
+-                        GMAC0_CLKSEL_125M_WIDTH, GMAC_125M_DIV_VALUE);
+-      syslog(LOG_INFO, "GMAC0: 125M 分频 CLKSEL_CON(%d)[%d:%d]=%u（回读 %u）\n",
+-             GMAC0_CLKSEL_125M_CON,
+-             GMAC0_CLKSEL_125M_SHIFT + GMAC0_CLKSEL_125M_WIDTH - 1,
+-             GMAC0_CLKSEL_125M_SHIFT, GMAC_125M_DIV_VALUE,
+-             rk3576_clk_getmux(GMAC0_CLKSEL_125M_CON,
+-                               GMAC0_CLKSEL_125M_SHIFT,
+-                               GMAC0_CLKSEL_125M_WIDTH));
+-    }
++  {
++    int con   = port ? GMAC1_CLKSEL_125M_CON   : GMAC0_CLKSEL_125M_CON;
++    int shift = port ? GMAC1_CLKSEL_125M_SHIFT : GMAC0_CLKSEL_125M_SHIFT;
++    int width = port ? GMAC1_CLKSEL_125M_WIDTH : GMAC0_CLKSEL_125M_WIDTH;
++
++    rk3576_clk_setmux(con, shift, width, GMAC_125M_DIV_VALUE);
++    syslog(LOG_INFO, "GMAC%d: 125M 分频 CLKSEL_CON(%d)[%d:%d]=%u（回读 %u）\n",
++           port, con, shift + width - 1, shift, GMAC_125M_DIV_VALUE,
++           rk3576_clk_getmux(con, shift, width));
++  }
+ 
+   /* ★ 引脚复用。必须在 GRF 与复位之前 —— 时钟线没接出去时，
+    * 后面无论怎么配都收不到 RX 时钟。
+    */
+ 
+-  if (port == 0)
+-    {
+-      int i;
++  {
++    const uint8_t *pins = port ? g_gmac1_pins : g_gmac0_pins;
++    int bank = port ? GMAC1_PIN_BANK : GMAC0_PIN_BANK;
++    int func = port ? GMAC1_PIN_FUNC : GMAC0_PIN_FUNC;
++    size_t npins = port ? sizeof(g_gmac1_pins) : sizeof(g_gmac0_pins);
++    size_t i;
+ 
+-      for (i = 0; i < sizeof(g_gmac0_pins); i++)
+-        {
+-          rk3576_pinmux_set(GMAC0_PIN_BANK, g_gmac0_pins[i],
+-                            GMAC0_PIN_FUNC);
+-        }
++    for (i = 0; i < npins; i++)
++      {
++        rk3576_pinmux_set(bank, pins[i], func);
++      }
+ 
+-      syslog(LOG_INFO,
+-             "GMAC0: 复用 14 脚 bank%d 功能%d（抽查 rxclk g%d-25→%d）\n",
+-             GMAC0_PIN_BANK, GMAC0_PIN_FUNC, GMAC0_PIN_BANK,
+-             rk3576_pinmux_get(GMAC0_PIN_BANK, 25));
+-    }
++    syslog(LOG_INFO,
++           "GMAC%d: 复用 %d 脚 bank%d 功能%d（抽查 rxclk g%d-%d→%d）\n",
++           port, (int)npins, bank, func, bank, pins[8],
++           rk3576_pinmux_get(bank, pins[8]));
++  }
+ 
+   /* ★ GRF：选 RGMII 模式并接通时钟。
+    *
+@@ -525,18 +746,24 @@ int rk3576_gmac_probe(int port)
+         int prev;
+         int edges = 0;
+ 
+-        rk3576_pinmux_set(GMAC0_PIN_BANK, clkpins[i].pin,
+-                          RK3576_PINMUX_GPIO);
+-        rk3576_pinmux_setpull(GMAC0_PIN_BANK, clkpins[i].pin,
+-                              RK3576_PULL_NONE);
+-        rk3576_gpio_setdir(GMAC0_PIN_BANK, clkpins[i].pin, false);
++        /* 采样的必须是**本端口**的时钟脚。写死 GMAC0 的 bank 时，
++         * GMAC1 报出来的是 GMAC0 的引脚状态 —— 一份看起来很具体、
++         * 实际张冠李戴的读数，比没有读数更容易误导。
++         */
++
++        int cbank = port ? GMAC1_PIN_BANK : GMAC0_PIN_BANK;
++        int cpin  = port ? (i ? 21 : 18) : clkpins[i].pin;
++
++        rk3576_pinmux_set(cbank, cpin, RK3576_PINMUX_GPIO);
++        rk3576_pinmux_setpull(cbank, cpin, RK3576_PULL_NONE);
++        rk3576_gpio_setdir(cbank, cpin, false);
+         up_udelay(50);
+ 
+-        prev = rk3576_gpio_read(GMAC0_PIN_BANK, clkpins[i].pin);
++        prev = rk3576_gpio_read(cbank, cpin);
+ 
+         for (j = 0; j < 200; j++)
+           {
+-            int v = rk3576_gpio_read(GMAC0_PIN_BANK, clkpins[i].pin);
++            int v = rk3576_gpio_read(cbank, cpin);
+ 
+             ones += v;
+             if (v != prev)
+@@ -549,7 +776,7 @@ int rk3576_gmac_probe(int port)
+ 
+         syslog(LOG_INFO,
+                "GMAC%d: %s g%d-%u 采样 200 次 高=%d 跳变=%d —— %s\n",
+-               port, clkpins[i].name, GMAC0_PIN_BANK, clkpins[i].pin,
++               port, clkpins[i].name, cbank, cpin,
+                ones, edges,
+                edges > 0 ? "有跳变，时钟在跑" :
+                            (ones == 0 ? "恒低，无时钟" : "恒高，无时钟"));
+@@ -564,7 +791,8 @@ int rk3576_gmac_probe(int port)
+          * 否则后面的现象都是自己造出来的（本项目在触摸那次踩过）。
+          */
+ 
+-        rk3576_pinmux_set(GMAC0_PIN_BANK, clkpins[i].pin, GMAC0_PIN_FUNC);
++        rk3576_pinmux_set(cbank, cpin,
++                          port ? GMAC1_PIN_FUNC : GMAC0_PIN_FUNC);
+       }
+   }
+ 
+@@ -618,6 +846,46 @@ int rk3576_gmac_probe(int port)
+         uint16_t bmsr = 0xffff;
+         int i;
+ 
++        /* ★ 稳定性判断要在固件里做，不能靠人看串口。
++         *
++         *   上一轮我据"两次启动读到的 ID1 不同"断言 MDIO 在返回噪声。
++         *   但那两个值是从**串口日志**里读的，而串口这一整轮一直在丢字符
++         *   —— 我无法区分"MDIO 乱"和"日志乱"。用一个本身不可靠的观测去
++         *   判断另一个东西可不可靠，这个循环今天已经绕进去好几次了。
++         *
++         *   改成同一次启动里连读 8 遍 PHYID1，在固件里比较，只输出
++         *   "稳定/不稳定"和取值。这样结论不再经过串口这一层。
++         */
++
++        {
++          uint16_t v0 = 0;
++          uint16_t v = 0;
++          int same = 1;
++          int k;
++
++          for (k = 0; k < 8; k++)
++            {
++              gmac_mdio_read(port, GMAC_PHY_ADDR, 2, &v);
++              if (k == 0)
++                {
++                  v0 = v;
++                }
++              else if (v != v0)
++                {
++                  same = 0;
++                }
++            }
++
++          syslog(LOG_ERR,
++                 "GMAC%d: PHYID1 连读 8 次 %s，值=0x%04x（%s）\n",
++                 port, same ? "全部相同" : "有差异", v0,
++                 !same ? "MDIO 不稳定，先修总线" :
++                 (v0 == 0xffff) ? "无应答，查 PHY 供电/复位/地址" :
++                 (v0 == 0x0000) ? "读回全 0，查 MDC 是否在跑" :
++                 "MDIO 可信");
++          up_mdelay(3);
++        }
++
+         gmac_mdio_read(port, GMAC_PHY_ADDR, 0, &bmcr);   /* BMCR  */
+         gmac_mdio_read(port, GMAC_PHY_ADDR, 1, &bmsr);   /* BMSR  */
+         gmac_mdio_read(port, GMAC_PHY_ADDR, 2, &id1);    /* PHYID1 */
+@@ -648,6 +916,123 @@ int rk3576_gmac_probe(int port)
+                (bmsr != 0xffff && (bmsr & (1u << 5))) ? "已完成" : "未完成");
+         up_mdelay(3);
+ 
++        /* ★ 扫描 32 个 MDIO 地址。
++         *
++         *   这条测量拖了好几轮才做。它一次回答三个问题：地址对不对、
++         *   总线上有几颗 PHY、以及读到的 ID 是真器件还是噪声 ——
++         *   如果 32 个地址都"应答"同一个值，那就不是 PHY 在说话。
++         */
++
++        {
++          int a;
++
++          for (a = 0; a < 32; a++)
++            {
++              uint16_t s1 = 0xffff;
++              uint16_t s2 = 0xffff;
++
++              gmac_mdio_read(port, a, 2, &s1);
++              gmac_mdio_read(port, a, 3, &s2);
++
++              if (s1 != 0xffff && s1 != 0x0000)
++                {
++                  syslog(LOG_ERR, "GMAC%d: 扫描 addr=%d ID=%04x%04x\n",
++                         port, a, s1, s2);
++                  up_mdelay(3);
++                }
++            }
++        }
++
++        /* ★ PHY 层实验：软复位 + 强制重启自协商。
++         *
++         *   两颗 PHY 用网线对接时，自协商是 PHY 之间的事，与 MAC 无关。
++         *   既然 PHY 活着、自协商使能、又没 power-down/isolate，却五秒
++         *   不完成，那就把它按标准流程重来一遍，并把**链路伙伴**的
++         *   通告寄存器读出来 —— reg5 有值说明对端在发 FLP，问题在本端
++         *   解析；reg5 全 0 且 reg6.bit0=0 说明**根本没收到对端**，
++         *   那问题就在网线/变压器/模拟侧，不在寄存器配置。
++         */
++
++        {
++          uint16_t v = 0;
++          int n;
++
++          gmac_mdio_read(port, GMAC_PHY_ADDR, 4, &v);
++          syslog(LOG_ERR, "GMAC%d: 本端通告 ANAR(reg4)=0x%04x\n", port, v);
++          up_mdelay(3);
++          gmac_mdio_read(port, GMAC_PHY_ADDR, 9, &v);
++          syslog(LOG_ERR, "GMAC%d: 千兆通告 GBCR(reg9)=0x%04x\n", port, v);
++          up_mdelay(3);
++
++          /* ★ 先验证写通道本身，再谈写进去的内容。
++           *
++           *   上一轮软复位后 BMCR 读回 0x0000、且"0ms 就自清"，这更像
++           *   写下去的是 0 而不是 0x8000。在确认写能落地之前，任何
++           *   "写了 X 但 PHY 没反应"的结论都不成立。
++           *
++           *   用 ANAR(reg4) 试：它可读可写、改动无副作用，且刚读到的
++           *   原值 0x01e1 已知，写完能复原。
++           */
++
++          {
++            uint16_t back = 0xffff;
++            int wr;
++
++            wr = gmac_mdio_write(port, GMAC_PHY_ADDR, 4, 0x0141);
++            gmac_mdio_read(port, GMAC_PHY_ADDR, 4, &back);
++            syslog(LOG_ERR,
++                   "GMAC%d: 写通道自检 ANAR 写 0x0141 读回 0x%04x（写返回 %d）"
++                   "%s\n", port, back, wr,
++                   back == 0x0141 ? " 写通道正常" : " ★写没落地");
++            up_mdelay(3);
++
++            gmac_mdio_write(port, GMAC_PHY_ADDR, 4, 0x01e1);  /* 复原 */
++          }
++
++          gmac_mdio_write(port, GMAC_PHY_ADDR, 0, 0x8000);  /* 软复位 */
++
++          for (n = 0; n < 200; n++)
++            {
++              up_mdelay(5);
++              gmac_mdio_read(port, GMAC_PHY_ADDR, 0, &v);
++              if ((v & 0x8000) == 0)
++                {
++                  break;
++                }
++            }
++
++          syslog(LOG_ERR, "GMAC%d: PHY 软复位 %s（%d ms 后 BMCR=0x%04x）\n",
++                 port, (v & 0x8000) ? "未自清" : "已完成", n * 5, v);
++          up_mdelay(3);
++
++          /* 自协商使能 + 重启 */
++
++          gmac_mdio_write(port, GMAC_PHY_ADDR, 0, 0x1200);
++          gmac_mdio_read(port, GMAC_PHY_ADDR, 0, &v);
++          syslog(LOG_ERR, "GMAC%d: 写 BMCR=0x1200 后读回 0x%04x\n", port, v);
++          up_mdelay(3);
++
++          for (n = 1; n <= 6; n++)
++            {
++              uint16_t lp = 0;
++              uint16_t exp = 0;
++
++              up_mdelay(1000);
++              gmac_mdio_read(port, GMAC_PHY_ADDR, 1, &v);
++              gmac_mdio_read(port, GMAC_PHY_ADDR, 5, &lp);
++              gmac_mdio_read(port, GMAC_PHY_ADDR, 6, &exp);
++              syslog(LOG_ERR,
++                     "GMAC%d: 重启后 %ds BMSR=0x%04x LP(reg5)=0x%04x "
++                     "EXP(reg6)=0x%04x\n", port, n, v, lp, exp);
++              up_mdelay(3);
++
++              if (v & (1u << 2))
++                {
++                  break;
++                }
++            }
++        }
++
+         /* 链路没起来时再多等一会儿重读几次 —— 1000Base-T 自协商可能要
+          * 数秒，一次读不到不代表永远读不到。
+          */
+diff --git a/arch/arm64/src/rk3576/rk3576_gmac.h b/arch/arm64/src/rk3576/rk3576_gmac.h
+index aa2918ec..ff504946 100644
+--- a/arch/arm64/src/rk3576/rk3576_gmac.h
++++ b/arch/arm64/src/rk3576/rk3576_gmac.h
+@@ -67,6 +67,7 @@
+  *
+  ****************************************************************************/
+ 
++void rk3576_gmac_refclk25m(int port);
+ void rk3576_gmac_phy_reset(int bank, int pin, bool active_low);
+ 
+ int rk3576_gmac_probe(int port);
 -- 
 2.43.0
 
