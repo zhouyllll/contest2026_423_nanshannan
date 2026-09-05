@@ -15,8 +15,9 @@
 
 ## 当前进度总表（截至 2026-09-04）
 
-必测 35 项：**通过 18、部分通过 3、不可行 3、已编入待实测 8、待做 1、
-阻塞 1、需对端设备 1**。
+必测 35 项：**通过 25、部分通过 5、不可行 3、待做 1、需对端设备 1**。
+（2026-09-05 实测更新：一次跑完 1.1.8 / 1.1.12 / 1.3.2 / 1.3.3 / 1.3.4 /
+1.3.5 / 1.3.17，另加 1.3.13 用独立定时器重新拿回。）
 
 "已编入待实测"= 配置已开、程序已进 `builtin_list.h`、编译通过，只差在
 板子上敲一遍。命令见文末《一次烧写要跑完的命令清单》。
@@ -30,27 +31,27 @@
 | 1.1.5 | Kernel-getprime | ✅ | |
 | 1.1.6 | Kernel-mm | ✅ | TEST COMPLETE |
 | 1.1.7 | Kernel-scanftest | ⚠️ | 85 通过 / 11 失败 |
-| 1.1.8 | Kernel-C | ◆ | `CONFIG_EXAMPLES_HELLO` 早已开，`hello` 直接可跑 |
+| 1.1.8 | Kernel-C | ✅ | `hello` 打印 Hello, World!! |
 | 1.1.9 | Kernel-Cxx | ❌ | 需先接入 C++ 标准库（LIBCXX/UCLIBCXX/ETL） |
 | 1.1.10 | Kernel-popen | ❌ | 本 libc 无 popen 实现 |
 | 1.1.11 | Kernel-pipe | ✅ | PASSED（含重定向） |
-| 1.1.12 | Kernel-md5 | ◆ | `md5_test` 已编入（tests 仓 `FS_TEST_EDONLY`），待实测 |
+| 1.1.12 | Kernel-md5 | ✅ | `md5_test -c 100` 全部同值 `01fbd2fa33f6ea48e11960f47c9b622b`（串口丢 1 行，收到 99 行） |
 | 1.1.13 | Kernel-C++ 功能 | ❌ | 同 1.1.9 |
 | 1.3.1 | 烧写测试 | ✅ | `scripts/flash.sh` 一条命令，串口触发 loader，**无需按 recovery** |
-| 1.3.2 | RAM 读写 | ◆ | `fstest` 已编入，`/tmp` 已挂 tmpfs，待实测 |
-| 1.3.3 | RAM 读写性能 | ◆ | `ramtest` 早已编入，待实测 |
-| 1.3.4 | RAM 随机读写 | ◆ | `mkrd` + `cmocka_driver_block` 均已就绪，待实测 |
-| 1.3.5 | Flash 功能 | ◐ | trace 依赖已修（一句功能赋值被圈进 `#ifdef` 调试块），`/dev/mmcsd1` 在 trace 关闭下正常识别。但 xTS 用例本身在真卡上跑不完（见下），改用 FAT + `fstest` 做有界验收。**不能对 eMMC 跑** |
+| 1.3.2 | RAM 读写 | ✅ | `fstest -n 10 -m /tmp` → OK: 20, FAILED: 0 |
+| 1.3.3 | RAM 读写性能 | ✅ | `ramtest -w -s 1048576` 各阶段（marching 1/0、pattern、address-in-address）无报错 |
+| 1.3.4 | RAM 随机读写 | ✅ | `mkrd -m 10 -s 512 2048` + `cmocka_driver_block -m /dev/ram10` → 3/3 OK |
+| 1.3.5 | Flash 功能 | ✅ | `mkfatfs -F 32 /dev/mmcsd1` → `mount -t vfat` → `fstest -n 10 -m /mnt` **OK: 20, FAILED: 0**；文件读写往返也正确。卡是 16GB，必须 `-F 32`（自动只试 FAT12/16）。**不能对 eMMC 跑** |
 | 1.3.6 | GPIO 功能 | ⚠️ | 3/4。中断子项要求输入/输出两脚**物理短接**（已备好 GPIO4_A7 ↔ GPIO4_B3，同 1.8V 域） |
 | 1.3.7 | I2C / SPI 功能 | ◐ | **xTS 用例需对端板子**，单板不可能通过（见下文）。SPI 驱动已用计时法证实时钟真在跑；I2C 由板上真实器件（RTC@0x51、触摸@0x38）证实 |
 | 1.3.10 | UART 串口功能 | ✅ | `cmocka_driver_uart` 1/1 |
-| 1.3.11 | UART 文件传输 | ◆ | ymodem 的 `sb`/`rb` 已编入，待实测 |
+| 1.3.11 | UART 文件传输 | ◐ | 板端 `sb` 发出的 YMODEM 头块经 CRC 校验正确（文件名 `a.txt`、大小 9）。完整传输需 PC 端 minicom 的 YMODEM，我临时写的接收端跟不上 `sb` 的握手超时 |
 | 1.3.12 | RTC 时钟 | ✅ | HYM8563 读写 + 掉电后时间保持 |
 | 1.3.13 | Timer 定时器 | ✅ | `cmocka_driver_oneshot` OK。改用**独立的** RK3576 TIMER（CH0 闹钟 + CH1 计数），不再碰调度器的 ARM 通用定时器；同时 `sleep 3/8` 实测 3.3/8.4 s、静置 120 s 零自发复位 |
-| 1.3.14 | 时间一致性 | ◆ | 无需配置，`date` 即可；要静置 24h。时基已修好，可以测了 |
+| 1.3.14 | 时间一致性 | ◐ | `date -s` / `date` 实测正常（设 15:03:47，随后读到 15:03:50 / :54 / 04:13，与间隔一致）。已对时，24h 后复读比对漂移 |
 | 1.3.15 | Watchdog | ◐ | 时基修好后复测：确实触发复位并恢复，重启后能读到 `soc warm boot, reset status: 0x1050`。但 cmocka 那 4 个子项**跑不完** —— DW 看门狗使能后软件关不掉，第一个子项就把板子复位了（见下） |
 | 1.3.16 | RNG | ✅ | 自检两批不同；`hexdump /dev/random` 读数随机 |
-| 1.3.17 | Crypto | ◆ | 八个算法用例全部编入（见下），待实测 |
+| 1.3.17 | Crypto | ✅ | 八项全过零失败：des3cbc / aescbc / aesctr / aesxts / hmac(md5,sha1,sha256) / hash(md5,sha1,sha256,sha512) / crc32×4 / ecdsa(P-256 生成·签名·验证) |
 | 1.2.1 | Reboot 启动异常 | ✅ | 10/10 |
 | 1.2.2 | Cold boot 启动异常 | ✅ | 5/5（口径见 `notes/xts-stability.md`） |
 | 1.2.3 | 系统 RAM 占用 | ✅ | 3.5MB / 63MB，5.6% |
@@ -369,6 +370,40 @@ include 补上"文件存在"的条件，并把 `fs_test/` 改成 `vela_fs_test/`
 在一份全新的 `repo sync` 上用 `git -C src/tests apply` 还原 —— `tests`
 是公共仓，改动不能提交上去，不归档就会在下一次同步时消失。
 （`tests/Kconfig` 里那处绝对路径是构建时自动生成的，不属于修改，不归档。）
+
+## ★ 2026-09-05 实测记录
+
+一次连跑的结果，命令与输出都在 `logs/` 的会话记录里：
+
+| 用例 | 命令 | 结果 |
+|---|---|---|
+| 1.1.8 | `hello` | Hello, World!! |
+| 1.1.12 | `md5_test -f /tmp/1.txt -c 100` | 99 行全部同值（串口丢 1 行） |
+| 1.3.2 | `fstest -n 10 -m /tmp` | OK: 20, FAILED: 0 |
+| 1.3.3 | `ramtest -w -s 1048576` | 四个阶段无报错 |
+| 1.3.4 | `mkrd -m 10 -s 512 2048` + `cmocka_driver_block -m /dev/ram10` | 3/3 OK |
+| 1.3.5 | `mkfatfs -F 32` + `mount` + `fstest -n 10 -m /mnt` | OK: 20, FAILED: 0 |
+| 1.3.13 | `cmocka_driver_oneshot` | OK |
+| 1.3.17 | 八个 `cmocka_*` 算法 | 全过，零失败 |
+
+### ★ md5_test 之前的"挂死"是时基造成的
+
+`md5_test` 每轮之间有一句 `usleep(10000)`。在 `/dev/oneshot` 抢走调度器
+定时器、系统时基失效的那段时间里，`usleep` 永不返回 —— 于是用例挂住，
+看起来像是用例或文件系统有问题。时基修好后一次通过。
+
+**一个坏掉的公共设施会制造出一批看起来彼此无关的假故障。** 这一节里它
+至少伪装成了三件事：板子随机重启、`cam show` 挂死、`md5_test` 挂死。
+
+### ★ 16GB 的卡必须显式 `-F 32`
+
+`mkfatfs /dev/mmcsd1` 会失败：它只试 FAT12 和 FAT16，两者的簇数上限
+（4078 / 65518）都远小于这张卡的 96 万簇，试遍所有簇大小后报
+`Failed to set cluster size`。要写 `mkfatfs -F 32`。
+
+另外别在格式化前 `mount`：卡上残留的垃圾会被 FAT 当成引导扇区，算出
+十几亿号的扇区去读，卡回 `OUT_OF_RANGE` 之后就不再应答任何命令，
+只能重启板子。**先格式化，再挂载。**
 
 ## 里程碑映射
 
