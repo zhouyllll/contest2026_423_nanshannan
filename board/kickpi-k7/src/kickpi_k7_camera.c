@@ -30,6 +30,8 @@
 #include <inttypes.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <time.h>
+#include <poll.h>
 #include <sys/ioctl.h>
 #include <nuttx/video/fb.h>
 #include <syslog.h>
@@ -556,6 +558,14 @@ static uint32_t g_cam_hist[256];
  */
 
 static int g_cam_ready;
+
+/* 预览时置位：抑制取图/送屏里那些逐帧的统计日志。
+ *
+ * ★ 不是为了"少刷屏"这么简单 —— 1.5Mbps 的串口打一屏直方图要几毫秒，
+ *   连续预览下它会直接成为帧率瓶颈，测出来的 fps 就变成在测串口。
+ */
+
+static bool g_cam_quiet;
 static uint16_t g_cam_p1;
 static uint16_t g_cam_p50;
 static uint16_t g_cam_p99;
@@ -723,6 +733,11 @@ int kickpi_camera_capture(void)
       g_cam_hist[v >> 8]++;
     }
 
+  if (g_cam_quiet)
+    {
+      goto quiet_done;
+    }
+
   syslog(LOG_INFO,
          "摄像头: 取图 %dx%d INTSTAT=0x%08" PRIx32
          " 像素 min=%u max=%u 均值=%u\n",
@@ -799,6 +814,8 @@ int kickpi_camera_capture(void)
   g_cam_min = g_cam_p1;
   g_cam_max = g_cam_p99;
 
+quiet_done:
+
   if (mx == 0)
     {
       syslog(LOG_WARNING,
@@ -814,7 +831,7 @@ int kickpi_camera_capture(void)
       syslog(LOG_WARNING,
              "  零像素超过一成 —— DMA 很可能没写满整帧，看上面的行号\n");
     }
-  else
+  else if (!g_cam_quiet)
     {
       syslog(LOG_INFO, "  动态范围正常，看起来是真实图像\n");
     }
@@ -1309,6 +1326,11 @@ int kickpi_camera_show(int gamma)
 
   close(fd);
 
+  if (g_cam_quiet)
+    {
+      return OK;
+    }
+
   syslog(LOG_INFO,
          "摄像头: 已送屏 %ux%u 画面区 %dx%d @y=%d（按 %u~%u 拉伸，伽马%s）\n",
          vinfo.xres, vinfo.yres, vinfo.xres, imgh, yoff,
@@ -1716,4 +1738,97 @@ int kickpi_camera_gain(int gain, int shr)
          gain, gain * 3 / 10, (gain * 3) % 10,
          shr >= 8 ? "，快门已改" : "");
   return OK;
+}
+
+/****************************************************************************
+ * Name: kickpi_camera_preview
+ *
+ * Description:
+ *   连续取图并送屏，直到跑满 frames 帧或串口上收到任意输入。
+ *
+ *   ★ 为什么不是"取一帧"的循环那么简单
+ *
+ *     硬件在 FRM0/FRM1 之间乒乓，本可以边取边显、把两者重叠起来。但
+ *     FRAME1_END 会在 1 号缓冲**没被写过**的情况下置位（见 rk3576_cif.c
+ *     的说明），乒乓的换页语义还没搞清楚。这里就老老实实每帧都
+ *     "启动 -> 等 0 号写完 -> 停 -> 渲染"，慢一些，但每一帧都是完整的。
+ *
+ *     把没搞懂的地方绕开、并把绕开的理由写下来，比装作懂了写一段
+ *     碰运气的代码强 —— 后者出问题时，人会先怀疑别的地方。
+ *
+ *   ★ 一定要能停下来
+ *
+ *     这一课是拿 SD 卡那次换来的：`cmocka_driver_block` 的压测占住控制台
+ *     几十分钟不放，Ctrl-C 不受理，最后只能断电。所以这里两道保险：
+ *     帧数有上限，且每帧检查一次串口有没有输入，敲任意键就退出。
+ *
+ * Input Parameters:
+ *   frames - 最多跑多少帧，<=0 时取默认 300
+ *
+ ****************************************************************************/
+
+int kickpi_camera_preview(int frames)
+{
+  struct timespec t0;
+  struct timespec t1;
+  int done = 0;
+  int ret = OK;
+  int stop = 0;
+
+  if (frames <= 0)
+    {
+      frames = 300;
+    }
+
+  syslog(LOG_INFO, "摄像头: 预览开始，最多 %d 帧，敲任意键停止\n", frames);
+
+  /* 逐帧的统计日志必须关掉 —— 1.5Mbps 的串口打一屏直方图要几毫秒，
+   * 不关的话测出来的是串口速度，不是取图送屏的速度。
+   */
+
+  g_cam_quiet = true;
+  clock_gettime(CLOCK_MONOTONIC, &t0);
+
+  for (done = 0; done < frames && !stop; done++)
+    {
+      struct pollfd pfd;
+
+      ret = kickpi_camera_capture();
+      if (ret < 0)
+        {
+          break;
+        }
+
+      ret = kickpi_camera_show(1);
+      if (ret < 0)
+        {
+          break;
+        }
+
+      /* 有没有人在串口上敲键。超时给 0，只是查一下，不等。 */
+
+      pfd.fd     = 0;
+      pfd.events = POLLIN;
+      if (poll(&pfd, 1, 0) > 0)
+        {
+          stop = 1;
+        }
+    }
+
+  clock_gettime(CLOCK_MONOTONIC, &t1);
+  g_cam_quiet = false;
+
+  {
+    int64_t ms = (int64_t)(t1.tv_sec - t0.tv_sec) * 1000 +
+                 (t1.tv_nsec - t0.tv_nsec) / 1000000;
+
+    syslog(LOG_INFO,
+           "摄像头: 预览结束 %d 帧 / %lld ms = %lld.%02lld fps%s\n",
+           done, (long long)ms,
+           ms > 0 ? (long long)(done * 1000 / ms) : 0,
+           ms > 0 ? (long long)(done * 100000 / ms % 100) : 0,
+           stop ? "（按键停止）" : "");
+  }
+
+  return ret;
 }

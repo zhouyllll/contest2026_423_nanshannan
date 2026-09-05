@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
       printf("      cam regs         打印 ESMART1/VP1 寄存器现状\n");
       printf("      cam gain <0-240> [shr]  模拟增益，每级 0.3dB\n");
       printf("      cam show [0|1]   送屏，参数 0 关伽马用于对照\n");
+      printf("      cam preview [n]  连续预览 n 帧（默认 300），敲键停止\n");
       printf("      cam fbinfo|stat\n");
       return 1;
     }
@@ -140,6 +141,10 @@ int main(int argc, char *argv[])
 
       ret = kickpi_camera_gain(atoi(argv[2]),
                                argc > 3 ? atoi(argv[3]) : -1);
+    }
+  else if (strcmp(argv[1], "preview") == 0)
+    {
+      ret = kickpi_camera_preview(argc > 2 ? atoi(argv[2]) : 0);
     }
   else if (strcmp(argv[1], "regs") == 0)
     {

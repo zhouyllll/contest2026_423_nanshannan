@@ -351,6 +351,17 @@ int kickpi_camera_regs(void);
 
 int kickpi_camera_gain(int gain, int shr);
 
+/****************************************************************************
+ * Name: kickpi_camera_preview
+ *
+ * Description:
+ *   连续取图送屏，跑满 frames 帧或串口收到任意输入即停，结束时报帧率。
+ *   逐帧统计日志会被抑制 —— 否则测到的是串口速度而不是取图送屏的速度。
+ *
+ ****************************************************************************/
+
+int kickpi_camera_preview(int frames);
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* __VENDOR_ROCKCHIP_BOARDS_RK3576_KICKPI_K7_INCLUDE_BOARD_H */
