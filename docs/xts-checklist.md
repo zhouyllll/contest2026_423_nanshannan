@@ -42,8 +42,8 @@
 | 1.3.3 | RAM 读写性能 | ✅ | `ramtest -w -s 1048576` 各阶段（marching 1/0、pattern、address-in-address）无报错 |
 | 1.3.4 | RAM 随机读写 | ✅ | `mkrd -m 10 -s 512 2048` + `cmocka_driver_block -m /dev/ram10` → 3/3 OK |
 | 1.3.5 | Flash 功能 | ✅ | `mkfatfs -F 32 /dev/mmcsd1` → `mount -t vfat` → `fstest -n 10 -m /mnt` **OK: 20, FAILED: 0**；文件读写往返也正确。卡是 16GB，必须 `-F 32`（自动只试 FAT12/16）。**不能对 eMMC 跑** |
-| 1.3.6 | GPIO 功能 | ⚠️ | 3/4。中断子项要求输入/输出两脚**物理短接**（已备好 GPIO4_A7 ↔ GPIO4_B3，同 1.8V 域） |
-| 1.3.7 | I2C / SPI 功能 | ◐ | **xTS 用例需对端板子**，单板不可能通过（见下文）。SPI 驱动已用计时法证实时钟真在跑；I2C 由板上真实器件（RTC@0x51、触摸@0x38）证实 |
+| 1.3.6 | GPIO 功能 | ⚠️ | 3/4。中断子项要两脚**物理短接**：**排针第 5 脚（GPIO4_A4）↔ 第 7 脚（GPIO4_A6）**，一根短杜邦线。原先写的 GPIO4_A7/B3 是错的 —— 那两根没引到连接器（见下） |
+| 1.3.7 | I2C / SPI 功能 | ◐ | **xTS 用例需对端板子**，单板不可能通过（见下文）。SPI 环回自检的第三层要短接 **第 10 脚（MOSI/GPIO4_B1）↔ 第 12 脚（MISO/GPIO4_B2）**。I2C 由板上真实器件（RTC@0x51、触摸@0x38）证实 |
 | 1.3.10 | UART 串口功能 | ✅ | `cmocka_driver_uart` 1/1 |
 | 1.3.11 | UART 文件传输 | ◐ | **接收方向已完整验证**：主机 `sb --ymodem` → 板端 `rb -f /mnt`，`Transfer complete`，板上 `cat` 出的内容与源文件逐字节一致。发送方向（板端 `sb` → 主机 `rb`）能收到正确的头块（文件名对），数据块被 lrzsz 拒收，未定位 |
 | 1.3.12 | RTC 时钟 | ✅ | HYM8563 读写 + 掉电后时间保持 |
@@ -516,6 +516,45 @@ NAME_MAX，否则 fs_fat32.h 会 `#warning` 而 -Werror 直接编不过）之后
 前提是 `CONFIG_SERIAL_TERMIOS=y` —— `apps/system/ymodem/ymodem.c` 本来就
 调了 `cfmakeraw()` + `tcsetattr()` 关回显，但没开这个选项时 `tcsetattr`
 是空操作，控制台照样回显，写进去的字节原样回来混进数据流。
+
+## ★ 跳线要接哪两脚（1.3.6 / 1.3.7）
+
+查 KICKPI-K7 规格书的「40Pin 引脚定义」表，GPIO4 实际只引出五根：
+
+```
+GPIO4_A4 → 5 脚          GPIO4_B0 → 8 脚   （SPI4_CLK）
+GPIO4_A6 → 7 脚          GPIO4_B1 → 10 脚  （SPI4_MOSI）
+                         GPIO4_B2 → 12 脚  （SPI4_MISO）
+```
+
+| 用途 | 接线 |
+|---|---|
+| **1.3.6 GPIO 中断** | **5 脚（GPIO4_A4，输出）↔ 7 脚（GPIO4_A6，输入）** |
+| **1.3.7 SPI 环回** | **10 脚（MOSI）↔ 12 脚（MISO）** |
+
+两组都在同一排、相隔一个位置，短杜邦线即可。
+
+★ 此前清单写的是 GPIO4_A7 ↔ GPIO4_B3，**那是错的**：它们取自厂商的
+`rk3576-kickpi-k7c-extend-40pin.dtsi`，而 dtsi 列的是**芯片上存在的引脚**，
+不等于**连接器上引出的引脚**。这两根都不在 40Pin 表里，插不上线。
+
+**"软件上能配"与"手上能接"是两件事** —— 这个错误只有到了真要插线那一刻
+才会暴露，而在那之前它在文档里躺了很久，看起来还很有依据（引了 dtsi）。
+
+## ★ GMAC 现状：PHY 没有输出接收时钟
+
+两个网口对接之后复测，仍然是：
+
+```
+GMAC0: RXCLK(PHY 送来) g3-25 采样 200 次 高=0 跳变=0 —— 恒低，无时钟
+GMAC0: DMA 软复位超时 DMA_MODE=0x00000001
+```
+
+RGMII 的 RXCLK 由 PHY driving，网线对端接没接都不影响它输出 —— 所以
+问题不在链路，在 **PHY 本身没跑起来**（供电、复位、25MHz 参考时钟这一层）。
+DMA 软复位不完成是它的下游结果：dw_gmac 的软复位要等 RXCLK 才能完成。
+
+另外 `ifconfig` 报 command not found，网络应用层的配置还没开。
 
 ## 里程碑映射
 

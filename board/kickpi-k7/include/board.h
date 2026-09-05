@@ -93,12 +93,23 @@
  *   并使能，两个使用者对同一根中断线做了冲突配置，结果板子挂死。
  *   电气上可用不等于空闲。
  *
- *   GPIO4_B3 取自 40 针扩展口（厂商 rk3576-kickpi-k7c-extend-40pin.dtsi
- *   列出的引脚之一），板上没有器件接它。
+ *   ★ 更正：原来选的是 GPIO4_B3，理由是"厂商 extend-40pin.dtsi 里列了它"。
+ *     但 dtsi 列出的是**芯片上存在的引脚**，不等于**连接器上引出的引脚**。
+ *     查 KICKPI-K7 规格书的「40Pin 引脚定义」表，GPIO4 实际只引出五根：
+ *
+ *       GPIO4_A4 → 5 脚      GPIO4_B0 → 8 脚（SPI4_CLK）
+ *       GPIO4_A6 → 7 脚      GPIO4_B1 → 10 脚（SPI4_MOSI）
+ *                            GPIO4_B2 → 12 脚（SPI4_MISO）
+ *
+ *     GPIO4_A7 和 GPIO4_B3 都不在表里 —— 插不上跳线，这个测试根本做不了。
+ *     从 dtsi 挑引脚而没查连接器表，是一个只有到了插线那一刻才会暴露的
+ *     错误。**"软件上能配"与"手上能接"是两件事。**
+ *
+ *   改用 GPIO4_A6（7 脚）作输入。B0/B1/B2 留给 SPI4，不占。
  */
 
-#define BOARD_TESTPIN_BANK       4            /* GPIO4_B3 */
-#define BOARD_TESTPIN_PIN        11           /* RK_PB3 = 1*8+3 */
+#define BOARD_TESTPIN_BANK       4            /* GPIO4_A6，排针第 7 脚 */
+#define BOARD_TESTPIN_PIN        6            /* RK_PA6 = 0*8+6 */
 
 /* 与上面那一脚配对的输出脚，用于 cmocka_driver_gpio 的中断子项。
  *
@@ -108,12 +119,15 @@
  * ★ 必须和 GPIO4_B3 同在 1.8V 域
  *
  *   40 针口上的 GPIO 分属两个电压域（厂商 dtsi 逐条标了 1.8V / 3.3V）。
- *   拿 3.3V 的输出脚去驱动 1.8V 的输入脚会超出该脚耐压。GPIO4_A7 与
- *   GPIO4_B3 都标的 1.8V，可以直接对接。
+ *   拿 3.3V 的输出脚去驱动 1.8V 的输入脚会超出该脚耐压。GPIO4_A4 与
+ *   GPIO4_A6 同属 GPIO4 的 A 组，电压域一致，可以直接对接。
+ *
+ *   接线：**排针第 5 脚（GPIO4_A4，输出） ↔ 第 7 脚（GPIO4_A6，输入）**，
+ *   同在奇数排、相隔一个位置，一根短杜邦线即可。
  */
 
-#define BOARD_TESTPIN_OUT_BANK   4            /* GPIO4_A7 */
-#define BOARD_TESTPIN_OUT_PIN    7            /* RK_PA7 = 0*8+7 */
+#define BOARD_TESTPIN_OUT_BANK   4            /* GPIO4_A4，排针第 5 脚 */
+#define BOARD_TESTPIN_OUT_PIN    4            /* RK_PA4 = 0*8+4 */
 
 /* 实时时钟 HYM8563
  *

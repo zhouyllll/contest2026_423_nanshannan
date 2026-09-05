@@ -225,7 +225,7 @@ static const struct gpio_operations_s g_gpin_ops =
 static struct kickpi_gpin_s g_gpins[] =
 {
   {
-    .bank = BOARD_TESTPIN_BANK,       /* GPIO4_B3，40 针扩展口，未接器件 */
+    .bank = BOARD_TESTPIN_BANK,       /* GPIO4_A6，排针第 7 脚 */
     .pin  = BOARD_TESTPIN_PIN,
     .name = "testpin",
   },
@@ -255,7 +255,7 @@ static struct kickpi_gpout_s g_gpouts[] =
      *   所以能被它拉动的脚必须是拉了也无所谓的脚。
      */
 
-    .bank = BOARD_TESTPIN_OUT_BANK,   /* GPIO4_A7，40 针扩展口，未接器件 */
+    .bank = BOARD_TESTPIN_OUT_BANK,   /* GPIO4_A4，排针第 5 脚 */
     .pin  = BOARD_TESTPIN_OUT_PIN,
     .name = "testpin-out",
   },
