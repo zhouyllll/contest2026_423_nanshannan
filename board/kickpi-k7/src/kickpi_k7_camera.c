@@ -545,7 +545,7 @@ int kickpi_camera_status(void)
 
 #define CAM_BUF_ALIGN    64
 
-static uint8_t *g_cam_buf[2];
+static uint8_t *g_cam_buf[3];
 
 /* 直方图与百分位。直方图放静态区而不是栈上 —— 1KB 的局部数组对
  * 板级初始化任务的栈来说不算小，而这个函数一次只跑一遍，没必要省。
@@ -616,10 +616,21 @@ int kickpi_camera_capture(void)
        * 第二帧会写到地址 0，把 DDR 起始处冲掉且不报错。
        */
 
+      /* ★ 三块，不是两块。
+       *
+       *   两块时硬件写完 FRM0 立刻写 FRM1，写完 FRM1 又回头写 FRM0 ——
+       *   而渲染一帧比传感器出一帧慢，还没读完就被覆盖了，读出来是
+       *   半新半旧的撕裂画面。第三块作备用：每次帧结束就把刚完成的
+       *   那个槽换成备用块，正在被消费的那一块永远不是 DMA 的目标。
+       *   厂商内核 rkcif_assign_new_buffer_pingpong() 就是这么做的。
+       */
+
       g_cam_buf[0] = kmm_memalign(CAM_BUF_ALIGN, CAM_FRAME_BYTES);
       g_cam_buf[1] = kmm_memalign(CAM_BUF_ALIGN, CAM_FRAME_BYTES);
+      g_cam_buf[2] = kmm_memalign(CAM_BUF_ALIGN, CAM_FRAME_BYTES);
 
-      if (g_cam_buf[0] == NULL || g_cam_buf[1] == NULL)
+      if (g_cam_buf[0] == NULL || g_cam_buf[1] == NULL ||
+          g_cam_buf[2] == NULL)
         {
           syslog(LOG_ERR, "摄像头: 取图缓冲分配失败（每个 %d 字节）\n",
                  CAM_FRAME_BYTES);
@@ -1443,17 +1454,35 @@ int kickpi_camera_show_seq(int gamma, int seq)
       int mx;
       int my;
 
-      for (my = my0; my < my0 + 24 && my < (int)vinfo.yres; my++)
+      if (my0 + 24 > (int)vinfo.yres)
         {
-          for (mx = mx0; mx < mx0 + 40 && mx < (int)vinfo.xres; mx++)
+          my0 = (int)vinfo.yres - 24;
+        }
+
+      /* ★ 先把整条标记带擦干净，再画。
+       *
+       *   上一版只画不擦，而黑边为了省开销已经改成"不每帧重写"，于是
+       *   每帧的白块留在原地，几十帧叠起来连成一条横贯屏幕的白条 ——
+       *   看上去就像画面冻住了。讽刺的是：白条恰恰证明屏幕一直在刷，
+       *   只是这个用来判断"屏幕有没有在刷"的标记自己失效了。
+       *
+       *   教训：判据必须自带复位。一个只会累加、不会归零的指示器，
+       *   最终会停在饱和状态，那时它既不报错也不再有信息量。
+       *
+       *   擦一条 720x24 是 69KB，相对每帧 1.2MB 的刷回可以忽略。
+       */
+
+      for (my = my0; my < my0 + 24; my++)
+        {
+          for (mx = 0; mx < (int)vinfo.xres; mx++)
             {
-              fb[(size_t)my * (pinfo.stride / 4) + mx] = 0xffffffffu;
+              fb[(size_t)my * rowpix + mx] =
+                (mx >= mx0 && mx < mx0 + 40) ? 0xffffffffu : 0xff000000u;
             }
         }
 
-      up_flush_dcache((uintptr_t)&fb[(size_t)my0 * (pinfo.stride / 4)],
-                      (uintptr_t)&fb[(size_t)(my0 + 24) *
-                                     (pinfo.stride / 4)]);
+      up_flush_dcache((uintptr_t)&fb[(size_t)my0 * rowpix],
+                      (uintptr_t)&fb[(size_t)(my0 + 24) * rowpix]);
     }
 
   if (g_cam_quiet)
@@ -1904,9 +1933,13 @@ int kickpi_camera_preview(int frames)
   struct timespec ta;
   struct timespec tb;
   struct timespec tc;
-  int64_t cap_ms = 0;
+  int64_t wait_ms = 0;
+  int64_t inv_ms = 0;
   int64_t shw_ms = 0;
+  int slot_buf[2];
+  int spare;
   int done = 0;
+  int dropped = 0;
   int ret = OK;
   int stop = 0;
 
@@ -1915,28 +1948,87 @@ int kickpi_camera_preview(int frames)
       frames = 300;
     }
 
-  syslog(LOG_INFO, "摄像头: 预览开始，最多 %d 帧，敲任意键停止\n", frames);
+  if (g_cam_buf[0] == NULL)
+    {
+      ret = kickpi_camera_capture();     /* 借它把缓冲分配好并测一次曝光 */
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
 
-  /* 逐帧的统计日志必须关掉 —— 1.5Mbps 的串口打一屏直方图要几毫秒，
-   * 不关的话测出来的是串口速度，不是取图送屏的速度。
-   */
+  syslog(LOG_INFO,
+         "摄像头: 预览开始，最多 %d 帧，敲任意键停止\n", frames);
 
   g_cam_quiet = true;
+
+  /* ★ CIF 只启动一次，之后一直跑。
+   *
+   *   之前每帧都 start/stop，等硬件出帧的 33ms 与我们渲染的时间是串行
+   *   相加的。让它连续跑，硬件采下一帧与我们渲染这一帧就重叠了 ——
+   *   这才是帧率的主要来源，比省几次 memcpy 有效得多。
+   *
+   *   顺带解决了一个此前绕开的怪现象：反复 stop/start 之后 FRAME1_END
+   *   会在 1 号缓冲没被写过时置位。持续流里硬件的乒乓状态不再被我们
+   *   打断，两个标志与两个槽的对应关系就稳定了。
+   */
+
+  slot_buf[0] = 0;
+  slot_buf[1] = 1;
+  spare       = 2;
+
+  ret = rk3576_cif_start(KICKPI_CAM_CSI_HOST,
+                         (uintptr_t)g_cam_buf[0], (uintptr_t)g_cam_buf[1],
+                         IMX415_MODE_WIDTH, IMX415_MODE_HEIGHT);
+  if (ret < 0)
+    {
+      g_cam_quiet = false;
+      return ret;
+    }
+
   clock_gettime(CLOCK_MONOTONIC, &t0);
 
   for (done = 0; done < frames && !stop; done++)
     {
       struct pollfd pfd;
+      uint32_t stat;
+      int slot;
 
       clock_gettime(CLOCK_MONOTONIC, &ta);
 
-      ret = kickpi_camera_capture();
-      if (ret < 0)
+      /* 等任意一个槽写完 */
+
+      slot = rk3576_cif_wait_frame(KICKPI_CAM_CSI_HOST, -1, 500, &stat);
+      if (slot < 0)
         {
+          ret = slot;
           break;
         }
 
+      /* ★ 先换页再读。
+       *
+       *   把刚完成的槽指向备用块，硬件下一轮就写到别处去了，我们手上
+       *   这一块在整个渲染期间都不会被改写。顺序反过来（先读后换）会留
+       *   一个窗口，硬件可能已经开始覆盖 —— 而撕裂只是偶发，很难复现。
+       */
+
+      g_cam_ready = slot_buf[slot];
+      rk3576_cif_set_buffer(KICKPI_CAM_CSI_HOST, slot,
+                            (uintptr_t)g_cam_buf[spare]);
+      slot_buf[slot] = spare;
+
       clock_gettime(CLOCK_MONOTONIC, &tb);
+
+      up_invalidate_dcache((uintptr_t)g_cam_buf[g_cam_ready],
+                           (uintptr_t)g_cam_buf[g_cam_ready] +
+                           CAM_FRAME_BYTES);
+
+      clock_gettime(CLOCK_MONOTONIC, &tc);
+
+      wait_ms += (tb.tv_sec - ta.tv_sec) * 1000 +
+                 (tb.tv_nsec - ta.tv_nsec) / 1000000;
+      inv_ms  += (tc.tv_sec - tb.tv_sec) * 1000 +
+                 (tc.tv_nsec - tb.tv_nsec) / 1000000;
 
       ret = kickpi_camera_show_seq(1, done);
       if (ret < 0)
@@ -1944,14 +2036,18 @@ int kickpi_camera_preview(int frames)
           break;
         }
 
-      clock_gettime(CLOCK_MONOTONIC, &tc);
+      clock_gettime(CLOCK_MONOTONIC, &tb);
+      shw_ms += (tb.tv_sec - tc.tv_sec) * 1000 +
+                (tb.tv_nsec - tc.tv_nsec) / 1000000;
 
-      cap_ms += (tb.tv_sec - ta.tv_sec) * 1000 +
-                (tb.tv_nsec - ta.tv_nsec) / 1000000;
-      shw_ms += (tc.tv_sec - tb.tv_sec) * 1000 +
-                (tc.tv_nsec - tb.tv_nsec) / 1000000;
+      /* 渲染完的这一块成为下一轮的备用 */
 
-      /* 有没有人在串口上敲键。超时给 0，只是查一下，不等。 */
+      spare = g_cam_ready;
+
+      if ((stat & 0x300) == 0x300)
+        {
+          dropped++;      /* 两个标志同时置位 = 我们慢了至少一帧 */
+        }
 
       pfd.fd     = 0;
       pfd.events = POLLIN;
@@ -1962,6 +2058,7 @@ int kickpi_camera_preview(int frames)
     }
 
   clock_gettime(CLOCK_MONOTONIC, &t1);
+  rk3576_cif_stop(KICKPI_CAM_CSI_HOST);
   g_cam_quiet = false;
 
   {
@@ -1975,21 +2072,13 @@ int kickpi_camera_preview(int frames)
            ms > 0 ? (long long)(done * 100000 / ms % 100) : 0,
            stop ? "（按键停止）" : "");
 
-    /* ★ 分段计时，而不是只报一个总帧率。
-     *
-     *   "帧率低"要能回答"低在哪"才有用：取图是等硬件（传感器帧周期
-     *   决定，我们改不动），送屏是 CPU 干活（缩放、伽马、刷缓存，可以
-     *   优化，也是唯一可能靠多核并行的部分）。两者混在一个数里，就没法
-     *   判断优化该往哪投，也没法判断 SMP 有没有意义。
-     */
-
     syslog(LOG_INFO,
-           "  分段：取图 %lld ms（%lld%%）送屏 %lld ms（%lld%%），"
-           "每帧取图 %lld ms 送屏 %lld ms\n",
-           (long long)cap_ms, ms > 0 ? (long long)(cap_ms * 100 / ms) : 0,
-           (long long)shw_ms, ms > 0 ? (long long)(shw_ms * 100 / ms) : 0,
-           done > 0 ? (long long)(cap_ms / done) : 0,
-           done > 0 ? (long long)(shw_ms / done) : 0);
+           "  每帧：等帧 %lld ms 失效缓存 %lld ms 送屏 %lld ms，"
+           "追不上而丢帧 %d 次\n",
+           done > 0 ? (long long)(wait_ms / done) : 0,
+           done > 0 ? (long long)(inv_ms / done) : 0,
+           done > 0 ? (long long)(shw_ms / done) : 0,
+           dropped);
   }
 
   return ret;
