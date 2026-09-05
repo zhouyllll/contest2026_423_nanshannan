@@ -537,7 +537,16 @@ int kickpi_camera_status(void)
 
 /* 非压缩 RAW12：每像素 16 位 */
 
-#define CAM_FRAME_BYTES  (IMX415_MODE_WIDTH * IMX415_MODE_HEIGHT * 2)
+/* ★ 行跨距不等于行宽。
+ *
+ *   CIF 要求行跨距对齐到 256 字节（见 rk3576_cif.c 的说明），1932 x 2
+ *   = 3864 对齐上去是 4096，每行末尾有 232 字节填充。缓冲要按跨距分配，
+ *   索引也要按跨距算 —— 凡是写成 "行号 x 宽度" 的地方都是错的。
+ */
+
+#define CAM_LINE_BYTES   ((IMX415_MODE_WIDTH * 2 + 255) & ~255)
+#define CAM_ROW_PIX      (CAM_LINE_BYTES / 2)   /* 以 uint16 计的行跨距 */
+#define CAM_FRAME_BYTES  (CAM_LINE_BYTES * IMX415_MODE_HEIGHT)
 
 /* DMA 缓冲要按缓存行对齐。不对齐时失效缓存会连带影响相邻数据 ——
  * 那种破坏是随机的、事后极难定位。
@@ -786,10 +795,20 @@ int kickpi_camera_capture(void)
   step  = g_cam_quiet ? 8 : 1;
   nsamp = 0;
 
+  /* ★ 必须按行遍历，不能把缓冲当成一片连续像素。
+   *
+   *   行跨距 4096 字节而行宽只有 1932 像素（3864 字节），每行尾部有
+   *   232 字节填充。平铺遍历会把填充当成像素统计进去 —— 填充是 0，
+   *   于是"零像素占比"凭空多出 6%，而这个判据恰恰是用来判断 DMA 有没有
+   *   写满的。判据被自己引入的噪声污染，比没有判据更糟。
+   */
+
   p = (uint16_t *)g_cam_buf[g_cam_ready];
   for (i = 0; i < npix; i += step)
     {
-      uint16_t v = p[i];
+      size_t row = i / IMX415_MODE_WIDTH;
+      size_t col = i % IMX415_MODE_WIDTH;
+      uint16_t v = p[row * CAM_ROW_PIX + col];
 
       nsamp++;
       sum += v;
@@ -1417,10 +1436,10 @@ int kickpi_camera_show_seq(int gamma, int seq)
            *   还原颜色），但足以让画面可辨。
            */
 
-          acc = (uint32_t)src[(sy)     * IMX415_MODE_WIDTH + sx]     +
-                (uint32_t)src[(sy)     * IMX415_MODE_WIDTH + sx + 1] +
-                (uint32_t)src[(sy + 1) * IMX415_MODE_WIDTH + sx]     +
-                (uint32_t)src[(sy + 1) * IMX415_MODE_WIDTH + sx + 1];
+          acc = (uint32_t)src[(sy)     * CAM_ROW_PIX + sx]     +
+                (uint32_t)src[(sy)     * CAM_ROW_PIX + sx + 1] +
+                (uint32_t)src[(sy + 1) * CAM_ROW_PIX + sx]     +
+                (uint32_t)src[(sy + 1) * CAM_ROW_PIX + sx + 1];
           acc >>= 2;
 
           if (span != 0)
