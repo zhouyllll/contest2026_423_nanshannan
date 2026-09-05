@@ -697,6 +697,31 @@ int kickpi_camera_capture(void)
    *   超时给 500ms，30fps 下一帧 33ms，足够容下启动瞬态。
    */
 
+  /* ★ 第一帧要丢掉。
+   *
+   *   rk3576_cif_start() 是在任意时刻打开 DMA 的，多半正落在传感器某一帧
+   *   的中间 —— 那一帧只有后半段被写进缓冲，前半段是旧数据或零。
+   *
+   *   这个缺陷一直存在，只是被长消隐掩盖着：VMAX=3165 时消隐占一帧的
+   *   65%，随手启动大概率落在消隐里，拿到的就是完整帧（实测 0% 零像素）；
+   *   VMAX 降到 1583 之后消隐只占 31%，于是大概率从半中间接上 ——
+   *   实测只写到第 768 行/1096（70%），屏上就是画面区下部一块黑。
+   *
+   *   ★ 提高帧率并没有引入这个 bug，只是把它从"很少发生"变成了"经常
+   *     发生"。被概率掩盖的缺陷，会在参数一变时集中爆发。
+   *
+   *   等两次帧结束：第一次标志属于那个残帧，第二次才是完整的一帧。
+   */
+
+  ret = rk3576_cif_wait_frame(KICKPI_CAM_CSI_HOST, 0, 500, &stat);
+  if (ret < 0)
+    {
+      rk3576_cif_stop(KICKPI_CAM_CSI_HOST);
+      syslog(LOG_ERR, "摄像头: 没等到首帧（将丢弃），INTSTAT=0x%08" PRIx32
+             "\n", stat);
+      return ret;
+    }
+
   ret = rk3576_cif_wait_frame(KICKPI_CAM_CSI_HOST, 0, 500, &stat);
   if (ret < 0)
     {
@@ -1215,10 +1240,23 @@ int kickpi_camera_show_seq(int gamma, int seq)
    *   不保证填回来的值可用。
    */
 
-  syslog(LOG_INFO,
-         "摄像头: fb %ux%u bpp=%u fmt=%u mem=%p len=%zu stride=%u\n",
-         vinfo.xres, vinfo.yres, pinfo.bpp, vinfo.fmt,
-         pinfo.fbmem, (size_t)pinfo.fblen, pinfo.stride);
+  /* ★ 这一行也要静默。
+   *
+   *   它是"先把参数打出来再用"的那条原则留下的 —— 单次送屏时很有价值。
+   *   但预览时每帧都打，20000 帧就是 20000 行，既刷屏又占用发送时间。
+   *
+   *   我给静默模式加保护时逐条裹了后面的统计，唯独漏了这条，因为它在
+   *   函数开头、在 quiet 检查之前。**静默这种横切关注点，加的时候要通盘
+   *   数一遍输出点，而不是顺着代码往下裹。**
+   */
+
+  if (!g_cam_quiet)
+    {
+      syslog(LOG_INFO,
+             "摄像头: fb %ux%u bpp=%u fmt=%u mem=%p len=%zu stride=%u\n",
+             vinfo.xres, vinfo.yres, pinfo.bpp, vinfo.fmt,
+             pinfo.fbmem, (size_t)pinfo.fblen, pinfo.stride);
+    }
 
   if (fb == NULL || pinfo.fblen == 0 || pinfo.stride == 0 ||
       pinfo.bpp != 32)
@@ -1969,8 +2007,6 @@ int kickpi_camera_preview(int frames)
   int64_t wait_ms = 0;
   int64_t inv_ms = 0;
   int64_t shw_ms = 0;
-  int slot_buf[2];
-  int spare;
   int done = 0;
   int dropped = 0;
   int ret = OK;
@@ -1993,6 +2029,50 @@ int kickpi_camera_preview(int frames)
   syslog(LOG_INFO,
          "摄像头: 预览开始，最多 %d 帧，敲任意键停止\n", frames);
 
+  /* ★ 开始前把整屏清成不透明黑，清一次。
+   *
+   *   预览为了提速不每帧重写黑边 —— 黑边内容不变，重写它等于把三分之二
+   *   的写入和 cache 刷回花在一张不动的图上。但"不重写"的前提是**它已经
+   *   被写过一次**。若本次启动后没跑过非预览的送屏，那片内存还是
+   *   up_fbinitialize() 里 memset(0) 的结果，也就是 alpha=0 的透明像素，
+   *   不是不透明的黑。
+   *
+   *   现象是"画面区上下的部分显示异常而且从不变化" —— 它当然不变，
+   *   从来没人写过它。而中间的画面区一直在刷，于是看起来像"上半部分
+   *   卡死、下半部分正常"。
+   *
+   *   优化掉一件重复的工作时，要连它的**前提**一起接管：不再每帧做，
+   *   就得保证有人做过第一次。
+   */
+
+  {
+    int fd = open("/dev/fb0", O_RDWR);
+
+    if (fd >= 0)
+      {
+        struct fb_planeinfo_s pi;
+
+        memset(&pi, 0, sizeof(pi));
+        if (ioctl(fd, FBIOGET_PLANEINFO, (unsigned long)&pi) >= 0 &&
+            pi.fbmem != NULL && pi.fblen >= 4)
+          {
+            uint32_t *q = (uint32_t *)pi.fbmem;
+            size_t    n = pi.fblen / 4;
+            size_t    k;
+
+            for (k = 0; k < n; k++)
+              {
+                q[k] = 0xff000000u;
+              }
+
+            up_flush_dcache((uintptr_t)pi.fbmem,
+                            (uintptr_t)pi.fbmem + pi.fblen);
+          }
+
+        close(fd);
+      }
+  }
+
   g_cam_quiet = true;
 
   /* ★ CIF 只启动一次，之后一直跑。
@@ -2006,10 +2086,6 @@ int kickpi_camera_preview(int frames)
    *   打断，两个标志与两个槽的对应关系就稳定了。
    */
 
-  slot_buf[0] = 0;
-  slot_buf[1] = 1;
-  spare       = 2;
-
   ret = rk3576_cif_start(KICKPI_CAM_CSI_HOST,
                          (uintptr_t)g_cam_buf[0], (uintptr_t)g_cam_buf[1],
                          IMX415_MODE_WIDTH, IMX415_MODE_HEIGHT);
@@ -2018,6 +2094,20 @@ int kickpi_camera_preview(int frames)
       g_cam_quiet = false;
       return ret;
     }
+
+  /* 预览同理：连续流的第一帧也是从半中间接上的，丢掉它。 */
+
+  {
+    uint32_t s0;
+
+    if (rk3576_cif_wait_frame(KICKPI_CAM_CSI_HOST, -1, 500, &s0) < 0)
+      {
+        rk3576_cif_stop(KICKPI_CAM_CSI_HOST);
+        g_cam_quiet = false;
+        syslog(LOG_ERR, "摄像头: 预览没等到首帧\n");
+        return -ETIMEDOUT;
+      }
+  }
 
   clock_gettime(CLOCK_MONOTONIC, &t0);
 
@@ -2038,17 +2128,28 @@ int kickpi_camera_preview(int frames)
           break;
         }
 
-      /* ★ 先换页再读。
+      /* ★ 不换页，就用硬件自己的两块乒乓。
        *
-       *   把刚完成的槽指向备用块，硬件下一轮就写到别处去了，我们手上
-       *   这一块在整个渲染期间都不会被改写。顺序反过来（先读后换）会留
-       *   一个窗口，硬件可能已经开始覆盖 —— 而撕裂只是偶发，很难复现。
+       *   上一版每帧都把刚完成的槽改指到第三块备用缓冲上，想让"正在被
+       *   读的那块永远不是 DMA 目标"。厂商内核确实是这么做的 —— 但它在
+       *   帧结束中断里改，而我们是 1ms 粒度轮询，赶上硬件已经开始写下
+       *   一帧时改地址，就把它写到一半的目标换掉了：前面若干行落在旧
+       *   缓冲、后面的落到新缓冲。
+       *
+       *   结果是缓冲里"前半是新帧、后半是上一帧"。屏上的表现非常具体：
+       *   画面区**上半随镜头更新、下半冻结**（显示的上半来自摄像头帧的
+       *   前几行，下半来自后几行）。
+       *
+       *   而这套换页本来就是多余的：渲染只要 9ms，60fps 的帧周期是
+       *   16.6ms。硬件写 FRM1 的时候我们读 FRM0，等它绕回 FRM0 时我们
+       *   早读完了。不改地址，那条竞争根本不存在。
+       *
+       *   ★ 代价是这个方案有前提：渲染必须快过一个帧周期。所以下面把
+       *     "送屏时间 >= 帧周期"当成一个显式的告警，而不是让它悄悄变成
+       *     偶发撕裂 —— 前提失效时要能自己说出来。
        */
 
-      g_cam_ready = slot_buf[slot];
-      rk3576_cif_set_buffer(KICKPI_CAM_CSI_HOST, slot,
-                            (uintptr_t)g_cam_buf[spare]);
-      slot_buf[slot] = spare;
+      g_cam_ready = slot;
 
       clock_gettime(CLOCK_MONOTONIC, &tb);
 
@@ -2063,6 +2164,35 @@ int kickpi_camera_preview(int frames)
       inv_ms  += (tc.tv_sec - tb.tv_sec) * 1000 +
                  (tc.tv_nsec - tb.tv_nsec) / 1000000;
 
+      /* ★ 每 60 帧打一次这一帧的指纹。
+       *
+       *   白块在动只证明**送屏**是活的 —— 帧缓冲每帧都写、也确实上了屏。
+       *   它不能证明**摄像头数据**在变：如果每帧渲染的都是同一份内容，
+       *   屏上就是"白块在动、画面静止"。我之前验证了一环就默认另一环
+       *   也活着，正是这个漏洞。
+       *
+       *   指纹取 16 个散布的像素求和，加上刚用的缓冲序号与 INTSTAT。
+       *   指纹每次都变 -> 数据在更新，问题在别处；
+       *   指纹恒定       -> DMA 没有往里写新帧，查 CIF 的连续流。
+       */
+
+      if ((done % 60) == 0)
+        {
+          const uint16_t *q = (const uint16_t *)g_cam_buf[g_cam_ready];
+          uint32_t fp = 0;
+          int k;
+
+          for (k = 0; k < 16; k++)
+            {
+              fp += q[(size_t)k * 131071 % (IMX415_MODE_WIDTH *
+                                            IMX415_MODE_HEIGHT)];
+            }
+
+          syslog(LOG_INFO,
+                 "  帧%d 缓冲%d INTSTAT=0x%08" PRIx32 " 指纹=0x%08" PRIx32
+                 " p50=%u\n", done, g_cam_ready, stat, fp, g_cam_p50);
+        }
+
       ret = kickpi_camera_show_seq(1, done);
       if (ret < 0)
         {
@@ -2073,13 +2203,17 @@ int kickpi_camera_preview(int frames)
       shw_ms += (tb.tv_sec - tc.tv_sec) * 1000 +
                 (tb.tv_nsec - tc.tv_nsec) / 1000000;
 
-      /* 渲染完的这一块成为下一轮的备用 */
-
-      spare = g_cam_ready;
-
       if ((stat & 0x300) == 0x300)
         {
-          dropped++;      /* 两个标志同时置位 = 我们慢了至少一帧 */
+          /* 两个标志同时置位 = 我们慢了至少一帧。
+           *
+           * 不换页方案的前提是"渲染快过一个帧周期"。这一条一旦不成立，
+           * 硬件会绕回来覆盖我们正在读的那一块，画面开始撕裂。把它记成
+           * 一个数并在收尾报出来 —— 前提失效时要能自己说出来，而不是
+           * 变成偶发、难复现的画面异常。
+           */
+
+          dropped++;
         }
 
       pfd.fd     = 0;
