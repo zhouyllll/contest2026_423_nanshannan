@@ -40,7 +40,7 @@
 | 1.3.2 | RAM 读写 | ◆ | `fstest` 已编入，`/tmp` 已挂 tmpfs，待实测 |
 | 1.3.3 | RAM 读写性能 | ◆ | `ramtest` 早已编入，待实测 |
 | 1.3.4 | RAM 随机读写 | ◆ | `mkrd` + `cmocka_driver_block` 均已就绪，待实测 |
-| 1.3.5 | Flash 功能 | ⛔ | 阻塞：SD 卡仅在开 trace 编译选项时工作，根因未定位。**不能对 eMMC 跑**（见下文） |
+| 1.3.5 | Flash 功能 | ◐ | trace 依赖已修（一句功能赋值被圈进 `#ifdef` 调试块），`/dev/mmcsd1` 在 trace 关闭下正常识别。但 xTS 用例本身在真卡上跑不完（见下），改用 FAT + `fstest` 做有界验收。**不能对 eMMC 跑** |
 | 1.3.6 | GPIO 功能 | ⚠️ | 3/4。中断子项要求输入/输出两脚**物理短接**（已备好 GPIO4_A7 ↔ GPIO4_B3，同 1.8V 域） |
 | 1.3.7 | I2C / SPI 功能 | ◐ | **xTS 用例需对端板子**，单板不可能通过（见下文）。SPI 驱动已用计时法证实时钟真在跑；I2C 由板上真实器件（RTC@0x51、触摸@0x38）证实 |
 | 1.3.10 | UART 串口功能 | ✅ | `cmocka_driver_uart` 1/1 |
@@ -133,6 +133,45 @@ CONFIG_SCHED_LPWORK=y
 Makefile 里却仍留着 sched/syscall/time/pthread/mutex 的分支，开启后
 make 会去找不存在的 `cmocka_sched_test.c`。已给这 8 个分支补上
 "主源文件存在"的条件，作为补丁归档。
+
+### ★ 1.3.5 的两件事：一个真缺陷，一个用例本身的规模问题
+
+**真缺陷（已修）**：SD 卡此前只有打开 `CONFIG_RK3576_DWMMC_TRACE` 才能
+工作。根因不是竞态 —— `priv->last_result = OK;` 这句写在了 `#ifdef` 调试块
+**里面**，而所有失败路径的赋值都在块外。关掉 trace 后它永远停在命令发出
+前置的 `-EBUSY`，`recvshort/recvlong` 开头的
+`if (priv->last_result != OK) return ...` 让每条命令的响应读取都失败。
+
+"只有开日志才工作"几乎必然被读成"日志的额外延时掩盖了时序问题"，排查
+方向也确实一度是延时、FIFO 水位、时钟。实际与时序毫无关系，编译器也不会
+有任何提示。**规则：`#ifdef` 调试块里只放打印和统计，任何改变状态的语句
+都要放外面 —— 切换调试选项不应该改变功能。**
+
+**用例的规模问题（无解，只能换验收方式）**：`cmocka_driver_block` 的第一个
+子项 `drivertest_block_stress` 会逐扇区写**整个设备的 95%**：
+
+```c
+nsectors = pre->cfg.geo_nsectors * SECTORS_RANGE;   /* 0.95 */
+for (i = 0; i < nsectors; i++)
+  {
+    lseek(...); write(..., 512); fsync(pre->fd);
+  }
+```
+
+它是照着 1.3.4 那种 `mkrd -m 10` 的 10MB 内存盘设计的。换成多 GB 的 TF 卡
+就是几千万次单扇区写加 fsync，PIO 方式要按天算 —— 实测跑了十几分钟毫无
+进展，而且会一直占住控制台（nsh 阻塞在子任务上，Ctrl-C 不受理，只能断电）。
+
+替代的有界验收（配置已编入）：
+
+```sh
+mkfatfs /dev/mmcsd1
+mount -t vfat /dev/mmcsd1 /mnt
+fstest -n 10 -m /mnt
+```
+
+`fstest` 做的同样是"随机内容写进去、读回来、CRC 比对"，验证强度相当，
+规模由 `-n` 控制。顺带给板子一个能用的 SD 文件系统。
 
 ### ★ 1.3.5 Flash 功能只能对 SD 卡跑，不能对 eMMC 跑
 
