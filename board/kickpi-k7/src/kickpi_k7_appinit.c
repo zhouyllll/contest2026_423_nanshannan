@@ -561,7 +561,29 @@ int board_app_initialize(uintptr_t arg)
    * 而 SoC 侧的寄存器读写一切正常。本端口为此误查过时钟与模块复位两轮。
    */
 
+  /* ★ 两颗 PHY 都要放出复位，即使我们只用 GMAC0。
+   *
+   *   RTL8211F 这类 PHY **只在链路建立之后才输出 RXCLK**。而 dw_gmac 的
+   *   DMA 软复位要等所有时钟域就绪，其中 RX 时钟正是 PHY 送来的 —— 所以
+   *   没有链路伙伴，软复位就永远不完成，MAC 起不来，TXCLK 也就不输出。
+   *   两个"无时钟"是同一个源头的上下游，不是两个独立故障。
+   *
+   *   板上把两个网口对接之后，对端就是 GMAC1 的那颗 PHY。它的复位脚
+   *   GPIO3_A3 在 board.h 里定义了却从没被调用 —— 一直被摁在复位里，
+   *   于是"接了网线"和"没接"对 GMAC0 毫无区别。
+   *
+   *   ★ 这解释了为什么此前把两个口串起来毫无变化：我们以为在测链路，
+   *     其实对端根本没上电工作。**做对照实验前要先确认对照组是活的。**
+   */
+
+  rk3576_gmac_phy_reset(BOARD_GMAC1_RST_BANK, BOARD_GMAC1_RST_PIN, true);
   rk3576_gmac_phy_reset(BOARD_GMAC0_RST_BANK, BOARD_GMAC0_RST_PIN, true);
+
+  /* PHY 自协商要时间（1000Base-T 通常 1~3 秒）。软复位等 RX 时钟，
+   * 而 RX 时钟要等链路 —— 这里给协商留出时间，否则必然超时。
+   */
+
+  up_mdelay(2500);
 
   ret = rk3576_gmac_probe(0);
   if (ret < 0)
