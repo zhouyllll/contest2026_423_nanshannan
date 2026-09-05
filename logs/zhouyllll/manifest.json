@@ -44,9 +44,9 @@
       "session_id": "6da36939-72ed-45a4-8311-5cc9b1b96e52",
       "tool": "claude-code",
       "started_at": "2026-09-05T15:44:58.906Z",
-      "last_event_at": "2026-09-05T15:44:58.906Z",
-      "event_count": 1453,
-      "raw_event_count": 3506,
+      "last_event_at": "2026-09-05T17:06:09.723Z",
+      "event_count": 1702,
+      "raw_event_count": 4091,
       "file_path": "logs/zhouyllll/2026-09-05/claude-code__6da36939-72ed-45a4-8311-5cc9b1b96e52.jsonl",
       "collection_mode": "cli",
       "health": "ok",
@@ -112,5 +112,5 @@
       "health": "ok"
     }
   ],
-  "updated_at": "2026-09-05T15:44:59.835Z"
+  "updated_at": "2026-09-05T17:06:09.748Z"
 }

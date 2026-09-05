@@ -576,6 +576,16 @@ int board_app_initialize(uintptr_t arg)
    *     其实对端根本没上电工作。**做对照实验前要先确认对照组是活的。**
    */
 
+  /* ★ 参考时钟要先于复位释放。
+   *
+   *   PHY 的 25MHz 由 SoC 送出（dtsi 里 PHY 节点的
+   *   clocks = <&cru REFCLKO25M_GMAC0_OUT>），板上没有晶振。
+   *   PHY 出复位那一刻就得有时钟，否则模拟前端不启动。
+   */
+
+  rk3576_gmac_refclk25m(0);
+  rk3576_gmac_refclk25m(1);
+
   rk3576_gmac_phy_reset(BOARD_GMAC1_RST_BANK, BOARD_GMAC1_RST_PIN, true);
   rk3576_gmac_phy_reset(BOARD_GMAC0_RST_BANK, BOARD_GMAC0_RST_PIN, true);
 
@@ -585,10 +595,23 @@ int board_app_initialize(uintptr_t arg)
 
   up_mdelay(2500);
 
+  /* ★ 两个口都要配。
+   *
+   *   板上把两个网口用网线对接了，所以对端就是本板的另一个 MAC/PHY。
+   *   只配 GMAC0 的话，对端那半条链路没人管 —— 而 RGMII 的 RX 时钟由
+   *   对端 PHY 在链路建立后才输出，链路建不起来就一直没有时钟。
+   */
+
   ret = rk3576_gmac_probe(0);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: GMAC0 探测失败: %d\n", ret);
+    }
+
+  ret = rk3576_gmac_probe(1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: GMAC1 探测失败: %d\n", ret);
     }
 #endif
 
