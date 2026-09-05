@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
       printf("      cam gain <0-240> [shr]  模拟增益，每级 0.3dB\n");
       printf("      cam show [0|1]   送屏，参数 0 关伽马用于对照\n");
       printf("      cam preview [n]  连续预览 n 帧（默认 300），敲键停止\n");
+      printf("      cam vmax <行数>  改帧率，1143≈83fps 3165≈30fps\n");
       printf("      cam fbinfo|stat\n");
       return 1;
     }
@@ -145,6 +146,16 @@ int main(int argc, char *argv[])
   else if (strcmp(argv[1], "preview") == 0)
     {
       ret = kickpi_camera_preview(argc > 2 ? atoi(argv[2]) : 0);
+    }
+  else if (strcmp(argv[1], "vmax") == 0)
+    {
+      if (argc < 3)
+        {
+          printf("用法: cam vmax <1143-1048575>  一帧总行数，越小越快\n");
+          return 1;
+        }
+
+      ret = kickpi_camera_vmax(atoi(argv[2]));
     }
   else if (strcmp(argv[1], "regs") == 0)
     {

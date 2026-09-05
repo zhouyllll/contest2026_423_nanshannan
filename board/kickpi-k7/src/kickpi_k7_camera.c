@@ -558,6 +558,16 @@ static uint32_t g_cam_hist[256];
 #define CAM_SXTAB_MAX 2048
 static uint16_t g_cam_sxtab[CAM_SXTAB_MAX];
 
+/* 伽马查表。
+ *
+ * ★ 原来每个像素跑一遍整数开方（约 8 轮循环），一帧 29 万像素。
+ *   而 g 只有 0..255 共 256 种取值 —— 算 256 次存起来，之后一次查表。
+ *   这是纯赚：结果逐位相同，只是不再重复算同一件事。
+ */
+
+static uint8_t g_cam_gamma[256];
+static bool    g_cam_gamma_ready;
+
 /* 刚写完的是哪一个乒乓缓冲。统计和送屏都要读这一个，读另一个就是在读
  * 正被 DMA 改写的内存。
  */
@@ -1288,6 +1298,42 @@ int kickpi_camera_show_seq(int gamma, int seq)
                                    (int)vinfo.xres);
     }
 
+  if (!g_cam_gamma_ready)
+    {
+      int q;
+
+      for (q = 0; q < 256; q++)
+        {
+          uint32_t v = (uint32_t)q * 255u;
+          uint32_t r = 0;
+          uint32_t bit = 1u << 16;
+
+          while (bit > v)
+            {
+              bit >>= 2;
+            }
+
+          while (bit != 0)
+            {
+              if (v >= r + bit)
+                {
+                  v -= r + bit;
+                  r = (r >> 1) + bit;
+                }
+              else
+                {
+                  r >>= 1;
+                }
+
+              bit >>= 2;
+            }
+
+          g_cam_gamma[q] = (uint8_t)r;
+        }
+
+      g_cam_gamma_ready = true;
+    }
+
   for (dy = yoff; dy < yoff + imgh && dy < (int)vinfo.yres; dy++)
     {
       /* ★ 纵向要用纵向比例。
@@ -1368,34 +1414,21 @@ int kickpi_camera_show_seq(int gamma, int seq)
 
           if (gamma)
             {
-              uint32_t v = g * 255u;
-              uint32_t r = 0;
-              uint32_t bit = 1u << 16;
-
-              while (bit > v)
-                {
-                  bit >>= 2;
-                }
-
-              while (bit != 0)
-                {
-                  if (v >= r + bit)
-                    {
-                      v -= r + bit;
-                      r = (r >> 1) + bit;
-                    }
-                  else
-                    {
-                      r >>= 1;
-                    }
-
-                  bit >>= 2;
-                }
-
-              g = r;
+              g = g_cam_gamma[g];
             }
 
-          outhist[g >> 4]++;
+          /* ★ 预览时不统计输出灰度。
+           *
+           *   这是每像素一次自增，一帧 29 万次，而预览根本不打印它 ——
+           *   纯粹是给"屏幕全黑时判断写进去的是不是黑"那个判据用的，
+           *   单帧看一次就够。与前面清缓冲、全帧统计是同一类：判据本身
+           *   没错，错在每帧都算。
+           */
+
+          if (!g_cam_quiet)
+            {
+              outhist[g >> 4]++;
+            }
 
           fb[dy * rowpix + dx] =
             0xff000000u | (g << 16) | (g << 8) | g;
@@ -2082,4 +2115,97 @@ int kickpi_camera_preview(int frames)
   }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: kickpi_camera_vmax
+ *
+ * Description:
+ *   改 IMX415 的 VMAX（一帧的总行数），也就是改帧率。
+ *
+ *   ★ 帧率不是分辨率决定的，是空转的行数决定的
+ *
+ *     厂商模式表里 3864x2192 和 1944x1097 都标 30fps，但两者的余量差得
+ *     很远：全分辨率 VMAX=2250 而有效行 2192，消隐只占 2.6%，是真的跑满了；
+ *     我们这个 1944x1097 的 VMAX=3165 而有效行只有 1097 —— **三分之二的
+ *     帧时间在空转**，只是被配成了 30fps 这个通用值。
+ *
+ *     行周期 1H = HMAX / 74.25MHz = 782 / 74.25e6 = 10.53us，
+ *     3165 x 10.53us = 33.3ms，正好 30fps。SDK 自己给的下限是
+ *     VMAX >= height + 46 = 1143，对应 12.0ms ≈ 83fps。
+ *
+ *     减掉的是**空行**，行速率不变，所以 MIPI 带宽不受影响 —— 这一点
+ *     容易想反：不是"传更多数据所以更快"，是"少等一会儿"。
+ *
+ *   ★ 代价是曝光
+ *
+ *     曝光行数 = VMAX - SHR0，VMAX 减小，可用的最长曝光同比缩短。
+ *     VMAX 从 3165 降到 1143，曝光只剩 36%，要补约 9dB 增益，噪点会涨。
+ *     所以做成运行时可调而不是写死：拿 cam gain 配合着扫，看这块传感器
+ *     在这个光照下能接受到哪一档。
+ *
+ * Input Parameters:
+ *   vmax - 一帧的总行数，最小 1143（= 有效行 1097 + 46）
+ *
+ ****************************************************************************/
+
+int kickpi_camera_vmax(int vmax)
+{
+  uint8_t v;
+  int ret;
+
+  if (g_cam_i2c == NULL)
+    {
+      syslog(LOG_ERR, "摄像头: I2C 未初始化\n");
+      return -ENODEV;
+    }
+
+  if (vmax < IMX415_MODE_HEIGHT + 46 || vmax > 0xfffff)
+    {
+      syslog(LOG_ERR,
+             "摄像头: VMAX 要在 %d~1048575 之间（下限 = 有效行 %d + 46）\n",
+             IMX415_MODE_HEIGHT + 46, IMX415_MODE_HEIGHT);
+      return -EINVAL;
+    }
+
+  ret = imx415_write8(g_cam_i2c, 0x3024, (uint8_t)(vmax & 0xff));
+  if (ret >= 0)
+    {
+      ret = imx415_write8(g_cam_i2c, 0x3025, (uint8_t)((vmax >> 8) & 0xff));
+    }
+
+  if (ret >= 0)
+    {
+      ret = imx415_write8(g_cam_i2c, 0x3026, (uint8_t)((vmax >> 16) & 0x0f));
+    }
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "摄像头: 写 VMAX 失败 %d\n", ret);
+      return ret;
+    }
+
+  /* 回读核对 —— 与模式表那里同样的理由：写返回成功不代表寄存器接受了。 */
+
+  ret = imx415_read8(g_cam_i2c, 0x3024, &v);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (v != (uint8_t)(vmax & 0xff))
+    {
+      syslog(LOG_ERR, "摄像头: VMAX 回读 0x%02x，期望 0x%02x —— 没写进去\n",
+             v, (uint8_t)(vmax & 0xff));
+      return -EIO;
+    }
+
+  /* 1H = 10.53us，用整数算成 1000 倍避免浮点 */
+
+  syslog(LOG_INFO,
+         "摄像头: VMAX=%d，一帧 %d.%02d ms，理论 %d.%d fps（曝光上限 %d 行）\n",
+         vmax, vmax * 1053 / 100000, (vmax * 1053 / 1000) % 100,
+         100000000 / (vmax * 1053) , (1000000000 / (vmax * 1053)) % 10,
+         vmax - 8);
+  return OK;
 }
