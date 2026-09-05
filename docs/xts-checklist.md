@@ -42,7 +42,7 @@
 | 1.3.3 | RAM 读写性能 | ✅ | `ramtest -w -s 1048576` 各阶段（marching 1/0、pattern、address-in-address）无报错 |
 | 1.3.4 | RAM 随机读写 | ✅ | `mkrd -m 10 -s 512 2048` + `cmocka_driver_block -m /dev/ram10` → 3/3 OK |
 | 1.3.5 | Flash 功能 | ✅ | `mkfatfs -F 32 /dev/mmcsd1` → `mount -t vfat` → `fstest -n 10 -m /mnt` **OK: 20, FAILED: 0**；文件读写往返也正确。卡是 16GB，必须 `-F 32`（自动只试 FAT12/16）。**不能对 eMMC 跑** |
-| 1.3.6 | GPIO 功能 | ⚠️ | 3/4。中断子项要两脚**物理短接**：**排针第 5 脚（GPIO4_A4）↔ 第 7 脚（GPIO4_A6）**，一根短杜邦线。原先写的 GPIO4_A7/B3 是错的 —— 那两根没引到连接器（见下） |
+| 1.3.6 | GPIO 功能 | ✅ | **4/4**（bool / loop / rw / interrupt）。中断子项要把**排针第 5 脚（GPIO4_A4）↔ 第 7 脚（GPIO4_A6）**用杜邦线短接。此前"挂死"的真正原因是输入脚上永远等不到边沿 —— 原先选的 GPIO4_A7/B3 没引到连接器，线根本插不上 |
 | 1.3.7 | I2C / SPI 功能 | ◐ | **xTS 用例需对端板子**，单板不可能通过（见下文）。SPI 环回自检的第三层要短接 **第 10 脚（MOSI/GPIO4_B1）↔ 第 12 脚（MISO/GPIO4_B2）**。I2C 由板上真实器件（RTC@0x51、触摸@0x38）证实 |
 | 1.3.10 | UART 串口功能 | ✅ | `cmocka_driver_uart` 1/1 |
 | 1.3.11 | UART 文件传输 | ◐ | **接收方向已完整验证**：主机 `sb --ymodem` → 板端 `rb -f /mnt`，`Transfer complete`，板上 `cat` 出的内容与源文件逐字节一致。发送方向（板端 `sb` → 主机 `rb`）能收到正确的头块（文件名对），数据块被 lrzsz 拒收，未定位 |
@@ -197,7 +197,7 @@ eMMC 第 0 扇区往后是引导器与启动镜像，跑一次就把板子写坏
 | 1.3.3 | RAM 读写性能 | `ramtest` | ◆ 已编入 |
 | 1.3.4 | RAM 随机读写 | `mkrd` + `cmocka_driver_block` | ◆ 已编入 |
 | 1.3.5 | Flash 功能 | eMMC / SPI Flash + MTD | ⛔ 阻塞，见上 |
-| 1.3.6 | **GPIO 功能** | `cmocka_driver_gpio` | ⚠️ 3/4，中断子项挂死，未定位（案例 14） |
+| 1.3.6 | **GPIO 功能** | `cmocka_driver_gpio` | ✅ 4/4（需 5↔7 脚短接） |
 | 1.3.7 | **I2C / SPI 功能** | I2C、SPI 驱动 | ◐ 需对端板子，见上 |
 | 1.3.10 | **UART 串口功能** | DW 8250 串口 | ✅ 1/1 |
 | 1.3.11 | UART 文件传输 | ymodem `sb`/`rb` | ◆ 已编入 |
