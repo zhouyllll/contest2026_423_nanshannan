@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
       printf("      cam morph <0-7>  从 U-Boot 参数出发逐个变量地改（7 复现故障）\n");
       printf("      cam regs         打印 ESMART1/VP1 寄存器现状\n");
       printf("      cam gain <0-240> [shr]  模拟增益，每级 0.3dB\n");
+      printf("      cam show [0|1]   送屏，参数 0 关伽马用于对照\n");
       printf("      cam fbinfo|stat\n");
       return 1;
     }
@@ -85,7 +86,7 @@ int main(int argc, char *argv[])
     }
   else if (strcmp(argv[1], "show") == 0)
     {
-      ret = kickpi_camera_show();
+      ret = kickpi_camera_show(argc > 2 ? atoi(argv[2]) : 1);
     }
   else if (strcmp(argv[1], "white") == 0)
     {

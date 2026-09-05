@@ -1068,13 +1068,16 @@ int kickpi_camera_fbtest(int pattern)
   return OK;
 }
 
-int kickpi_camera_show(void)
+int kickpi_camera_show(int gamma)
 {
   struct fb_videoinfo_s vinfo;
   struct fb_planeinfo_s pinfo;
   uint32_t *fb;
   uint16_t *src;
   uint32_t span;
+  uint32_t outhist[16];
+  int imgh;
+  int yoff;
   int fd;
   int dx;
   int dy;
@@ -1151,6 +1154,24 @@ int kickpi_camera_show(void)
     uint32_t maxpix = (uint32_t)(pinfo.fblen / 4);
     uint32_t rowpix = pinfo.stride / 4;
 
+    memset(outhist, 0, sizeof(outhist));
+
+    /* ★ 把画面竖直居中，而不是贴在最上面。
+     *
+     *   摄像头是横的 1932x1096、屏是竖的 720x1280，按宽度等比缩放之后
+     *   只有 720x408，其余三分之二是黑的。贴在顶端时，"上面一小条有东西、
+     *   下面一大片黑"这个样子与"整屏全黑"在昏暗画面下很难分辨；居中之后
+     *   上下各留一条黑边，一眼就能看出画面区域在哪，也就能判断是画面暗
+     *   还是根本没画上去。
+     */
+
+    imgh = (int)IMX415_MODE_HEIGHT * (int)vinfo.xres / (int)IMX415_MODE_WIDTH;
+    yoff = ((int)vinfo.yres - imgh) / 2;
+    if (yoff < 0)
+      {
+        yoff = 0;
+      }
+
   for (dy = 0; dy < (int)vinfo.yres; dy++)
     {
       /* ★ 纵向要用纵向比例。
@@ -1161,7 +1182,12 @@ int kickpi_camera_show(void)
        *   宽度定标，高度随之。
        */
 
-      int sy = dy * (int)IMX415_MODE_WIDTH / (int)vinfo.xres;
+      int sy = (dy - yoff) * (int)IMX415_MODE_WIDTH / (int)vinfo.xres;
+
+      if (dy < yoff)
+        {
+          sy = IMX415_MODE_HEIGHT;      /* 上黑边，走下面的越界分支 */
+        }
 
       if ((uint32_t)dy * rowpix + vinfo.xres > maxpix)
         {
@@ -1217,6 +1243,49 @@ int kickpi_camera_show(void)
               g = 255;
             }
 
+          /* ★ 伽马。原始线性数据直接送显示器本来就是错的。
+           *
+           *   显示器期望的是伽马编码的信号（约 2.2 次方），而传感器出的
+           *   是线性光强。把线性值当成显示值送过去，中间调会被压得极暗：
+           *   这次 p50 落在拉伸后的 44/255，屏上就是接近黑 —— 而数据其实
+           *   是好的。这一步不是"美化"，是缺了会得出错误结论的一步。
+           *
+           *   用 sqrt 近似 gamma 0.5：sqrt(g/255)*255 = sqrt(g*255)。
+           *   44 -> 106，中间调回到能看见的位置。整数开方够用，不值得
+           *   为此引入浮点。
+           */
+
+          if (gamma)
+            {
+              uint32_t v = g * 255u;
+              uint32_t r = 0;
+              uint32_t bit = 1u << 16;
+
+              while (bit > v)
+                {
+                  bit >>= 2;
+                }
+
+              while (bit != 0)
+                {
+                  if (v >= r + bit)
+                    {
+                      v -= r + bit;
+                      r = (r >> 1) + bit;
+                    }
+                  else
+                    {
+                      r >>= 1;
+                    }
+
+                  bit >>= 2;
+                }
+
+              g = r;
+            }
+
+          outhist[g >> 4]++;
+
           fb[dy * rowpix + dx] =
             0xff000000u | (g << 16) | (g << 8) | g;
         }
@@ -1241,8 +1310,33 @@ int kickpi_camera_show(void)
   close(fd);
 
   syslog(LOG_INFO,
-         "摄像头: 已送屏 %ux%u（灰度，按 %u~%u 线性拉伸）\n",
-         vinfo.xres, vinfo.yres, g_cam_min, g_cam_max);
+         "摄像头: 已送屏 %ux%u 画面区 %dx%d @y=%d（按 %u~%u 拉伸，伽马%s）\n",
+         vinfo.xres, vinfo.yres, vinfo.xres, imgh, yoff,
+         g_cam_min, g_cam_max, gamma ? "开" : "关");
+
+  /* ★ 统计**写出去的**灰度，而不只是读进来的原始值。
+   *
+   *   屏幕全黑时，"写进去的像素本来就接近黑"和"像素没问题但显示不出来"
+   *   是两件事，改法毫不相干。之前只统计了输入侧（传感器读数），这两种
+   *   情况给出的输入统计完全一样，分不开。这里统计的是真正落进帧缓冲的
+   *   那个 8 位灰度 —— 它若分布正常而屏幕仍黑，嫌疑就整个转到显示侧。
+   */
+
+  {
+    int b;
+
+    for (b = 0; b < 16; b++)
+      {
+        if (outhist[b] != 0)
+          {
+            syslog(LOG_INFO, "  输出灰度[%3d..%3d] %lu%%\n",
+                   b * 16, b * 16 + 15,
+                   (unsigned long)((uint64_t)outhist[b] * 100 /
+                                   ((uint64_t)vinfo.xres * vinfo.yres)));
+            up_mdelay(2);
+          }
+      }
+  }
 
   return OK;
 }
