@@ -50,6 +50,7 @@
 #include "rk3576_dsi2.h"
 #include "rk3576_dwmmc.h"
 #include "rk3576_wdt.h"
+#include "rk3576_timer.h"
 #include "rk3576_rng.h"
 #include "rk3576_gmac.h"
 #include "rk3576_vop2.h"
@@ -481,50 +482,28 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#if 0  /* ★ 暂时关闭，见下 —— 打开会让整个系统的定时功能失效 */
+#ifdef CONFIG_RK3576_TIMER
   /* 注册 /dev/oneshot（xTS 1.3.13/14 的 cmocka_driver_oneshot 需要它）。
    *
-   * ★★ 这段代码一开就把系统时基打死了，实测证据见下。
+   * ★ 下半部用的是 RK3576 的独立 TIMER，不是 arm64 通用定时器。
    *
-   *   原来的想法是"下半部直接用 arm64 通用定时器，本板不需要额外的定时
-   *   器硬件"。问题在于**那个下半部不是空闲的，它是调度器正在用的那一个**：
+   *   最初这里写的是 arm64_oneshot_initialize()，理由是"通用定时器是
+   *   SoC 无关的那一个，本板不需要额外硬件"。那个理由本身没错，错在
+   *   **它不是空闲的**：内核的 up_timer_initialize() 已经把同一个下半部
+   *   实例交给调度器了，而 struct oneshot_lowerhalf_s 只有一对
+   *   callback/arg，谁后设谁赢。
    *
-   *     arm64_arch_timer.c:
-   *       static struct oneshot_lowerhalf_s g_arm64_oneshot_lowerhalf;  <- 唯一实例
-   *       void up_timer_initialize(void)
-   *       { up_alarm_set_lowerhalf(arm64_oneshot_initialize()); }        <- 内核已占用
+   *   于是注册 /dev/oneshot 就把调度器的定时回调顶掉，系统时基当场死掉：
+   *   sleep 永不返回、延时 work_queue 永不触发、看门狗 automonitor 从不
+   *   喂狗因而每 95 秒硬件复位一次。而串口、nsh、所有命令都正常（靠
+   *   UART 中断唤醒），up_mdelay() 也正常（忙等读计数器）—— 这个故障
+   *   因此可以长期潜伏，并且会把"板子自己重启"栽赃给别的模块。
    *
-   *   而 struct oneshot_lowerhalf_s 里只有**一对** callback/arg。
-   *   oneshot_register("/dev/oneshot", os) 之后，谁后设谁赢，调度器的
-   *   定时回调被顶掉；再加上第二次 arm64_oneshot_initialize() 里那句
-   *   arm64_arch_timer_set_compare(UINT64_MAX)，当场把已经挂起的闹钟取消。
-   *
-   *   后果是**整个系统的定时功能安静地死掉**，而且现象极具迷惑性：
-   *
-   *     串口、nsh、所有命令都正常      —— 靠 UART 中断唤醒，不需要时基
-   *     up_mdelay() 正常               —— 忙等读计数器，不需要时基
-   *     sleep 3 永远不返回             —— 实测 25 秒不回提示符
-   *     work_queue(..., 延时) 永不触发 —— 看门狗 automonitor 因此从不喂狗，
-   *                                       板子每 95 秒被硬件复位一次
-   *
-   *   最后一条尤其阴险：它把"板子自己重启"伪装成了别的模块的问题。我在
-   *   摄像头那边白白追了好几轮，每次都是"某条命令之后板子重启了"，其实
-   *   跟那条命令毫无关系。
-   *
-   *   实测对照（摘掉这段注册之后，其余不变）：
-   *     sleep 3 -> 3.3s、sleep 8 -> 8.4s
-   *     喂狗每 30 秒一次，CCVR 被拉回 2147483644
-   *     静置 100 秒零自发重启
-   *
-   * ★ 正确的修法是给 /dev/oneshot 一个**自己的**硬件定时器。
-   *
-   *   RK3576 有独立的 TIMER 模块，用其中一路做 oneshot 下半部，与调度器
-   *   占用的 ARM 通用定时器互不相干。在那之前先关掉 —— xTS 1.3.13 少一项，
-   *   总好过整个系统的定时都是坏的却记着一堆"通过"。
+   *   详见 notes/DEBUG-CASES.md 案例 16。
    */
 
   {
-    struct oneshot_lowerhalf_s *os = arm64_oneshot_initialize();
+    struct oneshot_lowerhalf_s *os = rk3576_oneshot_initialize();
 
     if (os == NULL)
       {
