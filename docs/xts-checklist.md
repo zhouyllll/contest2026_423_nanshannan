@@ -15,7 +15,7 @@
 
 ## 当前进度总表（截至 2026-09-04）
 
-必测 35 项：**通过 25、部分通过 5、不可行 3、待做 1、需对端设备 1**。
+必测 35 项：**通过 27、部分通过 6、不可行 0、待做 1、需对端设备 1**。
 （2026-09-05 实测更新：一次跑完 1.1.8 / 1.1.12 / 1.3.2 / 1.3.3 / 1.3.4 /
 1.3.5 / 1.3.17，另加 1.3.13 用独立定时器重新拿回。）
 
@@ -32,11 +32,11 @@
 | 1.1.6 | Kernel-mm | ✅ | TEST COMPLETE |
 | 1.1.7 | Kernel-scanftest | ⚠️ | 85 通过 / 11 失败 |
 | 1.1.8 | Kernel-C | ✅ | `hello` 打印 Hello, World!! |
-| 1.1.9 | Kernel-Cxx | ❌ | 需先接入 C++ 标准库（LIBCXX/UCLIBCXX/ETL） |
-| 1.1.10 | Kernel-popen | ❌ | 本 libc 无 popen 实现 |
+| 1.1.9 | Kernel-Cxx | ✅ | `helloxx` 三种实例（动态/栈上/静态构造）全部打印。用**工具链自带**的 libstdc++/libsupc++，不下载源码 |
+| 1.1.10 | Kernel-popen | ✅ | `popen` 实测：`popen("help")` 的输出经管道回来、`pclose()` 正常。之前"libc 无 popen"的判断是错的 —— 实现在 `apps/system/popen/popen.c` |
 | 1.1.11 | Kernel-pipe | ✅ | PASSED（含重定向） |
 | 1.1.12 | Kernel-md5 | ✅ | `md5_test -c 100` 全部同值 `01fbd2fa33f6ea48e11960f47c9b622b`（串口丢 1 行，收到 99 行） |
-| 1.1.13 | Kernel-C++ 功能 | ❌ | 同 1.1.9 |
+| 1.1.13 | Kernel-C++ 功能 | ◐ | `cxxtest` 的 `std::vector`/`std::map`/RTTI 全过，**卡在 `Test Exception`**：arm64 上栈展开表没被注册（见下） |
 | 1.3.1 | 烧写测试 | ✅ | `scripts/flash.sh` 一条命令，串口触发 loader，**无需按 recovery** |
 | 1.3.2 | RAM 读写 | ✅ | `fstest -n 10 -m /tmp` → OK: 20, FAILED: 0 |
 | 1.3.3 | RAM 读写性能 | ✅ | `ramtest -w -s 1048576` 各阶段（marching 1/0、pattern、address-in-address）无报错 |
@@ -96,11 +96,11 @@
 | 1.1.6 | Kernel-mm 内存 | `mm` | ✅ TEST COMPLETE |
 | 1.1.7 | Kernel-scanftest | `scanftest` | ⚠️ 85 通过 / 11 失败 |
 | 1.1.8 | Kernel-C | `hello` | ◆ 已编入，待实测 |
-| 1.1.9 | Kernel-Cxx | `helloxx` | ❌ 需先接 C++ 标准库 |
-| 1.1.10 | Kernel-popen | `popen` | ❌ 本 libc 无 popen 实现 |
+| 1.1.9 | Kernel-Cxx | `helloxx` | ✅ 工具链自带 libstdc++ |
+| 1.1.10 | Kernel-popen | `popen` | ✅ 实现在 apps/system/popen |
 | 1.1.11 | Kernel-pipe | `pipe` | ✅ PASSED（含重定向） |
 | 1.1.12 | Kernel-md5 | `md5_test -f /tmp/1.txt -c 100` | ◆ 已编入，待实测 |
-| 1.1.13 | Kernel-C++ 功能 | `cxxtest` | ❌ 同 1.1.9 |
+| 1.1.13 | Kernel-C++ 功能 | `cxxtest` | ◐ 异常之外都过 |
 
 公共前提配置：
 ```
@@ -404,6 +404,73 @@ include 补上"文件存在"的条件，并把 `fs_test/` 改成 `vela_fs_test/`
 另外别在格式化前 `mount`：卡上残留的垃圾会被 FAT 当成引导扇区，算出
 十几亿号的扇区去读，卡回 `OUT_OF_RANGE` 之后就不再应答任何命令，
 只能重启板子。**先格式化，再挂载。**
+
+## ★ C++（1.1.9 / 1.1.13）：不用下载源码
+
+`nuttx/libs/libxx` 里 LIBCXX 和 uClibc++ 都要联网下载源码，但**用不着**：
+预置工具链 `aarch64-none-elf` 自带 `libstdc++.a` 与 `libsupc++.a`。
+
+```
+CONFIG_HAVE_CXX=y  CONFIG_HAVE_CXXINITIALIZE=y
+CONFIG_LIBCXXTOOLCHAIN=y      # STL 头文件用工具链的
+CONFIG_LIBSUPCXX_TOOLCHAIN=y  # 底层 ABI 用工具链的
+CONFIG_CXX_STANDARD="gnu++17"  CONFIG_CXX_EXCEPTION=y  CONFIG_CXX_RTTI=y
+CONFIG_EXAMPLES_HELLOXX=y  CONFIG_TESTING_CXXTEST=y
+```
+
+★ 但只开这些会在链接时炸出一堆 `basic_string::_M_replace`、
+`_Rb_tree_increment`、`__throw_logic_error` 缺符号。原因是
+`arch/arm64/src/Toolchain.defs` 里**只有** `LIBSUPCXX_TOOLCHAIN` 那条会加
+`libsupc++.a`（底层 ABI），**没有人加 `libstdc++.a`**（STL 的编译部分）。
+
+迷惑之处在于：纯模板的东西（`std::vector<int>`）在头文件里就展开了，
+编译链接都过；一用 `std::string`/`std::map`/`iostream` 就缺符号 —— 看着
+像"C++ 支持没配好"，其实只差一个库。已在 `board/kickpi-k7/scripts/Make.defs`
+里补一行（放板级而不是改公共仓的 Toolchain.defs，等效且不用维护补丁）。
+
+### ★ 1.1.13 卡在异常：arm64 的栈展开表从来没被注册过
+
+`cxxtest` 的 vector/map/RTTI 都过，`Test Exception` 崩在 `__cxa_throw`
+内部（`eh_throw.cc:97`）。查下来不是我们这块板特有的：
+
+- 链接脚本把 `.eh_frame` 放在 `/DISCARD/` 里 —— **上游 NuttX 的每一块
+  arm64 板子都是这么写的**（pinephone、zcu111、vdk-armv8r 都一样）
+- 全树没有任何 `__register_frame_info` 调用
+- `_Unwind_RaiseException`、`__cxa_throw` 符号都在，`.gcc_except_table`
+  （着陆点表）也在 —— 唯独 `_Unwind_Find_FDE` 要查的那张表找不到
+
+把 `.eh_frame` 从 DISCARD 挪进 `.rodata` 之后镜像大了 24KB（数据确实进去
+了），但展开器仍然找不到：并进 `.rodata` 就没有独立的 `PT_GNU_EH_FRAME`
+程序头了。要真正打通得二选一：给它一个独立输出段并让链接器生成
+`--eh-frame-hdr` 的程序头，或者在启动时调
+`__register_frame_info(__EH_FRAME_BEGIN__, &object)`。
+
+**结论：这是 arm64 NuttX 的一处普遍空缺，不是移植缺陷。** 如实记 ◐。
+
+## ★ 1.3.11 的症结：CONFIG_SERIAL_TERMIOS 没开
+
+`apps/system/ymodem/ymodem.c` 里其实已经做了正确的事：
+
+```c
+cfmakeraw(&term);
+tcsetattr(ctx->recvfd, TCSANOW, &term);   /* 传输期间关回显 */
+```
+
+但 `CONFIG_SERIAL_TERMIOS` 没开时 `tcsetattr` 是空操作，控制台照样回显 ——
+我写进去的每个字节都原样回来，混在 YMODEM 数据流里。第一次抓包时那一长串
+`0x43` 就是自己发的 `'C'`，据此还误判过一次"对端发少了一个字节"。
+
+已开 `CONFIG_SERIAL_TERMIOS=y`。主机侧用 lrzsz（`/usr/bin/rb`）：
+
+```sh
+# 板端先发，主机紧接着收（顺序反了会让 rb 的 'C' 被 nsh 回显污染）
+#   板: sb /mnt/a.txt
+#   PC: rb --ymodem < /dev/ttyUSB0 > /dev/ttyUSB0
+```
+
+脚本方式的难点是两者共用一条控制台、握手窗口很窄。**用 minicom 的内置
+YMODEM（Ctrl-A R）最省事**，xTS 文档对这一项本来也是让用 PC 端终端做。
+板端 `sb` 已验证正确：抓到的头块经 CRC 校验通过，文件名 `a.txt`、大小 9 都对。
 
 ## 里程碑映射
 

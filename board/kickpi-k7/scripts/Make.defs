@@ -40,3 +40,21 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)$(DELIM)binfmt$(DELIM)libnxflat$(DELIM)gnu-nxflat-pcrel.ld -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
+
+# ★ 链上工具链自带的 libstdc++.a。
+#
+#   CONFIG_LIBCXXTOOLCHAIN 只让编译器找到 C++ 头文件，而
+#   arch/arm64/src/Toolchain.defs 里只有 CONFIG_LIBSUPCXX_TOOLCHAIN 那条
+#   会加 libsupc++.a（底层 ABI：new/delete、异常、typeinfo），**没有人加
+#   libstdc++.a**（STL 的编译部分）。
+#
+#   后果很有迷惑性：纯模板的东西（std::vector<int>）在头文件里就展开了，
+#   编译链接都过；一旦用到 std::string / std::map / iostream 就报一堆
+#   basic_string::_M_replace、_Rb_tree_increment、__throw_logic_error
+#   之类的缺符号 —— 看起来像"C++ 支持没配好"，其实只差一个库。
+#
+#   放在板级而不是改 arch/arm64/src/Toolchain.defs：那是公共仓，改了要
+#   额外维护补丁，而这里加一行等效。
+ifeq ($(CONFIG_LIBCXXTOOLCHAIN),y)
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libstdc++.a))
+endif

@@ -116,6 +116,23 @@ SECTIONS
        *(.rodata.*)
        *(.data.rel.ro)
        *(.data.rel.ro.*)
+
+       /* ★ C++ 异常的栈展开表必须保留。
+        *
+        *   这里原本把 .eh_frame 放在下面的 /DISCARD/ 里 —— 纯 C 的移植
+        *   用不到它，所以一直没暴露。开了 C++ 异常之后，
+        *   .gcc_except_table（着陆点表）还在，而 _Unwind_RaiseException
+        *   要走的 CFI 描述没了，`throw` 的瞬间展开器找不到信息，直接崩
+        *   在 sched_dumpstack。
+        *
+        *   现象是"cxxtest 前面 vector/map/RTTI 都过，到 Test Exception
+        *   崩溃"，很容易被当成 C++ 库没配好 —— 实际上库是全的，是链接
+        *   脚本把展开表扔了。**丢弃一个自己用不到的段，代价要等到别人
+        *   用到时才显现。**
+        */
+
+       *(.eh_frame_hdr)
+       KEEP(*(.eh_frame))
   } :text
   . = ALIGN(4096);
   _erodata = .;                /* End of read-only data */
@@ -160,7 +177,6 @@ SECTIONS
        *(.exit.text)
        *(.exit.data)
        *(.exitcall.exit)
-       *(.eh_frame)
   }
 
   /* Stabs debugging sections.  */
