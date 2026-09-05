@@ -553,6 +553,11 @@ static uint8_t *g_cam_buf[2];
 
 static uint32_t g_cam_hist[256];
 
+/* 源列坐标查表，见 show 里的说明。屏宽不会超过这个数。 */
+
+#define CAM_SXTAB_MAX 2048
+static uint16_t g_cam_sxtab[CAM_SXTAB_MAX];
+
 /* 刚写完的是哪一个乒乓缓冲。统计和送屏都要读这一个，读另一个就是在读
  * 正被 DMA 改写的内存。
  */
@@ -600,6 +605,8 @@ int kickpi_camera_capture(void)
   size_t npix = IMX415_MODE_WIDTH * IMX415_MODE_HEIGHT;
   size_t zeros = 0;
   size_t last = 0;
+  size_t nsamp;
+  size_t step;
   size_t i;
   int ret;
 
@@ -628,12 +635,26 @@ int kickpi_camera_capture(void)
    *   依赖于内存是干净的。
    */
 
-  memset(g_cam_buf[0], 0, CAM_FRAME_BYTES);
-  memset(g_cam_buf[1], 0, CAM_FRAME_BYTES);
-  up_clean_dcache((uintptr_t)g_cam_buf[0],
-                  (uintptr_t)g_cam_buf[0] + CAM_FRAME_BYTES);
-  up_clean_dcache((uintptr_t)g_cam_buf[1],
-                  (uintptr_t)g_cam_buf[1] + CAM_FRAME_BYTES);
+  /* ★ 清零只为一个判据服务，所以只在非预览时做。
+   *
+   *   缓冲事先是干净的，读回来还有零，才说明 DMA 没写满整帧 —— "零像素
+   *   占比"这个判据的前提就是这次清零。两块都清是因为乒乓先写完哪一块
+   *   事先不知道。
+   *
+   *   但这是 8.5MB 的 memset 加 8.5MB 的 clean_dcache。实测每帧取图
+   *   133ms，其中真正等硬件只有约 33ms，这一段是大头之一。而它回答的
+   *   问题一次启动看一遍就够，不该每帧都问。
+   */
+
+  if (!g_cam_quiet)
+    {
+      memset(g_cam_buf[0], 0, CAM_FRAME_BYTES);
+      memset(g_cam_buf[1], 0, CAM_FRAME_BYTES);
+      up_clean_dcache((uintptr_t)g_cam_buf[0],
+                      (uintptr_t)g_cam_buf[0] + CAM_FRAME_BYTES);
+      up_clean_dcache((uintptr_t)g_cam_buf[1],
+                      (uintptr_t)g_cam_buf[1] + CAM_FRAME_BYTES);
+    }
 
   ret = rk3576_cif_start(KICKPI_CAM_CSI_HOST,
                          (uintptr_t)g_cam_buf[0], (uintptr_t)g_cam_buf[1],
@@ -686,8 +707,8 @@ int kickpi_camera_capture(void)
    *   会得出"一个字节都没收到"的错误结论。
    */
 
-  up_invalidate_dcache((uintptr_t)g_cam_buf[0],
-                       (uintptr_t)g_cam_buf[0] + CAM_FRAME_BYTES);
+  up_invalidate_dcache((uintptr_t)g_cam_buf[g_cam_ready],
+                       (uintptr_t)g_cam_buf[g_cam_ready] + CAM_FRAME_BYTES);
 
   /* ★ 直方图 + "最后一个非零像素"，比 min/max/均值 有用得多。
    *
@@ -705,11 +726,26 @@ int kickpi_camera_capture(void)
   memset(g_cam_hist, 0, sizeof(g_cam_hist));
   last = 0;
 
-  p = (uint16_t *)g_cam_buf[0];
-  for (i = 0; i < npix; i++)
+  /* ★ 预览时隔 8 个取 1 个。
+   *
+   *   这一趟扫 211 万像素，唯一的产出是拉伸用的 p1/p99。百分位是分布的
+   *   性质，八分之一的样本给出的分布在这个用途上与全采样没有可分辨的
+   *   差别，代价却只有八分之一。
+   *
+   *   但零像素与"最后一个非零像素"这两个判据是逐像素扫出来的，抽样之后
+   *   它们不再成立 —— 所以下面只在非预览时打印它们。判据的前提没了就
+   *   不能再报，报了就是假数据。
+   */
+
+  step  = g_cam_quiet ? 8 : 1;
+  nsamp = 0;
+
+  p = (uint16_t *)g_cam_buf[g_cam_ready];
+  for (i = 0; i < npix; i += step)
     {
       uint16_t v = p[i];
 
+      nsamp++;
       sum += v;
       if (v < mn)
         {
@@ -733,22 +769,30 @@ int kickpi_camera_capture(void)
       g_cam_hist[v >> 8]++;
     }
 
-  if (g_cam_quiet)
+  /* ★ 打印可以跳过，计算不能。
+   *
+   *   这里原来是 `if (g_cam_quiet) goto quiet_done;`，一跳把下面的百分位
+   *   计算和 g_cam_min/g_cam_max 的赋值一起跳过了 —— 预览时拉伸区间因此
+   *   永远停在上一次手动取图的值，光线变了画面不会跟着适应。
+   *
+   *   这与 DWMMC 那次是同一类错误：为了"少打点日志"，把一句功能代码
+   *   一起圈了进去。静默应当只影响输出，不影响状态。
+   */
+
+  if (!g_cam_quiet)
     {
-      goto quiet_done;
+      syslog(LOG_INFO,
+             "摄像头: 取图 %dx%d INTSTAT=0x%08" PRIx32
+             " 像素 min=%u max=%u 均值=%u\n",
+             IMX415_MODE_WIDTH, IMX415_MODE_HEIGHT, stat,
+             mn, mx, (unsigned)(sum / nsamp));
+
+      syslog(LOG_INFO,
+             "  零像素 %lu/%lu（%lu%%），最后一个非零像素在第 %lu 行/%d\n",
+             (unsigned long)zeros, (unsigned long)nsamp,
+             (unsigned long)(zeros * 100 / nsamp),
+             (unsigned long)(last / IMX415_MODE_WIDTH), IMX415_MODE_HEIGHT);
     }
-
-  syslog(LOG_INFO,
-         "摄像头: 取图 %dx%d INTSTAT=0x%08" PRIx32
-         " 像素 min=%u max=%u 均值=%u\n",
-         IMX415_MODE_WIDTH, IMX415_MODE_HEIGHT, stat,
-         mn, mx, (unsigned)(sum / npix));
-
-  syslog(LOG_INFO,
-         "  零像素 %lu/%lu（%lu%%），最后一个非零像素在第 %lu 行/%d\n",
-         (unsigned long)zeros, (unsigned long)npix,
-         (unsigned long)(zeros * 100 / npix),
-         (unsigned long)(last / IMX415_MODE_WIDTH), IMX415_MODE_HEIGHT);
 
   /* 百分位。用 256 桶的直方图求，够精度，也不用排序两百万个数。 */
 
@@ -766,25 +810,28 @@ int kickpi_camera_capture(void)
 
         acc2 += g_cam_hist[b];
 
-        if (prev < npix / 100 && acc2 >= npix / 100)
+        if (prev < nsamp / 100 && acc2 >= nsamp / 100)
           {
             g_cam_p1 = (uint16_t)(b << 8);
           }
 
-        if (prev < npix / 2 && acc2 >= npix / 2)
+        if (prev < nsamp / 2 && acc2 >= nsamp / 2)
           {
             g_cam_p50 = (uint16_t)(b << 8);
           }
 
-        if (prev < npix - npix / 100 && acc2 >= npix - npix / 100)
+        if (prev < nsamp - nsamp / 100 && acc2 >= nsamp - nsamp / 100)
           {
             g_cam_p99 = (uint16_t)(b << 8);
           }
       }
   }
 
-  syslog(LOG_INFO, "  百分位 p1=%u p50=%u p99=%u\n",
-         g_cam_p1, g_cam_p50, g_cam_p99);
+  if (!g_cam_quiet)
+    {
+      syslog(LOG_INFO, "  百分位 p1=%u p50=%u p99=%u\n",
+             g_cam_p1, g_cam_p50, g_cam_p99);
+    }
 
   /* 直方图只打非空的桶，否则 256 行刷屏还看不出重点。 */
 
@@ -793,7 +840,7 @@ int kickpi_camera_capture(void)
 
     for (b = 0; b < 256; b++)
       {
-        if (g_cam_hist[b] * 1000 / npix > 0)
+        if (!g_cam_quiet && g_cam_hist[b] * 1000 / nsamp > 0)
           {
             syslog(LOG_INFO, "  桶[%3d] %5u.. 占 %lu%%\n",
                    b, (unsigned)(b << 8),
@@ -814,7 +861,6 @@ int kickpi_camera_capture(void)
   g_cam_min = g_cam_p1;
   g_cam_max = g_cam_p99;
 
-quiet_done:
 
   if (mx == 0)
     {
@@ -1087,12 +1133,18 @@ int kickpi_camera_fbtest(int pattern)
 
 int kickpi_camera_show(int gamma)
 {
+  return kickpi_camera_show_seq(gamma, -1);
+}
+
+int kickpi_camera_show_seq(int gamma, int seq)
+{
   struct fb_videoinfo_s vinfo;
   struct fb_planeinfo_s pinfo;
   uint32_t *fb;
   uint16_t *src;
   uint32_t span;
   uint32_t outhist[16];
+  uint32_t rowpix;
   int imgh;
   int yoff;
   int fd;
@@ -1169,7 +1221,8 @@ int kickpi_camera_show(int gamma)
 
   {
     uint32_t maxpix = (uint32_t)(pinfo.fblen / 4);
-    uint32_t rowpix = pinfo.stride / 4;
+
+    rowpix = pinfo.stride / 4;
 
     memset(outhist, 0, sizeof(outhist));
 
@@ -1189,7 +1242,42 @@ int kickpi_camera_show(int gamma)
         yoff = 0;
       }
 
-  for (dy = 0; dy < (int)vinfo.yres; dy++)
+  /* ★ 只遍历画面区，黑边不每帧重写。
+   *
+   *   黑边占屏幕三分之二，内容每帧都一样（纯黑）。每帧重写它，等于把
+   *   三分之二的写入和三分之二的 cache 刷回花在一张不变的图上。
+   *   非预览时仍整屏清一遍，保证切换图案后残留被盖掉。
+   */
+
+  if (!g_cam_quiet)
+    {
+      for (dy = 0; dy < (int)vinfo.yres; dy++)
+        {
+          if (dy >= yoff && dy < yoff + imgh)
+            {
+              continue;
+            }
+
+          for (dx = 0; dx < (int)vinfo.xres; dx++)
+            {
+              fb[(size_t)dy * rowpix + dx] = 0xff000000u;
+            }
+        }
+    }
+
+  /* ★ 源列坐标查表。
+   *
+   *   原来每个像素算一次 dx * 1932 / 720，一帧就是 29 万次整数除法。
+   *   同一行里 dx 的取值完全相同，逐帧也不变 —— 算一次存下来即可。
+   */
+
+  for (dx = 0; dx < (int)vinfo.xres && dx < CAM_SXTAB_MAX; dx++)
+    {
+      g_cam_sxtab[dx] = (uint16_t)(dx * (int)IMX415_MODE_WIDTH /
+                                   (int)vinfo.xres);
+    }
+
+  for (dy = yoff; dy < yoff + imgh && dy < (int)vinfo.yres; dy++)
     {
       /* ★ 纵向要用纵向比例。
        *
@@ -1201,11 +1289,6 @@ int kickpi_camera_show(int gamma)
 
       int sy = (dy - yoff) * (int)IMX415_MODE_WIDTH / (int)vinfo.xres;
 
-      if (dy < yoff)
-        {
-          sy = IMX415_MODE_HEIGHT;      /* 上黑边，走下面的越界分支 */
-        }
-
       if ((uint32_t)dy * rowpix + vinfo.xres > maxpix)
         {
           syslog(LOG_WARNING,
@@ -1215,7 +1298,7 @@ int kickpi_camera_show(int gamma)
 
       for (dx = 0; dx < (int)vinfo.xres; dx++)
         {
-          int sx = dx * (int)IMX415_MODE_WIDTH / (int)vinfo.xres;
+          int sx = g_cam_sxtab[dx];
           uint32_t g;
           uint32_t acc;
 
@@ -1322,9 +1405,56 @@ int kickpi_camera_show(int gamma)
    *   被下一帧扫出去。那个 ioctl 是给需要显式刷新的面板用的。
    */
 
-  up_flush_dcache((uintptr_t)fb, (uintptr_t)fb + pinfo.fblen);
+  /* ★ 只刷画面区，不刷整屏。
+   *
+   *   3.6MB 变 1.2MB。黑边这一帧根本没写过，刷它没有意义 —— cache
+   *   维护是按地址范围逐行做的，范围小三倍就快三倍。
+   */
+
+  if (g_cam_quiet)
+    {
+      up_flush_dcache((uintptr_t)&fb[(size_t)yoff * rowpix],
+                      (uintptr_t)&fb[(size_t)(yoff + imgh) * rowpix]);
+    }
+  else
+    {
+      up_flush_dcache((uintptr_t)fb, (uintptr_t)fb + pinfo.fblen);
+    }
+
 
   close(fd);
+
+  /* ★ 活动标记：在下方黑边里画一个随帧号移动的白块。
+   *
+   *   "屏幕没在更新"和"屏幕在更新但画面几乎没变"是两件事 —— 固定增益、
+   *   固定曝光对着静止场景，相邻两帧本来就该长得一样，光看画面分不出来。
+   *   而这两种情况的排查方向完全相反：前者查送屏通路，后者查传感器。
+   *
+   *   画一个**必然**每帧都不同的东西，就把它们分开了：方块在动 = 屏幕在
+   *   更新，那画面不变就只是场景不变；方块不动 = 送屏根本没生效。
+   *
+   *   放在黑边里，不干扰画面本身。
+   */
+
+  if (seq >= 0)
+    {
+      int mx0 = (seq * 16) % ((int)vinfo.xres - 40);
+      int my0 = yoff + imgh + 20;
+      int mx;
+      int my;
+
+      for (my = my0; my < my0 + 24 && my < (int)vinfo.yres; my++)
+        {
+          for (mx = mx0; mx < mx0 + 40 && mx < (int)vinfo.xres; mx++)
+            {
+              fb[(size_t)my * (pinfo.stride / 4) + mx] = 0xffffffffu;
+            }
+        }
+
+      up_flush_dcache((uintptr_t)&fb[(size_t)my0 * (pinfo.stride / 4)],
+                      (uintptr_t)&fb[(size_t)(my0 + 24) *
+                                     (pinfo.stride / 4)]);
+    }
 
   if (g_cam_quiet)
     {
@@ -1771,6 +1901,11 @@ int kickpi_camera_preview(int frames)
 {
   struct timespec t0;
   struct timespec t1;
+  struct timespec ta;
+  struct timespec tb;
+  struct timespec tc;
+  int64_t cap_ms = 0;
+  int64_t shw_ms = 0;
   int done = 0;
   int ret = OK;
   int stop = 0;
@@ -1793,17 +1928,28 @@ int kickpi_camera_preview(int frames)
     {
       struct pollfd pfd;
 
+      clock_gettime(CLOCK_MONOTONIC, &ta);
+
       ret = kickpi_camera_capture();
       if (ret < 0)
         {
           break;
         }
 
-      ret = kickpi_camera_show(1);
+      clock_gettime(CLOCK_MONOTONIC, &tb);
+
+      ret = kickpi_camera_show_seq(1, done);
       if (ret < 0)
         {
           break;
         }
+
+      clock_gettime(CLOCK_MONOTONIC, &tc);
+
+      cap_ms += (tb.tv_sec - ta.tv_sec) * 1000 +
+                (tb.tv_nsec - ta.tv_nsec) / 1000000;
+      shw_ms += (tc.tv_sec - tb.tv_sec) * 1000 +
+                (tc.tv_nsec - tb.tv_nsec) / 1000000;
 
       /* 有没有人在串口上敲键。超时给 0，只是查一下，不等。 */
 
@@ -1828,6 +1974,22 @@ int kickpi_camera_preview(int frames)
            ms > 0 ? (long long)(done * 1000 / ms) : 0,
            ms > 0 ? (long long)(done * 100000 / ms % 100) : 0,
            stop ? "（按键停止）" : "");
+
+    /* ★ 分段计时，而不是只报一个总帧率。
+     *
+     *   "帧率低"要能回答"低在哪"才有用：取图是等硬件（传感器帧周期
+     *   决定，我们改不动），送屏是 CPU 干活（缩放、伽马、刷缓存，可以
+     *   优化，也是唯一可能靠多核并行的部分）。两者混在一个数里，就没法
+     *   判断优化该往哪投，也没法判断 SMP 有没有意义。
+     */
+
+    syslog(LOG_INFO,
+           "  分段：取图 %lld ms（%lld%%）送屏 %lld ms（%lld%%），"
+           "每帧取图 %lld ms 送屏 %lld ms\n",
+           (long long)cap_ms, ms > 0 ? (long long)(cap_ms * 100 / ms) : 0,
+           (long long)shw_ms, ms > 0 ? (long long)(shw_ms * 100 / ms) : 0,
+           done > 0 ? (long long)(cap_ms / done) : 0,
+           done > 0 ? (long long)(shw_ms / done) : 0);
   }
 
   return ret;

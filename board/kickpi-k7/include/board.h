@@ -282,6 +282,12 @@ int kickpi_camera_capture(void);
 
 int kickpi_camera_show(int gamma);
 
+/* 同上，但 seq >= 0 时在黑边画一个随帧号移动的白块 —— 用来把
+ * "屏幕没更新"与"屏幕更新了但画面没变"分开。
+ */
+
+int kickpi_camera_show_seq(int gamma, int seq);
+
 /****************************************************************************
  * Name: kickpi_camera_fbinfo
  *
