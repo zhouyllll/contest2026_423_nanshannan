@@ -1,0 +1,21 @@
+diff --git a/Makefile b/Makefile
+index 29a7a33..d65040b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -24,6 +24,16 @@ CFLAGS += -I$(APPDIR)/system/libuv/libuv/src
+ CFLAGS += -I$(APPDIR)/system/libuv/libuv/src/unix
+ CFLAGS += -I$(APPDIR)/system/libuv/libuv/test
+ 
++# ★ uv_aes.c / uv_hkdf.c / uv_ecdh.c 是照着 mbedtls 2.x 写的，直接访问
++#   mbedtls_cipher_context_t 的 cipher_info / add_padding / get_padding。
++#   树里的 mbedtls 是 3.4.0，这些成员已被 MBEDTLS_PRIVATE() 包起来，
++#   不加这个宏就编不过（uv_aes.c 里那句 "hack as
++#   mbedtls_cipher_context_t.add_padding" 的注释即是佐证）。
++#
++#   这是上游与 mbedtls 版本的适配问题，不是板级问题，
++#   按《驱动开发指南》的分工另行提 PR。
++CFLAGS += -DMBEDTLS_ALLOW_PRIVATE_ACCESS
++
+ CFLAGS += -Wno-shadow -Wno-dangling-pointer
+ CFLAGS += -DDEF_THREADPOOL_SIZE=CONFIG_LIBUV_THREADPOOL_SIZE
+ CFLAGS += -DDEF_THREADPOOL_STACKSIZE=CONFIG_LIBUV_THREAD_STACKSIZE

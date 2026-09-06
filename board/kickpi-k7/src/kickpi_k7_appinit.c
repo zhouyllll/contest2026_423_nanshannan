@@ -112,6 +112,23 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: 挂载 tmpfs 到 /tmp 失败: %d\n", ret);
     }
+
+  /* ★ /data 给 ai_agent 用。
+   *
+   *   CONFIG_EXAMPLES_AI_AGENT_VELA_DATA_DIR 默认是 /data/ai_agent，
+   *   Skills 按官方指引放在 /data/agent/skills/。板子上没有这个挂载点，
+   *   agent 起来后建不了配置和会话文件。
+   *
+   *   ★ 现在用 tmpfs，掉电即失 —— 只够先跑通 CLI 对话。Skills 和记忆
+   *     要持久化，得改挂到 SD 卡（/dev/mmcsd1）。留待接 Skills 时再换，
+   *     现在换会把"agent 能不能跑"和"SD 卡在不在"两件事绑在一起。
+   */
+
+  ret = mount(NULL, "/data", "tmpfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 挂载 tmpfs 到 /data 失败: %d\n", ret);
+    }
 #endif
 
 #ifdef CONFIG_FS_PROCFS

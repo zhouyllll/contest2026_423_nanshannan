@@ -1,0 +1,13 @@
+diff --git a/testing/drivers/drivertest/drivertest_spidev_master.c b/testing/drivers/drivertest/drivertest_spidev_master.c
+index 2bc7481..60e36fb 100644
+--- a/testing/drivers/drivertest/drivertest_spidev_master.c
++++ b/testing/drivers/drivertest/drivertest_spidev_master.c
+@@ -499,7 +499,7 @@ static int spi_transfer_buffer(FAR struct spi_test_ctx_s *spi)
+   size = str_unescape((char *)spi->tx_buffer, tx_str);
+   if (spi->verbose)
+     {
+-      printf("tx size %d\n", size);
++      printf("tx size %zu\n", size);
+     }
+ 
+   spi->trans_size = size;
