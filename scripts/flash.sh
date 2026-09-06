@@ -71,6 +71,14 @@ if ! in_loader; then
   if [ -w "$SERIAL" ]; then
     echo "通过串口触发下载模式…"
     stty -F "$SERIAL" "$BAUD" raw -echo -echoe -echok -crtscts
+    # ★ 前台如果跑着 ai_agent，它有自己的 vela> 提示符，会把 loader 当成
+    #   未知命令吃掉 —— 板子根本不会进下载模式，而失败要到 rkdeveloptool
+    #   找不到设备时才暴露，方向很容易查偏。
+    #
+    #   这里只**报告**不代劳：试过在这里替用户发 quit，结果 agent 退出时
+    #   把控制台一起带走了，板子既没进下载模式、串口也没了回显，反而从
+    #   "重发一次就好"变成"必须按 RESET"。自动化在不确定的前台状态上
+    #   动手，代价比它省下的那一步大。
     printf 'loader\r' > "$SERIAL"
     sleep 6
     attach_usb || true
@@ -80,7 +88,8 @@ fi
 if ! in_loader; then
   echo "板子未进入下载模式。可能原因："
   echo "  - 串口没在 nsh 提示符下（先确认 $SERIAL 能敲命令）"
-  echo "  - 板上固件还没有 loader 命令（首次需手动 recovery 烧一次）"
+  echo "  - 前台跑着 ai_agent（提示符是 vela> 而不是 nsh>）：先在它里面敲 quit
+  - 板上固件还没有 loader 命令（首次需手动 recovery 烧一次）"
   echo "  - usbipd 未共享设备：在 Windows 管理员终端执行"
   echo "      usbipd bind --force --busid <busid>"
   exit 1

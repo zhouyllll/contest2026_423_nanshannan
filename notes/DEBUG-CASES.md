@@ -1876,3 +1876,61 @@ fourcc（`V4L2_PIX_FMT_JPEG` = 'JPEG' 的 32 位值）去比，永远不相等�
 字段名在 V4L2、imgsensor、imgdata 三层都叫同一个名字，值域却是三套。
 编译器不会报错，因为都是整数。
 
+
+---
+
+## 案例 20：LLM 明明回了，agent 却报超时 —— 用墙钟量耗时，撞上 TLS 改钟
+
+**现象**：`ask` 之后日志里两行紧挨着，互相矛盾：
+
+```
+[llm] Response: 72 bytes text, 0 tool calls, finish=end_turn
+[agent] LLM watchdog: call took 2747053661 ms (limit 60s), treating as timeout
+[trace] END status=timeout iters=1 elapsed=1772273579s
+```
+
+响应**已经成功收到了**，看门狗却把它当超时丢掉。2747053661 ms 是 31 天，
+`elapsed` 是个 Unix 纪元量级的数 —— 这两个数字本身就是"时钟跳变"的指纹，
+不是"网络很慢"能产生的量级。
+
+**根因**：同一次调用里有两处对时间的操作打架。
+
+```
+vela_tls.c:258   clock_settime(CLOCK_REALTIME, ...)   ← 握手前把墙钟往前推
+agent_loop.c     gettimeofday(&tv_start) ... gettimeofday(&tv_end)
+```
+
+日志里 `[vela_tls] Clock too old, forcing to 26...` 就是那次推。板子上电时
+墙钟从 0 开始，比服务器证书的 notBefore 还早，TLS 层为了让校验通过强行
+把钟设成一个合理值。起始时间戳取于跳变之前、结束时间戳取于之后，
+差值就是跳变本身的大小。
+
+**修法**：耗时一律用 `CLOCK_MONOTONIC`。agent_loop.c 里这 10 处
+`gettimeofday` 全是"起止相减"，**语义上本来就不该用墙钟** —— 除了 TLS
+改钟，NTP 校时、手动设日期落在调用中间都会产生同样的错误。已改为
+`mono_timeofday()`，归档为 `bsp/upstream/agent-monotonic-latency.patch`。
+
+**教训**：`gettimeofday` 回答的是"现在几点"，不是"过了多久"。这两个问题
+在墙钟稳定时答案恰好一致，所以错误用法能长期不暴露 —— 直到某个组件
+合法地调了一次钟。**一个只在"另一件正确的事发生时"才出错的缺陷，
+最难归因**：这里改钟是 TLS 该做的、响应是成功的，唯一错的是计时方式。
+
+---
+
+## 案例 21：自动化替用户"顺手做一步"，把可恢复变成不可恢复
+
+**现象**：`flash.sh` 触发不了下载模式。串口一看，板子停在 ai_agent 的
+`vela>` 提示符 —— 脚本发的 `loader` 被 agent 当成未知命令吃掉了，
+所以板子根本没进下载模式，而失败要到 `rkdeveloptool` 找不到设备时
+才暴露出来。
+
+诊断是对的。**接下来做错了**：我在脚本里加了"先发 quit 退出 agent"。
+结果 agent 退出时把控制台一起带走了 —— 串口从此零回显，USB 也不枚举，
+板子既没进下载模式也回不到 nsh。原本"手动敲个 quit 再跑一次"就能解决，
+变成必须按 RESET。
+
+**教训**：自动化在**前台状态不确定**的地方替用户动手，风险不对称。
+成功省下一次手动输入，失败搭进去一次物理操作 —— 而脚本恰恰无法确认
+前台是什么。现在脚本只**报告**"提示符是 vela> 而不是 nsh>，先敲 quit"，
+把这一步留给能看见屏幕的人。
+

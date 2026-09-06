@@ -1,0 +1,116 @@
+diff --git a/src/core/agent_loop.c b/src/core/agent_loop.c
+index 3d9dec3..13a0da9 100644
+--- a/src/core/agent_loop.c
++++ b/src/core/agent_loop.c
+@@ -43,6 +43,7 @@
+ #include <string.h>
+ #include <strings.h>
+ #include <sys/time.h>
++#include <time.h>
+ 
+ #include "cJSON.h"
+ 
+@@ -67,6 +68,41 @@ static bool llm_call_timed_out(uint32_t latency_ms);
+ 
+ /* ── Clock-safe elapsed time calculation ───────────────────── */
+ 
++/* Read a monotonic timestamp into a struct timeval.
++ *
++ * ★ Elapsed time MUST NOT come from gettimeofday() here.
++ *
++ *   vela_tls.c calls clock_settime(CLOCK_REALTIME, ...) before the
++ *   handshake when the wall clock is older than the server certificate's
++ *   validity window ("Clock too old, forcing to ..."). The LLM start
++ *   timestamp is taken before that jump and the end timestamp after it,
++ *   so their difference is the size of the jump -- observed on real
++ *   hardware as "LLM watchdog: call took 2747053661 ms (limit 60s)",
++ *   which made the watchdog discard a response that had in fact already
++ *   arrived successfully ("Response: 72 bytes text").
++ *
++ *   A monotonic clock is immune to that, and to any other wall-clock
++ *   adjustment (NTP, manual date setting) landing mid-call. Every use of
++ *   these timestamps in this file is a start/end difference, so none of
++ *   them wants wall-clock time in the first place.
++ */
++
++static void mono_timeofday(struct timeval* tv)
++{
++    struct timespec ts;
++
++    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
++        /* Should not happen. Report zero rather than a garbage latency
++         * that would trip the watchdog. */
++        tv->tv_sec = 0;
++        tv->tv_usec = 0;
++        return;
++    }
++
++    tv->tv_sec = ts.tv_sec;
++    tv->tv_usec = ts.tv_nsec / 1000;
++}
++
+ static inline uint32_t calc_elapsed_ms(const struct timeval* t0,
+     const struct timeval* t1)
+ {
+@@ -820,9 +856,9 @@ static char* force_finish_reply(const char* system_prompt,
+     llm_response_t resp;
+     char* result = NULL;
+     struct timeval t0, t1;
+-    gettimeofday(&t0, NULL);
++    mono_timeofday(&t0);
+     int err = llm_chat_tools(system_prompt, messages, NULL, &resp);
+-    gettimeofday(&t1, NULL);
++    mono_timeofday(&t1);
+     uint32_t ms = calc_elapsed_ms(&t0, &t1);
+     bool timed_out = llm_call_timed_out(ms);
+ 
+@@ -990,9 +1026,9 @@ static char* handle_task_complete(const char* sys_prompt, cJSON* messages,
+     llm_response_t final_resp;
+     char* result = NULL;
+     struct timeval t0, t1;
+-    gettimeofday(&t0, NULL);
++    mono_timeofday(&t0);
+     int err = llm_chat_tools(sys_prompt, messages, NULL, &final_resp);
+-    gettimeofday(&t1, NULL);
++    mono_timeofday(&t1);
+     uint32_t ms = calc_elapsed_ms(&t0, &t1);
+     bool timed_out = llm_call_timed_out(ms);
+ 
+@@ -1065,9 +1101,9 @@ static char* run_react_loop(const char* sys_prompt, cJSON* messages,
+ 
+         llm_response_t resp;
+         struct timeval tv_start, tv_end;
+-        gettimeofday(&tv_start, NULL);
++        mono_timeofday(&tv_start);
+         int err = llm_chat_tools(sys_prompt, messages, tools_json, &resp);
+-        gettimeofday(&tv_end, NULL);
++        mono_timeofday(&tv_end);
+         uint32_t latency_ms = calc_elapsed_ms(&tv_start, &tv_end);
+ 
+         /* Router failover: on LLM call failure, try next backend */
+@@ -1083,10 +1119,10 @@ static char* run_react_loop(const char* sys_prompt, cJSON* messages,
+                 router_idx = next_idx;
+                 trace.backend_idx = next_idx;
+                 llm_response_free(&resp);
+-                gettimeofday(&tv_start, NULL);
++                mono_timeofday(&tv_start);
+                 err = llm_chat_tools(sys_prompt, messages,
+                     tools_json, &resp);
+-                gettimeofday(&tv_end, NULL);
++                mono_timeofday(&tv_end);
+                 latency_ms = calc_elapsed_ms(&tv_start, &tv_end);
+             }
+         }
+@@ -1183,10 +1219,10 @@ static char* run_react_loop(const char* sys_prompt, cJSON* messages,
+                     router_idx = prem_idx;
+                     trace.backend_idx = prem_idx;
+ 
+-                    gettimeofday(&tv_start, NULL);
++                    mono_timeofday(&tv_start);
+                     err = llm_chat_tools(sys_prompt, messages,
+                         tools_json, &resp);
+-                    gettimeofday(&tv_end, NULL);
++                    mono_timeofday(&tv_end);
+                     latency_ms = calc_elapsed_ms(&tv_start, &tv_end);
+ 
+                     /* Watchdog check on cascade retry */
