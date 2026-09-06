@@ -1,7 +1,7 @@
 From 379868bc8fc3f48c3f7238b790822dc19b0f8e1f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 30 Aug 2026 22:11:05 +0800
-Subject: [PATCH 01/47] arm64/rk3576: add Rockchip RK3576 SoC port
+Subject: [PATCH 01/48] arm64/rk3576: add Rockchip RK3576 SoC port
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1116,7 +1116,7 @@ index 00000000..6ae4d210
 From 6e0c6a95613c0db62da6fa926e806f3afcea195d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 15:06:41 +0800
-Subject: [PATCH 02/47] arm64/rk3576: fix illegal eret by clearing U-Boot's
+Subject: [PATCH 02/48] arm64/rk3576: fix illegal eret by clearing U-Boot's
  leftover HCR_EL2.TGE
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1363,7 +1363,7 @@ index 559489f6..d2fb5605 100644
 From 52c4bfa58de8b3b2dd2d57ecf13653e9c433c65e Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:38:15 +0800
-Subject: [PATCH 03/47] arm64/rk3576: clear U-Boot's leftover
+Subject: [PATCH 03/48] arm64/rk3576: clear U-Boot's leftover
  HCR_EL2.{IMO,FMO,AMO}; fix load address
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1490,7 +1490,7 @@ index d2fb5605..128e8a22 100644
 From 1a226e049212fce50e0724ee37b6671ac0f23e23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 22:50:02 +0800
-Subject: [PATCH 04/47] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
+Subject: [PATCH 04/48] =?UTF-8?q?arm64/rk3576:=20=E6=B3=A8=E6=98=8E=20HCR?=
  =?UTF-8?q?=5FEL2=20=E6=B8=85=E7=90=86=E4=B8=8E=E4=B8=8A=E6=B8=B8=E8=A1=A5?=
  =?UTF-8?q?=E4=B8=81=E7=9A=84=E5=85=B3=E7=B3=BB?=
 MIME-Version: 1.0
@@ -1535,7 +1535,7 @@ index 128e8a22..f76d45cb 100644
 From 509d2fa1a06f4560ce252d7cc6a4d507ea7bd6dc Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Mon, 31 Aug 2026 23:18:55 +0800
-Subject: [PATCH 05/47] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
+Subject: [PATCH 05/48] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GPIO?=
  =?UTF-8?q?=20=E9=A9=B1=E5=8A=A8=EF=BC=88Rockchip=20GPIO=20v2=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1989,7 +1989,7 @@ index 00000000..2fe55c92
 From 895f1f4e4df1ffb6dc7c665adb230ea472f48600 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 00:43:14 +0800
-Subject: [PATCH 06/47] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
+Subject: [PATCH 06/48] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20CRU?=
  =?UTF-8?q?=E3=80=81=E5=BC=95=E8=84=9A=E5=A4=8D=E7=94=A8=E4=B8=8E=20I2C=20?=
  =?UTF-8?q?=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
@@ -3602,7 +3602,7 @@ index 00000000..8d4d6561
 From 0efe6a8352599f5b577eda2598ab46844332a791 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:24:26 +0800
-Subject: [PATCH 07/47] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
+Subject: [PATCH 07/48] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20eMMC?=
  =?UTF-8?q?=20(dwcmshc/SDHCI)=20=E5=91=BD=E4=BB=A4=E9=80=9A=E8=B7=AF?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -4324,7 +4324,7 @@ index 00000000..971084de
 From 19f41551f493da28c0756c5e83a0850a0bcf9aae Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 09:29:46 +0800
-Subject: [PATCH 08/47] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
+Subject: [PATCH 08/48] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E6=95=B0=E6=8D=AE?=
  =?UTF-8?q?=E9=80=9A=E8=B7=AF=E6=89=93=E9=80=9A=EF=BC=88CMD9/CMD7/CMD17=20?=
  =?UTF-8?q?+=20PIO=20=E8=AF=BB=E5=9D=97=EF=BC=89?=
 MIME-Version: 1.0
@@ -4534,7 +4534,7 @@ index cd0d10dc..99c4ecc0 100644
 From 98b2a2df090330a6d91d6f52c098751b1697768a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 13:13:58 +0800
-Subject: [PATCH 09/47] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
+Subject: [PATCH 09/48] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=AE=9E=E7=8E=B0?=
  =?UTF-8?q?=20sdio=5Fdev=5Fs=EF=BC=8C/dev/mmcsd0=20=E5=8F=AF=E7=94=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -5263,7 +5263,7 @@ index 971084de..c0f64978 100644
 From 3a65d6b63b5febca4827bd7fecd8d2145adb51a0 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:07:47 +0800
-Subject: [PATCH 10/47] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
+Subject: [PATCH 10/48] =?UTF-8?q?arm64/rk3576:=20eMMC=20=E5=9D=97=E8=AE=BE?=
  =?UTF-8?q?=E5=A4=87=E8=AF=BB=E9=80=9A=EF=BC=881=20=E4=BD=8D=20@50MHz?=
  =?UTF-8?q?=EF=BC=89=EF=BC=8C4=20=E4=BD=8D=E5=BE=85=E4=BF=AE?=
 MIME-Version: 1.0
@@ -5486,7 +5486,7 @@ index a3b84e47..a2996f1a 100644
 From 84d0c755aa873b306fefd87a20e4c2e0abccf064 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 14:14:24 +0800
-Subject: [PATCH 11/47] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
+Subject: [PATCH 11/48] =?UTF-8?q?arm64/rk3576:=20eMMC=204=20=E4=BD=8D?=
  =?UTF-8?q?=E6=80=BB=E7=BA=BF=E6=89=93=E9=80=9A=EF=BC=8850MHz=EF=BC=89?=
  =?UTF-8?q?=EF=BC=8C=E6=A0=B9=E5=9B=A0=E6=98=AF=E8=83=BD=E5=8A=9B=E5=A3=B0?=
  =?UTF-8?q?=E6=98=8E?=
@@ -5587,7 +5587,7 @@ index a2996f1a..2206c8ab 100644
 From 5250326bc4b5ede69c28dea6feaf51d0ae74e46a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:27:58 +0800
-Subject: [PATCH 12/47] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
+Subject: [PATCH 12/48] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F(PMU)=E4=B8=8E=20GPIO=20=E4=B8=AD?=
  =?UTF-8?q?=E6=96=AD=EF=BC=8C=E4=B8=BA=E6=98=BE=E7=A4=BA=E4=B8=8E=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E9=93=BA=E8=B7=AF?=
@@ -6294,7 +6294,7 @@ index 00000000..80545549
 From 40634c8959141615d593598f97b5c70597d2039d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:41:21 +0800
-Subject: [PATCH 13/47] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
+Subject: [PATCH 13/48] =?UTF-8?q?arm64/rk3576:=20=E4=BF=AE=E6=AD=A3?=
  =?UTF-8?q?=E7=94=B5=E6=BA=90=E5=9F=9F=E7=BC=96=E5=8F=B7=E4=B8=8E=E6=AF=8F?=
  =?UTF-8?q?=E5=9F=9F=E7=9A=84=20req=20=E5=81=8F=E7=A7=BB?=
 MIME-Version: 1.0
@@ -6451,7 +6451,7 @@ index 80545549..84de6b0f 100644
 From d632b41753c213abee75ccaedbe6a88659d68b89 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 15:59:50 +0800
-Subject: [PATCH 14/47] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
+Subject: [PATCH 14/48] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20SAI?=
  =?UTF-8?q?=20=E9=9F=B3=E9=A2=91=E6=8E=A5=E5=8F=A3=E9=A9=B1=E5=8A=A8?=
  =?UTF-8?q?=EF=BC=88PIO=20=E5=8F=91=E9=80=81=EF=BC=89?=
 MIME-Version: 1.0
@@ -7201,7 +7201,7 @@ index 00000000..4c5ceb1c
 From 945dc74f703bb97d7c2331a2eb40df1bc888eb23 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:26:44 +0800
-Subject: [PATCH 15/47] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
+Subject: [PATCH 15/48] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20VOP2?=
  =?UTF-8?q?=20=E6=98=BE=E7=A4=BA=E6=8E=A7=E5=88=B6=E5=99=A8=EF=BC=88?=
  =?UTF-8?q?=E8=87=AA=E6=A3=80=20+=20=E5=86=85=E7=BD=AE=E5=BD=A9=E6=9D=A1?=
  =?UTF-8?q?=EF=BC=89?=
@@ -7744,7 +7744,7 @@ index 00000000..d59f5f55
 From e19fbf3e1dcfc9bd8c9cac919da3591de3b6bdb5 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:38:18 +0800
-Subject: [PATCH 16/47] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 16/48] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20DSI2=20=E4=B8=BB=E6=9C=BA=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8360,7 +8360,7 @@ index 00000000..b4cf8682
 From 506a2907cd27c7244a478ced9cc2e03e3e02ff77 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:44:28 +0800
-Subject: [PATCH 17/47] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
+Subject: [PATCH 17/48] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20MIPI?=
  =?UTF-8?q?=20D/C-PHY=20=E9=A9=B1=E5=8A=A8=EF=BC=88D-PHY=20PLL=EF=BC=89?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -8813,7 +8813,7 @@ index 00000000..6183bd51
 From 67474c8ffe832b715faa83734a71a32b80b33da6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 16:54:26 +0800
-Subject: [PATCH 18/47] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
+Subject: [PATCH 18/48] =?UTF-8?q?arm64/rk3576:=20=E6=96=B0=E5=A2=9E=20GMAC?=
  =?UTF-8?q?=20=E5=89=8D=E7=BD=AE=E9=93=BE=E8=B7=AF=E4=B8=8E=20MDIO?=
  =?UTF-8?q?=EF=BC=88DWMAC=204.20a=EF=BC=89?=
 MIME-Version: 1.0
@@ -9314,7 +9314,7 @@ index 00000000..92991a43
 From 474c4a000e75319ecee875dffde4a0e7342ba12d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:07:45 +0800
-Subject: [PATCH 19/47] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
+Subject: [PATCH 19/48] =?UTF-8?q?arm64/rk3576:=20GMAC=20=E5=89=8D=E7=BD=AE?=
  =?UTF-8?q?=E9=93=BE=E8=B7=AF=E5=85=AD=E9=A1=B9=E9=85=8D=E9=BD=90=EF=BC=8C?=
  =?UTF-8?q?DMA=20=E8=BD=AF=E5=A4=8D=E4=BD=8D=E4=BB=8D=E6=9C=AA=E5=AE=8C?=
  =?UTF-8?q?=E6=88=90?=
@@ -9867,7 +9867,7 @@ index 6f8e5f23..5afaf918 100644
 From 51d98edc4f4ae78ed5d33d08d8b5fdf85719c59b Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Tue, 1 Sep 2026 23:24:18 +0800
-Subject: [PATCH 20/47] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
+Subject: [PATCH 20/48] =?UTF-8?q?arm64/rk3576:=20I2C=20=E6=89=A9=E5=B1=95?=
  =?UTF-8?q?=E5=88=B0=E4=B8=83=E6=9D=A1=E6=80=BB=E7=BA=BF=EF=BC=88=E8=A7=A6?=
  =?UTF-8?q?=E6=91=B8=E5=AE=9A=E4=BD=8D=E7=94=A8=EF=BC=89?=
 MIME-Version: 1.0
@@ -9974,7 +9974,7 @@ index f57a2bfa..43f2313e 100644
 From 7a968bf8c6c3d85daf2dc81619a2800cf4bf89c4 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 11:12:37 +0800
-Subject: [PATCH 21/47] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
+Subject: [PATCH 21/48] =?UTF-8?q?rk3576:=20=E6=98=BE=E7=A4=BA=E9=93=BE?=
  =?UTF-8?q?=E8=B7=AF=E4=BF=AE=E6=AD=A3=20+=20I2C0(PMU=20=E5=9F=9F)=20+=20?=
  =?UTF-8?q?=E5=BC=95=E8=84=9A=E4=B8=8A=E4=B8=8B=E6=8B=89=20API?=
 MIME-Version: 1.0
@@ -10837,7 +10837,7 @@ index d59f5f55..8c0f10a3 100644
 From c8d3eeab1d0eb34c8c9922e7a7fb4fa48df7c057 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Wed, 2 Sep 2026 12:05:26 +0800
-Subject: [PATCH 22/47] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
+Subject: [PATCH 22/48] =?UTF-8?q?drivers/input/ft5x06:=20=E4=BF=AE?=
  =?UTF-8?q?=E6=AD=A3=20sizeof=20=E7=9A=84=E6=A0=BC=E5=BC=8F=E4=B8=B2?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -11173,7 +11173,7 @@ index be5db167..34eb7303 100644
 From abf918d9dedc4458cf1505937f86a90791fd1681 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 00:31:04 +0800
-Subject: [PATCH 23/47] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
+Subject: [PATCH 23/48] =?UTF-8?q?rk3576:=20SD=20=E5=8D=A1(DW=20MSHC)?=
  =?UTF-8?q?=E5=9D=97=E8=AF=BB=E5=86=99=E3=80=81=E6=91=84=E5=83=8F=E5=A4=B4?=
  =?UTF-8?q?=20MCLK=E3=80=81=E5=85=8D=20recovery=20=E9=87=8D=E5=90=AF?=
 MIME-Version: 1.0
@@ -13336,7 +13336,7 @@ index f8333cb5..d841ebfb 100644
 From 2d8fa26231ab76705ef1144e445f76f2a8959934 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 12:01:05 +0800
-Subject: [PATCH 24/47] =?UTF-8?q?drivers/timers:=20=E6=96=B0=E5=A2=9E=20HY?=
+Subject: [PATCH 24/48] =?UTF-8?q?drivers/timers:=20=E6=96=B0=E5=A2=9E=20HY?=
  =?UTF-8?q?M8563=20I2C=20RTC=20=E9=A9=B1=E5=8A=A8?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -14153,7 +14153,7 @@ index 00000000..b597148d
 From d170765c4ab997d9f7dc6270211cbdfe3a18cd5b Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 13:34:59 +0800
-Subject: [PATCH 25/47] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=20DesignWare?=
+Subject: [PATCH 25/48] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=20DesignWare?=
  =?UTF-8?q?=20=E7=9C=8B=E9=97=A8=E7=8B=97=E9=A9=B1=E5=8A=A8=EF=BC=88xTS=20?=
  =?UTF-8?q?1.3.15=EF=BC=89?=
 MIME-Version: 1.0
@@ -14648,7 +14648,7 @@ index f8845b62..8609631b 100644
 From b5d7ce5c4d828ecac48a28c26d3327828b2d3645 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 13:46:09 +0800
-Subject: [PATCH 26/47] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=E7=A1=AC?=
+Subject: [PATCH 26/48] =?UTF-8?q?rk3576:=20=E6=96=B0=E5=A2=9E=E7=A1=AC?=
  =?UTF-8?q?=E4=BB=B6=E9=9A=8F=E6=9C=BA=E6=95=B0=E9=A9=B1=E5=8A=A8=20/dev/r?=
  =?UTF-8?q?andom=EF=BC=88xTS=201.3.16=EF=BC=89?=
 MIME-Version: 1.0
@@ -14993,7 +14993,7 @@ index 00000000..70e4a877
 From a4e9b7be465cd44bd2299b7d3a9c79d9b8c4340d Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 15:38:11 +0800
-Subject: [PATCH 27/47] arch/arm64/rk3576: add polled SPI master driver (SPI4)
+Subject: [PATCH 27/48] arch/arm64/rk3576: add polled SPI master driver (SPI4)
 
 Synopsys DesignWare SSI, Rockchip variant (rockchip,rk3066-spi).
 Register layout differs from stock DW SSI: data ports are split
@@ -16029,7 +16029,7 @@ index 00000000..f37ca9d6
 From e4e27eaa165c6013754cd3144e86a3e6257e7fd6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 15:46:28 +0800
-Subject: [PATCH 28/47] arch/arm64/rk3576: guard against GPIO interrupt storms
+Subject: [PATCH 28/48] arch/arm64/rk3576: guard against GPIO interrupt storms
 
 A pin can re-enter its handler without bound in two ways, neither of
 which reports an error -- the board simply stops responding, with no
@@ -16134,7 +16134,7 @@ index edb7a4ee..c7125d96 100644
 From 2e21784235ae6149b8dd14e3a4922174f500e29f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 19:12:28 +0800
-Subject: [PATCH 29/47] arch/arm64/rk3576: bound the SPI transfer loop, add
+Subject: [PATCH 29/48] arch/arm64/rk3576: bound the SPI transfer loop, add
  pulls and pull readback
 
 The push/pop loop had no exit.  With no serial clock (gate off, module
@@ -16466,7 +16466,7 @@ index 9b983e82..23d6a976 100644
 From 74c7a2d63af08db7e49610ddf66b0f19f9abccc7 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 20:06:48 +0800
-Subject: [PATCH 30/47] arch/arm64/rk3576: add MIPI CSI-2 D-PHY receiver
+Subject: [PATCH 30/48] arch/arm64/rk3576: add MIPI CSI-2 D-PHY receiver
 
 First stage of the camera capture path.  This is different hardware
 from rk3576_dcphy.c, not a direction flag on it: the display side is a
@@ -16940,7 +16940,7 @@ index 00000000..02138656
 From bc209e7ff21891788202f179086f89fe52d03e78 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Thu, 3 Sep 2026 20:27:35 +0800
-Subject: [PATCH 31/47] arch/arm64/rk3576: add MIPI CSI-2 host controller
+Subject: [PATCH 31/48] arch/arm64/rk3576: add MIPI CSI-2 host controller
 
 Second stage of the capture path, and the first point in it that can be
 observed at all.  The sensor can only be confirmed over I2C and the
@@ -17390,7 +17390,7 @@ index 00000000..a4001926
 From 86a2c46526107c38f6f8ff54d86ea5ff8629c6f9 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Fri, 4 Sep 2026 22:55:50 +0800
-Subject: [PATCH 32/47] arch/arm64/rk3576: add CIF capture controller, log GPIO
+Subject: [PATCH 32/48] arch/arm64/rk3576: add CIF capture controller, log GPIO
  interrupt storms
 
 CIF is the last stage of the camera path (sensor -> D-PHY -> CSI-2 host
@@ -17895,7 +17895,7 @@ index c7125d96..4b064f5c 100644
 From cd8377e58146260ddcbc237196d79bc01eaff599 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Fri, 4 Sep 2026 22:56:07 +0800
-Subject: [PATCH 33/47] arch/arm64/rk3576: bisect the VOP2 window against
+Subject: [PATCH 33/48] arch/arm64/rk3576: bisect the VOP2 window against
  U-Boot's known-good one
 
 Our own full-screen ESMART1 window renders incorrectly: solid fills and
@@ -18623,7 +18623,7 @@ index d841ebfb..ec9f5595 100644
 From 9db16a799017690229a04d024555387f0045c2ed Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Fri, 4 Sep 2026 23:04:17 +0800
-Subject: [PATCH 34/47] arch/arm64/rk3576: DSP_ST is an active-area offset, not
+Subject: [PATCH 34/48] arch/arm64/rk3576: DSP_ST is an active-area offset, not
  a whole-frame one
 
 fb_setup wrote the layer's display origin as hsync_len + hback_porch
@@ -18792,7 +18792,7 @@ index ec9f5595..8b19e14d 100644
 From 0a1e36e81c91e0afe144f6b59147cf68582801ed Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sat, 5 Sep 2026 00:04:04 +0800
-Subject: [PATCH 35/47] arch/arm64/rk3576: bound the CIF DMA with the
+Subject: [PATCH 35/48] arch/arm64/rk3576: bound the CIF DMA with the
  frame-size register
 
 The CIF driver programmed the stride and the buffer addresses but never
@@ -18905,7 +18905,7 @@ index d62ebb8b..046bb771 100644
 From 21c0122a0ccedfd9f1c9ecc0d218c478a46a5513 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sat, 5 Sep 2026 01:02:00 +0800
-Subject: [PATCH 36/47] arch/arm64/rk3576: enable the CIF frame-end interrupt,
+Subject: [PATCH 36/48] arch/arm64/rk3576: enable the CIF frame-end interrupt,
  wait on it
 
 INTEN was written with CSI_ALL_ERROR_INTEN alone, which unmasks bits
@@ -19119,7 +19119,7 @@ index ea01350b..444fcaa6 100644
 From 16eaca44ad8f1b8b024c46c4b63c3281e8eab250 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sat, 5 Sep 2026 08:38:13 +0800
-Subject: [PATCH 37/47] arch/arm64/rk3576: give /dev/oneshot its own timer
+Subject: [PATCH 37/48] arch/arm64/rk3576: give /dev/oneshot its own timer
  instead of the arch one
 
 The board registered arm64_oneshot_initialize()'s return value as
@@ -19722,7 +19722,7 @@ index 00000000..9924d8fc
 From 37ea7531ed5d3210d09a7c30fb34563290ba5069 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sat, 5 Sep 2026 08:43:34 +0800
-Subject: [PATCH 38/47] arch/arm64/rk3576: correct a wrong claim about the
+Subject: [PATCH 38/48] arch/arm64/rk3576: correct a wrong claim about the
  timer enable sequence
 
 A comment here asserted that CONTROL's mode bits must be written before
@@ -19810,7 +19810,7 @@ index 236e67f7..e453265e 100644
 From dc3f6164acec7f496de10824163cd9cab44d33d9 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sat, 5 Sep 2026 09:14:43 +0800
-Subject: [PATCH 39/47] arch/arm64/rk3576: move a functional assignment out of
+Subject: [PATCH 39/48] arch/arm64/rk3576: move a functional assignment out of
  the DWMMC trace block
 
 The SD card only worked when CONFIG_RK3576_DWMMC_TRACE was compiled in.
@@ -19884,7 +19884,7 @@ index cee9fbb5..dc96f30d 100644
 From 703305ccae29973be1d11a39c39b485a31601844 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sat, 5 Sep 2026 14:03:55 +0800
-Subject: [PATCH 40/47] arch/arm64/rk3576: allow swapping a CIF ping-pong slot
+Subject: [PATCH 40/48] arch/arm64/rk3576: allow swapping a CIF ping-pong slot
  while running
 
 With only two buffers and no swapping, the hardware finishes FRM0, moves
@@ -19994,7 +19994,7 @@ index 444fcaa6..d09b108e 100644
 From 5a668440f8ea786d6932b29144f9414f550f95d8 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sat, 5 Sep 2026 21:27:49 +0800
-Subject: [PATCH 41/47] arch/arm64/rk3576: characterise the CIF write-bandwidth
+Subject: [PATCH 41/48] arch/arm64/rk3576: characterise the CIF write-bandwidth
  limit; two clocks ruled out
 
 At 60fps the captured frame is truncated: the last non-zero pixel sits at
@@ -20223,7 +20223,7 @@ index eb2ca68c..826583e3 100644
 From b9455f100a6bcca308c31d631452bd17c0ca6a6c Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sat, 5 Sep 2026 21:40:34 +0800
-Subject: [PATCH 42/47] arch/arm64/rk3576: align the CIF line stride to 256
+Subject: [PATCH 42/48] arch/arm64/rk3576: align the CIF line stride to 256
  bytes as the vendor does
 
   channel->virtual_width = ALIGN(channel->width * fmt->raw_bpp / 8, 256);
@@ -20296,7 +20296,7 @@ index 826583e3..58c0917c 100644
 From 085c86611da094d50da461ede0aa756a47efad9f Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sat, 5 Sep 2026 21:59:46 +0800
-Subject: [PATCH 43/47] arch/arm64/rk3576: rule out bandwidth as the cause of
+Subject: [PATCH 43/48] arch/arm64/rk3576: rule out bandwidth as the cause of
  CIF frame-tail truncation
 
 Switching the write-to-DDR format from UNCOMPACT (16 bits per pixel,
@@ -20361,7 +20361,7 @@ index 58c0917c..c80993c1 100644
 From f7143c782d15338d9bfb96a20594b259849fdf51 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 6 Sep 2026 00:13:45 +0800
-Subject: [PATCH 44/47] arch/arm64/rk3576: read the PHY on the GMAC failure
+Subject: [PATCH 44/48] arch/arm64/rk3576: read the PHY on the GMAC failure
  path; MDIO proves unreliable
 
 The probe returned at the DMA soft-reset timeout and never reached the
@@ -20513,7 +20513,7 @@ index 87850136..b63b8408 100644
 From 8452ea2fa22740508eafb828f2f5425af20de084 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 6 Sep 2026 04:49:58 +0800
-Subject: [PATCH 45/47] arch/arm64/rk3576: bring up SMP on the four Cortex-A53
+Subject: [PATCH 45/48] arch/arm64/rk3576: bring up SMP on the four Cortex-A53
  cores
 
 RK3576 is 4x Cortex-A53 (MPIDR 0x0-0x3, Aff1=0) + 4x Cortex-A72
@@ -21209,7 +21209,7 @@ index aa2918ec..ff504946 100644
 From 437b3d801919a316dd2a8cee589b17ff405940a6 Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 6 Sep 2026 10:56:15 +0800
-Subject: [PATCH 46/47] arch/arm64/rk3576: add the Maxio MAE0621A vendor init;
+Subject: [PATCH 46/48] arch/arm64/rk3576: add the Maxio MAE0621A vendor init;
  the link now comes up
 
 The GMAC never linked: PHY registers read and wrote perfectly, autoneg was
@@ -21481,7 +21481,7 @@ index de1c9592..e7a07154 100644
 From 2bc491ca30ae118e8f626465fcf7a66801a6591a Mon Sep 17 00:00:00 2001
 From: zhouyllll <xuezhou28@gmail.com>
 Date: Sun, 6 Sep 2026 12:45:53 +0800
-Subject: [PATCH 47/47] arch/arm64/rk3576: port the DWMAC 4.x driver; link and
+Subject: [PATCH 47/48] arch/arm64/rk3576: port the DWMAC 4.x driver; link and
  MAC-level RX now work
 
 Add rk3576_eth.c, ported from arch/arm/src/s32k3xx/s32k3xx_emac.c -- the
@@ -28703,6 +28703,370 @@ index ff504946..7fb96fda 100644
  void rk3576_gmac_phy_reset(int bank, int pin, bool active_low);
  
  int rk3576_gmac_probe(int port);
+-- 
+2.43.0
+
+
+From 32ff56afb16485af531d5db99f2455688796d211 Mon Sep 17 00:00:00 2001
+From: zhouyllll <xuezhou28@gmail.com>
+Date: Sun, 6 Sep 2026 13:37:21 +0800
+Subject: [PATCH 48/48] arch/arm64/rk3576: the network port now works end to
+ end
+
+Two defects stood between a working link and working traffic, both of
+them in how the interrupt reaches the CPU.
+
+1. DMA_MODE.INTM routed the channel interrupt to a private line.
+
+   The GMAC never asserted macirq.  Rather than keep guessing at the
+   interrupt number, scan the GIC pending bitmap before and after
+   traffic: a level interrupt nobody handles stays pending, so whichever
+   bit lights up is the real line.  It was IRQ 336 (SPI 304) -- a number
+   that appears nowhere in rk3576.dtsi -- while the dtsi gives gmac1
+   macirq as SPI 301.  That is the signature of INTM being non-zero,
+   which splits per-channel interrupts out of the common sbd_intr line.
+   initdma() now clears INTM explicitly, and interrupts arrive on 333
+   with NIS set, as they should.
+
+2. The ISR did not clear the status bits.
+
+   RK3576's GMAC interrupt is level triggered (IRQ_TYPE_LEVEL_HIGH).
+   The reference driver clears DMA_CH0_STATUS in the work queue, which
+   is fine for a pulsed interrupt and fatal for a level one: the line
+   stays asserted, the ISR re-enters immediately, and the board dies by
+   watchdog.  Masking the DMA interrupt enable does not help either --
+   the line is driven by the status bits, not by the enables.  The ISR
+   now clears the status and hands the value to the worker through
+   priv->dmasr, since the register it would otherwise read has already
+   been cleared.  The DEBUGASSERT on work_available() became a plain
+   check; with assertions on it was itself a way to crash.
+
+Also corrected in passing: NIE/AIE are BIT(15)/BIT(14) here, not
+BIT(16)/BIT(15).  Those names in dwmac4_dma.h belong to the original
+4.00; every core from 4.10 on goes through dwmac410_enable_dma_irq(),
+which uses the _4_10 pair.  Trying BIT(16) read back as zero -- the bit
+is not implemented.  The readback is the evidence, not the macro name.
+
+Measured on KICKPI-K7 against a switch: board to host 6/6 and host to
+board 10/10, 0% loss, RTT around 0.5-2 ms at 1000M full duplex.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01R8x2gNA2B8dB1TSCrtBacm
+---
+ arch/arm64/src/rk3576/hardware/rk3576_emac.h |  24 +++
+ arch/arm64/src/rk3576/rk3576_eth.c           | 169 ++++++++-----------
+ arch/arm64/src/rk3576/rk3576_eth.h           |  10 +-
+ 3 files changed, 107 insertions(+), 96 deletions(-)
+
+diff --git a/arch/arm64/src/rk3576/hardware/rk3576_emac.h b/arch/arm64/src/rk3576/hardware/rk3576_emac.h
+index 4ff158f7..2be138f6 100644
+--- a/arch/arm64/src/rk3576/hardware/rk3576_emac.h
++++ b/arch/arm64/src/rk3576/hardware/rk3576_emac.h
+@@ -2784,6 +2784,30 @@
+ #define EMAC_DMA_CH0_INTERRUPT_ENABLE_ERIE  (1 << 11) /* Bit 11: Early Receive Interrupt Enable */
+ #define EMAC_DMA_CH0_INTERRUPT_ENABLE_FBEE  (1 << 12) /* Bit 12: Fatal Bus Error Enable */
+ #define EMAC_DMA_CH0_INTERRUPT_ENABLE_CDEE  (1 << 13) /* Bit 13: Context Descriptor Error Enable */
++/* ★ 汇总使能位的位置**随 IP 版本变化**，这是本文件里唯一不能照抄
++ * S32K3XX 的地方。出处 kernel-6.1/drivers/net/ethernet/stmicro/stmmac/
++ * dwmac4_dma.h：
++ *
++ *     #define DMA_CHAN_INTR_ENA_NIE       BIT(16)   // 4.20a 及以后
++ *     #define DMA_CHAN_INTR_ENA_AIE       BIT(15)
++ *     #define DMA_CHAN_INTR_ENA_NIE_4_10  BIT(15)   // 仅 4.10
++ *     #define DMA_CHAN_INTR_ENA_AIE_4_10  BIT(14)
++ *
++ * ★ 但**真正生效的是哪一组，要看 stmmac 用的是哪个 ops**：
++ *   dwmac4_lib.c 里有两个函数 —— dwmac4_enable_dma_irq() 用 NIE=BIT(16)，
++ *   dwmac410_enable_dma_irq() 用 _4_10 那组（NIE=BIT(15)）。
++ *   4.10 及以后的核走的都是 dwmac410_ops，所以 **NIE 是 BIT(15)**；
++ *   BIT(16) 只属于最初的 4.00。
++ *
++ *   我一度按"4.20a 就该用 BIT(16)"改成了 16，上板回读 IE=0x00008041 ——
++ *   bit16 根本写不进去，硬件不实现。**回读是判据，命名不是。**
++ *
++ * 位置写错的表现极难定位：individual 位（RI/TI）照常置位，
++ * DMA_CH0_STATUS 上明明看得见收到了包，**但汇总位 NIS 永远不置，
++ * 中断线一次都不拉**。GIC 侧查下来全对（使能、目标 CPU 都没问题），
++ * pending 位却始终为 0。
++ */
++
+ #define EMAC_DMA_CH0_INTERRUPT_ENABLE_AIE   (1 << 14) /* Bit 14: Abnormal Interrupt Summary Enable */
+ #define EMAC_DMA_CH0_INTERRUPT_ENABLE_NIE   (1 << 15) /* Bit 15: Normal Interrupt Summary Enable */
+ 
+diff --git a/arch/arm64/src/rk3576/rk3576_eth.c b/arch/arm64/src/rk3576/rk3576_eth.c
+index 8ced9151..5f5c36c6 100644
+--- a/arch/arm64/src/rk3576/rk3576_eth.c
++++ b/arch/arm64/src/rk3576/rk3576_eth.c
+@@ -377,6 +377,7 @@ union rk3576_eth_desc_u
+ struct rk3576_eth_driver_s
+ {
+   bool bifup;                  /* true:ifup false:ifdown */
++  uint32_t dmasr;              /* ISR 抓下来的 DMA 状态，交给 worker 用 */
+   uint8_t phyaddr;             /* Selected PHY address */
+   struct wdog_s txtimeout;     /* TX timeout timer */
+   struct work_s irqwork;       /* For deferring interrupt work to the work queue */
+@@ -1745,9 +1746,9 @@ static void rk3576_eth_interrupt_work(void *arg)
+ 
+   net_lock();
+ 
+-  /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
++  /* 用 ISR 抓下来的状态：寄存器已经在 ISR 里被清掉了 */
+ 
+-  dmasr = getreg32(RK3576_EMAC_DMA_CH0_STATUS);
++  dmasr = priv->dmasr;
+ 
+   /* Mask only enabled interrupts.  This depends on the fact that the
+    * interrupt related bits (0-16) correspond in these two registers.
+@@ -1816,13 +1817,6 @@ static void rk3576_eth_interrupt_work(void *arg)
+ 
+   net_unlock();
+ 
+-  /* 处理完毕，恢复 DMA 的中断使能（与 ISR 里的屏蔽成对） */
+-
+-  putreg32(EMAC_DMA_CH0_INTERRUPT_ENABLE_AIE |
+-           EMAC_DMA_CH0_INTERRUPT_ENABLE_NIE |
+-           EMAC_DMA_CH0_INTERRUPT_ENABLE_RIE |
+-           EMAC_DMA_CH0_INTERRUPT_ENABLE_TIE,
+-           RK3576_EMAC_DMA_CH0_INTERRUPT_ENABLE);
+ }
+ 
+ /****************************************************************************
+@@ -1854,16 +1848,6 @@ static int rk3576_eth_enet_interrupt(int irq, void *context, void *arg)
+ 
+   dmasr = getreg32(RK3576_EMAC_DMA_CH0_STATUS);
+ 
+-  {
+-    static int nirq;
+-
+-    if (nirq < 3)
+-      {
+-        nirq++;
+-        syslog(LOG_INFO, "ETH: irq#%d dmasr=%08" PRIx32 "\n", nirq, dmasr);
+-      }
+-  }
+-
+   if (dmasr != 0)
+     {
+       /* Disable further Ethernet interrupts.  Because Ethernet interrupts
+@@ -1872,16 +1856,20 @@ static int rk3576_eth_enet_interrupt(int irq, void *context, void *arg)
+        *
+        * ★ RK3576 的 GMAC 中断是**电平触发**（dtsi: IRQ_TYPE_LEVEL_HIGH）。
+        *   ISR 里既不清 DMA 状态位也不屏蔽中断的话，中断会立刻重入，
+-       *   状态位由工作队列里的 interrupt_work 清 —— 在它跑起来之前
+-       *   中断一直挂着。表现是"先能收几个包，随后收发全停"。
++       *   ★ 电平触发的中断，**必须在 ISR 里当场把状态位清掉**，
++       *     否则中断线一直拉着，ISR 反复重入 —— 表现为看门狗复位。
++       *     参考驱动是在工作队列里才清，那是给边沿/脉冲中断写的，
++       *     搬过来会死。
+        *
+-       *   ★ 在**外设一侧**屏蔽（清 DMA_CH0_INTERRUPT_ENABLE），不动 GIC。
+-       *     先前试过在 ISR 里 up_disable_irq()、worker 里 up_enable_irq()，
+-       *     结果发送直接超时 —— 中断没能恢复。改成关外设的中断使能，
+-       *     语义清楚且只影响本控制器。
++       *     光屏蔽 DMA 的中断使能也不够：中断线由状态位驱动，
++       *     使能位只决定"要不要产生"，已经拉起的线不会因此落下。
++       *
++       *   清掉的状态存进 priv->dmasr 交给 worker，worker 不再自己读 ——
++       *   否则它读到的是已经被清空的寄存器，什么都处理不了。
+        */
+ 
+-      putreg32(0, RK3576_EMAC_DMA_CH0_INTERRUPT_ENABLE);
++      putreg32(dmasr, RK3576_EMAC_DMA_CH0_STATUS);
++      priv->dmasr = dmasr;
+ 
+       /* Check if a packet transmission just completed. */
+ 
+@@ -1895,11 +1883,15 @@ static int rk3576_eth_enet_interrupt(int irq, void *context, void *arg)
+           wd_cancel(&priv->txtimeout);
+         }
+ 
+-      DEBUGASSERT(work_available(&priv->irqwork));
+-
+-      /* Schedule to perform the interrupt processing on the worker thread. */
++      /* 已经排着一份就不再排 —— 原来这里是 DEBUGASSERT，
++       * 开了断言的构建上会直接崩掉。
++       */
+ 
+-      work_queue(ETHWORK, &priv->irqwork, rk3576_eth_interrupt_work, priv, 0);
++      if (work_available(&priv->irqwork))
++        {
++          work_queue(ETHWORK, &priv->irqwork,
++                     rk3576_eth_interrupt_work, priv, 0);
++        }
+     }
+ 
+   return OK;
+@@ -2068,65 +2060,11 @@ static int rk3576_eth_ifup_action(struct net_driver_s *dev, bool resetphy)
+   priv->bifup = true;
+ 
+   up_enable_irq(RK3576_IRQ_EMAC);
++  up_enable_irq(RK3576_IRQ_EMAC_CH0);
+ 
+-  /* ★ 一次性把决定收发能不能工作的寄存器全打出来。
+-   *   逐个猜一轮要烧一次板子，不如一次看全。
+-   */
+-
+-  syslog(LOG_INFO,
+-         "ETH: MACCR=%08" PRIx32 " ADDR0=%04" PRIx32 ":%08" PRIx32 "\n",
++  syslog(LOG_INFO, "ETH: eth0 就绪 MACCR=%08" PRIx32 " IE=%08" PRIx32 "\n",
+          getreg32(RK3576_EMAC_MAC_CONFIGURATION),
+-         getreg32(RK3576_EMAC_MAC_ADDRESS0_HIGH) & 0xffff,
+-         getreg32(RK3576_EMAC_MAC_ADDRESS0_LOW));
+-  syslog(LOG_INFO,
+-         "ETH: DMA RXCTRL=%08" PRIx32 " TXCTRL=%08" PRIx32
+-         " IE=%08" PRIx32 " ST=%08" PRIx32 "\n",
+-         getreg32(RK3576_EMAC_DMA_CH0_RX_CONTROL),
+-         getreg32(RK3576_EMAC_DMA_CH0_TX_CONTROL),
+-         getreg32(RK3576_EMAC_DMA_CH0_INTERRUPT_ENABLE),
+-         getreg32(RK3576_EMAC_DMA_CH0_STATUS));
+-  /* ★ GIC 侧的实际状态。
+-   *   up_enable_irq() 只置使能位；**目标 CPU（ITARGETSR）是在
+-   *   arm64_gic_initialize() 的循环里配的，而那个循环的上界是硬件
+-   *   报告的 nlines**。若 nlines 小于本中断号，就会出现"使能了、
+-   *   却没有任何 CPU 被指定接收"——中断永远不来，且没有任何报错。
+-   */
+-
+-  {
+-    uint32_t gicd  = CONFIG_GICD_BASE;
+-    uint32_t typer = getreg32(gicd + 0x0004);
+-    uint32_t nlines = (((typer & 0x1f) + 1) << 5);
+-    int irq = RK3576_IRQ_EMAC;
+-
+-    syslog(LOG_INFO,
+-           "ETH: GIC irq=%d nlines=%" PRIu32 " ISENABLER=%08" PRIx32
+-           " ITARGETSR=%02" PRIx32 "\n",
+-           irq, nlines,
+-           (getreg32(gicd + 0x0100 + 4 * (irq / 32)) >> (irq % 32)) & 1,
+-           (getreg32(gicd + 0x0800 + 4 * (irq / 4)) >> (8 * (irq % 4)))
+-             & 0xff);
+-  }
+-
+-  /* ★ MMC 计数器统计的是 **MAC 层**收到/发出的帧，与 DMA 无关。
+-   *   为零 = RGMII 侧就没有帧进来（PHY/延时/时钟问题）；
+-   *   非零而 DMA 无中断 = MAC 收到了但没交付给 DMA。
+-   *   这一条能把剩下的可能一刀切开。
+-   */
+-
+-  syslog(LOG_INFO,
+-         "ETH: MMC rx_gb=%" PRIu32 " rx_crcerr=%" PRIu32
+-         " tx_g=%" PRIu32 " dmast=%08" PRIx32 "\n",
+-         getreg32(RK3576_EMAC_RX_PACKETS_COUNT_GOOD_BAD),
+-         getreg32(RK3576_EMAC_RX_CRC_ERROR_PACKETS),
+-         getreg32(RK3576_EMAC_TX_PACKET_COUNT_GOOD),
+-         getreg32(RK3576_EMAC_DMA_CH0_STATUS));
+-
+-  syslog(LOG_INFO,
+-         "ETH: RXQ_CTRL0=%08" PRIx32 " MTL_RXQ0=%08" PRIx32
+-         " PKTFILTER=%08" PRIx32 "\n",
+-         getreg32(RK3576_EMAC_MAC_RXQ_CTRL0),
+-         getreg32(RK3576_EMAC_MTL_RXQ0_OPERATION_MODE),
+-         getreg32(RK3576_EMAC_MAC_PACKET_FILTER));
++         getreg32(RK3576_EMAC_DMA_CH0_INTERRUPT_ENABLE));
+ 
+   /* ★ 必须报告载波已就绪。
+    *
+@@ -3474,6 +3412,45 @@ static void rk3576_eth_initdma(struct rk3576_eth_driver_s *priv)
+   putreg32(EMAC_DMA_CH0_CONTROL_DSL((DESC_PADSIZE - DESC_SIZE) / 8),
+            RK3576_EMAC_DMA_CH0_CONTROL);
+ 
++  /* ★ 先清状态、再开中断，最后才启动收发。
++   *
++   *   原来的顺序是"启动 RX -> 开中断"。DMA_CH0_STATUS 的 RI 是粘滞位，
++   *   而**拉中断线的是汇总位 NIS**，NIS 只在事件发生的那一刻、且对应
++   *   使能位已经打开时才置。若首帧落在 SR 置位与 IE 写入之间，就会出现
++   *   RI=1 而 NIS=0：状态寄存器上看得见收到了包，中断线却从未拉起。
++   *
++   *   实测正是这个现象：MMC 计数器显示 MAC 收到帧、CRC 零错误，
++   *   DMA_CH0_STATUS=0x40（RI），但 ISR 一次都没进过。
++   */
++
++  /* ★ DMA_MODE 的 INTM（bits[17:16]）决定通道中断走哪条线：
++   *   0 = 全部汇总到 macirq（sbd_intr）；非 0 = 每通道各走一条独立线。
++   *   出处 dwmac4_dma.h 的 DMA_BUS_MODE_INTM_MASK，stmmac 只在
++   *   multi_msi_en 时才置它。
++   *
++   *   实测扫描 GIC 的 pending 位图发现：流量过后挂起的是 IRQ 336
++   *   （SPI 304），而 dtsi 给 gmac1 的 macirq 是 SPI 301（IRQ 333），
++   *   且 SPI 304 在整份 dtsi 里没有任何设备占用 —— 正是"通道中断走了
++   *   独立线"的样子。这里显式清零。
++   */
++
++  {
++    uint32_t v = getreg32(RK3576_EMAC_DMA_MODE);
++
++    v &= ~(3u << 16);
++    putreg32(v, RK3576_EMAC_DMA_MODE);
++    syslog(LOG_INFO, "ETH: DMA_MODE INTM 清零后=%08" PRIx32 "\n",
++           getreg32(RK3576_EMAC_DMA_MODE));
++  }
++
++  putreg32(0xffffffff, RK3576_EMAC_DMA_CH0_STATUS);
++
++  putreg32(EMAC_DMA_CH0_INTERRUPT_ENABLE_AIE |
++           EMAC_DMA_CH0_INTERRUPT_ENABLE_NIE |
++           EMAC_DMA_CH0_INTERRUPT_ENABLE_RIE |
++           EMAC_DMA_CH0_INTERRUPT_ENABLE_TIE,
++           RK3576_EMAC_DMA_CH0_INTERRUPT_ENABLE);
++
+   /* Set EMAC_DMA_CH0_TX_CONTROL register */
+ 
+   putreg32(EMAC_DMA_CH0_TX_CONTROL_TXPBL(32) | EMAC_DMA_CH0_TX_CONTROL_OSF,
+@@ -3497,13 +3474,6 @@ static void rk3576_eth_initdma(struct rk3576_eth_driver_s *priv)
+   regval |= EMAC_DMA_CH0_RX_CONTROL_SR;
+   putreg32(regval, RK3576_EMAC_DMA_CH0_RX_CONTROL);
+ 
+-  /* DMA enable interrupts */
+-
+-  regval = EMAC_DMA_CH0_INTERRUPT_ENABLE_AIE |
+-           EMAC_DMA_CH0_INTERRUPT_ENABLE_NIE |
+-           EMAC_DMA_CH0_INTERRUPT_ENABLE_RIE |
+-           EMAC_DMA_CH0_INTERRUPT_ENABLE_TIE;
+-  putreg32(regval, RK3576_EMAC_DMA_CH0_INTERRUPT_ENABLE);
+ }
+ 
+ /****************************************************************************
+@@ -3595,6 +3565,17 @@ int rk3576_eth_netinitialize(int intf)
+       return -EAGAIN;
+     }
+ 
++  /* 通道独立线也挂上，两条都指向同一个 ISR。
++   * 清了 INTM 之后应当只有 macirq 会来；留着这条是为了在
++   * INTM 不生效时仍能工作，ISR 会打印实际触发的号。
++   */
++
++  if (irq_attach(RK3576_IRQ_EMAC_CH0, rk3576_eth_enet_interrupt, NULL))
++    {
++      nerr("ERROR: 挂 GMAC 通道中断失败\n");
++      return -EAGAIN;
++    }
++
+   /* Initialize the driver structure */
+ 
+   memset(priv, 0, sizeof(struct rk3576_eth_driver_s));
+diff --git a/arch/arm64/src/rk3576/rk3576_eth.h b/arch/arm64/src/rk3576/rk3576_eth.h
+index 1830470e..7948cb5a 100644
+--- a/arch/arm64/src/rk3576/rk3576_eth.h
++++ b/arch/arm64/src/rk3576/rk3576_eth.h
+@@ -23,11 +23,17 @@
+  * SPI 号加 32 得到 IRQ 号，与本端口其它外设的换算一致。
+  */
+ 
++/* ★ 除了 dtsi 标注的 macirq，DMA 通道在 INTM 非 0 时还会走一条
++ * 独立的中断线。实测 gmac1 的通道线是 SPI 304（dtsi 里无人占用）。
++ */
++
+ #ifdef CONFIG_RK3576_ETH_PORT1
+-#  define RK3576_IRQ_EMAC   (301 + 32)
++#  define RK3576_IRQ_EMAC       (301 + 32)
++#  define RK3576_IRQ_EMAC_CH0   (304 + 32)
+ #  define CONFIG_RK3576_ETH_PORT 1
+ #else
+-#  define RK3576_IRQ_EMAC   (293 + 32)
++#  define RK3576_IRQ_EMAC       (293 + 32)
++#  define RK3576_IRQ_EMAC_CH0   (296 + 32)
+ #  define CONFIG_RK3576_ETH_PORT 0
+ #endif
+ 
 -- 
 2.43.0
 
