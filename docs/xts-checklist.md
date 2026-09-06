@@ -15,12 +15,11 @@
 
 ## 当前进度总表（截至 2026-09-06）
 
-必测 35 项：**通过 28、部分通过 5、格式边界 1、待做 1**。不可行 0。
+必测 35 项：**通过 29、部分通过 5、待做 1**。不可行 0、格式边界 0。
 
-- ✅ 28：一、系统内核 13 项中 11 项，1.3.x 驱动 11 项，1.2.x/2.1.x 指标 6 项
-- ◐ 5：1.1.13（C++ 异常）、1.3.7（需对端板）、1.3.11（发送方向）、
+- ✅ 29
+- ◐ 5：1.1.13（C++ 异常）、1.3.7（需从机模式）、1.3.11（发送方向）、
   1.3.14（等 24h 复读）、1.3.15（看门狗关不掉，子项跑不完）
-- ⚠️ 1：1.1.7 scanftest 146/18，属 libc 格式说明符一致性
 - ☐ 1：3.1.1 12h 待机，需预留整天
 
 "已编入待实测"= 配置已开、程序已进 `builtin_list.h`、编译通过，只差在
@@ -34,7 +33,7 @@
 | 1.1.4 | Kernel-ostest | ✅ | `ostest` 24 个套件 |
 | 1.1.5 | Kernel-getprime | ✅ | |
 | 1.1.6 | Kernel-mm | ✅ | TEST COMPLETE |
-| 1.1.7 | Kernel-scanftest | ⚠️ | **146 通过 / 18 失败**（旧记录 85/11 已过时）。失败集中在 #10、#28-31、#35-38、#49 等格式说明符边界用例，属 libc 一致性，非移植缺陷 |
+| 1.1.7 | Kernel-scanftest | ✅ | **OK: 164, FAILED: 0**。此前 146/18 的判断（"格式说明符边界、属 libc 一致性"）是错的 —— 根因是 `CONFIG_LIBC_SCANSET` 没开，**用例自己的 Kconfig 帮助文本就写着**「For all tests to be successful, you need to enable LIBC_FLOATINGPOINT, LIBC_LONG_LONG and LIBC_SCANSET」。三个都补进 defconfig 后满分 |
 | 1.1.8 | Kernel-C | ✅ | `hello` 打印 Hello, World!! |
 | 1.1.9 | Kernel-Cxx | ✅ | `helloxx` 三种实例（动态/栈上/静态构造）全部打印。用**工具链自带**的 libstdc++/libsupc++，不下载源码 |
 | 1.1.10 | Kernel-popen | ✅ | `popen` 实测：`popen("help")` 的输出经管道回来、`pclose()` 正常。之前"libc 无 popen"的判断是错的 —— 实现在 `apps/system/popen/popen.c` |
@@ -98,7 +97,7 @@
 | 1.1.4 | Kernel-ostest | `ostest` | ✅ 24 个套件 |
 | 1.1.5 | Kernel-getprime | `getprime` | ✅ |
 | 1.1.6 | Kernel-mm 内存 | `mm` | ✅ TEST COMPLETE |
-| 1.1.7 | Kernel-scanftest | `scanftest` | ⚠️ 146 通过 / 18 失败 |
+| 1.1.7 | Kernel-scanftest | `scanftest` | ✅ OK: 164, FAILED: 0 |
 | 1.1.8 | Kernel-C | `hello` | ◆ 已编入，待实测 |
 | 1.1.9 | Kernel-Cxx | `helloxx` | ✅ 工具链自带 libstdc++ |
 | 1.1.10 | Kernel-popen | `popen` | ✅ 实现在 apps/system/popen |
