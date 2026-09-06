@@ -54,6 +54,14 @@ endif
 ifeq ($(CONFIG_RK3576_I2C),y)
 CSRCS += kickpi_k7_camera.c
 
+ifeq ($(CONFIG_KICKPI_K7_IMGPROC),y)
+CSRCS += kickpi_k7_imgproc.c
+# libjpeg-turbo 的头文件没有导出到公共头路径（树里没有别的代码用它），
+# 这里显式加上。jconfig.h 是它构建时生成的，也在同一目录。
+# ★ 这里是 nuttx 侧的 Makefile，APPDIR 不一定有定义，用 TOPDIR 走过去。
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)/../apps/external/libjpeg-turbo/libjpeg-turbo
+endif
+
 ifeq ($(CONFIG_RK3576_VIDEO),y)
 CSRCS += kickpi_k7_video.c
 endif

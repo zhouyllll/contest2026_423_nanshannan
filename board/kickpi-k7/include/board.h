@@ -250,6 +250,17 @@
 int kickpi_camera_stream(bool on);
 
 /****************************************************************************
+ * 去马赛克 + JPEG（kickpi_k7_imgproc.c）
+ *
+ *   phase 是 Bayer 相位（0=RGGB 1=GRBG 2=GBRG 3=BGGR）。
+ *   ★ 必须拿彩色标定图实测确认 —— 相位错了图像不会崩，只会红蓝互换
+ *     或整体偏色，看起来像白平衡问题，很容易归错因。
+ ****************************************************************************/
+
+int kickpi_camera_jpeg(FAR const char *path, int phase, int quality);
+int kickpi_imgproc_selftest(int phase, FAR const char *path);
+
+/****************************************************************************
  * Name: kickpi_camera_receiver
  *
  * Description:

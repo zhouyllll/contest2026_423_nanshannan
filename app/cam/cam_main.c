@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
   if (argc < 2)
     {
-      printf("用法: cam on|off|rx|cap|show|white|black|bars|half|vhalf|line|box\n");
+      printf("用法: cam on|off|rx|cap|jpeg|jpegtest|show|white|black|bars|half|vhalf|line|box\n");
       printf("      cam ub <0-2>     还原 U-Boot 窗口并写图案\n");
       printf("      cam morph <0-7>  从 U-Boot 参数出发逐个变量地改（7 复现故障）\n");
       printf("      cam regs         打印 ESMART1/VP1 寄存器现状\n");
@@ -85,6 +85,33 @@ int main(int argc, char *argv[])
   else if (strcmp(argv[1], "cap") == 0)
     {
       ret = kickpi_camera_capture();
+    }
+  else if (strcmp(argv[1], "jpeg") == 0)
+    {
+      /* cam jpeg <路径> [相位] [质量]
+       *
+       * 把最近取到的一帧去马赛克并编码成 JPEG。
+       *
+       * ★ 相位默认 0（RGGB），但**必须拿彩色标定图实测确认** ——
+       *   相位错了图像不会崩，只会红蓝互换或整体偏色，看起来像
+       *   白平衡问题，很容易归错因。
+       */
+
+      ret = kickpi_camera_jpeg(argc > 2 ? argv[2] : "/tmp/cam.jpg",
+                               argc > 3 ? atoi(argv[3]) : 0,
+                               argc > 4 ? atoi(argv[4]) : 85);
+    }
+  else if (strcmp(argv[1], "jpegtest") == 0)
+    {
+      /* cam jpegtest [路径] [相位]
+       *
+       * 用合成的红/绿/蓝三色带 Bayer 图验证「去马赛克 + JPEG」通路。
+       * 摄像头接不上时也能跑 —— 它验的是相位映射和跨距索引，
+       * 恰好是最容易写错、又最难从真实照片上看出来的地方。
+       */
+
+      ret = kickpi_imgproc_selftest(argc > 3 ? atoi(argv[3]) : 0,
+                                    argc > 2 ? argv[2] : "/tmp/bayer.jpg");
     }
   else if (strcmp(argv[1], "show") == 0)
     {

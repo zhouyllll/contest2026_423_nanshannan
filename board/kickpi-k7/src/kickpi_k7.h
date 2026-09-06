@@ -93,6 +93,21 @@ int kickpi_camera_receiver(bool on);
 int kickpi_camera_status(void);
 
 /****************************************************************************
+ * 去马赛克 + JPEG 编码（kickpi_k7_imgproc.c）
+ *
+ *   stride_pix 是以 uint16 计的行跨距，不是宽度 —— CIF 要求 256 字节
+ *   对齐，1932x2=3864 会被对齐到 4096。写成「行号 x 宽度」就错了。
+ ****************************************************************************/
+
+int kickpi_imgproc_jpeg(FAR const uint16_t *raw, int stride_pix,
+                        int width, int height, int phase,
+                        uint16_t black, uint16_t white,
+                        int quality, FAR const char *path);
+
+int kickpi_imgproc_selftest(int phase, FAR const char *path);
+int kickpi_camera_jpeg(FAR const char *path, int phase, int quality);
+
+/****************************************************************************
  * Name: kickpi_k7_video_initialize
  *
  *   注册 V4L2 设备 /dev/video0（IMX415 imgsensor + CIF imgdata）。

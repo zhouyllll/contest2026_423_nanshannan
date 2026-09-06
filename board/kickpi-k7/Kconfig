@@ -1,0 +1,14 @@
+
+config KICKPI_K7_IMGPROC
+	bool "去马赛克 + JPEG 编码"
+	default n
+	depends on LIB_JPEG_TURBO
+	---help---
+		把传感器出的 Bayer RAW12 转成 RGB 并编码为 JPEG。
+
+		★ 逐行处理：1932x1096 的整帧 RGB888 是 6.35MB，而 ai_agent
+		  跑起来后堆只剩约 6.1MB，整帧转换分配不出来。所以每次只
+		  去马赛克一行立刻喂给 libjpeg，峰值内存是一行 5.8KB。
+
+		提供 kickpi_imgproc_selftest()，用合成的红/绿/蓝三色带
+		Bayer 图验证通路 —— 摄像头接不上时也能验相位映射和跨距索引。

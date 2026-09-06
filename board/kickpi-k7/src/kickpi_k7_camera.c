@@ -1031,6 +1031,37 @@ int kickpi_camera_fbinfo(void)
 }
 
 /****************************************************************************
+ * Name: kickpi_camera_jpeg
+ *
+ * Description:
+ *   把最近取到的一帧去马赛克并编码成 JPEG。
+ *
+ *   ★ 用实测的动态范围做拉伸，不用固定的右移 4。
+ *
+ *     默认曝光下 12 位像素只落在很窄的一段（实测 196~299），
+ *     直接 >>4 得到 12~18，编出来是一张几乎全黑的 JPEG ——
+ *     那会让"拍到了"看起来像"没拍到"。这里复用 kickpi_camera_show
+ *     用的同一组 g_cam_min/g_cam_max，两条路径的亮度表现才一致。
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KICKPI_K7_IMGPROC
+int kickpi_camera_jpeg(FAR const char *path, int phase, int quality)
+{
+  if (g_cam_ready < 0 || g_cam_buf[g_cam_ready] == NULL)
+    {
+      syslog(LOG_ERR, "摄像头: 还没有可用的帧，先跑 cam cap\n");
+      return -ENODATA;
+    }
+
+  return kickpi_imgproc_jpeg((FAR const uint16_t *)g_cam_buf[g_cam_ready],
+                             CAM_ROW_PIX,
+                             IMX415_MODE_WIDTH, IMX415_MODE_HEIGHT,
+                             phase, g_cam_min, g_cam_max, quality, path);
+}
+#endif
+
+/****************************************************************************
  * Name: kickpi_camera_fbtest
  *
  * Description:
