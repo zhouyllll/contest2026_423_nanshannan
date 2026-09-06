@@ -1,0 +1,356 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+# ★ 本文件是**树外芯片层**的 Kconfig，由构建系统拷贝到
+#   nuttx/arch/dummy/Kconfig 后 source（见 tools/Unix.mk 的
+#   "Copy $(CHIP_KCONFIG) to arch/dummy/Kconfig"）。
+#
+#   因此这里不再有 `if ARCH_CHIP_RK3576` 这层守卫 —— 芯片是否生效由
+#   CONFIG_ARCH_CHIP_CUSTOM_DIR 指向哪里决定，而不是由一个注册在
+#   nuttx/arch/arm64/Kconfig 里的选项决定。
+#
+#   移植指南《新平台适配指南》明确要求「所有定制代码存放在 vendor
+#   目录中，不得修改核心代码」，原先在 arch/arm64/Kconfig 里注册
+#   ARCH_CHIP_RK3576 正是对核心仓的修改，现已回退。
+
+config RK3576_CHIP
+	bool
+	default y
+	select ARCH_CORTEX_A53
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_RESET
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARM64_HAVE_PSCI
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_IRQTRIGGER
+	---help---
+		Rockchip RK3576 SoC（四核 Cortex-A53 + 四核 Cortex-A72）。
+
+		中断控制器是 GIC-400（GICv2），与 RK3399/RK3568/RK3588 的 GICv3
+		不同，defconfig 中须设 CONFIG_ARM64_GIC_VERSION=2。
+
+		启动核是 A53 簇 core 0（MPIDR 0x0）。
+
+		★ 这些 select 原先写在 nuttx/arch/arm64/Kconfig 的
+		  ARCH_CHIP_RK3576 条目里。搬到树外之后没有那个条目了，
+		  改用这个恒为 y 的隐藏项承接。
+
+menu "Rockchip RK3576 Peripheral Selection"
+
+comment "RK3576 的调试串口不在此处配置。"
+comment "DW 8250 与 16550 兼容，直接使用通用驱动："
+comment "  Device Drivers -> Serial Driver Support -> 16550 UART Chip support"
+comment "并在 defconfig 中填 16550_UART0_BASE / CLOCK / IRQ / BAUD。"
+
+config RK3576_UART0_IS_CONSOLE
+	bool "UART0 作为调试控制台"
+	default y
+	---help---
+		标记 RK3576 的调试控制台走 UART0（0x2ad40000，GIC_SPI 76 -> IRQ 108）。
+		本选项只作记录用途，实际基址、时钟与中断号由通用 16550 驱动提供。
+
+		已由 KICKPI 官方 Armbian 源码的 U-Boot defconfig 确认：
+		CONFIG_DEBUG_UART_BASE=0x2ad40000，即 UART0。
+
+config RK3576_CIF
+	bool "VICAP/CIF 取图"
+	default n
+	select RK3576_CSIHOST
+	---help---
+		取图链路的最后一级：把 CSI-2 收到的像素写进 DDR。
+
+		五路 CSI 输入共用一套寄存器，按 csi_host_idx 加偏移区分，
+		而且前两路间距 0x200、之后是 0x100 —— 不是等差数列，
+		按等差算会写到隔壁那一路上，不报错。
+
+		输出用非压缩 RAW12（每像素 16 位）：显示时取高字节即灰度，
+		省掉位解包一环。
+
+config RK3576_CSIHOST
+	bool "MIPI CSI-2 主机控制器"
+	default n
+	select RK3576_CSIDPHY
+	---help---
+		取图链路的第二级，解析 CSI-2 协议。
+
+		它同时是链路上**第一个可观测点**：PHY_STATE 能看各通道是否
+		还停在空闲态，ERR1/ERR2 能看 SoT/ECC/CRC 错误。即使后面的
+		CIF 还没写完拿不到图，靠这一级也能分清「线上没数据」和
+		「有数据但收错」—— 两者都表现为看不到图，下一步却完全不同。
+
+config RK3576_CSIDPHY
+	bool "MIPI CSI-2 D-PHY 接收端"
+	default n
+	---help---
+		摄像头取图链路的第一级。与 RK3576_DCPHY（屏用的 Samsung
+		DCPHY 发送端）是**完全不同的硬件**，寄存器组毫无交集：
+		参考实现分别是 phy-rockchip-csi2-dphy-hw.c 与
+		phy-rockchip-samsung-dcphy.c。
+
+		dtb 里有 csi2_dphy0..5 六个逻辑 PHY，物理块只有两套
+		（@0x2b030000 与 @0x2b070000）：索引 <3 走前者，>=3 走后者。
+		本板摄像头挂在 csi2_dphy3。
+
+config RK3576_SPI
+	bool "SPI 主机（轮询式）"
+	default n
+	select SPI
+	select SPI_EXCHANGE
+	---help---
+		Synopsys DesignWare SSI 的 Rockchip 改版，原厂 dtb 里
+		compatible 为 "rockchip,rk3576-spi", "rockchip,rk3066-spi"。
+		寄存器布局与 DW 原版有出入（数据口分成 TXDR 0x400 /
+		RXDR 0x800，CTRLR0 位域重排），照 DW 手册写会踩空。
+
+		当前只实现 SPI4：板上四个通用 SPI 控制器在基础 dtb 里都是
+		disabled，只有 SPI4 被厂商的 40 针扩展 dtsi 使能并引到排针
+		上（m2 复用组）。其余三个没有对外引脚，无从验证。
+
+		片选用 GPIO（GPIO4_A5）而不是控制器原生 CS，与厂商 dtsi 的
+		cs-gpios 一致 —— NuttX 把片选拆成独立的 select/deselect，
+		要求整个事务期间保持有效，原生 CS 做不到。
+
+config RK3576_I2C
+	bool "I2C 主机（轮询式）"
+	default n
+	select I2C
+	---help---
+		Rockchip 自家的 I2C 控制器（非 DesignWare）。原厂 dtb 里
+		compatible 为 "rockchip,rk3576-i2c", "rockchip,rk3399-i2c"，
+		回退串指向 RK3399 同代 IP。
+
+		当前实现为轮询式，不使用中断：I2C 是低速总线，轮询开销可接受，
+		换来少一个可能出错的环节。也不配置引脚复用与时钟，依赖 U-Boot
+		已初始化的总线。
+
+		板上 I2C2（0x2ac50000）挂有 RTC HYM8563 @0x51 与
+		Type-C PD HUSB311 @0x4e。
+
+config RK3576_SDHCI
+	bool "eMMC 主机控制器 (dwcmshc / SDHCI)"
+	default n
+	---help---
+		RK3576 的 eMMC 控制器（0x2a330000），DesignWare dwcmshc，
+		遵循 SD Host Controller 标准寄存器布局，与 RK3588 同款。
+
+		当前只实现 rk3576_sdhci_probe()：走 eMMC 上电识别序列
+		（CMD0/CMD1/CMD2/CMD3）验证命令通路。完整的 sdio_dev_s
+		实现（28 个方法）在此之后分步补。
+
+		不配置电源域与时钟：板上实测 U-Boot 交接后 CAP0 的基准时钟
+		字段为 200MHz，与 dtsi 的 assigned-clock-rates 一致，说明
+		PD_NVM 电源域与五路时钟都已就绪。
+
+config RK3576_SAI
+	bool "SAI 音频接口"
+	default n
+	---help---
+		RK3576 的音频接口是 SAI（Serial Audio Interface），不是传统
+		I2S，寄存器布局取自 Linux sound/soc/rockchip/rockchip_sai.c。
+
+		板上 ES8388 codec 接在 SAI1（0x2a610000），codec 驱动用上游
+		现成的 drivers/audio/es8388.c。
+
+		当前只实现 rk3576_sai_probe()：打开 PD_AUDIO 电源域与三路时钟、
+		配置引脚复用，读版本寄存器自检。i2s_dev_s 与传输逻辑后续补。
+
+config RK3576_VOP2
+	bool "VOP2 显示控制器"
+	default n
+	---help---
+		RK3576 的显示控制器（0x27d00000），寄存器定义取自 Linux
+		drivers/gpu/drm/rockchip/。
+
+		★ RK3576 与 RK3568 的显示接口寄存器完全不同：RK3568 在
+		  DSP_IF_EN(0x028) 里用位域选接口，RK3576 每个接口一个独立
+		  寄存器（MIPI0 在 0x180）。照抄 RK3568 不会报错，只是写到
+		  别处、屏不亮而无从查起。
+
+		当前实现电源域/时钟自检与内置彩条输出。彩条不经过帧缓冲与
+		图层，可把"VOP 时序配置"与"图层/内存通路"两类问题分开验证。
+
+config RK3576_RNG
+	bool "硬件随机数 (/dev/random)"
+	default n
+	---help---
+		RK3576 的硬件随机数（0x2a410000，compatible "rockchip,rkrng"）。
+
+		★ 与 crypto v1/v2 两代的寄存器完全不同：v1 在 CRYPTO 块的
+		  0x0200、v2 在 0x0400 偏移，而 rkrng 是独立地址空间、
+		  CTRL 在 0x0010。照 v2 写不报错，只是读到全 0。
+
+		初始化时取两批数据比较，完全相同则判定硬件未工作并拒绝注册。
+
+config RK3576_TIMER
+	bool "RK3576 独立 TIMER（oneshot 下半部）"
+	default n
+	select ONESHOT
+	---help---
+		用 TIMER_NS_0 的 CH0/CH1（0x2ACC0000 起，通道间距 0x1000）实现
+		/dev/oneshot 的下半部：CH0 做带中断的一次性闹钟（GIC_SPI 45），
+		CH1 自由运行向上计数供 current() 读。
+
+		★ 必须用独立定时器，不能复用 arm64 通用定时器。后者是调度器
+		  正在用的下半部，而 struct oneshot_lowerhalf_s 只有一对
+		  callback/arg —— 注册 /dev/oneshot 会顶掉调度器的定时回调，
+		  系统时基当场失效（sleep 不返回、延时 work 不触发、看门狗
+		  automonitor 不喂狗），而串口与 nsh 表现完全正常。
+
+config RK3576_WDT
+	bool "看门狗 (Synopsys DesignWare)"
+	default n
+	depends on WATCHDOG
+	---help---
+		RK3576 的看门狗（0x2ace0000，snps,dw-wdt）。
+
+		★ 两点与常规看门狗不同，接入时要留意：
+		  1) 一旦使能便**无法由软件关闭**，stop() 返回 -ENOSYS。
+		     假装停成功会让上层不再喂狗，之后莫名重启。
+		  2) 超时只能取 2^(16+i) 个 tclk 周期的离散档位，设不出精确值。
+		     驱动取不小于请求值的最小档，并让 getstatus() 报告实际值。
+
+config RK3576_DWMMC
+	bool "SD 卡控制器 (DesignWare MSHC)"
+	default n
+	select ARCH_HAVE_SDIO
+	---help---
+		RK3576 的 SD 卡控制器（0x2a310000）。
+
+		★ 与 eMMC 不是同一种 IP，不能复用 RK3576_SDHCI 的代码：
+		    mmc@2a330000  rockchip,rk3576-dwcmshc  -> eMMC，标准 SDHCI
+		    mmc@2a310000  rockchip,rk3576-dw-mshc  -> SD 卡，Synopsys 自有
+		  名字只差两个字母，寄存器布局与状态机完全不同。
+
+		当前实现前置链路与自检：电源域 PD_SDGMAC、两路时钟、模块复位、
+		引脚复用，并用 VERID、软复位自清、CDETECT 三个独立读数确认状态。
+
+config RK3576_DWMMC_TRACE
+	bool "打印 SD 卡命令序列"
+	default n
+	depends on RK3576_DWMMC
+	---help---
+		把每条命令的编号与结果打出来。
+
+		用途是定位「卡未被识别」这类现象 —— mmcsd 会依次尝试 SD、SDIO、
+		MMC 的多种命令，不认得的必然超时，只看最终结论分不出哪一条是
+		真失败。打开后能直接看到序列断在哪。
+
+		日志量较大，定位完应关掉。
+
+config RK3576_FB
+	bool "VOP2 帧缓冲 (/dev/fb0)"
+	default n
+	depends on RK3576_VOP2 && VIDEO_FB
+	---help---
+		把 VOP2 的 ESMART1 图层接到 NuttX 的 fb 框架上。
+
+		★ 本驱动不初始化显示链路，只接管出厂 U-Boot 已经跑起来的那条。
+
+		  U-Boot 在加载内核前已完成面板上电、发送厂商初始化序列、配置
+		  D-PHY/DSI/VOP2 并在 VP1 上出图。那份面板初始化序列在厂商的
+		  rk3576-kickpi-k7-android-mipi-5-720-1280-F050008M01.dtsi 里，
+		  拿不到；面板一经复位就无法恢复，而背光是独立控制的，表现为
+		  「背光亮、永远无显示、寄存器读数却全部正常」，极难定位。
+
+		  因此本驱动只读时序取分辨率、分配帧缓冲、把图层指过去，
+		  绝不触碰面板复位、供电与 DSI 配置。
+
+config RK3576_DSI2
+	bool "MIPI DSI2 主机"
+	default n
+	select RK3576_VOP2
+	---help---
+		Synopsys MIPI DSI 2.0 主机（0x27d80000，电源域 PD_VO0）。
+
+		★ 是 DSI 2.0 不是 1.x。网上多数 Rockchip MIPI 资料讲的是
+		  dw-mipi-dsi 1.x（RK3399/RK3568 那代），寄存器名相似但偏移
+		  不同，照 1.x 写不会报错、只是配置全部落空。
+		  寄存器取自 Linux drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi2.c。
+
+		提供命令模式发送（面板初始化序列）与视频模式切换。
+		D-PHY 的 PLL 配置在 rk3576_dcphy.c，没有它链路不会真正工作。
+
+config RK3576_DCPHY
+	bool "MIPI D/C-PHY"
+	default n
+	---help---
+		Samsung IP 的 MIPI combo PHY（0x2b020000），DSI 与 CSI 共用。
+		本实现只做 D-PHY（显示用），不做 C-PHY。
+
+		PLL 为 P/M/S 分频：Fout = (M * 2 * Fin) / (P * 2^S)，
+		约束 Fvco 在 2.6~6.6GHz、Fin/P 在 6~30MHz。
+
+		★ PLL_LOCK 是整条显示链路上第一个真正的硬件反馈。VOP 与 DSI
+		  的配置只能"回读一致"，证明不了对错；PLL 锁定与否由硬件决定。
+		  锁不上就不必往下查 VOP/DSI。
+
+config RK3576_GMAC
+	bool "以太网 GMAC"
+	default n
+	---help---
+		Synopsys DesignWare MAC 4.20a（stmmac 系）。两路：
+		GMAC0 0x2a220000、GMAC1 0x2a230000，同属电源域 PD_SDGMAC。
+
+		★ NuttX 里已有同 IP 家族的成熟实现可参照：
+		  arch/arm/src/stm32h7/stm32_ethernet.c（4267 行）。
+		  已核对 MACCR=0x0000、MTL=0x0C00、DMA=0x1000 三处标志性偏移
+		  与 4.20a 一致。
+
+		本项负责硬件上电：时钟、GRF、引脚复用、RGMII 延时线，
+		以及 PHY（Maxio MAE0621A）的厂商初始化 —— 不做这一步
+		PHY 的模拟前端不工作，MDIO 却照常可读写，很有迷惑性。
+		收发由 RK3576_ETH 提供。
+
+config RK3576_ETH
+	bool "以太网收发（DWMAC 4.x 网络设备）"
+	default n
+	depends on RK3576_GMAC && NET
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NET
+	---help---
+		把 GMAC 注册成 NuttX 的网络设备。移植自
+		arch/arm/src/s32k3xx/s32k3xx_emac.c —— 那是同一套 Synopsys
+		DWMAC 4.x，寄存器偏移逐个核对完全一致。
+
+		硬件上电由 RK3576_GMAC 的 rk3576_gmac_probe() 完成，
+		本驱动只做 MAC/DMA 与设备注册。
+
+if RK3576_ETH
+
+config RK3576_ETH_PORT1
+	bool "用 GMAC1（eth1，0x2a230000）而不是 GMAC0"
+	default n
+	---help---
+		本驱动一次服务一个端口。选中则用 GMAC1，否则用 GMAC0。
+
+config RK3576_ETH_PHY_MAE0621A
+	bool "PHY 是 Maxio MAE0621A"
+	default y
+	---help---
+		KICKPI-K7 板上两路 GMAC 用的都是 Maxio MAE0621A-Q2C
+		（PHY ID 0x7b744411）。它的链路状态在分页寄存器
+		0xa43/0x1a，不在标准寄存器里。
+
+config RK3576_ETH_NETHIFS
+	int "网络接口数"
+	default 1
+	range 1 1
+
+config RK3576_ETH_NTXBUFFERS
+	int "发送描述符个数"
+	default 8
+
+config RK3576_ETH_NRXBUFFERS
+	int "接收描述符个数"
+	default 8
+
+config RK3576_ETH_BUFSIZE
+	int "DMA 缓冲区大小"
+	default 1536
+
+endif # RK3576_ETH
+
+endmenu # Rockchip RK3576 Peripheral Selection

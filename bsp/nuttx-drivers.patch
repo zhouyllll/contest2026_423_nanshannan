@@ -1,0 +1,403 @@
+diff --git a/drivers/input/ft5x06.c b/drivers/input/ft5x06.c
+index be5db167..34eb7303 100644
+--- a/drivers/input/ft5x06.c
++++ b/drivers/input/ft5x06.c
+@@ -1097,7 +1097,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
+   priv = kmm_zalloc(sizeof(struct ft5x06_dev_s));
+   if (!priv)
+     {
+-      ierr("ERROR: kmm_zalloc(%d) failed\n", sizeof(struct ft5x06_dev_s));
++      ierr("ERROR: kmm_zalloc(%zu) failed\n", sizeof(struct ft5x06_dev_s));
+       return -ENOMEM;
+     }
+ 
+diff --git a/drivers/timers/Kconfig b/drivers/timers/Kconfig
+index 31c2f53f..e08c5074 100644
+--- a/drivers/timers/Kconfig
++++ b/drivers/timers/Kconfig
+@@ -328,6 +328,17 @@ config RTC_DS1307
+ 	---help---
+ 		Enables support for the Maxim Integrated DS1307 I2C RTC timer.
+ 
++config RTC_HYM8563
++	bool "Haoyu HYM8563 I2C RTC"
++	default n
++	depends on I2C
++	---help---
++		Haoyu HYM8563 I2C 实时时钟。
++
++		★ 秒寄存器 bit7 是掉电标志（VL），置位表示走时曾中断、
++		  读出的时间不可信。本驱动在该情况下让 rdtime 返回 -ENODATA，
++		  而不是交出一个看似合法的随机时间 —— 后者比读不出来更难查。
++
+ config RTC_DS3231
+ 	bool "DS3231"
+ 	---help---
+diff --git a/drivers/timers/Make.defs b/drivers/timers/Make.defs
+index ee3d0b00..6681aba3 100644
+--- a/drivers/timers/Make.defs
++++ b/drivers/timers/Make.defs
+@@ -153,3 +153,7 @@ endif
+ 
+ DEPPATH += $(TMRDEPPATH)
+ VPATH += $(TMRVPATH)
++
++ifeq ($(CONFIG_RTC_HYM8563),y)
++  CSRCS += hym8563.c
++endif
+diff --git a/drivers/timers/hym8563.c b/drivers/timers/hym8563.c
+new file mode 100644
+index 00000000..8609631b
+--- /dev/null
++++ b/drivers/timers/hym8563.c
+@@ -0,0 +1,316 @@
++/****************************************************************************
++ * drivers/timers/hym8563.c
++ *
++ * Haoyu HYM8563 I2C 实时时钟。
++ *
++ * 寄存器定义取自 Linux drivers/rtc/rtc-hym8563.c。
++ *
++ * ★ 掉电标志（秒寄存器 bit7，VL）是这颗芯片唯一能说明"时间可不可信"
++ *   的位。它置位表示电压曾经低到无法保证走时，读出来的时间是垃圾。
++ *   不检查它的话，上层会拿到一个看似合法、实则随机的时间，而且没有
++ *   任何迹象表明有问题 —— 这类错误比读不出来更难查。
++ *
++ ****************************************************************************/
++
++/****************************************************************************
++ * Included Files
++ ****************************************************************************/
++
++#include <nuttx/config.h>
++
++#include <stdint.h>
++#include <stdbool.h>
++#include <string.h>
++#include <errno.h>
++#include <syslog.h>
++
++#include <nuttx/i2c/i2c_master.h>
++#include <nuttx/timers/rtc.h>
++#ifdef CONFIG_RTC_ARCH
++#  include <nuttx/timers/arch_rtc.h>
++#endif
++#include <nuttx/kmalloc.h>
++
++#ifdef CONFIG_RTC_HYM8563
++
++/****************************************************************************
++ * Pre-processor Definitions
++ ****************************************************************************/
++
++#define HYM8563_CTL1        0x00
++#define HYM8563_CTL1_STOP   (1 << 5)
++
++#define HYM8563_CTL2        0x01
++
++#define HYM8563_SEC         0x02
++#define HYM8563_SEC_VL      (1 << 7)   /* 掉电标志：置位表示时间不可信 */
++#define HYM8563_SEC_MASK    0x7f
++#define HYM8563_MIN_MASK    0x7f
++#define HYM8563_HOUR_MASK   0x3f
++#define HYM8563_DAY_MASK    0x3f
++#define HYM8563_WEEKDAY_MASK 0x07
++#define HYM8563_MONTH_CENTURY (1 << 7)
++#define HYM8563_MONTH_MASK  0x1f
++
++/****************************************************************************
++ * Private Types
++ ****************************************************************************/
++
++struct hym8563_dev_s
++{
++  struct rtc_lowerhalf_s      lower;   /* 必须是第一个成员 */
++  FAR struct i2c_master_s    *i2c;
++  uint8_t                     addr;
++  uint32_t                    freq;
++};
++
++/****************************************************************************
++ * Private Functions
++ ****************************************************************************/
++
++static inline uint8_t bcd2bin(uint8_t v)
++{
++  return (v & 0x0f) + ((v >> 4) * 10);
++}
++
++static inline uint8_t bin2bcd(uint8_t v)
++{
++  return ((v / 10) << 4) | (v % 10);
++}
++
++static int hym8563_read(FAR struct hym8563_dev_s *priv, uint8_t reg,
++                        FAR uint8_t *buf, size_t len)
++{
++  struct i2c_msg_s msg[2];
++
++  msg[0].frequency = priv->freq;
++  msg[0].addr      = priv->addr;
++  msg[0].flags     = 0;
++  msg[0].buffer    = &reg;
++  msg[0].length    = 1;
++
++  msg[1].frequency = priv->freq;
++  msg[1].addr      = priv->addr;
++  msg[1].flags     = I2C_M_READ;
++  msg[1].buffer    = buf;
++  msg[1].length    = len;
++
++  return I2C_TRANSFER(priv->i2c, msg, 2);
++}
++
++static int hym8563_write(FAR struct hym8563_dev_s *priv, uint8_t reg,
++                         FAR const uint8_t *buf, size_t len)
++{
++  struct i2c_msg_s msg;
++  uint8_t tmp[8];
++
++  if (len + 1 > sizeof(tmp))
++    {
++      return -EINVAL;
++    }
++
++  tmp[0] = reg;
++  memcpy(&tmp[1], buf, len);
++
++  msg.frequency = priv->freq;
++  msg.addr      = priv->addr;
++  msg.flags     = 0;
++  msg.buffer    = tmp;
++  msg.length    = len + 1;
++
++  return I2C_TRANSFER(priv->i2c, &msg, 1);
++}
++
++/****************************************************************************
++ * Name: hym8563_rdtime
++ ****************************************************************************/
++
++static int hym8563_rdtime(FAR struct rtc_lowerhalf_s *lower,
++                          FAR struct rtc_time *rtctime)
++{
++  FAR struct hym8563_dev_s *priv = (FAR struct hym8563_dev_s *)lower;
++  uint8_t buf[7];
++  int ret;
++
++  ret = hym8563_read(priv, HYM8563_SEC, buf, sizeof(buf));
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  /* ★ 先看掉电标志再解释数据。置位时后面的值是随机的，返回它等于
++   * 给上层一个看似合法的错误时间。
++   */
++
++  if (buf[0] & HYM8563_SEC_VL)
++    {
++      syslog(LOG_WARNING,
++             "HYM8563: 掉电标志置位，时间不可信（需先 settime）\n");
++      return -ENODATA;
++    }
++
++  rtctime->tm_sec  = bcd2bin(buf[0] & HYM8563_SEC_MASK);
++  rtctime->tm_min  = bcd2bin(buf[1] & HYM8563_MIN_MASK);
++  rtctime->tm_hour = bcd2bin(buf[2] & HYM8563_HOUR_MASK);
++  rtctime->tm_mday = bcd2bin(buf[3] & HYM8563_DAY_MASK);
++  rtctime->tm_wday = bcd2bin(buf[4] & HYM8563_WEEKDAY_MASK);
++  rtctime->tm_mon  = bcd2bin(buf[5] & HYM8563_MONTH_MASK) - 1;
++
++  /* 世纪位在月份寄存器的 bit7：置位表示 20xx 之前的世纪。
++   * tm_year 以 1900 为基准。
++   */
++
++  rtctime->tm_year = bcd2bin(buf[6]) +
++                     ((buf[5] & HYM8563_MONTH_CENTURY) ? 0 : 100);
++  return OK;
++}
++
++/****************************************************************************
++ * Name: hym8563_settime
++ ****************************************************************************/
++
++static int hym8563_settime(FAR struct rtc_lowerhalf_s *lower,
++                           FAR const struct rtc_time *rtctime)
++{
++  FAR struct hym8563_dev_s *priv = (FAR struct hym8563_dev_s *)lower;
++  uint8_t buf[7];
++  uint8_t ctl1;
++  int ret;
++
++  /* 写时间之前必须停走时，否则可能写到一半被进位打断。 */
++
++  ret = hym8563_read(priv, HYM8563_CTL1, &ctl1, 1);
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  ctl1 |= HYM8563_CTL1_STOP;
++  ret = hym8563_write(priv, HYM8563_CTL1, &ctl1, 1);
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  buf[0] = bin2bcd(rtctime->tm_sec);    /* 写 0 到 VL 位，清掉电标志 */
++  buf[1] = bin2bcd(rtctime->tm_min);
++  buf[2] = bin2bcd(rtctime->tm_hour);
++  buf[3] = bin2bcd(rtctime->tm_mday);
++  buf[4] = bin2bcd(rtctime->tm_wday);
++  buf[5] = bin2bcd(rtctime->tm_mon + 1);
++  buf[6] = bin2bcd(rtctime->tm_year % 100);
++
++  if (rtctime->tm_year < 100)
++    {
++      buf[5] |= HYM8563_MONTH_CENTURY;
++    }
++
++  ret = hym8563_write(priv, HYM8563_SEC, buf, sizeof(buf));
++  if (ret < 0)
++    {
++      return ret;
++    }
++
++  /* 恢复走时 */
++
++  ctl1 &= ~HYM8563_CTL1_STOP;
++  return hym8563_write(priv, HYM8563_CTL1, &ctl1, 1);
++}
++
++static bool hym8563_havesettime(FAR struct rtc_lowerhalf_s *lower)
++{
++  FAR struct hym8563_dev_s *priv = (FAR struct hym8563_dev_s *)lower;
++  uint8_t sec;
++
++  /* 掉电标志没置位，就说明走时未中断过，时间可信。 */
++
++  if (hym8563_read(priv, HYM8563_SEC, &sec, 1) < 0)
++    {
++      return false;
++    }
++
++  return (sec & HYM8563_SEC_VL) == 0;
++}
++
++static const struct rtc_ops_s g_hym8563_ops =
++{
++  .rdtime      = hym8563_rdtime,
++  .settime     = hym8563_settime,
++  .havesettime = hym8563_havesettime,
++};
++
++/****************************************************************************
++ * Public Functions
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: hym8563_rtc_initialize
++ *
++ * Description:
++ *   注册 HYM8563 为 /dev/rtcN。
++ *
++ ****************************************************************************/
++
++int hym8563_rtc_initialize(int minor, FAR struct i2c_master_s *i2c,
++                           uint8_t addr, uint32_t frequency)
++{
++  FAR struct hym8563_dev_s *priv;
++  uint8_t ctl[2];
++  int ret;
++
++  if (i2c == NULL)
++    {
++      return -EINVAL;
++    }
++
++  priv = kmm_zalloc(sizeof(struct hym8563_dev_s));
++  if (priv == NULL)
++    {
++      return -ENOMEM;
++    }
++
++  priv->lower.ops = &g_hym8563_ops;
++  priv->i2c       = i2c;
++  priv->addr      = addr;
++  priv->freq      = frequency;
++
++  /* ★ 先读一次控制寄存器确认芯片真的在总线上应答。
++   * 注册成功不等于器件存在 —— 这一点在本板的触摸上踩过。
++   */
++
++  ret = hym8563_read(priv, HYM8563_CTL1, ctl, 2);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "ERROR: HYM8563 @0x%02x 无应答: %d\n", addr, ret);
++      kmm_free(priv);
++      return ret;
++    }
++
++  syslog(LOG_INFO, "HYM8563: 应答正常 CTL1=0x%02x CTL2=0x%02x\n",
++         ctl[0], ctl[1]);
++
++  ret = rtc_initialize(minor, (FAR struct rtc_lowerhalf_s *)priv);
++  if (ret < 0)
++    {
++      syslog(LOG_ERR, "ERROR: 注册 /dev/rtc%d 失败: %d\n", minor, ret);
++      kmm_free(priv);
++      return ret;
++    }
++
++#ifdef CONFIG_RTC_ARCH
++  /* ★ rtc_initialize() 只是注册 /dev/rtcN 这个字符设备，系统时钟并不
++   * 会因此用上它。要让开机自动恢复时间，还得把下半部交给 arch_rtc：
++   *
++   *     up_rtc_set_lowerhalf(lower, sync)
++   *
++   * sync=true 会立刻用 RTC 的值同步系统时钟。掉电标志置位时 rdtime
++   * 返回 -ENODATA，clock_synchronize() 会保持原有时间，不会写入垃圾值。
++   */
++
++  up_rtc_set_lowerhalf((FAR struct rtc_lowerhalf_s *)priv, true);
++#endif
++
++  return OK;
++}
++
++#endif /* CONFIG_RTC_HYM8563 */
+diff --git a/include/nuttx/timers/hym8563.h b/include/nuttx/timers/hym8563.h
+new file mode 100644
+index 00000000..b597148d
+--- /dev/null
++++ b/include/nuttx/timers/hym8563.h
+@@ -0,0 +1,28 @@
++/****************************************************************************
++ * include/nuttx/timers/hym8563.h
++ ****************************************************************************/
++
++#ifndef __INCLUDE_NUTTX_TIMERS_HYM8563_H
++#define __INCLUDE_NUTTX_TIMERS_HYM8563_H
++
++#include <nuttx/config.h>
++#include <stdint.h>
++#include <nuttx/i2c/i2c_master.h>
++
++/****************************************************************************
++ * Public Function Prototypes
++ ****************************************************************************/
++
++/****************************************************************************
++ * Name: hym8563_rtc_initialize
++ *
++ * Description:
++ *   把 HYM8563 注册为 /dev/rtc<minor>。注册前会读控制寄存器确认器件
++ *   在位；掉电标志置位时 rdtime 返回 -ENODATA，而不是交出随机时间。
++ *
++ ****************************************************************************/
++
++int hym8563_rtc_initialize(int minor, FAR struct i2c_master_s *i2c,
++                           uint8_t addr, uint32_t frequency);
++
++#endif /* __INCLUDE_NUTTX_TIMERS_HYM8563_H */

@@ -1,0 +1,105 @@
+############################################################################
+# arch/arm64/src/rk3576/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include common/Make.defs
+
+# Rockchip RK3576 specific C source files
+#
+# 注意这里没有 rk3576_serial.c 之外的串口驱动：DW 8250 与 16550 兼容，
+# 驱动本体在 drivers/serial/uart_16550.c，本文件只提供两个转发函数。
+
+CHIP_CSRCS  = rk3576_boot.c rk3576_serial.c rk3576_gpio.c
+CHIP_CSRCS += rk3576_cru.c rk3576_pinmux.c rk3576_power.c
+
+ifeq ($(CONFIG_RK3576_GMAC),y)
+CHIP_CSRCS += rk3576_gmac.c
+endif
+
+ifeq ($(CONFIG_RK3576_ETH),y)
+CHIP_CSRCS += rk3576_eth.c
+endif
+
+ifeq ($(CONFIG_RK3576_DCPHY),y)
+CHIP_CSRCS += rk3576_dcphy.c
+endif
+
+ifeq ($(CONFIG_RK3576_DSI2),y)
+CHIP_CSRCS += rk3576_dsi2.c
+endif
+
+ifeq ($(CONFIG_RK3576_VOP2),y)
+CHIP_CSRCS += rk3576_vop2.c
+endif
+
+ifeq ($(CONFIG_RK3576_RNG),y)
+CHIP_CSRCS += rk3576_rng.c
+endif
+
+ifeq ($(CONFIG_RK3576_WDT),y)
+CHIP_CSRCS += rk3576_wdt.c
+endif
+
+ifeq ($(CONFIG_RK3576_TIMER),y)
+CHIP_CSRCS += rk3576_timer.c
+endif
+
+CHIP_CSRCS += rk3576_reboot.c
+
+ifeq ($(CONFIG_RK3576_DWMMC),y)
+CHIP_CSRCS += rk3576_dwmmc.c
+endif
+
+ifeq ($(CONFIG_RK3576_FB),y)
+CHIP_CSRCS += rk3576_fb.c
+endif
+
+ifeq ($(CONFIG_RK3576_SAI),y)
+CHIP_CSRCS += rk3576_sai.c
+endif
+
+ifeq ($(CONFIG_RK3576_SDHCI),y)
+CHIP_CSRCS += rk3576_sdhci.c
+endif
+
+ifeq ($(CONFIG_RK3576_I2C),y)
+CHIP_CSRCS += rk3576_i2c.c
+endif
+
+ifeq ($(CONFIG_RK3576_CIF),y)
+CHIP_CSRCS += rk3576_cif.c
+endif
+
+ifeq ($(CONFIG_RK3576_CSIHOST),y)
+CHIP_CSRCS += rk3576_csihost.c
+endif
+
+ifeq ($(CONFIG_RK3576_CSIDPHY),y)
+CHIP_CSRCS += rk3576_csidphy.c
+endif
+
+ifeq ($(CONFIG_RK3576_SPI),y)
+CHIP_CSRCS += rk3576_spi.c
+endif
+
+ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
+CHIP_ASRCS  = rk3576_lowputc.S
+endif

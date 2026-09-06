@@ -22,7 +22,21 @@ set -e
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"   # 队伍仓根
 WS="$(cd "$ROOT/.." && pwd)"                              # openvela 工作区根
 NUTTX="$WS/nuttx"
-P_NUTTX="$ROOT/bsp/nuttx-rk3576.patch"
+# ★ 芯片层已搬到本仓 chip/rk3576/，不再以补丁形式存在。
+#
+#   《新平台适配指南》要求「所有定制代码存放在 vendor 目录中，不得修改
+#   核心代码」，芯片层通过 CONFIG_ARCH_CHIP_CUSTOM_DIR 从树外加载。
+#
+#   nuttx 仓里现在只剩两类**通用驱动**，按《驱动开发指南》它们本就该在
+#   drivers/ 下，将来各自独立提 PR 给上游：
+#       drivers/timers/hym8563.c    新增的通用 I2C RTC 驱动
+#       drivers/input/ft5x06.c      给已有通用驱动修的一处 bug
+#
+#   所以导两份：
+#       nuttx-drivers.patch   压平的净差异，就是要提上游的内容
+#       nuttx-history.patch   完整提交序列，留作开发过程的记录
+P_NUTTX="$ROOT/bsp/nuttx-drivers.patch"
+P_HIST="$ROOT/bsp/nuttx-history.patch"
 BRANCH=rk3576-bsp
 UPSTREAM=dev-ai-contest-2026
 
@@ -39,14 +53,18 @@ base() {  # $1 = repo
 do_export() {  # $1=repo $2=patchfile $3=名字
   local B n_p n_b
   B=$(base "$1") || { echo "✗ $3：分支 $BRANCH 不存在"; return 1; }
-  git -C "$1" format-patch --stdout "$B..$BRANCH" > "$2"
-  n_p=$(grep -c '^From ' "$2" || true)
+  # 净差异：直接可提上游的内容
+  git -C "$1" diff "$B..$BRANCH" > "$2"
+  # 完整序列：开发过程的记录（含已搬走的芯片层）
+  git -C "$1" format-patch --stdout "$B..$BRANCH" > "$P_HIST"
+  n_p=$(grep -c '^From ' "$P_HIST" || true)
   n_b=$(git -C "$1" rev-list --count "$B..$BRANCH")
-  echo "$3 -> $(basename "$2")"
-  echo "  基线   : $B"
-  echo "  提交数 : $n_p（分支上共 $n_b 个）"
-  git -C "$1" diff --stat "$B..$BRANCH" | tail -1 | sed 's/^/  /'
-  [ "$n_p" = "$n_b" ] || { echo "  ✗ 提交数对不上，补丁不完整！"; return 1; }
+  echo "$3"
+  echo "  基线     : $B"
+  echo "  净差异   -> $(basename "$2")"
+  git -C "$1" diff --stat "$B..$BRANCH" | tail -1 | sed 's/^/             /'
+  echo "  提交序列 -> $(basename "$P_HIST")（$n_p 个提交）"
+  [ "$n_p" = "$n_b" ] || { echo "  ✗ 提交数对不上，记录不完整！"; return 1; }
 }
 
 case "${1:-}" in
