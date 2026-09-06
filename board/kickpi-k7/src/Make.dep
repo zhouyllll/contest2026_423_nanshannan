@@ -172,6 +172,7 @@ kickpi_k7_appinit.o: kickpi_k7_appinit.c \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_timer.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_rng.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_gmac.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_eth.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_vop2.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_sdhci.h \
  kickpi_k7.h
@@ -627,6 +628,7 @@ kickpi_k7_camera.o: kickpi_k7_camera.c \
  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/ioctl.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/ioctl.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/serial/tioctl.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/net/ioctl.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/input/ioctl.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/video/fb.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/debug.h \

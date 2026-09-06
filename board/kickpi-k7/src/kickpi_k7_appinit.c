@@ -53,6 +53,7 @@
 #include "rk3576_timer.h"
 #include "rk3576_rng.h"
 #include "rk3576_gmac.h"
+#include "rk3576_eth.h"
 #include "rk3576_vop2.h"
 #include "rk3576_sdhci.h"
 #include "kickpi_k7.h"
@@ -612,6 +613,29 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: GMAC1 探测失败: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RK3576_ETH
+  /* ★ 网络设备要在 rk3576_gmac_probe() **之后**注册。
+   *
+   *   probe 里做的是时钟、GRF、引脚复用、RGMII 延时线，以及 PHY 的
+   *   厂商初始化 —— 少了最后一项，PHY 的模拟前端不工作，DMA 软复位
+   *   不会完成，网络设备注册上去也是死的。
+   *
+   *   arm64 通用层默认在 OS 早期就调 arm64_netinitialize()，那时
+   *   板级初始化还没跑。所以开 CONFIG_NETDEV_LATEINIT 把它挪到这里。
+   */
+
+  ret = rk3576_eth_netinitialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 网络设备注册失败: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "网络: eth0 已注册（GMAC%d）\n",
+             CONFIG_RK3576_ETH_PORT);
     }
 #endif
 

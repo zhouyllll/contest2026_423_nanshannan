@@ -48,6 +48,7 @@ spi_selftest_main.c.home.dministrator.openvela-amlogic.src.contest2026_423_nansh
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/lib/lib.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/stdlib.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/ioctl.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/net/ioctl.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/input/ioctl.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/unistd.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/tls.h \
