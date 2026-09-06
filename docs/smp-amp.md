@@ -44,6 +44,22 @@ A72 簇会算出 0..3，与 A53 簇撞号。届时需要自定义
 而 A72 簇正是 AMP 阶段准备划给另一个 OS 的那一半，所以现在不占它，
 两件事不打架。
 
+★ 更正：AMP 阶段**不需要**改这个映射。`CORE_TO_MPID` 的实现是
+
+```c
+__mpidr = GET_MPIDR();                       /* 取当前核的 MPIDR */
+__mpidr &= ~(MPIDR_AFFLVL_MASK << AFF0_SHIFT);
+__mpidr |= (core << AFF0_SHIFT);             /* 只替换 Aff0 */
+```
+
+它保留了**正在运行的这颗核**的 Aff1。所以当 NuttX 的启动核是 A72 簇的
+core 0（MPIDR 0x100）时，`arm64_get_mpid(1..3)` 自动得到 0x101..0x103，
+`MPID_TO_CORE` 取 Aff0 也仍然得到 0..3 —— 整套逻辑对**任一单簇**都成立，
+无需改动。只有想同时用满两个簇（8 核）时才需要自定义映射。
+
+我此前在提交信息里写「扩到 A72 簇需要 Aff1 感知的映射」，那是没读透这个
+宏就下的结论，实际只有跨簇才需要。
+
 ### 实测
 
 ```
@@ -121,12 +137,31 @@ eMMC 上的 rootfs 也没动过 —— **Linux 侧是现成的**。
 1. **链接地址搬到保留区**（现在 0x40480000 在 Linux 的地盘里），
    并与内核 dts 的 `reserved-memory` 对齐
 2. **SMP 改到 A72 簇**：现在我们占的正是 Linux 要用的 A53 簇。
-   这需要上面说的 Aff1 感知映射
+   代码无需改动（见上面的更正），只是启动核由 U-Boot 的 AMP 指定为
+   MPIDR 0x100
 3. **外设分家**：UART / I2C / GPIO / VOP2 / CIF / GMAC / SD 现在
    全部由 NuttX 独占初始化，AMP 下必须和 Linux 明确划分，
    否则两边同时碰同一个控制器
 4. **通信通道**：要让 AMP 有意义，需要 rpmsg/OpenAMP
    （共享内存 + mailbox）。`CONFIG_OPENAMP` 当前未开
+
+### 进度：U-Boot 已编出
+
+已从 SDK 抽出 u-boot + rkbin 到 `~/rk3576-amp/`，用 openvela 自带的
+`aarch64-none-elf-` 工具链编译通过（SDK 原本要 gcc-linaro 6.3.1，
+新版 GCC 会把若干警告当错误，加 `KCFLAGS="-Wno-error"` 即可）：
+
+```
+make rk3576_defconfig rk3576-amp.config CROSS_COMPILE=<tc>
+make CROSS_COMPILE=<tc> KCFLAGS="-Wno-error" -j
+```
+
+产物 `u-boot.img` 1.45MB。确认 AMP 已链入（`nm` 可见 `amp_cpus_on`、
+`arm64_switch_amp_pe`、`sip_smc_amp_cfg`、`os_amp_dispatcher_cpu`）。
+
+★ AMP 逻辑全在 U-Boot 本体（`drivers/cpu/`），**只需替换 `uboot` 分区**，
+不必动 loader/TPL。万一 U-Boot 起不来，SPL 仍在，一般还能进下载模式，
+风险比换整套 bootloader 小得多。
 
 ### 建议的推进顺序
 
