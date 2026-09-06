@@ -1,0 +1,47 @@
+diff --git a/netutils/tftpc/Kconfig b/netutils/tftpc/Kconfig
+index 59766f0..5fa8d13 100644
+--- a/netutils/tftpc/Kconfig
++++ b/netutils/tftpc/Kconfig
+@@ -12,3 +12,16 @@ config NETUTILS_TFTPC
+ 
+ if NETUTILS_TFTPC
+ endif
++
++config NETUTILS_TFTP_PORT
++	int "TFTP server port"
++	default 69
++	depends on NETUTILS_TFTPC
++	---help---
++		The well-known TFTP server port.  Standard is 69.
++
++		Made configurable because binding port 69 on the host requires
++		root; pointing both ends at a high port lets an unprivileged
++		TFTP server receive files from the target.  The value was
++		already honoured by tftpc_internal.h via #ifndef, it just had
++		no Kconfig entry, so it could not be set from a defconfig.
+diff --git a/netutils/tftpc/tftpc_put.c b/netutils/tftpc/tftpc_put.c
+index a30e357..3006d90 100644
+--- a/netutils/tftpc/tftpc_put.c
++++ b/netutils/tftpc/tftpc_put.c
+@@ -230,7 +230,20 @@ static int tftp_rcvack(int sd, FAR uint8_t *packet,
+               /* Success! */
+ 
+               ninfo("Received ACK for block %d\n", rblockno);
+-              *blockno = rblockno;
++
++              /* blockno is optional: the caller that waits for the ACK of
++               * the initial WRQ passes NULL, because that block number is
++               * necessarily zero and of no interest to it.  Dereferencing
++               * unconditionally faulted on every successful put -- the
++               * failure needed a *working* server to show up, so it hid
++               * behind every unreachable-host test.
++               */
++
++              if (blockno != NULL)
++                {
++                  *blockno = rblockno;
++                }
++
+               return OK;
+             }
+         }

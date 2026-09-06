@@ -15,15 +15,24 @@ config KICKPI_K7_IMGPROC
 
 config KICKPI_K7_BAYER_PHASE
 	int "Bayer 相位（0=RGGB 1=GRBG 2=GBRG 3=BGGR）"
-	default 0
+	default 2
 	range 0 3
 	depends on KICKPI_K7_IMGPROC
 	---help---
 		(0,0) 处是哪个颜色，取决于传感器的裁剪起点是奇是偶。
 
-		★ 必须拿彩色标定图实测确认。相位错了图像不会崩，只会红蓝
-		  互换或整体偏色，看起来像白平衡不准，很容易归错因。
-		  默认值只是个起点，不是结论。
+		★ 已上板实测确定为 2（GBRG）。用手机满屏纯红贴住镜头，
+		  `cam cap` 后 `cam bayer` 读四个位置的平均值：
+
+		      (0,0)=8666  (1,0)=3998
+		      (0,1)=14378 (1,1)=8649
+
+		  两个 G 相等且在主对角线（8666/8649）；红光下 (0,1) 最亮
+		  是 R、(1,0) 最暗是 B —— 三条判据互相印证，排布是 GBRG。
+
+		★ 中性场景下测不出来：四个值只差 1~3%，那是噪声不是信号。
+		  必须用饱和的单色画面，手机自发光比红纸可靠（纸是反射光，
+		  环境光一混就不纯）。
 
 config KICKPI_K7_JPEG_QUALITY
 	int "JPEG 质量 (1-100)"
