@@ -120,6 +120,160 @@ static inline uint16_t raw_at(FAR const uint16_t *raw, int stride_pix,
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: LSC / CCM —— 两级需要标定的 ISP
+ *
+ *   ★ 这两级的系数**只能实测**，不能凭型号猜。
+ *
+ *     - LSC（镜头阴影）取决于镜头 + 光圈 + IR 滤片的组合，同一颗
+ *       传感器换个镜头就完全不同。
+ *     - CCM（色彩校正矩阵）取决于传感器的光谱响应与目标色空间，
+ *       要用色卡在已知光源下解最小二乘。
+ *
+ *     所以默认值是**恒等**（LSC 全 1、CCM 单位阵）—— 这一级存在但不
+ *     改变画面。填一组"看起来专业"的常数比不做更糟：画面会被改成
+ *     错的样子，而且看起来像是校正过的，后面没人会再怀疑它。
+ *
+ *   ★ LSC 可以自己标：`cam lsccal` 对着均匀白面拍一张，量径向衰减。
+ *     CCM 需要色卡，目前只提供 `cam ccm` 手工设置的通路。
+ *
+ ****************************************************************************/
+
+/* LSC 径向模型：gain(r) = 1 + k1*rn + k2*rn^2，rn = (r/rmax)^2，Q16。
+ * 用 rn = r^2 而不是 r，省掉每像素一次开方；二次型对普通镜头的渐晕
+ * 已经够用。
+ */
+
+static int g_lsc_k1;                  /* Q16，0 = 未标定 */
+static int g_lsc_k2;
+
+/* CCM，行主序 Q8。单位阵 = {256,0,0, 0,256,0, 0,0,256} */
+
+static int g_ccm[9] =
+{
+  256, 0, 0,
+  0, 256, 0,
+  0, 0, 256
+};
+
+static bool g_ccm_active;             /* 非单位阵时才做乘法 */
+
+void kickpi_imgproc_set_lsc(int k1, int k2)
+{
+  g_lsc_k1 = k1;
+  g_lsc_k2 = k2;
+}
+
+void kickpi_imgproc_get_lsc(FAR int *k1, FAR int *k2)
+{
+  *k1 = g_lsc_k1;
+  *k2 = g_lsc_k2;
+}
+
+void kickpi_imgproc_set_ccm(FAR const int *m)
+{
+  static const int ident[9] =
+  {
+    256, 0, 0, 0, 256, 0, 0, 0, 256
+  };
+
+  int i;
+
+  memcpy(g_ccm, m, sizeof(g_ccm));
+  g_ccm_active = (memcmp(g_ccm, ident, sizeof(ident)) != 0);
+
+  for (i = 0; i < 9; i++)
+    {
+      ninfo("CCM[%d] = %d\n", i, g_ccm[i]);
+    }
+}
+
+/* 某像素处的镜头阴影补偿增益，Q8。未标定时恒返回 1.0。 */
+
+static inline int lsc_gain_q8(int x, int y, int width, int height)
+{
+  int64_t maxr2;
+  int64_t r2;
+  int64_t rn;
+  int64_t g;
+  int dx;
+  int dy;
+
+  if (g_lsc_k1 == 0 && g_lsc_k2 == 0)
+    {
+      return AWB_UNITY;
+    }
+
+  dx = x - width / 2;
+  dy = y - height / 2;
+
+  maxr2 = (int64_t)(width / 2) * (width / 2) +
+          (int64_t)(height / 2) * (height / 2);
+  if (maxr2 <= 0)
+    {
+      return AWB_UNITY;
+    }
+
+  r2 = (int64_t)dx * dx + (int64_t)dy * dy;
+  rn = (r2 << 16) / maxr2;                       /* 0..65536 */
+
+  g = 65536 + ((int64_t)g_lsc_k1 * rn >> 16)
+            + ((int64_t)g_lsc_k2 * rn >> 16) * rn / 65536;
+
+  g >>= 8;                                       /* Q16 -> Q8 */
+
+  if (g < AWB_GAIN_MIN)
+    {
+      return AWB_GAIN_MIN;
+    }
+
+  if (g > AWB_GAIN_MAX)
+    {
+      return AWB_GAIN_MAX;
+    }
+
+  return (int)g;
+}
+
+/* 3x3 色彩校正，就地做。输入输出都是 8 位。
+ *
+ * ★ 严格说 CCM 该在**线性**域做，而我们这里已经过了 to8g 的拉伸。
+ *   拉伸是线性的（减黑电平再按范围缩放），所以仍然线性，只是量化到
+ *   了 8 位 —— 对一个还没有色卡标定的通路来说，这点精度损失不是当前
+ *   的瓶颈。等真做了标定，要一并把这一级挪到 16 位域。
+ */
+
+static inline void apply_ccm(FAR uint8_t *px)
+{
+  int r;
+  int g;
+  int b;
+  int i;
+  int o[3];
+
+  if (!g_ccm_active)
+    {
+      return;
+    }
+
+  r = px[0];
+  g = px[1];
+  b = px[2];
+
+  for (i = 0; i < 3; i++)
+    {
+      int v = (g_ccm[i * 3 + 0] * r +
+               g_ccm[i * 3 + 1] * g +
+               g_ccm[i * 3 + 2] * b) >> 8;
+
+      o[i] = v < 0 ? 0 : (v > 255 ? 255 : v);
+    }
+
+  px[0] = (uint8_t)o[0];
+  px[1] = (uint8_t)o[1];
+  px[2] = (uint8_t)o[2];
+}
+
 static inline uint8_t to8g(uint16_t v, uint16_t black, uint16_t white,
                            int gq8)
 {
@@ -225,9 +379,19 @@ static void demosaic_row(FAR const uint16_t *raw, int stride_pix,
           r = (uint16_t)((ul + ur + dl + dr) >> 2);
         }
 
-      rgb[x * 3 + 0] = to8g(r, black, white, gain[0]);
-      rgb[x * 3 + 1] = to8g(g, black, white, gain[1]);
-      rgb[x * 3 + 2] = to8g(b, black, white, gain[2]);
+      /* LSC 是与通道无关的空间增益，AWB 是与位置无关的通道增益，
+       * 两者相乘即可，不需要各来一遍乘法。
+       */
+
+      {
+        int lg = lsc_gain_q8(x, y, width, height);
+
+        rgb[x * 3 + 0] = to8g(r, black, white, gain[0] * lg >> 8);
+        rgb[x * 3 + 1] = to8g(g, black, white, gain[1] * lg >> 8);
+        rgb[x * 3 + 2] = to8g(b, black, white, gain[2] * lg >> 8);
+      }
+
+      apply_ccm(&rgb[x * 3]);
     }
 }
 
@@ -778,6 +942,160 @@ int kickpi_imgproc_jpeg_mem(FAR const uint16_t *raw, int stride_pix,
   return kickpi_imgproc_jpeg_scaled(raw, stride_pix, width, height,
                                     width, height, phase, black, white,
                                     quality, out, outlen);
+}
+
+/****************************************************************************
+ * Name: kickpi_imgproc_lsccal
+ *
+ * Description:
+ *   对着**均匀白面**拍一张，量径向衰减，拟合 LSC 的 k1/k2。
+ *
+ *   用法：拿一张白纸贴住镜头、或对着均匀漫射的白墙，确保画面里没有
+ *   任何结构、也没有过曝。然后 cam cap + cam lsccal。
+ *
+ *   ★ 只用 G 位统计。G 的采样点是 R/B 的两倍，信噪比最好；严格说
+ *     渐晕是分通道的（主光线角与色差有关），但在没有色卡的阶段，
+ *     先把亮度渐晕拉平已经是最大的一步改善。分通道 LSC 留到以后。
+ *
+ *   ★ 会拒绝明显不是标定图的输入。
+ *
+ *     增益必须随半径单调不减 —— 镜头渐晕只会让边缘更暗，不会更亮。
+ *     拿一张普通照片来标，中心暗边缘亮的情况随处可见，拟合出来的
+ *     k1/k2 会把画面改坏。而 LSC 一旦写进去就默默作用于每一帧，
+ *     错了很难被发现，所以宁可在这里拒绝。
+ *
+ ****************************************************************************/
+
+#define LSC_BINS 8
+
+int kickpi_imgproc_lsccal(FAR const uint16_t *raw, int stride_pix,
+                          int width, int height, int phase,
+                          FAR int *k1_out, FAR int *k2_out)
+{
+  uint64_t sum[LSC_BINS];
+  uint32_t cnt[LSC_BINS];
+  uint32_t mean[LSC_BINS];
+  uint16_t black;
+  uint16_t white;
+  int64_t maxr2;
+  int i;
+  int x;
+  int y;
+
+  if (raw == NULL || width <= 0 || height <= 0)
+    {
+      return -EINVAL;
+    }
+
+  memset(sum, 0, sizeof(sum));
+  memset(cnt, 0, sizeof(cnt));
+
+  measure_range(raw, stride_pix, width, height, &black, &white);
+
+  maxr2 = (int64_t)(width / 2) * (width / 2) +
+          (int64_t)(height / 2) * (height / 2);
+  if (maxr2 <= 0)
+    {
+      return -EINVAL;
+    }
+
+  for (y = 0; y < height; y += 2)
+    {
+      for (x = 0; x < width; x += 2)
+        {
+          int dx;
+          int dy;
+          int cx = (x & 1) ^ (phase & 1);
+          int cy = (y & 1) ^ ((phase >> 1) & 1);
+          int bin;
+          int64_t rn;
+          uint16_t v;
+
+          /* 只要 G 位：归一后 (1,0) 和 (0,1) 是 G */
+
+          if (cx == cy)
+            {
+              continue;
+            }
+
+          dx = x - width / 2;
+          dy = y - height / 2;
+          rn = (((int64_t)dx * dx + (int64_t)dy * dy) << 16) / maxr2;
+          bin = (int)(rn * LSC_BINS >> 16);
+          if (bin >= LSC_BINS)
+            {
+              bin = LSC_BINS - 1;
+            }
+
+          v = raw[(size_t)y * stride_pix + x];
+          if (v > black)
+            {
+              sum[bin] += (uint32_t)(v - black);
+              cnt[bin]++;
+            }
+        }
+    }
+
+  for (i = 0; i < LSC_BINS; i++)
+    {
+      if (cnt[i] == 0)
+        {
+          syslog(LOG_ERR, "LSC 标定: 第 %d 环没有有效样本\n", i);
+          return -EIO;
+        }
+
+      mean[i] = (uint32_t)(sum[i] / cnt[i]);
+      syslog(LOG_INFO, "LSC 标定: 环 %d 均值 %" PRIu32 "\n", i, mean[i]);
+    }
+
+  if (mean[0] == 0)
+    {
+      return -EIO;
+    }
+
+  /* 单调性检查：允许一点噪声抖动（5%），但整体必须是往下走的 */
+
+  for (i = 1; i < LSC_BINS; i++)
+    {
+      if (mean[i] > mean[i - 1] * 105 / 100)
+        {
+          syslog(LOG_ERR,
+                 "LSC 标定: 环 %d 比环 %d 还亮（%" PRIu32 " > %" PRIu32
+                 "）—— 这不像均匀白面，拒绝写入\n",
+                 i, i - 1, mean[i], mean[i - 1]);
+          return -EINVAL;
+        }
+    }
+
+  if (mean[LSC_BINS - 1] * 100 / mean[0] > 98)
+    {
+      syslog(LOG_WARNING,
+             "LSC 标定: 边缘只比中心暗 %d%%，没有可校正的渐晕\n",
+             100 - (int)(mean[LSC_BINS - 1] * 100 / mean[0]));
+      *k1_out = 0;
+      *k2_out = 0;
+      return OK;
+    }
+
+  /* gain(rn) = center / mean(rn) = 1 + k1*rn + k2*rn^2
+   *
+   * 取 rn=0.5（第 4 环的中点）与 rn≈1.0（最外环）两点定两个未知数：
+   *   a = g(0.5) - 1 = 0.5*k1 + 0.25*k2
+   *   b = g(1.0) - 1 =     k1 +      k2
+   * 解得 k1 = 4a - b，k2 = 2b - 4a。
+   */
+
+  {
+    int64_t a = ((int64_t)mean[0] << 16) / mean[LSC_BINS / 2] - 65536;
+    int64_t b = ((int64_t)mean[0] << 16) / mean[LSC_BINS - 1] - 65536;
+
+    *k1_out = (int)(4 * a - b);
+    *k2_out = (int)(2 * b - 4 * a);
+  }
+
+  syslog(LOG_INFO, "LSC 标定: k1=%d k2=%d (Q16)，边缘/中心 = %d%%\n",
+         *k1_out, *k2_out, (int)(mean[LSC_BINS - 1] * 100 / mean[0]));
+  return OK;
 }
 
 /****************************************************************************

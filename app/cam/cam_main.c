@@ -59,6 +59,9 @@ int main(int argc, char *argv[])
   if (argc < 2)
     {
       printf("用法: cam on|off|rx|cap|jpeg|jpegtest|bayer|show|white|black|bars|half|vhalf|line|box\n");
+        printf("      cam lsccal [相位]  对着均匀白面标定镜头阴影\n");
+        printf("      cam lsc [k1 k2]    看/设 LSC 系数（Q16，0 0 关闭）\n");
+        printf("      cam ccm <9 个系数> 色彩校正矩阵（Q8，需色卡标定）\n");
       printf("      cam ub <0-2>     还原 U-Boot 窗口并写图案\n");
       printf("      cam morph <0-7>  从 U-Boot 参数出发逐个变量地改（7 复现故障）\n");
       printf("      cam regs         打印 ESMART1/VP1 寄存器现状\n");
@@ -85,6 +88,69 @@ int main(int argc, char *argv[])
   else if (strcmp(argv[1], "cap") == 0)
     {
       ret = kickpi_camera_capture();
+    }
+  else if (strcmp(argv[1], "lsccal") == 0)
+    {
+      /* cam lsccal [相位]
+       *
+       * 对着均匀白面拍一张（cam cap）之后跑这个，量径向渐晕并写进
+       * LSC。拍的不是均匀面会被拒绝 —— 见 kickpi_imgproc_lsccal 的
+       * 单调性检查。
+       */
+
+      ret = kickpi_camera_lsccal(argc > 2 ? atoi(argv[2])
+                                          : CONFIG_KICKPI_K7_BAYER_PHASE);
+    }
+  else if (strcmp(argv[1], "lsc") == 0)
+    {
+      /* cam lsc            打印当前系数
+       * cam lsc <k1> <k2>  手工设置（Q16），cam lsc 0 0 关闭
+       */
+
+      if (argc >= 4)
+        {
+          kickpi_imgproc_set_lsc(atoi(argv[2]), atoi(argv[3]));
+        }
+
+      {
+        int k1;
+        int k2;
+
+        kickpi_imgproc_get_lsc(&k1, &k2);
+        printf("LSC k1=%d k2=%d (Q16, 0 0 = 关闭)\n", k1, k2);
+      }
+
+      ret = OK;
+    }
+  else if (strcmp(argv[1], "ccm") == 0)
+    {
+      /* cam ccm <m0..m8>   3x3 色彩校正矩阵，Q8（256 = 1.0），行主序
+       *
+       * ★ 系数要用色卡在已知光源下解出来。这里只提供通路，不提供
+       *   猜出来的数字 —— 填错了画面会被改成错的样子，而且看起来
+       *   像是校正过的。
+       */
+
+      if (argc < 11)
+        {
+          printf("用法: cam ccm <9 个 Q8 系数>  例如单位阵:\n"
+                 "      cam ccm 256 0 0 0 256 0 0 0 256\n");
+          return 1;
+        }
+
+      {
+        int m[9];
+        int i;
+
+        for (i = 0; i < 9; i++)
+          {
+            m[i] = atoi(argv[2 + i]);
+          }
+
+        kickpi_imgproc_set_ccm(m);
+      }
+
+      ret = OK;
     }
   else if (strcmp(argv[1], "jpeg") == 0)
     {

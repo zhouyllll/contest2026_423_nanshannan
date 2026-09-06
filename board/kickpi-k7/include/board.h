@@ -258,6 +258,21 @@ int kickpi_camera_stream(bool on);
  ****************************************************************************/
 
 int kickpi_camera_jpeg(FAR const char *path, int phase, int quality);
+
+/* LSC（镜头阴影）与 CCM（色彩校正矩阵）。
+ *
+ * ★ 两者的系数都只能实测，默认恒等 —— 这一级存在但不改变画面。
+ *   LSC 用 kickpi_imgproc_lsccal() 对着均匀白面自标；CCM 需要色卡，
+ *   目前只提供手工设置的通路。
+ */
+
+void kickpi_imgproc_set_lsc(int k1, int k2);
+void kickpi_imgproc_get_lsc(FAR int *k1, FAR int *k2);
+void kickpi_imgproc_set_ccm(FAR const int *m);
+int  kickpi_imgproc_lsccal(FAR const uint16_t *raw, int stride_pix,
+                           int width, int height, int phase,
+                           FAR int *k1_out, FAR int *k2_out);
+int  kickpi_camera_lsccal(int phase);
 int kickpi_imgproc_selftest(int phase, FAR const char *path);
 int kickpi_camera_bayerstat(void);
 int kickpi_imgproc_bayerstat(FAR const uint16_t *raw, int stride_pix,
