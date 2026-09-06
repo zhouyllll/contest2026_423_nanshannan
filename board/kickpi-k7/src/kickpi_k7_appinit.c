@@ -564,6 +564,23 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_RK3576_VIDEO
+  /* ★ V4L2 设备要在摄像头初始化之后注册。
+   *
+   *   探测、MCLK、传感器寄存器表都在上一步做完；本步只把
+   *   imgsensor + imgdata 交给视频框架。顺序反了的话，
+   *   capture_register() 会在传感器还没上电时去问 is_available()。
+   */
+
+  ret = kickpi_k7_video_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: V4L2 设备注册失败: %d\n", ret);
+    }
+#endif
+
+
+
 #ifdef CONFIG_RK3576_GMAC
   /* 以太网前置链路：PD_SDGMAC + 时钟 + DMA 复位 + MDIO 读 PHY ID。
    *

@@ -53,6 +53,10 @@ endif
 # 摄像头只依赖 I2C（传感器时钟来自板上晶振，供电是普通 GPIO）
 ifeq ($(CONFIG_RK3576_I2C),y)
 CSRCS += kickpi_k7_camera.c
+
+ifeq ($(CONFIG_RK3576_VIDEO),y)
+CSRCS += kickpi_k7_video.c
+endif
 endif
 
 include $(TOPDIR)/boards/Board.mk

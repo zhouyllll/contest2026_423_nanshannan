@@ -89,6 +89,17 @@ int kickpi_spi_loopback(void);
  ****************************************************************************/
 
 int kickpi_camera_stream(bool on);
+int kickpi_camera_receiver(bool on);
+int kickpi_camera_status(void);
+
+/****************************************************************************
+ * Name: kickpi_k7_video_initialize
+ *
+ *   注册 V4L2 设备 /dev/video0（IMX415 imgsensor + CIF imgdata）。
+ *   必须在 kickpi_k7_camera_initialize() 之后调用。
+ ****************************************************************************/
+
+int kickpi_k7_video_initialize(void);
 #endif
 
 #ifdef CONFIG_INPUT_FT5X06

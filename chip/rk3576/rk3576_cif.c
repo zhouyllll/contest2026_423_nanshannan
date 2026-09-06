@@ -517,6 +517,28 @@ int rk3576_cif_stop(int host)
 }
 
 /****************************************************************************
+ * Name: rk3576_cif_clear_status
+ *
+ * Description:
+ *   清中断状态位（写 1 清）。
+ *
+ *   ★ CIF 的中断是电平触发的（dtsi: IRQ_TYPE_LEVEL_HIGH），在 ISR 里
+ *     不清标志中断线就一直拉着、立刻重入。轮询取图（wait_frame）时
+ *     清标志是顺带做的，走中断路径就必须有这个独立接口。
+ *
+ ****************************************************************************/
+
+void rk3576_cif_clear_status(int host, uint32_t status)
+{
+  if (host < 0 || host > 4)
+    {
+      return;
+    }
+
+  cif_putreg(cif_csi_offset(host) + CIF_MIPI_INTSTAT, status);
+}
+
+/****************************************************************************
  * Name: rk3576_cif_status
  *
  * Description:

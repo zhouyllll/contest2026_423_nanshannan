@@ -55,6 +55,22 @@ config RK3576_UART0_IS_CONSOLE
 		已由 KICKPI 官方 Armbian 源码的 U-Boot defconfig 确认：
 		CONFIG_DEBUG_UART_BASE=0x2ad40000，即 UART0。
 
+config RK3576_VIDEO
+	bool "摄像头 V4L2 设备（/dev/videoN）"
+	default n
+	depends on RK3576_CIF && VIDEO
+	---help---
+		把 CIF 包成 NuttX 视频框架的 imgdata 下半部，配合 IMX415 的
+		imgsensor 由 capture_register() 注册成 V4L2 设备。
+
+		★ 为什么需要：ai_agent 的视觉能力（摄像头拍照 + Vision LLM）
+		  只认 V4L2 设备，原来的 cam 命令直接调 rk3576_cif_* 私有接口，
+		  agent 用不了。
+
+		★ 与 cam 命令的关键差别是**中断而非轮询**：V4L2 的
+		  start_capture() 要求帧结束时回调，轮询实现不了。
+		  本项会挂 CIF 中断（GIC_SPI 318 -> IRQ 350）。
+
 config RK3576_CIF
 	bool "VICAP/CIF 取图"
 	default n
