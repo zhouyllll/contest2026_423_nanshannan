@@ -259,6 +259,10 @@ int kickpi_camera_stream(bool on);
 
 int kickpi_camera_jpeg(FAR const char *path, int phase, int quality);
 int kickpi_imgproc_selftest(int phase, FAR const char *path);
+int kickpi_imgproc_jpeg_mem(FAR const uint16_t *raw, int stride_pix,
+                            int width, int height, int phase,
+                            uint16_t black, uint16_t white, int quality,
+                            FAR uint8_t *out, size_t outlen);
 
 /****************************************************************************
  * Name: kickpi_camera_receiver

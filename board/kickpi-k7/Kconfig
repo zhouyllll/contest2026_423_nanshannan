@@ -12,3 +12,21 @@ config KICKPI_K7_IMGPROC
 
 		提供 kickpi_imgproc_selftest()，用合成的红/绿/蓝三色带
 		Bayer 图验证通路 —— 摄像头接不上时也能验相位映射和跨距索引。
+
+config KICKPI_K7_BAYER_PHASE
+	int "Bayer 相位（0=RGGB 1=GRBG 2=GBRG 3=BGGR）"
+	default 0
+	range 0 3
+	depends on KICKPI_K7_IMGPROC
+	---help---
+		(0,0) 处是哪个颜色，取决于传感器的裁剪起点是奇是偶。
+
+		★ 必须拿彩色标定图实测确认。相位错了图像不会崩，只会红蓝
+		  互换或整体偏色，看起来像白平衡不准，很容易归错因。
+		  默认值只是个起点，不是结论。
+
+config KICKPI_K7_JPEG_QUALITY
+	int "JPEG 质量 (1-100)"
+	default 85
+	range 1 100
+	depends on KICKPI_K7_IMGPROC

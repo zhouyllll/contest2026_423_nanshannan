@@ -150,7 +150,13 @@ static int imx415_validate_frame_setting(FAR struct imgsensor_s *sensor,
       return -EINVAL;
     }
 
-  if (fmt[0].pixelformat != V4L2_PIX_FMT_SBGGR10)
+  /* ★ 传感器永远出 Bayer；JPEG 是**输出**格式，由 imgdata 那层软件
+   *   转换。所以这里两种都要接受，否则上层设 JPEG 时会被传感器挡掉，
+   *   报错还落在传感器上，方向就查偏了。
+   */
+
+  if (fmt[0].pixelformat != V4L2_PIX_FMT_SBGGR10 &&
+      fmt[0].pixelformat != V4L2_PIX_FMT_JPEG)
     {
       return -EINVAL;
     }
@@ -193,6 +199,34 @@ static int imx415_sensor_stop_capture(FAR struct imgsensor_s *sensor,
 }
 
 /****************************************************************************
+ * Name: kickpi_video_convert
+ *
+ * Description:
+ *   芯片层在收到一帧 RAW 之后调这里，把它变成 JPEG。
+ *
+ *   ★ 相位和黑白电平是板级知识，所以这个函数在板级 ——
+ *     芯片层只知道"有个转换器"，不知道它怎么转。
+ *
+ *   ★ 黑白电平当前传 0/0，即退回朴素的右移 4。真实场景下应当用
+ *     实测的动态范围（kickpi_camera_show 用的那一组），否则默认曝光
+ *     下编出来偏暗。等摄像头能接上、能量到真实范围了再接进来 ——
+ *     现在填一个猜的值，比明确地不做更糟。
+ *
+ ****************************************************************************/
+
+static int kickpi_video_convert(FAR const uint16_t *raw, int stride_pix,
+                                int width, int height,
+                                FAR uint8_t *out, size_t outlen,
+                                FAR void *arg)
+{
+  return kickpi_imgproc_jpeg_mem(raw, stride_pix, width, height,
+                                 CONFIG_KICKPI_K7_BAYER_PHASE,
+                                 0, 0,
+                                 CONFIG_KICKPI_K7_JPEG_QUALITY,
+                                 out, outlen);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -211,6 +245,14 @@ int kickpi_k7_video_initialize(void)
   int ret;
 
   sensors[0] = &g_imx415_sensor;
+
+  /* 先注册转换器，再注册设备 —— validate_frame_setting 靠它判断
+   * 要不要声称支持 JPEG，顺序反了会在上层第一次问格式时答错。
+   */
+
+#ifdef CONFIG_KICKPI_K7_IMGPROC
+  rk3576_video_set_converter(kickpi_video_convert, NULL);
+#endif
 
   ret = capture_register("/dev/video0", rk3576_video_imgdata(),
                          sensors, 1);

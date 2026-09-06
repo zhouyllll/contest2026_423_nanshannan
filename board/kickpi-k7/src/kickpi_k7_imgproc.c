@@ -290,6 +290,100 @@ int kickpi_imgproc_jpeg(FAR const uint16_t *raw, int stride_pix,
 }
 
 /****************************************************************************
+ * Name: kickpi_imgproc_jpeg_mem
+ *
+ * Description:
+ *   同 kickpi_imgproc_jpeg，但编码到调用者给的内存缓冲区。
+ *
+ *   ★ V4L2 那条路要用这个：上层给的是一块 buffer，不是文件路径，
+ *     而且回调要报**压缩后**的真实字节数。
+ *
+ *   ★ 用 jpeg_mem_dest 而不是自己攒：libjpeg 会在缓冲区不够时自己
+ *     realloc，但我们给的是上层的固定缓冲区，不能被 realloc 掉。
+ *     所以先用一个自有缓冲区编码，成功后再拷进去并校验长度 ——
+ *     宁可多一次拷贝，也不能让 libjpeg 把上层的 buffer 换掉。
+ *
+ * Returned Value:
+ *   成功返回写入的字节数（>0），失败返回负的 errno。
+ *
+ ****************************************************************************/
+
+int kickpi_imgproc_jpeg_mem(FAR const uint16_t *raw, int stride_pix,
+                            int width, int height, int phase,
+                            uint16_t black, uint16_t white, int quality,
+                            FAR uint8_t *out, size_t outlen)
+{
+#ifndef CONFIG_LIB_JPEG_TURBO
+  return -ENOSYS;
+#else
+  struct jpeg_compress_struct cinfo;
+  struct jpeg_error_mgr jerr;
+  FAR unsigned char *jbuf = NULL;
+  unsigned long jlen = 0;
+  FAR uint8_t *rgbrow;
+  int y;
+  int ret;
+
+  if (raw == NULL || out == NULL || outlen == 0 ||
+      width <= 0 || height <= 0)
+    {
+      return -EINVAL;
+    }
+
+  rgbrow = kmm_malloc((size_t)width * 3);
+  if (rgbrow == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  cinfo.err = jpeg_std_error(&jerr);
+  jpeg_create_compress(&cinfo);
+  jpeg_mem_dest(&cinfo, &jbuf, &jlen);
+
+  cinfo.image_width      = width;
+  cinfo.image_height     = height;
+  cinfo.input_components = 3;
+  cinfo.in_color_space   = JCS_RGB;
+
+  jpeg_set_defaults(&cinfo);
+  jpeg_set_quality(&cinfo, quality, TRUE);
+  jpeg_start_compress(&cinfo, TRUE);
+
+  for (y = 0; y < height; y++)
+    {
+      JSAMPROW rows[1];
+
+      demosaic_row(raw, stride_pix, width, height, y, phase,
+                   black, white, rgbrow);
+      rows[0] = (JSAMPROW)rgbrow;
+      jpeg_write_scanlines(&cinfo, rows, 1);
+    }
+
+  jpeg_finish_compress(&cinfo);
+  jpeg_destroy_compress(&cinfo);
+  kmm_free(rgbrow);
+
+  if (jbuf == NULL)
+    {
+      return -EIO;
+    }
+
+  if (jlen > outlen)
+    {
+      nerr("ERROR: JPEG %lu 字节放不进 %zu 字节的缓冲区\n", jlen, outlen);
+      free(jbuf);
+      return -E2BIG;
+    }
+
+  memcpy(out, jbuf, jlen);
+  ret = (int)jlen;
+  free(jbuf);          /* jpeg_mem_dest 用的是 malloc，要用 free */
+
+  return ret;
+#endif
+}
+
+/****************************************************************************
  * Name: kickpi_imgproc_selftest
  *
  * Description:

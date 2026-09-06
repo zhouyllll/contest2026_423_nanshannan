@@ -39,6 +39,8 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/wqueue.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/video/imgdata.h>
 #include <nuttx/video/v4l2_cap.h>
 #include <sys/videoio.h>
@@ -46,6 +48,7 @@
 #include <arch/irq.h>
 
 #include "rk3576_cif.h"
+#include "rk3576_video.h"
 #include "hardware/rk3576_memorymap.h"
 
 #ifdef CONFIG_RK3576_VIDEO
@@ -86,7 +89,33 @@ struct rk3576_video_s
 
   imgdata_capture_t    callback;
   void                *arg;
+
+  /* ---- JPEG 模式 ----
+   *
+   * CIF 只出 Bayer RAW，而 ai_agent 的视觉工具向 /dev/video0 请求的是
+   * V4L2_PIX_FMT_JPEG（见 packages/ai_agent/src/tools/tool_camera.c）。
+   * 所以 JPEG 只能软件生成：CIF 先 DMA 进内部 RAW 缓冲，再转换成 JPEG
+   * 写进上层给的 buffer。
+   */
+
+  bool                 jpeg_mode;
+  FAR uint16_t        *rawbuf;      /* 内部 RAW 缓冲，仅 JPEG 模式用 */
+  size_t               rawbytes;
+  int                  stride_pix;  /* RAW 行跨距，以 uint16 计 */
+  uint32_t             outlen;      /* 上层 buffer 的容量 */
+  struct work_s        work;        /* 编码转到工作队列，不在 ISR 里做 */
+  struct timeval       ts;
 };
+
+/* 转换回调。
+ *
+ * ★ 去马赛克与 JPEG 编码放在板级（传感器的 Bayer 相位、黑白电平都是
+ *   板级知识），芯片层不该反向依赖板级。所以做成注册式：板级在初始化
+ *   时把自己的转换函数交给这一层。
+ */
+
+static rk3576_video_conv_t g_conv;
+static FAR void           *g_conv_arg;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -110,6 +139,7 @@ static int rk3576_video_start_capture(FAR struct imgdata_s *data,
                                 FAR imgdata_capture_t callback,
                                 FAR void *arg);
 static int rk3576_video_stop_capture(FAR struct imgdata_s *data);
+static void rk3576_video_encode_work(FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -138,6 +168,44 @@ static struct rk3576_video_s g_rk3576_video =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: rk3576_video_encode_work
+ *
+ * Description:
+ *   把刚收到的一帧 RAW 转成 JPEG 写进上层的 buffer，然后回调。
+ *
+ *   ★ 回调报的必须是**压缩后**的真实字节数，不是帧大小。上层按这个
+ *     长度把数据交给 Vision LLM，报错了就是一张截断的图。
+ *
+ ****************************************************************************/
+
+static void rk3576_video_encode_work(FAR void *arg)
+{
+  FAR struct rk3576_video_s *priv = (FAR struct rk3576_video_s *)arg;
+  int len;
+
+  if (!priv->capturing || priv->callback == NULL || g_conv == NULL)
+    {
+      return;
+    }
+
+  /* DMA 刚写完这块内存，CPU 侧的缓存里可能是旧数据 */
+
+  up_invalidate_dcache((uintptr_t)priv->rawbuf,
+                       (uintptr_t)priv->rawbuf + priv->rawbytes);
+
+  len = g_conv(priv->rawbuf, priv->stride_pix, priv->width, priv->height,
+               priv->buf, priv->outlen, g_conv_arg);
+  if (len <= 0)
+    {
+      nerr("ERROR: JPEG 编码失败: %d\n", len);
+      priv->callback(1, 0, &priv->ts, priv->arg);   /* result!=0 表示坏帧 */
+      return;
+    }
+
+  priv->callback(0, (uint32_t)len, &priv->ts, priv->arg);
+}
+
+/****************************************************************************
  * Name: rk3576_video_interrupt
  *
  * Description:
@@ -164,11 +232,28 @@ static int rk3576_video_interrupt(int irq, FAR void *context, FAR void *arg)
     {
       gettimeofday(&ts, NULL);
 
-      /* result=0 表示这一帧是好的。CIF 侧目前没有区分错误帧的判据，
-       * 有了再补 —— 现在报成功而实际是坏帧，比谎称失败更容易被发现。
-       */
+      if (priv->jpeg_mode)
+        {
+          /* ★ 编码要几十毫秒，绝不能在 ISR 里做 —— 那会把中断关到
+           *   下一帧之后，直接丢帧，而且看门狗可能先复位。
+           *   转到工作队列，时间戳在这里取（那才是这一帧的时刻）。
+           */
 
-      priv->callback(0, priv->framesize, &ts, priv->arg);
+          priv->ts = ts;
+          if (work_available(&priv->work))
+            {
+              work_queue(LPWORK, &priv->work, rk3576_video_encode_work,
+                         priv, 0);
+            }
+        }
+      else
+        {
+          /* result=0 表示这一帧是好的。CIF 侧目前没有区分错误帧的判据，
+           * 有了再补 —— 现在报成功而实际是坏帧，比谎称失败更容易被发现。
+           */
+
+          priv->callback(0, priv->framesize, &ts, priv->arg);
+        }
     }
 
   return OK;
@@ -246,6 +331,16 @@ static int rk3576_video_set_buf(FAR struct imgdata_s *data,
 
   priv->buf       = addr;
   priv->framesize = size;
+  priv->outlen    = size;
+
+  /* JPEG 模式下 CIF 写的是内部 RAW 缓冲，不是上层这块 —— 上层这块
+   * 是编码结果的目的地。所以这里不把它交给 CIF。
+   */
+
+  if (priv->jpeg_mode)
+    {
+      return OK;
+    }
 
   ret = rk3576_cif_set_buffer(RK3576_VIDEO_HOST, 0, (uintptr_t)addr);
   if (ret < 0)
@@ -281,7 +376,22 @@ static int rk3576_video_validate_frame_setting(
       return -EINVAL;
     }
 
-  if (datafmts[0].pixelformat != V4L2_PIX_FMT_SBGGR10)
+  /* SBGGR10：CIF 透传，上层直接拿 RAW。
+   * JPEG：软件转换，需要板级注册过转换器。
+   *
+   * ★ 没注册转换器就不声称支持 JPEG —— 谎报支持的话，上层会设成
+   *   JPEG 然后拿到一堆 Bayer 原始字节，当成 JPEG 去解，
+   *   错误会出现在很远的地方。
+   */
+
+  if (datafmts[0].pixelformat == V4L2_PIX_FMT_JPEG)
+    {
+      if (g_conv == NULL)
+        {
+          return -EINVAL;
+        }
+    }
+  else if (datafmts[0].pixelformat != V4L2_PIX_FMT_SBGGR10)
     {
       return -EINVAL;
     }
@@ -325,6 +435,37 @@ static int rk3576_video_start_capture(FAR struct imgdata_s *data,
   priv->height   = datafmts[0].height;
   priv->callback = callback;
   priv->arg      = arg;
+  priv->jpeg_mode = (datafmts[0].pixelformat == V4L2_PIX_FMT_JPEG);
+
+  if (priv->jpeg_mode)
+    {
+      /* CIF 的行跨距要 256 字节对齐（见 rk3576_cif.c），
+       * 每像素 2 字节。写成 "宽度 x 2" 是错的。
+       */
+
+      size_t line = (((size_t)priv->width * 2) + 255) & ~(size_t)255;
+      size_t need = line * priv->height;
+
+      if (priv->rawbuf != NULL && priv->rawbytes != need)
+        {
+          kmm_free(priv->rawbuf);
+          priv->rawbuf = NULL;
+        }
+
+      if (priv->rawbuf == NULL)
+        {
+          priv->rawbuf = kmm_memalign(64, need);
+          if (priv->rawbuf == NULL)
+            {
+              nerr("ERROR: 分配 %zu 字节 RAW 缓冲失败\n", need);
+              return -ENOMEM;
+            }
+
+          priv->rawbytes = need;
+        }
+
+      priv->stride_pix = (int)(line / 2);
+    }
 
   if (!priv->irq_attached)
     {
@@ -338,9 +479,13 @@ static int rk3576_video_start_capture(FAR struct imgdata_s *data,
       priv->irq_attached = true;
     }
 
-  ret = rk3576_cif_start(RK3576_VIDEO_HOST,
-                         (uintptr_t)priv->buf, (uintptr_t)priv->buf,
-                         priv->width, priv->height);
+  {
+    uintptr_t dma = priv->jpeg_mode ? (uintptr_t)priv->rawbuf
+                                    : (uintptr_t)priv->buf;
+
+    ret = rk3576_cif_start(RK3576_VIDEO_HOST, dma, dma,
+                           priv->width, priv->height);
+  }
   if (ret < 0)
     {
       return ret;
@@ -382,6 +527,24 @@ static int rk3576_video_stop_capture(FAR struct imgdata_s *data)
 FAR struct imgdata_s *rk3576_video_imgdata(void)
 {
   return &g_rk3576_video.data;
+}
+
+/****************************************************************************
+ * Name: rk3576_video_set_converter
+ *
+ * Description:
+ *   注册 RAW -> JPEG 的转换函数。不注册就不支持 JPEG 格式。
+ *
+ *   ★ 为什么要注册而不是直接调：去马赛克需要知道 Bayer 相位和黑白
+ *     电平，那都是**传感器/板级**的知识。芯片层直接调板级函数就成了
+ *     反向依赖，换一块板就得改芯片层。
+ *
+ ****************************************************************************/
+
+void rk3576_video_set_converter(rk3576_video_conv_t fn, FAR void *arg)
+{
+  g_conv     = fn;
+  g_conv_arg = arg;
 }
 
 #endif /* CONFIG_RK3576_VIDEO */
