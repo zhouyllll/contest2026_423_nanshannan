@@ -105,6 +105,9 @@ int kickpi_imgproc_jpeg(FAR const uint16_t *raw, int stride_pix,
                         int quality, FAR const char *path);
 
 int kickpi_imgproc_selftest(int phase, FAR const char *path);
+int kickpi_camera_bayerstat(void);
+int kickpi_imgproc_bayerstat(FAR const uint16_t *raw, int stride_pix,
+                             int width, int height);
 int kickpi_imgproc_jpeg_mem(FAR const uint16_t *raw, int stride_pix,
                             int width, int height, int phase,
                             uint16_t black, uint16_t white, int quality,

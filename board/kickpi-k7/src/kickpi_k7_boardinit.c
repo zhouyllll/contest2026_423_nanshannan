@@ -32,6 +32,7 @@
 
 #include "arm64_internal.h"
 #include "hardware/rk3576_memorymap.h"
+#include "rk3576_reboot.h"
 #include "kickpi_k7.h"
 
 /****************************************************************************
@@ -89,6 +90,35 @@ void board_late_initialize(void)
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */
 
 #ifdef CONFIG_BOARDCTL_RESET_CAUSE
+/****************************************************************************
+ * Name: board_reset
+ *
+ * Description:
+ *   nsh 的 `reboot` 命令走这里。
+ *
+ *   ★ 为什么要有它：在此之前板子上没有任何"重启"手段，每次都得走
+ *     `loader` -> USB 枚举 -> rkdeveloptool rd 这条链。而那条链的 USB
+ *     环节很不稳 —— 一场调试里已经三次卡在"板子进了 loader 但主机
+ *     看不见它"，只能人工断电。加上这个命令就绕开了整条 USB 链路。
+ *
+ *   status 非 0 时进下载模式，便于烧写；0 是普通重启。
+ *
+ ****************************************************************************/
+
+int board_reset(int status)
+{
+  if (status != 0)
+    {
+      rk3576_reboot_loader();
+    }
+  else
+    {
+      rk3576_reboot_normal();
+    }
+
+  return 0;
+}
+
 /****************************************************************************
  * Name: board_reset_cause
  *

@@ -1046,6 +1046,19 @@ int kickpi_camera_fbinfo(void)
  ****************************************************************************/
 
 #ifdef CONFIG_KICKPI_K7_IMGPROC
+int kickpi_camera_bayerstat(void)
+{
+  if (g_cam_ready < 0 || g_cam_buf[g_cam_ready] == NULL)
+    {
+      syslog(LOG_ERR, "摄像头: 还没有可用的帧，先跑 cam cap\n");
+      return -ENODATA;
+    }
+
+  return kickpi_imgproc_bayerstat(
+             (FAR const uint16_t *)g_cam_buf[g_cam_ready],
+             CAM_ROW_PIX, IMX415_MODE_WIDTH, IMX415_MODE_HEIGHT);
+}
+
 int kickpi_camera_jpeg(FAR const char *path, int phase, int quality)
 {
   if (g_cam_ready < 0 || g_cam_buf[g_cam_ready] == NULL)

@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
   if (argc < 2)
     {
-      printf("用法: cam on|off|rx|cap|jpeg|jpegtest|show|white|black|bars|half|vhalf|line|box\n");
+      printf("用法: cam on|off|rx|cap|jpeg|jpegtest|bayer|show|white|black|bars|half|vhalf|line|box\n");
       printf("      cam ub <0-2>     还原 U-Boot 窗口并写图案\n");
       printf("      cam morph <0-7>  从 U-Boot 参数出发逐个变量地改（7 复现故障）\n");
       printf("      cam regs         打印 ESMART1/VP1 寄存器现状\n");
@@ -100,6 +100,14 @@ int main(int argc, char *argv[])
       ret = kickpi_camera_jpeg(argc > 2 ? argv[2] : "/tmp/cam.jpg",
                                argc > 3 ? atoi(argv[3]) : 0,
                                argc > 4 ? atoi(argv[4]) : 85);
+    }
+  else if (strcmp(argv[1], "bayer") == 0)
+    {
+      /* cam bayer —— 统计 Bayer 四个位置的平均值，用来定相位。
+       * 拿红色物体充满画面再跑，判读方法见输出。
+       */
+
+      ret = kickpi_camera_bayerstat();
     }
   else if (strcmp(argv[1], "jpegtest") == 0)
     {

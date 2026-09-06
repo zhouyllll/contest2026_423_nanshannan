@@ -86,12 +86,21 @@ static inline uint16_t raw_at(FAR const uint16_t *raw, int stride_pix,
  * Name: to8
  *
  * Description:
- *   12 位采样映射到 8 位。
+ *   采样映射到 8 位。
  *
- *   ★ 默认曝光下 12 位像素只落在很窄的一段（实测 196~299），直接右移 4
- *     得到的是 12~18，出来几乎全黑 —— 那会让"拍到了"看起来像"没拍到"。
- *     所以支持传入实测的黑/白电平做线性拉伸；不传（white <= black）时
- *     退回朴素的右移。
+ *   ★★ 数据是 **12 位左对齐在 16 位容器里**（有效值在 bit[15:4]），
+ *      不是右对齐。
+ *
+ *      这一条是上板量出来的：加光时 max=65520=0xFFF0，而 65520>>4=4095
+ *      正好是 12 位满量程；遮光时值落在 3072~3328，>>4 得 192~208，
+ *      与工程笔记里"默认曝光下 12 位像素只占到 196~299"完全吻合。
+ *      现有显示路径（kickpi_camera_show）用的也是 >>8。
+ *
+ *      我一开始按右对齐写成 >>4，差了 16 倍 —— 而且这个错**不会报错**，
+ *      只会让 JPEG 全白。V4L2 那条路正好走的是这个回退分支。
+ *
+ *   ★ 默认曝光下有效值只占很窄一段，直接位移出来几乎全黑，
+ *     所以优先用实测的黑/白电平做线性拉伸。
  *
  ****************************************************************************/
 
@@ -101,7 +110,7 @@ static inline uint8_t to8(uint16_t v, uint16_t black, uint16_t white)
 
   if (white <= black)
     {
-      return (uint8_t)(v >> 4);        /* RAW12 -> 8 位 */
+      return (uint8_t)(v >> 8);        /* 12 位左对齐于 16 位 -> 8 位 */
     }
 
   if (v <= black)
@@ -194,6 +203,88 @@ static void demosaic_row(FAR const uint16_t *raw, int stride_pix,
 }
 
 /****************************************************************************
+ * Name: measure_range
+ *
+ * Description:
+ *   扫一遍算出这一帧的实际动态范围。
+ *
+ *   ★ 为什么值得多扫一遍：默认曝光下有效值只占满量程的 5%，
+ *     不拉伸的话编出来是一张几乎全黑的图，Vision LLM 什么也看不出来。
+ *     相对 JPEG 编码的开销，多一次顺序扫描可以忽略。
+ *
+ *   ★ 用 1% / 99% 分位而不是 min/max —— 单个坏点就能把 min/max 拉飞，
+ *     那样拉伸出来的图会整体发灰。
+ *
+ ****************************************************************************/
+
+static void measure_range(FAR const uint16_t *raw, int stride_pix,
+                          int width, int height,
+                          FAR uint16_t *black, FAR uint16_t *white)
+{
+  uint32_t hist[256];
+  uint32_t total = 0;
+  uint32_t acc;
+  uint32_t lo;
+  uint32_t hi;
+  int x;
+  int y;
+  int i;
+
+  memset(hist, 0, sizeof(hist));
+
+  /* 隔行隔列采样就够定范围了，省一半时间 */
+
+  for (y = 0; y < height; y += 2)
+    {
+      for (x = 0; x < width; x += 2)
+        {
+          hist[raw[y * stride_pix + x] >> 8]++;
+          total++;
+        }
+    }
+
+  if (total == 0)
+    {
+      *black = 0;
+      *white = 0;
+      return;
+    }
+
+  lo = total / 100;
+  hi = total - lo;
+
+  acc = 0;
+  *black = 0;
+  for (i = 0; i < 256; i++)
+    {
+      acc += hist[i];
+      if (acc >= lo)
+        {
+          *black = (uint16_t)(i << 8);
+          break;
+        }
+    }
+
+  acc = 0;
+  *white = 65535;
+  for (i = 0; i < 256; i++)
+    {
+      acc += hist[i];
+      if (acc >= hi)
+        {
+          *white = (uint16_t)(i << 8 | 0xff);
+          break;
+        }
+    }
+
+  if (*white <= *black)
+    {
+      *black = 0;
+      *white = 0;                      /* 退回固定位移 */
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -253,6 +344,13 @@ int kickpi_imgproc_jpeg(FAR const uint16_t *raw, int stride_pix,
       nerr("ERROR: 打不开 %s: %d\n", path, errno);
       kmm_free(rgbrow);
       return -errno;
+    }
+
+  if (white <= black)
+    {
+      /* 调用者没给范围，自己量 —— 见 measure_range 的说明 */
+
+      measure_range(raw, stride_pix, width, height, &black, &white);
     }
 
   cinfo.err = jpeg_std_error(&jerr);
@@ -336,6 +434,13 @@ int kickpi_imgproc_jpeg_mem(FAR const uint16_t *raw, int stride_pix,
       return -ENOMEM;
     }
 
+  if (white <= black)
+    {
+      /* 调用者没给范围，自己量 —— 见 measure_range 的说明 */
+
+      measure_range(raw, stride_pix, width, height, &black, &white);
+    }
+
   cinfo.err = jpeg_std_error(&jerr);
   jpeg_create_compress(&cinfo);
   jpeg_mem_dest(&cinfo, &jbuf, &jlen);
@@ -381,6 +486,72 @@ int kickpi_imgproc_jpeg_mem(FAR const uint16_t *raw, int stride_pix,
 
   return ret;
 #endif
+}
+
+/****************************************************************************
+ * Name: kickpi_imgproc_bayerstat
+ *
+ * Description:
+ *   统计 Bayer 四个位置各自的平均值。
+ *
+ *   ★ 这是**确定相位**的工具，比看照片可靠得多。
+ *
+ *     相位就是"(0,0) 处是哪个颜色"，它取决于传感器裁剪起点的奇偶。
+ *     拿一个纯色物体（红最好）充满画面，哪个位置最亮，那个位置就是
+ *     对应的颜色 —— 这是直接测量，不经过去马赛克，也不需要把图片
+ *     传回主机。
+ *
+ *     Bayer 的四个位置里有两个是 G，它们在任何光照下都应当接近；
+ *     若两个 G 差很多，说明取到的根本不是规整的 Bayer 阵列
+ *     （跨距算错、或者 CIF 的裁剪没对齐），那是比相位更严重的问题。
+ *
+ *     判读：设四个位置为 (0,0) (1,0) (0,1) (1,1)。
+ *       两个相近的是 G，它们必然在对角线上。
+ *       另两个一个是 R 一个是 B，对着红色物体时亮的那个是 R。
+ *       R 在 (0,0) -> 相位 0(RGGB)   R 在 (1,0) -> 相位 1(GRBG)
+ *       R 在 (0,1) -> 相位 2(GBRG)   R 在 (1,1) -> 相位 3(BGGR)
+ *
+ ****************************************************************************/
+
+int kickpi_imgproc_bayerstat(FAR const uint16_t *raw, int stride_pix,
+                             int width, int height)
+{
+  uint64_t sum[4] = { 0, 0, 0, 0 };
+  uint32_t cnt[4] = { 0, 0, 0, 0 };
+  int x;
+  int y;
+  int i;
+
+  if (raw == NULL || width < 4 || height < 4)
+    {
+      return -EINVAL;
+    }
+
+  /* 只统计中心一半区域 —— 边角有暗角和镜头渐晕，会把判断带偏 */
+
+  for (y = height / 4; y < height * 3 / 4; y++)
+    {
+      for (x = width / 4; x < width * 3 / 4; x++)
+        {
+          int k = ((y & 1) << 1) | (x & 1);
+
+          sum[k] += raw[y * stride_pix + x];
+          cnt[k]++;
+        }
+    }
+
+  syslog(LOG_INFO, "Bayer 四位平均（中心区域）：\n");
+  for (i = 0; i < 4; i++)
+    {
+      syslog(LOG_INFO, "  (%d,%d) = %llu\n", i & 1, (i >> 1) & 1,
+             cnt[i] ? (unsigned long long)(sum[i] / cnt[i]) : 0ull);
+    }
+
+  syslog(LOG_INFO,
+         "判读：两个相近的是 G（必在对角线）；对红色物体时另两个中亮的是 R。\n"
+         "      R 在 (0,0)->相位0  (1,0)->相位1  (0,1)->相位2  (1,1)->相位3\n");
+
+  return OK;
 }
 
 /****************************************************************************

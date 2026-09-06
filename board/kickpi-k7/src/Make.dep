@@ -65,6 +65,7 @@ kickpi_k7_boardinit.o: kickpi_k7_boardinit.c \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/bits.h \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/hardware/rk3576_memorymap.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/chip/chip.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_reboot.h \
  kickpi_k7.h
 kickpi_k7_appinit.o: kickpi_k7_appinit.c \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/config.h \
