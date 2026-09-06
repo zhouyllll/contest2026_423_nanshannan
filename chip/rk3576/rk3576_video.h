@@ -43,11 +43,21 @@ FAR struct imgdata_s *rk3576_video_imgdata(void);
  ****************************************************************************/
 
 typedef int (*rk3576_video_conv_t)(FAR const uint16_t *raw, int stride_pix,
-                                   int width, int height,
+                                   int srcw, int srch,
+                                   int dstw, int dsth,
                                    FAR uint8_t *out, size_t outlen,
                                    FAR void *arg);
 
-void rk3576_video_set_converter(rk3576_video_conv_t fn, FAR void *arg);
+/* 注册转换器，同时告诉芯片层**采集尺寸**（传感器模式的尺寸）。
+ *
+ * ★ 采集尺寸和输出尺寸是两件事。传感器只有一个固定模式，CIF 必须按那个
+ *   尺寸搬运；而上层请求的输出尺寸可以更小（ai_agent 要 1280x720 或
+ *   320x180）。以前芯片层把请求尺寸直接喂给 CIF，只有两者恰好相等时
+ *   才对 —— 一旦上层请求小图，CIF 就按错的尺寸算跨距，画面会斜。
+ */
+
+void rk3576_video_set_converter(rk3576_video_conv_t fn,
+                                int capw, int caph, FAR void *arg);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CHIP_RK3576_RK3576_VIDEO_H */

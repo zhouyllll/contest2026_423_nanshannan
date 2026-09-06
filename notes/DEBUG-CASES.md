@@ -1806,3 +1806,73 @@ GMAC0 用 CON2/CON3（+0x6408/+0x640c），GMAC1 用 CON4/CON5（+0x6410/+0x6414
 dtsi 给的是 `tx_delay = <0x21>`（GMAC0）/ `<0x20>`（GMAC1），
 `phy-mode = "rgmii-rxid"` 即关掉 SoC 内部的 RX 延时。
 延时只影响数据采样，不影响链路建立，所以放在链路之后调。
+
+---
+
+## 案例 18：TFTP put 必崩 —— 只有"能工作的服务器"才暴露得出来的空指针
+
+**现象**：板子 `put` 到主机就 panic 复位。主机侧只落下一个 0 字节的文件。
+
+```
+default_fatal_handler: (IFSC/DFSC) level 2 translation fault
+ESR_ELn: 0x96000046      FAR_ELn: 0x0      ELR_ELn: 0x404b69cc
+```
+
+`FAR_ELn = 0`、ESR 的 WnR 位是写 —— 往地址 0 写。`addr2line` 落在
+`apps/netutils/tftpc/tftpc_put.c:233`：
+
+```c
+*blockno = rblockno;          /* blockno 是 NULL */
+```
+
+**根因**：同文件 315 行，等 WRQ 的第一个 ACK 时故意传了 `NULL` —— 那个块号
+必然是 0，调用方不关心。但 `tftp_rcvack()` 无条件解引用。
+
+**为什么一直没被发现**：
+
+> 这个缺陷需要一个**真的会回 ACK 的服务器**才触发。所有"传给不可达
+> 主机"的测试都干净地返回 `ENETUNREACH`，因为那条路收不到 ACK，
+> 永远走不到出错的那一行。
+
+我自己也差点被这一点骗过去：先用不可达地址试，看到干净的错误返回，
+一度判断 `put` 本身没问题。**"错误路径工作正常"不能推出"成功路径工作
+正常"** —— 恰恰相反，只在成功路径上的代码，被错误路径的测试完整地
+遮蔽着。
+
+已修，归档为 `bsp/upstream/tftpc-null-blockno.patch`。
+
+---
+
+## 案例 19：V4L2 的 S_FMT 全部返回 EINVAL —— 两套命名空间的值在比较
+
+**现象**：`/dev/video0` 注册成功、能 open、`VIDIOC_QUERYCAP` 正常，但
+`VIDIOC_S_FMT` 无论什么尺寸都返回 EINVAL —— 连传感器的原生尺寸
+1932x1096 也一样。
+
+**歧路**：我先假设是尺寸不被接受（ai_agent 要 1280x720，而我们只声称
+支持 1932x1096），花时间做了"采集尺寸 / 输出尺寸分离 + 缩放"。那个改动
+本身是必要的，但**它不是当前失败的原因** —— 原生尺寸也失败这一条，
+本来就该立刻推翻"尺寸问题"这个假设。看到"所有输入都失败"时，
+应该先找**与输入无关**的共同因子。
+
+**根因**：上半部在下发之前会翻译格式：
+
+```c
+convert_to_imgsensorfmt()  V4L2_PIX_FMT_JPEG -> IMGSENSOR_PIX_FMT_JPEG (2)
+convert_to_imgdatafmt()    V4L2_PIX_FMT_JPEG -> IMGDATA_PIX_FMT_JPEG   (2)
+```
+
+所以 `validate_frame_setting` 收到的是 `IMGSENSOR_PIX_FMT_*` / 
+`IMGDATA_PIX_FMT_*` 这套 **0..10 的小整数枚举**，而我们拿 V4L2 的
+fourcc（`V4L2_PIX_FMT_JPEG` = 'JPEG' 的 32 位值）去比，永远不相等。
+
+**顺带纠正一个更早的错误设计**：这套枚举里**没有 Bayer RAW**，
+`capture_try_fmt` 的 switch 也不认 `V4L2_PIX_FMT_SBGGR10`，会落到
+`default: return -EINVAL`。也就是说"通过 V4L2 出 RAW"在这个框架版本里
+**不可表达**。我原先写的 SBGGR10 分支是死代码，而且是有害的死代码 ——
+它让接口看起来支持一件其实做不到的事。已删除；RAW 仍走板级 `cam` 命令。
+
+**教训**：跨层接口上，**类型名相同不代表值域相同**。`pixelformat` 这个
+字段名在 V4L2、imgsensor、imgdata 三层都叫同一个名字，值域却是三套。
+编译器不会报错，因为都是整数。
+

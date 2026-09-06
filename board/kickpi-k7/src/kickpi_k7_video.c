@@ -145,18 +145,29 @@ static int imx415_validate_frame_setting(FAR struct imgsensor_s *sensor,
    *   CIF 按错的跨距搬运，出来是斜纹，而且看不出是谁的错。
    */
 
-  if (fmt[0].width != IMX415_WIDTH || fmt[0].height != IMX415_HEIGHT)
+  /* ★ 这里的 pixelformat 是 **IMGSENSOR_PIX_FMT_\*** 枚举，不是 V4L2 的
+   *   fourcc —— 上半部的 convert_to_imgsensorfmt() 已经翻译过一道了。
+   *   拿 V4L2_PIX_FMT_JPEG 来比是在比两套命名空间的值，永远不相等，
+   *   表现是任何尺寸、任何格式的 S_FMT 都返回 EINVAL。
+   *
+   * ★ 只支持 JPEG。这套枚举里**没有 Bayer RAW**（见 imgsensor.h，
+   *   0..10 全是 YUV/RGB/JPEG），上半部的 capture_try_fmt 也不认
+   *   V4L2_PIX_FMT_SBGGR10，会直接落到 default 返回 EINVAL。
+   *   所以"通过 V4L2 出 RAW"在这个框架版本里不可表达 —— 声称支持
+   *   等于埋一个永远调不通的接口。RAW 仍然走板级的 cam 命令。
+   */
+
+  if (fmt[0].pixelformat != IMGSENSOR_PIX_FMT_JPEG)
     {
       return -EINVAL;
     }
 
-  /* ★ 传感器永远出 Bayer；JPEG 是**输出**格式，由 imgdata 那层软件
-   *   转换。所以这里两种都要接受，否则上层设 JPEG 时会被传感器挡掉，
-   *   报错还落在传感器上，方向就查偏了。
+  /* 传感器模式固定 1932x1096；JPEG 是软件生成的，输出可以更小，
+   * 缩放在 kickpi_imgproc_jpeg_scaled 里做。不能更大。
    */
 
-  if (fmt[0].pixelformat != V4L2_PIX_FMT_SBGGR10 &&
-      fmt[0].pixelformat != V4L2_PIX_FMT_JPEG)
+  if (fmt[0].width == 0 || fmt[0].height == 0 ||
+      fmt[0].width > IMX415_WIDTH || fmt[0].height > IMX415_HEIGHT)
     {
       return -EINVAL;
     }
@@ -215,15 +226,21 @@ static int imx415_sensor_stop_capture(FAR struct imgsensor_s *sensor,
  ****************************************************************************/
 
 static int kickpi_video_convert(FAR const uint16_t *raw, int stride_pix,
-                                int width, int height,
+                                int srcw, int srch, int dstw, int dsth,
                                 FAR uint8_t *out, size_t outlen,
                                 FAR void *arg)
 {
-  return kickpi_imgproc_jpeg_mem(raw, stride_pix, width, height,
-                                 CONFIG_KICKPI_K7_BAYER_PHASE,
-                                 0, 0,
-                                 CONFIG_KICKPI_K7_JPEG_QUALITY,
-                                 out, outlen);
+  /* 黑白电平传 0/0 = 让它自己量这一帧的动态范围。默认曝光下有效值只占
+   * 满量程的很窄一段，不拉伸编出来几乎全黑，Vision LLM 什么都看不出来。
+   * 白平衡也在里面按灰世界自动算 —— 传感器对绿的响应高一倍多，不校正
+   * 的话整幅明显偏绿。
+   */
+
+  return kickpi_imgproc_jpeg_scaled(raw, stride_pix, srcw, srch, dstw, dsth,
+                                    CONFIG_KICKPI_K7_BAYER_PHASE,
+                                    0, 0,
+                                    CONFIG_KICKPI_K7_JPEG_QUALITY,
+                                    out, outlen);
 }
 
 /****************************************************************************
@@ -251,7 +268,8 @@ int kickpi_k7_video_initialize(void)
    */
 
 #ifdef CONFIG_KICKPI_K7_IMGPROC
-  rk3576_video_set_converter(kickpi_video_convert, NULL);
+  rk3576_video_set_converter(kickpi_video_convert,
+                             IMX415_WIDTH, IMX415_HEIGHT, NULL);
 #endif
 
   ret = capture_register("/dev/video0", rk3576_video_imgdata(),

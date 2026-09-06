@@ -117,6 +117,13 @@ struct rk3576_video_s
 static rk3576_video_conv_t g_conv;
 static FAR void           *g_conv_arg;
 
+/* 采集尺寸 = 传感器模式的尺寸，由板级在注册转换器时告知。
+ * CIF 永远按这个尺寸搬运；上层请求的尺寸只决定 JPEG 的输出大小。
+ */
+
+static int                 g_capw;
+static int                 g_caph;
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -193,7 +200,8 @@ static void rk3576_video_encode_work(FAR void *arg)
   up_invalidate_dcache((uintptr_t)priv->rawbuf,
                        (uintptr_t)priv->rawbuf + priv->rawbytes);
 
-  len = g_conv(priv->rawbuf, priv->stride_pix, priv->width, priv->height,
+  len = g_conv(priv->rawbuf, priv->stride_pix, g_capw, g_caph,
+               priv->width, priv->height,
                priv->buf, priv->outlen, g_conv_arg);
   if (len <= 0)
     {
@@ -384,19 +392,32 @@ static int rk3576_video_validate_frame_setting(
    *   错误会出现在很远的地方。
    */
 
-  if (datafmts[0].pixelformat == V4L2_PIX_FMT_JPEG)
-    {
-      if (g_conv == NULL)
-        {
-          return -EINVAL;
-        }
-    }
-  else if (datafmts[0].pixelformat != V4L2_PIX_FMT_SBGGR10)
+  /* ★ 这里的 pixelformat 是 **IMGDATA_PIX_FMT_\*** 枚举，不是 V4L2 的
+   *   fourcc（上半部的 convert_to_imgdatafmt 已经翻译过）。
+   *
+   * ★ 只支持 JPEG：这套枚举里没有 Bayer RAW，V4L2 那条路出不了 RAW。
+   */
+
+  if (datafmts[0].pixelformat != IMGDATA_PIX_FMT_JPEG)
     {
       return -EINVAL;
     }
 
   if (datafmts[0].width == 0 || datafmts[0].height == 0)
+    {
+      return -EINVAL;
+    }
+
+  if (g_conv == NULL || g_capw <= 0 || g_caph <= 0)
+    {
+      return -EINVAL;
+    }
+
+  /* 输出可以小于采集尺寸（转换器负责缩放），不能更大 —— 传感器给不出
+   * 那么多信息（见 kickpi_imgproc_jpeg_scaled）。
+   */
+
+  if (datafmts[0].width > g_capw || datafmts[0].height > g_caph)
     {
       return -EINVAL;
     }
@@ -435,7 +456,7 @@ static int rk3576_video_start_capture(FAR struct imgdata_s *data,
   priv->height   = datafmts[0].height;
   priv->callback = callback;
   priv->arg      = arg;
-  priv->jpeg_mode = (datafmts[0].pixelformat == V4L2_PIX_FMT_JPEG);
+  priv->jpeg_mode = (datafmts[0].pixelformat == IMGDATA_PIX_FMT_JPEG);
 
   if (priv->jpeg_mode)
     {
@@ -443,8 +464,8 @@ static int rk3576_video_start_capture(FAR struct imgdata_s *data,
        * 每像素 2 字节。写成 "宽度 x 2" 是错的。
        */
 
-      size_t line = (((size_t)priv->width * 2) + 255) & ~(size_t)255;
-      size_t need = line * priv->height;
+      size_t line = (((size_t)g_capw * 2) + 255) & ~(size_t)255;
+      size_t need = line * (size_t)g_caph;
 
       if (priv->rawbuf != NULL && priv->rawbytes != need)
         {
@@ -483,8 +504,14 @@ static int rk3576_video_start_capture(FAR struct imgdata_s *data,
     uintptr_t dma = priv->jpeg_mode ? (uintptr_t)priv->rawbuf
                                     : (uintptr_t)priv->buf;
 
-    ret = rk3576_cif_start(RK3576_VIDEO_HOST, dma, dma,
-                           priv->width, priv->height);
+    /* ★ CIF 一律按采集尺寸搬运。JPEG 模式下 priv->width/height 是
+     *   **输出**尺寸，喂给 CIF 会让它按错的跨距写内存。
+     */
+
+    int cifw = priv->jpeg_mode ? g_capw : (int)priv->width;
+    int cifh = priv->jpeg_mode ? g_caph : (int)priv->height;
+
+    ret = rk3576_cif_start(RK3576_VIDEO_HOST, dma, dma, cifw, cifh);
   }
   if (ret < 0)
     {
@@ -541,10 +568,13 @@ FAR struct imgdata_s *rk3576_video_imgdata(void)
  *
  ****************************************************************************/
 
-void rk3576_video_set_converter(rk3576_video_conv_t fn, FAR void *arg)
+void rk3576_video_set_converter(rk3576_video_conv_t fn,
+                                int capw, int caph, FAR void *arg)
 {
   g_conv     = fn;
   g_conv_arg = arg;
+  g_capw     = capw;
+  g_caph     = caph;
 }
 
 #endif /* CONFIG_RK3576_VIDEO */

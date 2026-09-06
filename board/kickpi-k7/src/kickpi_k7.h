@@ -112,6 +112,18 @@ int kickpi_imgproc_jpeg_mem(FAR const uint16_t *raw, int stride_pix,
                             int width, int height, int phase,
                             uint16_t black, uint16_t white, int quality,
                             FAR uint8_t *out, size_t outlen);
+
+/* 同上，但同时缩放到 dstw x dsth（只支持缩小）。
+ *
+ * ★ 传感器模式是固定的 1932x1096，而 ai_agent 的视觉工具要 1280x720
+ *   或 320x180（见 packages/ai_agent/src/tools/tool_camera.c）。能变的
+ *   是**输出**尺寸，不是采集尺寸 —— 缩放放在这一层。
+ */
+
+int kickpi_imgproc_jpeg_scaled(FAR const uint16_t *raw, int stride_pix,
+                               int srcw, int srch, int dstw, int dsth,
+                               int phase, uint16_t black, uint16_t white,
+                               int quality, FAR uint8_t *out, size_t outlen);
 int kickpi_camera_jpeg(FAR const char *path, int phase, int quality);
 
 /****************************************************************************
