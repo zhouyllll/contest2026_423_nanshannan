@@ -122,7 +122,18 @@
 #define DWMMC_INT_ACD           (1u << 14)
 #define DWMMC_INT_EBE           (1u << 15)
 
-#define DWMMC_INT_ALL           0x1ffff
+/* ★ 清中断要清满 32 位，不能只清 0x1ffff。
+ *
+ *   RINTSTS 的高 16 位是各张卡的 SDIO 中断（bit16 = 卡0），只清低 17 位
+ *   的话高位会一直挂着。实测 SDIO 实例上 bit24 恒为 1，而 SD 卡实例上
+ *   没有 —— 就是这么来的。
+ *
+ *   这个项目里已经栽过一次一模一样的坑：GMAC 当初也是要
+ *   putreg32(0xffffffff, DMA_CH0_STATUS) 才正常。"清全部"这个名字骗人，
+ *   得看它到底覆盖了哪些位。
+ */
+
+#define DWMMC_INT_ALL           0xffffffffu
 
 #define DWMMC_INT_CMD_ERROR     (DWMMC_INT_RESP_ERR | DWMMC_INT_RCRC | \
                                  DWMMC_INT_RTO | DWMMC_INT_HLE)

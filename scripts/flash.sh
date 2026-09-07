@@ -89,6 +89,7 @@ if ! in_loader; then
   echo "板子未进入下载模式。可能原因："
   echo "  - 串口没在 nsh 提示符下（先确认 $SERIAL 能敲命令）"
   echo "  - 前台跑着 ai_agent（提示符是 vela> 而不是 nsh>）：先在它里面敲 quit
+  - 板上跑着原厂 Android（提示符是 console:/ \$）：在它里面执行 reboot loader
   - 板上固件还没有 loader 命令（首次需手动 recovery 烧一次）"
   echo "  - usbipd 未共享设备：在 Windows 管理员终端执行"
   echo "      usbipd bind --force --busid <busid>"
