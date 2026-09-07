@@ -307,7 +307,28 @@ int rk3576_dwmmc_probe(uint32_t base)
    */
 
   rk3576_clk_setmux(hw->sel_con, hw->sel_mux_shift, 2, 2);
-  rk3576_clk_setmux(hw->sel_con, hw->sel_div_shift, 6, 0);
+
+  /* ★ 分频位置：SDIO 在 CRU 里分到 400kHz，控制器的 CLKDIV 走旁路。
+   *
+   *   原厂 Linux 在这个主机上打印的是
+   *     mmc0: Bus speed = 400000Hz (req 400000Hz, actual 400000Hz, div = 0)
+   *   div=0 说明它把源时钟直接整到了 400kHz，而不是靠控制器内部分频。
+   *
+   *   两种分法的**频率**等效，但 Rockchip dw_mmc 的采样/驱动相位是按
+   *   源时钟整定的，分频放在控制器里会移动采样点 —— 表现正是"卡在拉
+   *   命令线但响应帧格式不对"（RESP_ERR，无超时无 CRC 错）。
+   *
+   *   24MHz / 60 = 400kHz，CRU 分频器写 (n-1)。
+   */
+
+  if (hw->is_sdio)
+    {
+      rk3576_clk_setmux(hw->sel_con, hw->sel_div_shift, 6, 59);
+    }
+  else
+    {
+      rk3576_clk_setmux(hw->sel_con, hw->sel_div_shift, 6, 0);
+    }
   rk3576_clk_gate(hw->gate_con, hw->gate_cclk, true);
   rk3576_clk_gate(hw->gate_con, hw->gate_hclk, true);
 
@@ -463,7 +484,11 @@ int rk3576_dwmmc_probe(uint32_t base)
 
     /* 先给足初始化时钟：400kHz 下 80 个时钟约 200us。 */
 
-    dw_putreg(base, DWMMC_CLKDIV, 30);          /* 24MHz / (2*30) = 400kHz */
+    /* SDIO 侧源时钟已在 CRU 分到 400kHz，控制器内部走旁路（与原厂一致）；
+     * SD 侧维持原来的做法（已验证可用，不动它）。
+     */
+
+    dw_putreg(base, DWMMC_CLKDIV, hw->is_sdio ? 0 : 30);
     dw_update_clk(base);
     dw_putreg(base, DWMMC_CLKENA, DWMMC_CLKENA_ENABLE);
     dw_update_clk(base);
