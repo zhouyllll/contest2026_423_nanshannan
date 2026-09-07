@@ -33,11 +33,19 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <mqueue.h>
+#include <time.h>
 
 #include <sys/ioctl.h>
 #include <nuttx/audio/audio.h>
 
-#define MIC_DEV       "/dev/audio/pcm0"
+/* ★ 录音走 pcm1（裸编解码器），不是 pcm0。
+ *
+ *   pcm0 外面套着 pcm_decode，那是放音用的 WAV 解码器 —— 它对递进来的
+ *   缓冲区调 pcm_parsewav()，而录音递的是空缓冲区，解析必然失败，
+ *   ENQUEUEBUFFER 直接返回 ENOENT。板级为此把裸设备另注册成 pcm1。
+ */
+
+#define MIC_DEV       "/dev/audio/pcm1"
 #define MIC_NBUFFERS  4
 
 /****************************************************************************
@@ -93,6 +101,8 @@ int main(int argc, char *argv[])
   int      peak     = 0;
   int      avg      = 0;
   int      total    = 0;
+  int      nbuf     = MIC_NBUFFERS;
+  int      bufbytes = 4096;
   unsigned int prio;
   int      i;
 
@@ -144,9 +154,20 @@ int main(int argc, char *argv[])
   cap_desc.caps.ac_type           = AUDIO_TYPE_INPUT;
   cap_desc.caps.ac_channels       = nchan;
   cap_desc.caps.ac_chmap          = 0;
+  /* ★ 字段位置要按**这个驱动实际读的**来，不能照搬别处的用法。
+   *
+   *   drivers/audio/es8388.c 的 AUDIO_TYPE_INPUT 分支读的是：
+   *     ac_controls.hw[0] -> 采样率
+   *     ac_controls.b[2]  -> 位深
+   *   ac_controls 是联合体，hw[0] 就是 b[0..1]，48000 放得下。
+   *
+   *   我原来把位深写进了 b[3]、拿 b[2] 放采样率高位，于是驱动读到位深
+   *   为 0，直接 -ERANGE。这类错误不会崩、只会拒绝，而拒绝的理由
+   *   （"参数超范围"）离真正的原因（字段填错位置）还有一步。
+   */
+
   cap_desc.caps.ac_controls.hw[0] = samprate;
-  cap_desc.caps.ac_controls.b[2]  = samprate >> 16;
-  cap_desc.caps.ac_controls.b[3]  = 16;            /* 位深 */
+  cap_desc.caps.ac_controls.b[2]  = 16;            /* 位深 */
 
   if (ioctl(fd, AUDIOIOC_CONFIGURE, (unsigned long)&cap_desc) < 0)
     {
@@ -175,27 +196,97 @@ int main(int argc, char *argv[])
       goto release;
     }
 
-  /* 4) 申请缓冲区并全部入队 */
+  /* 4) 先告诉驱动要几个缓冲区、每个多大，再申请。
+   *
+   * ★ 这一步不能省。audio.c 的 audio_allocbuffer() 开头是：
+   *
+   *     if (upper->periods >= upper->nbuffers)
+   *       return 0;          <- 返回**成功**，但什么都没分配
+   *
+   *   nbuffers 默认为 0，所以不设 BUFFERINFO 时第一次申请就走这条路：
+   *   ioctl 返回 0（看起来成功）、pbuffer 却没被填。调用方若直接使用，
+   *   就是解引用 NULL —— 表现为 data abort 而不是一条错误信息。
+   *   我正是这样崩过一次，之后才加的指针校验。
+   */
+
+  {
+    struct ap_buffer_info_s binfo;
+
+    /* ★ 必须先 **查询** 缓冲区信息，这一步有副作用。
+     *
+     *   audio.c 的 AUDIOIOC_GETBUFFERINFO 分支里：
+     *       ret = lower->ops->ioctl(...);
+     *       if (ret >= 0) upper->nbuffers = arg->nbuffers;
+     *
+     *   也就是说上半部的 nbuffers 是被这个"查询"操作赋值的。不查的话
+     *   nbuffers 恒为 0，而 audio_allocbuffer() 开头就是
+     *       if (upper->periods >= upper->nbuffers) return 0;
+     *   于是每次申请都"成功"却不分配。
+     *
+     *   一个 GET 操作承担初始化职责，这个耦合从接口名字上完全看不出来；
+     *   SETBUFFERINFO 在本设备上还返回 ENOTTY，更容易让人以为这条路走
+     *   不通。这里按驱动实际报的数量来用，不自己拍。
+     */
+
+    memset(&binfo, 0, sizeof(binfo));
+    if (ioctl(fd, AUDIOIOC_GETBUFFERINFO, (unsigned long)&binfo) < 0)
+      {
+        /* 驱动没实现查询：退回自己的默认值，nbuffers 仍是 0，
+         * 后面的指针校验会挡住，不会崩。
+         */
+
+        printf("GETBUFFERINFO 不支持 (%d)，用默认 %d 个缓冲区\n",
+               errno, MIC_NBUFFERS);
+        nbuf = MIC_NBUFFERS;
+      }
+    else
+      {
+        nbuf = binfo.nbuffers < MIC_NBUFFERS ? binfo.nbuffers : MIC_NBUFFERS;
+        bufbytes = binfo.buffer_size ? binfo.buffer_size : 4096;
+        printf("缓冲区: 驱动报 %u 个 x %u 字节，使用 %d 个\n",
+               binfo.nbuffers, binfo.buffer_size, nbuf);
+      }
+  }
 
   memset(bufs, 0, sizeof(bufs));
-  for (i = 0; i < MIC_NBUFFERS; i++)
+  for (i = 0; i < nbuf; i++)
     {
-      buf_desc.numbytes = 4096;
+      memset(&buf_desc, 0, sizeof(buf_desc));
+      buf_desc.numbytes = bufbytes;
       buf_desc.u.pbuffer = &bufs[i];
 
+      /* ★ 只判负值。AUDIOIOC_ALLOCBUFFER 的返回值约定在不同下半部实现里
+       *   不一致（有的返回结构体大小、有的返回 0），拿 == sizeof 去比
+       *   会把成功当成失败 —— 而且 errno 是 0，报出来的"失败: 0"自相矛盾。
+       */
+
       if (ioctl(fd, AUDIOIOC_ALLOCBUFFER,
-                (unsigned long)&buf_desc) != sizeof(buf_desc))
+                (unsigned long)&buf_desc) < 0)
         {
           printf("ALLOCBUFFER %d 失败: %d\n", i, errno);
           goto unreg;
         }
+
+      /* ★ 返回成功不等于指针填回来了。
+       *
+       *   把返回值判断放宽成"只判负值"之后，必须另外确认 pbuffer 真的被
+       *   写了 —— 否则后面直接解引用 NULL，表现是 data abort 而不是一条
+       *   错误信息，排查成本天差地别。我已经这样崩过一次。
+       */
+
+      if (bufs[i] == NULL)
+        {
+          printf("ALLOCBUFFER %d 返回成功但没给出缓冲区\n", i);
+          goto unreg;
+        }
     }
 
-  for (i = 0; i < MIC_NBUFFERS; i++)
+  for (i = 0; i < nbuf; i++)
     {
       bufs[i]->nbytes   = 0;
       bufs[i]->curbyte  = 0;
       bufs[i]->flags    = 0;
+      memset(&buf_desc, 0, sizeof(buf_desc));
       buf_desc.u.buffer = bufs[i];
 
       if (ioctl(fd, AUDIOIOC_ENQUEUEBUFFER,
@@ -228,10 +319,27 @@ int main(int argc, char *argv[])
 
     while (total < want)
       {
-        ssize_t n = mq_receive(mq, (FAR char *)&msg, sizeof(msg), &prio);
+        struct timespec ts;
+        ssize_t n;
+
+        /* ★ 等待也要有上界。
+         *
+         *   我原来只用字节数设了上界，但那只有在缓冲区**会回来**时才成立。
+         *   驱动若一个都不还（采集没真正跑起来就是这样），mq_receive 会
+         *   一直阻塞 —— 而这条命令是前台任务，控制台跟着一起没了。
+         *   这正是我做这个命令要避开的东西，第一版却没做到。
+         *
+         *   两秒收不到一个缓冲区就认定采集没起来，如实报告并退出。
+         */
+
+        clock_gettime(CLOCK_REALTIME, &ts);
+        ts.tv_sec += 2;
+
+        n = mq_timedreceive(mq, (FAR char *)&msg, sizeof(msg), &prio, &ts);
 
         if (n != sizeof(msg))
           {
+            printf("等缓冲区超时（已收 %d 个）—— 采集没有产出数据\n", got);
             break;
           }
 
@@ -240,6 +348,11 @@ int main(int argc, char *argv[])
             FAR struct ap_buffer_s *apb = msg.u.ptr;
             int p;
             int a;
+
+            if (apb == NULL)
+              {
+                continue;
+              }
 
             mic_stats((FAR const int16_t *)apb->samp,
                       apb->nbytes / 2, &p, &a);
@@ -261,6 +374,7 @@ int main(int argc, char *argv[])
             apb->nbytes  = 0;
             apb->curbyte = 0;
             apb->flags   = 0;
+            memset(&buf_desc, 0, sizeof(buf_desc));
             buf_desc.u.buffer = apb;
             ioctl(fd, AUDIOIOC_ENQUEUEBUFFER, (unsigned long)&buf_desc);
           }

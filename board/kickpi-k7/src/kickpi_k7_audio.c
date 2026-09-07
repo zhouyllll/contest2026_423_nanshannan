@@ -130,8 +130,30 @@ int kickpi_k7_audio_initialize(void)
       return ret;
     }
 
+  /* ★ 再把**未经 PCM 解码包装**的编解码器注册成 pcm1，专供录音。
+   *
+   *   pcm_decode 是给放音用的解码器：它在收到缓冲区时会调 pcm_parsewav()
+   *   去解析 WAV 头。录音递进去的是**空缓冲区**，解析必然失败 ——
+   *   实测 AUDIOIOC_ENQUEUEBUFFER 直接返回 ENOENT。
+   *
+   *   也就是说 pcm0 这条路天然只能放音。ES8388 本身是全双工的
+   *   （getcaps 上报 INPUT|OUTPUT，原厂 Android 下同一颗芯片
+   *   playback 1 : capture 1），所以把裸设备另外注册一个名字，录音走它。
+   *
+   *   两个设备共用同一个下半部：同一时刻只跑一个方向，这与该编解码器
+   *   的实际用法一致。
+   */
+
+  ret = audio_register("pcm1", codec);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 注册 /dev/audio/pcm1（录音）失败: %d\n", ret);
+      /* 不致命：放音仍可用 */
+    }
+
   syslog(LOG_INFO,
-         "音频: /dev/audio/pcm0 就绪（ES8388@I2C%d:0x%02x + SAI%d）\n",
+         "音频: /dev/audio/pcm0 放音 + pcm1 录音"
+         "（ES8388@I2C%d:0x%02x + SAI%d）\n",
          AUDIO_I2C_BUS, AUDIO_I2C_ADDR, AUDIO_SAI_PORT);
   return OK;
 }
