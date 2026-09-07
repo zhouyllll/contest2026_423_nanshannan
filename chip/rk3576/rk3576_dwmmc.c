@@ -93,17 +93,25 @@
  * Private Functions
  ****************************************************************************/
 
-static inline uint32_t dw_getreg(uint32_t off)
+/* ★ 基址必须按实例取，不能写死。
+ *
+ *   板上有两个 dw-mshc：0x2a310000 是 TF 卡，0x2a320000 是 WiFi（SDIO）。
+ *   两者**同时在用**，所以也不能用一个文件级的"当前基址"变量去切 ——
+ *   那种写法在单实例时看不出问题，等第二个实例接进来才会以数据错乱的
+ *   形式暴露，而且错得很隐蔽。
+ */
+
+static inline uint32_t dw_getreg(uint32_t base, uint32_t off)
 {
-  return getreg32(RK3576_SDMMC_ADDR + off);
+  return getreg32(base + off);
 }
 
-static inline void dw_putreg(uint32_t off, uint32_t val)
+static inline void dw_putreg(uint32_t base, uint32_t off, uint32_t val)
 {
-  putreg32(val, RK3576_SDMMC_ADDR + off);
+  putreg32(val, base + off);
 }
 
-static int dw_update_clk(void);
+static int dw_update_clk(uint32_t base);
 
 /****************************************************************************
  * Name: dw_reset_ctrl
@@ -114,16 +122,16 @@ static int dw_update_clk(void);
  *
  ****************************************************************************/
 
-static int dw_reset_ctrl(void)
+static int dw_reset_ctrl(uint32_t base)
 {
   uint32_t val;
   int us;
 
-  dw_putreg(DWMMC_CTRL, DWMMC_CTRL_ALL_RESET);
+  dw_putreg(base, DWMMC_CTRL, DWMMC_CTRL_ALL_RESET);
 
   for (us = 0; us < RESET_TIMEOUT_US; us++)
     {
-      val = dw_getreg(DWMMC_CTRL);
+      val = dw_getreg(base, DWMMC_CTRL);
       if ((val & DWMMC_CTRL_ALL_RESET) == 0)
         {
           return OK;
@@ -151,7 +159,7 @@ static int dw_reset_ctrl(void)
  *
  ****************************************************************************/
 
-int rk3576_dwmmc_probe(void)
+int rk3576_dwmmc_probe(uint32_t base)
 {
   uint32_t verid;
   uint32_t hcon;
@@ -210,7 +218,7 @@ int rk3576_dwmmc_probe(void)
    */
 
   rk3576_pinmux_set(PIN_PWR_BANK, PIN_PWR, PIN_FUNC);
-  dw_putreg(DWMMC_PWREN, 1);
+  dw_putreg(base, DWMMC_PWREN, 1);
   up_mdelay(20);
 
   /* 5) 判据一：版本与硬件配置寄存器。
@@ -219,8 +227,8 @@ int rk3576_dwmmc_probe(void)
    *    或电源域没上电 —— 三者之一，但至少能立刻排除"代码逻辑问题"。
    */
 
-  verid = dw_getreg(DWMMC_VERID);
-  hcon  = dw_getreg(DWMMC_HCON);
+  verid = dw_getreg(base, DWMMC_VERID);
+  hcon  = dw_getreg(base, DWMMC_HCON);
 
   if (verid == 0 || verid == 0xffffffff)
     {
@@ -239,21 +247,21 @@ int rk3576_dwmmc_probe(void)
 
   /* 6) 软复位。复位位自清是"时钟真的在跑"的证明，比读寄存器更强。 */
 
-  ret = dw_reset_ctrl();
+  ret = dw_reset_ctrl(base);
   if (ret < 0)
     {
       return ret;
     }
 
-  dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);   /* 清残留状态 */
-  dw_putreg(DWMMC_INTMASK, 0);               /* 轮询式，先不开中断 */
-  dw_putreg(DWMMC_TMOUT, 0xffffffff);
+  dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);   /* 清残留状态 */
+  dw_putreg(base, DWMMC_INTMASK, 0);               /* 轮询式，先不开中断 */
+  dw_putreg(base, DWMMC_TMOUT, 0xffffffff);
 
   /* 判据二：FIFO 深度。dtb 说 256，从 FIFOTH 复位值反推一次，
    * 对得上就说明读到的确实是这个控制器，而不是别的地址。
    */
 
-  fifo_depth = ((dw_getreg(DWMMC_FIFOTH) >> 16) & 0xfff) + 1;
+  fifo_depth = ((dw_getreg(base, DWMMC_FIFOTH) >> 16) & 0xfff) + 1;
 
   /* 判据三：卡在位检测。CDETECT 位 0 低有效。
    *
@@ -261,7 +269,7 @@ int rk3576_dwmmc_probe(void)
    * （命令超时）完全一样，事后无法区分。
    */
 
-  cdetect = dw_getreg(DWMMC_CDETECT);
+  cdetect = dw_getreg(base, DWMMC_CDETECT);
 
   syslog(LOG_INFO,
          "DWMMC: FIFO 深度≈%" PRIu32 "（dtb 记载 256）"
@@ -293,22 +301,22 @@ int rk3576_dwmmc_probe(void)
 
     /* 先给足初始化时钟：400kHz 下 80 个时钟约 200us。 */
 
-    dw_putreg(DWMMC_CLKDIV, 30);          /* 24MHz / (2*30) = 400kHz */
-    dw_update_clk();
-    dw_putreg(DWMMC_CLKENA, DWMMC_CLKENA_ENABLE);
-    dw_update_clk();
+    dw_putreg(base, DWMMC_CLKDIV, 30);          /* 24MHz / (2*30) = 400kHz */
+    dw_update_clk(base);
+    dw_putreg(base, DWMMC_CLKENA, DWMMC_CLKENA_ENABLE);
+    dw_update_clk(base);
     up_mdelay(2);
 
     /* CMD0 GO_IDLE_STATE，无响应，带初始化序列 */
 
-    dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);
-    dw_putreg(DWMMC_CMDARG, 0);
-    dw_putreg(DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG |
+    dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);
+    dw_putreg(base, DWMMC_CMDARG, 0);
+    dw_putreg(base, DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG |
                          DWMMC_CMD_INIT | DWMMC_CMD_INDX(0));
 
     for (us = 0; us < 200000; us++)
       {
-        if ((dw_getreg(DWMMC_CMD) & DWMMC_CMD_START) == 0)
+        if ((dw_getreg(base, DWMMC_CMD) & DWMMC_CMD_START) == 0)
           {
             break;
           }
@@ -318,7 +326,7 @@ int rk3576_dwmmc_probe(void)
 
     for (us = 0; us < 200000; us++)
       {
-        if (dw_getreg(DWMMC_RINTSTS) & DWMMC_INT_CMD_DONE)
+        if (dw_getreg(base, DWMMC_RINTSTS) & DWMMC_INT_CMD_DONE)
           {
             break;
           }
@@ -327,7 +335,7 @@ int rk3576_dwmmc_probe(void)
       }
 
     syslog(LOG_INFO, "DWMMC: CMD0 后 RINTSTS=0x%08" PRIx32 "\n",
-           dw_getreg(DWMMC_RINTSTS));
+           dw_getreg(base, DWMMC_RINTSTS));
 
     up_mdelay(2);
 
@@ -335,15 +343,15 @@ int rk3576_dwmmc_probe(void)
      * 短响应带 CRC。
      */
 
-    dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);
-    dw_putreg(DWMMC_CMDARG, 0x1aa);
-    dw_putreg(DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG |
+    dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);
+    dw_putreg(base, DWMMC_CMDARG, 0x1aa);
+    dw_putreg(base, DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG |
                          DWMMC_CMD_RESP_EXP | DWMMC_CMD_RESP_CRC |
                          DWMMC_CMD_INDX(8));
 
     for (us = 0; us < 200000; us++)
       {
-        if ((dw_getreg(DWMMC_CMD) & DWMMC_CMD_START) == 0)
+        if ((dw_getreg(base, DWMMC_CMD) & DWMMC_CMD_START) == 0)
           {
             break;
           }
@@ -354,7 +362,7 @@ int rk3576_dwmmc_probe(void)
     sts = 0;
     for (us = 0; us < 500000; us++)
       {
-        sts = dw_getreg(DWMMC_RINTSTS);
+        sts = dw_getreg(base, DWMMC_RINTSTS);
         if (sts & (DWMMC_INT_CMD_DONE | DWMMC_INT_CMD_ERROR))
           {
             break;
@@ -363,7 +371,7 @@ int rk3576_dwmmc_probe(void)
         up_udelay(1);
       }
 
-    resp = dw_getreg(DWMMC_RESP0);
+    resp = dw_getreg(base, DWMMC_RESP0);
 
     syslog(LOG_INFO,
            "DWMMC: CMD8 RINTSTS=0x%08" PRIx32 " RESP0=0x%08" PRIx32
@@ -374,7 +382,7 @@ int rk3576_dwmmc_probe(void)
            ((resp & 0xfff) == 0x1aa)  ? "回显正确，命令通路正常" :
                                         "回显不符，采样时序有问题");
 
-    dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);
+    dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);
   }
 
   return OK;
@@ -388,6 +396,7 @@ int rk3576_dwmmc_probe(void)
 struct rk3576_dwmmc_dev_s
 {
   struct sdio_dev_s dev;              /* 必须是第一个成员 */
+  uint32_t          base;             /* 控制器基址（TF 卡 / WiFi 各一份） */
   uint8_t          *buffer;           /* 当前事务的数据缓冲区 */
   size_t            remaining;        /* 待传字节数           */
   bool              is_write;
@@ -438,16 +447,16 @@ static struct rk3576_dwmmc_dev_s g_dwmmc;
  *
  ****************************************************************************/
 
-static int dw_update_clk(void)
+static int dw_update_clk(uint32_t base)
 {
   int us;
 
-  dw_putreg(DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_UPD_CLK |
+  dw_putreg(base, DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_UPD_CLK |
                        DWMMC_CMD_PRV_DAT_WAIT);
 
   for (us = 0; us < 100000; us++)
     {
-      if ((dw_getreg(DWMMC_CMD) & DWMMC_CMD_START) == 0)
+      if ((dw_getreg(base, DWMMC_CMD) & DWMMC_CMD_START) == 0)
         {
           return OK;
         }
@@ -456,7 +465,7 @@ static int dw_update_clk(void)
     }
 
   syslog(LOG_ERR, "ERROR: DWMMC 时钟更新超时 CMD=0x%08" PRIx32 "\n",
-         dw_getreg(DWMMC_CMD));
+         dw_getreg(base, DWMMC_CMD));
   return -ETIMEDOUT;
 }
 
@@ -473,8 +482,8 @@ static void dw_set_clock_hz(struct rk3576_dwmmc_dev_s *priv, uint32_t hz)
 
   /* 先停时钟再改 —— 运行中改分频会产生毛刺。 */
 
-  dw_putreg(DWMMC_CLKENA, 0);
-  dw_update_clk();
+  dw_putreg(priv->base, DWMMC_CLKENA, 0);
+  dw_update_clk(priv->base);
 
   if (hz == 0)
     {
@@ -551,11 +560,11 @@ static void dw_set_clock_hz(struct rk3576_dwmmc_dev_s *priv, uint32_t hz)
 
   /* CLKDIV 固定 0 = 直通（规格只允许 0 或 1） */
 
-  dw_putreg(DWMMC_CLKDIV, 0);
-  dw_update_clk();
+  dw_putreg(priv->base, DWMMC_CLKDIV, 0);
+  dw_update_clk(priv->base);
 
-  dw_putreg(DWMMC_CLKENA, DWMMC_CLKENA_ENABLE);
-  dw_update_clk();
+  dw_putreg(priv->base, DWMMC_CLKENA, DWMMC_CLKENA_ENABLE);
+  dw_update_clk(priv->base);
 
   priv->card_hz = parent / div;
 
@@ -569,16 +578,16 @@ static void dw_set_clock_hz(struct rk3576_dwmmc_dev_s *priv, uint32_t hz)
  * Name: dw_fifo_reset
  ****************************************************************************/
 
-static void dw_fifo_reset(void)
+static void dw_fifo_reset(uint32_t base)
 {
-  uint32_t val = dw_getreg(DWMMC_CTRL);
+  uint32_t val = dw_getreg(base, DWMMC_CTRL);
   int us;
 
-  dw_putreg(DWMMC_CTRL, val | DWMMC_CTRL_FIFO_RESET);
+  dw_putreg(base, DWMMC_CTRL, val | DWMMC_CTRL_FIFO_RESET);
 
   for (us = 0; us < 100000; us++)
     {
-      if ((dw_getreg(DWMMC_CTRL) & DWMMC_CTRL_FIFO_RESET) == 0)
+      if ((dw_getreg(base, DWMMC_CTRL) & DWMMC_CTRL_FIFO_RESET) == 0)
         {
           return;
         }
@@ -606,7 +615,7 @@ static void dw_fifo_reset(void)
  *
  ****************************************************************************/
 
-static void dw_wait_while_busy(void)
+static void dw_wait_while_busy(uint32_t base)
 {
   int us;
 
@@ -620,7 +629,7 @@ static void dw_wait_while_busy(void)
 
   for (us = 0; us < 500000; us++)
     {
-      uint32_t sts = dw_getreg(DWMMC_STATUS);
+      uint32_t sts = dw_getreg(base, DWMMC_STATUS);
 
       if ((sts & (DWMMC_STATUS_BUSY | DWMMC_STATUS_MC_BUSY)) == 0)
         {
@@ -632,7 +641,7 @@ static void dw_wait_while_busy(void)
 
   syslog(LOG_WARNING,
          "DWMMC: 卡持续忙 STATUS=0x%08" PRIx32 "，仍然发出命令\n",
-         dw_getreg(DWMMC_STATUS));
+         dw_getreg(base, DWMMC_STATUS));
 }
 
 /****************************************************************************
@@ -647,11 +656,11 @@ static void rk3576_dwmmc_reset(struct sdio_dev_s *dev)
   syslog(LOG_INFO, "DW reset()\n");
 #endif
 
-  dw_reset_ctrl();
-  dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);
-  dw_putreg(DWMMC_INTMASK, 0);
-  dw_putreg(DWMMC_TMOUT, 0xffffffff);
-  dw_putreg(DWMMC_CTYPE, DWMMC_CTYPE_1BIT);
+  dw_reset_ctrl(priv->base);
+  dw_putreg(priv->base, DWMMC_RINTSTS, DWMMC_INT_ALL);
+  dw_putreg(priv->base, DWMMC_INTMASK, 0);
+  dw_putreg(priv->base, DWMMC_TMOUT, 0xffffffff);
+  dw_putreg(priv->base, DWMMC_CTYPE, DWMMC_CTYPE_1BIT);
 
   priv->buffer     = NULL;
   priv->remaining  = 0;
@@ -688,13 +697,15 @@ static sdio_capset_t rk3576_dwmmc_capabilities(struct sdio_dev_s *dev)
 
 static sdio_statset_t rk3576_dwmmc_status(struct sdio_dev_s *dev)
 {
+  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
+
   UNUSED(dev);
 
   /* 用硬件的卡检测脚，而不是恒返回 PRESENT。SD 卡是可插拔的，
    * 这里说实话才有意义。
    */
 
-  return DWMMC_CDETECT_PRESENT(dw_getreg(DWMMC_CDETECT)) ?
+  return DWMMC_CDETECT_PRESENT(dw_getreg(priv->base, DWMMC_CDETECT)) ?
          SDIO_STATUS_PRESENT : 0;
 }
 
@@ -703,7 +714,7 @@ static void rk3576_dwmmc_widebus(struct sdio_dev_s *dev, bool wide)
   struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
 
   priv->widebus = wide;
-  dw_putreg(DWMMC_CTYPE, wide ? DWMMC_CTYPE_4BIT : DWMMC_CTYPE_1BIT);
+  dw_putreg(priv->base, DWMMC_CTYPE, wide ? DWMMC_CTYPE_4BIT : DWMMC_CTYPE_1BIT);
 }
 
 static void rk3576_dwmmc_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
@@ -731,11 +742,13 @@ static void rk3576_dwmmc_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
 static int rk3576_dwmmc_attach(struct sdio_dev_s *dev)
 {
+  struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
+
   UNUSED(dev);
 
   /* 轮询式实现，不接中断。中断版本待后续补。 */
 
-  dw_putreg(DWMMC_INTMASK, 0);
+  dw_putreg(priv->base, DWMMC_INTMASK, 0);
   return OK;
 }
 
@@ -792,15 +805,15 @@ static int rk3576_dwmmc_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
         }
 
       datalen = priv->remaining;
-      dw_putreg(DWMMC_BLKSIZ, priv->blocksize);
-      dw_putreg(DWMMC_BYTCNT, datalen);
+      dw_putreg(priv->base, DWMMC_BLKSIZ, priv->blocksize);
+      dw_putreg(priv->base, DWMMC_BYTCNT, datalen);
     }
   else
     {
       /* 不带数据的命令要把长度清零，否则控制器会沿用上一条的值。 */
 
-      dw_putreg(DWMMC_BLKSIZ, 0);
-      dw_putreg(DWMMC_BYTCNT, 0);
+      dw_putreg(priv->base, DWMMC_BLKSIZ, 0);
+      dw_putreg(priv->base, DWMMC_BYTCNT, 0);
     }
 
   /* CMD0 需要带初始化序列（80 个时钟） */
@@ -839,10 +852,10 @@ static int rk3576_dwmmc_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
 
   /* 顺序与 U-Boot 一致：先等卡不忙，再清中断状态，最后写参数与命令。 */
 
-  dw_wait_while_busy();
-  dw_putreg(DWMMC_RINTSTS, DWMMC_INT_ALL);
-  dw_putreg(DWMMC_CMDARG, arg);
-  dw_putreg(DWMMC_CMD, regval);
+  dw_wait_while_busy(priv->base);
+  dw_putreg(priv->base, DWMMC_RINTSTS, DWMMC_INT_ALL);
+  dw_putreg(priv->base, DWMMC_CMDARG, arg);
+  dw_putreg(priv->base, DWMMC_CMD, regval);
 
   /* 等待命令被控制器接受（START 位自清）。这一步不等于命令完成，
    * 只是控制器收下了 —— 两者分开，超时时能说清卡在哪一步。
@@ -850,7 +863,7 @@ static int rk3576_dwmmc_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
 
   for (us = 0; us < 100000; us++)
     {
-      if ((dw_getreg(DWMMC_CMD) & DWMMC_CMD_START) == 0)
+      if ((dw_getreg(priv->base, DWMMC_CMD) & DWMMC_CMD_START) == 0)
         {
 #ifdef CONFIG_RK3576_DWMMC_TRACE
           syslog(LOG_INFO, "DW >CMD%" PRIu32 " 已受理\n",
@@ -872,8 +885,8 @@ static int rk3576_dwmmc_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
   syslog(LOG_ERR,
          "DW >CMD%" PRIu32 " 未被受理 CMD=0x%08" PRIx32
          " STATUS=0x%08" PRIx32 " RINTSTS=0x%08" PRIx32 "\n",
-         cmd & MMCSD_CMDIDX_MASK, dw_getreg(DWMMC_CMD),
-         dw_getreg(DWMMC_STATUS), dw_getreg(DWMMC_RINTSTS));
+         cmd & MMCSD_CMDIDX_MASK, dw_getreg(priv->base, DWMMC_CMD),
+         dw_getreg(priv->base, DWMMC_STATUS), dw_getreg(priv->base, DWMMC_RINTSTS));
 
   /* 命令根本没发出去，同样要记 —— 否则 recv_* 会返回上一条命令
    * 遗留的 OK，把"没发成功"报成"成功"。
@@ -891,7 +904,7 @@ static int rk3576_dwmmc_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 
   for (us = 0; us < 500000; us++)
     {
-      sts = dw_getreg(DWMMC_RINTSTS);
+      sts = dw_getreg(priv->base, DWMMC_RINTSTS);
 
       if (sts & DWMMC_INT_CMD_ERROR)
         {
@@ -928,14 +941,14 @@ static int rk3576_dwmmc_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
           }
 #endif
 
-          dw_putreg(DWMMC_RINTSTS, DWMMC_INT_CMD_ERROR);
+          dw_putreg(priv->base, DWMMC_RINTSTS, DWMMC_INT_CMD_ERROR);
           priv->last_result = (sts & DWMMC_INT_RTO) ? -ETIMEDOUT : -EIO;
           return priv->last_result;
         }
 
       if (sts & DWMMC_INT_CMD_DONE)
         {
-          dw_putreg(DWMMC_RINTSTS, DWMMC_INT_CMD_DONE);
+          dw_putreg(priv->base, DWMMC_RINTSTS, DWMMC_INT_CMD_DONE);
 
           /* ★ 这一句必须在 #ifdef 外面。
            *
@@ -971,7 +984,7 @@ static int rk3576_dwmmc_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
             {
               syslog(LOG_INFO, "DW  CMD%" PRIu32 " 完成 resp=0x%08" PRIx32
                      "\n", cmd & MMCSD_CMDIDX_MASK,
-                     dw_getreg(DWMMC_RESP0));
+                     dw_getreg(priv->base, DWMMC_RESP0));
             }
 #endif
           return OK;
@@ -983,13 +996,13 @@ static int rk3576_dwmmc_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
   syslog(LOG_ERR,
          "DW CMD%" PRIu32 " 无响应 RINTSTS=0x%08" PRIx32
          " STATUS=0x%08" PRIx32 "\n",
-         cmd & MMCSD_CMDIDX_MASK, dw_getreg(DWMMC_RINTSTS),
-         dw_getreg(DWMMC_STATUS));
+         cmd & MMCSD_CMDIDX_MASK, dw_getreg(priv->base, DWMMC_RINTSTS),
+         dw_getreg(priv->base, DWMMC_STATUS));
   /* 命令卡在控制器里，后续命令多半也会被拖住。按参考驱动的做法复位
    * FIFO 与 DMA，把状态机拉回可用。
    */
 
-  dw_fifo_reset();
+  dw_fifo_reset(priv->base);
 
   priv->last_result = -ETIMEDOUT;
   return priv->last_result;
@@ -1013,7 +1026,7 @@ static int rk3576_dwmmc_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
 
   if (rshort != NULL)
     {
-      *rshort = dw_getreg(DWMMC_RESP0);
+      *rshort = dw_getreg(priv->base, DWMMC_RESP0);
     }
 
   return OK;
@@ -1044,10 +1057,10 @@ static int rk3576_dwmmc_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
    *   厂商号读成 0、容量算错 —— eMMC 那边正是这么发现的。
    */
 
-  rlong[0] = dw_getreg(DWMMC_RESP3);
-  rlong[1] = dw_getreg(DWMMC_RESP2);
-  rlong[2] = dw_getreg(DWMMC_RESP1);
-  rlong[3] = dw_getreg(DWMMC_RESP0);
+  rlong[0] = dw_getreg(priv->base, DWMMC_RESP3);
+  rlong[1] = dw_getreg(priv->base, DWMMC_RESP2);
+  rlong[2] = dw_getreg(priv->base, DWMMC_RESP1);
+  rlong[3] = dw_getreg(priv->base, DWMMC_RESP0);
   return OK;
 }
 
@@ -1068,7 +1081,7 @@ static int rk3576_dwmmc_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
 {
   struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
 
-  dw_fifo_reset();
+  dw_fifo_reset(priv->base);
   priv->buffer    = buffer;
   priv->remaining = nbytes;
   priv->is_write  = false;
@@ -1080,7 +1093,7 @@ static int rk3576_dwmmc_sendsetup(struct sdio_dev_s *dev,
 {
   struct rk3576_dwmmc_dev_s *priv = (struct rk3576_dwmmc_dev_s *)dev;
 
-  dw_fifo_reset();
+  dw_fifo_reset(priv->base);
   priv->buffer    = (uint8_t *)buffer;
   priv->remaining = nbytes;
   priv->is_write  = true;
@@ -1093,7 +1106,7 @@ static int rk3576_dwmmc_cancel(struct sdio_dev_s *dev)
 
   priv->buffer    = NULL;
   priv->remaining = 0;
-  dw_fifo_reset();
+  dw_fifo_reset(priv->base);
   return OK;
 }
 
@@ -1119,20 +1132,20 @@ static int dw_pio_transfer(struct rk3576_dwmmc_dev_s *priv)
          "DW xfer %s remaining=%zu words=%zu blksz=%u BLKSIZ=%" PRIu32
          " BYTCNT=%" PRIu32 "\n",
          priv->is_write ? "写" : "读", priv->remaining, words,
-         priv->blocksize, dw_getreg(DWMMC_BLKSIZ),
-         dw_getreg(DWMMC_BYTCNT));
+         priv->blocksize, dw_getreg(priv->base, DWMMC_BLKSIZ),
+         dw_getreg(priv->base, DWMMC_BYTCNT));
 #endif
 
   for (us = 0; us < 2000000 && done < words; us++)
     {
-      sts = dw_getreg(DWMMC_RINTSTS);
+      sts = dw_getreg(priv->base, DWMMC_RINTSTS);
 
       if (sts & DWMMC_INT_DATA_ERROR)
         {
           syslog(LOG_ERR,
                  "ERROR: DWMMC 数据错误 RINTSTS=0x%08" PRIx32
                  " 已传 %zu/%zu 字\n", sts, done, words);
-          dw_putreg(DWMMC_RINTSTS, DWMMC_INT_DATA_ERROR);
+          dw_putreg(priv->base, DWMMC_RINTSTS, DWMMC_INT_DATA_ERROR);
           return -EIO;
         }
 
@@ -1141,18 +1154,18 @@ static int dw_pio_transfer(struct rk3576_dwmmc_dev_s *priv)
           /* FIFO 未满就继续灌 */
 
           while (done < words &&
-                 (dw_getreg(DWMMC_STATUS) & DWMMC_STATUS_FIFO_FULL) == 0)
+                 (dw_getreg(priv->base, DWMMC_STATUS) & DWMMC_STATUS_FIFO_FULL) == 0)
             {
-              dw_putreg(priv->fifo_off, p[done++]);
+              dw_putreg(priv->base, priv->fifo_off, p[done++]);
             }
         }
       else
         {
-          uint32_t fcnt = DWMMC_GET_FCNT(dw_getreg(DWMMC_STATUS));
+          uint32_t fcnt = DWMMC_GET_FCNT(dw_getreg(priv->base, DWMMC_STATUS));
 
           while (done < words && fcnt-- > 0)
             {
-              p[done++] = dw_getreg(priv->fifo_off);
+              p[done++] = dw_getreg(priv->base, priv->fifo_off);
             }
         }
 
@@ -1166,7 +1179,7 @@ static int dw_pio_transfer(struct rk3576_dwmmc_dev_s *priv)
     {
       syslog(LOG_ERR,
              "ERROR: DWMMC 数据传输超时 已传 %zu/%zu 字 STATUS=0x%08"
-             PRIx32 "\n", done, words, dw_getreg(DWMMC_STATUS));
+             PRIx32 "\n", done, words, dw_getreg(priv->base, DWMMC_STATUS));
       return -ETIMEDOUT;
     }
 
@@ -1174,9 +1187,9 @@ static int dw_pio_transfer(struct rk3576_dwmmc_dev_s *priv)
 
   for (us = 0; us < 500000; us++)
     {
-      if (dw_getreg(DWMMC_RINTSTS) & DWMMC_INT_DATA_OVER)
+      if (dw_getreg(priv->base, DWMMC_RINTSTS) & DWMMC_INT_DATA_OVER)
         {
-          dw_putreg(DWMMC_RINTSTS, DWMMC_INT_DATA_OVER);
+          dw_putreg(priv->base, DWMMC_RINTSTS, DWMMC_INT_DATA_OVER);
           return OK;
         }
 
@@ -1198,8 +1211,8 @@ static int dw_pio_transfer(struct rk3576_dwmmc_dev_s *priv)
          "ERROR: DWMMC 等 DATA_OVER 超时 RINTSTS=0x%08" PRIx32
          " STATUS=0x%08" PRIx32 " 主机侧=%" PRIu32 " 卡侧=%" PRIu32
          " 字节（应为 %zu）\n",
-         dw_getreg(DWMMC_RINTSTS), dw_getreg(DWMMC_STATUS),
-         dw_getreg(DWMMC_TBBCNT), dw_getreg(DWMMC_TCBCNT),
+         dw_getreg(priv->base, DWMMC_RINTSTS), dw_getreg(priv->base, DWMMC_STATUS),
+         dw_getreg(priv->base, DWMMC_TBBCNT), dw_getreg(priv->base, DWMMC_TCBCNT),
          words * 4);
   return -ETIMEDOUT;
 }
@@ -1304,10 +1317,12 @@ static const struct sdio_dev_s g_dwmmc_ops =
  *
  ****************************************************************************/
 
-struct sdio_dev_s *rk3576_dwmmc_initialize(void)
+struct sdio_dev_s *rk3576_dwmmc_initialize(uint32_t base)
 {
   struct rk3576_dwmmc_dev_s *priv = &g_dwmmc;
   uint32_t hcon;
+
+  priv->base = base;
   uint32_t depth;
 
   priv->dev = g_dwmmc_ops;
@@ -1316,11 +1331,11 @@ struct sdio_dev_s *rk3576_dwmmc_initialize(void)
    * 取错的话数据写进 CDTHRCTL，不报错但一个字节也到不了卡上。
    */
 
-  hcon = dw_getreg(DWMMC_HCON);
+  hcon = dw_getreg(priv->base, DWMMC_HCON);
   UNUSED(hcon);
 
   priv->fifo_off =
-      (DWMMC_GET_VERID(dw_getreg(DWMMC_VERID)) >= DWMMC_VERID_240A) ?
+      (DWMMC_GET_VERID(dw_getreg(priv->base, DWMMC_VERID)) >= DWMMC_VERID_240A) ?
       DWMMC_DATA_240A : DWMMC_DATA_OLD;
 
   /* 源时钟：上面把选源设成了 xin24m、不分频。 */
@@ -1335,7 +1350,7 @@ struct sdio_dev_s *rk3576_dwmmc_initialize(void)
    *   水位设得超过实际深度，FIFO 永远达不到阈值，数据就排不出去。
    */
 
-  depth = (((dw_getreg(DWMMC_FIFOTH) >> 16) & 0xfff) + 1);
+  depth = (((dw_getreg(priv->base, DWMMC_FIFOTH) >> 16) & 0xfff) + 1);
   if (depth < 8 || depth > 4096)
     {
       depth = 128;
@@ -1348,16 +1363,16 @@ struct sdio_dev_s *rk3576_dwmmc_initialize(void)
    *   msize 是 FIFO 与卡之间的突发长度编码，写错会让搬运行为异常。
    */
 
-  dw_putreg(DWMMC_FIFOTH,
+  dw_putreg(priv->base, DWMMC_FIFOTH,
             DWMMC_SET_FIFOTH(0x2, depth / 2 - 1, depth / 2));
 
   /* 厂商在初始化时显式清 CLKSRC（该寄存器在新版 IP 上保留不用，
    * 但残留值会影响时钟选择）。
    */
 
-  dw_putreg(DWMMC_CLKSRC, 0);
+  dw_putreg(priv->base, DWMMC_CLKSRC, 0);
 
-  dw_putreg(DWMMC_CTRL, DWMMC_CTRL_INT_ENABLE);
+  dw_putreg(priv->base, DWMMC_CTRL, DWMMC_CTRL_INT_ENABLE);
 
   syslog(LOG_INFO,
          "DWMMC: sdio_dev 就绪 FIFO 窗口=0x%03" PRIx32

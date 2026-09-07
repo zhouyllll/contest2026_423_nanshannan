@@ -441,7 +441,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_RK3576_DWMMC
   /* SD 卡（TF）控制器。与 eMMC 是两种不同的 IP，各走各的驱动。 */
 
-  ret = rk3576_dwmmc_probe();
+  ret = rk3576_dwmmc_probe(RK3576_DWMMC_SD_BASE);
   if (ret < 0)
     {
       /* -ENODEV 是"卡不在位"，不是故障 —— SD 卡本来就是可插拔的，
@@ -454,7 +454,7 @@ int board_app_initialize(uintptr_t arg)
     }
   else
     {
-      struct sdio_dev_s *sd = rk3576_dwmmc_initialize();
+      struct sdio_dev_s *sd = rk3576_dwmmc_initialize(RK3576_DWMMC_SD_BASE);
 
       if (sd == NULL)
         {
