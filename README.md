@@ -20,21 +20,47 @@ openvela 官方已在大赛分支上把 KICKPI-K7 挂为**待适配目标**：
 
 ## 当前状态
 
-**SoC 层与板级层已建立，编译通过，等待开发板到位验证。**
+**openvela 已在 KICKPI-K7 上启动并运行，核心外设与端侧 AI 能力均已上板验证。**
 
 ```
-nuttx.bin        311296 字节
+nuttx.bin        1,986,560 字节
 Entry point      0x42000000
 Image 魔数       ARMd（U-Boot booti 可直接加载）
-中断控制器       arm64_gicv2.o（GICv3 未编入）
-地址一致性       scripts/check-addr.sh 六组检查全过
+CPU              4× Cortex-A53 SMP（A72 簇未启用）
+中断控制器       GIC-400 / GICv2
 ```
 
-已完成：启动入口 / MMU / 异常向量、GICv2 接入、Generic Timer、PSCI、
-早期打印与 16550 串口控制台配置、SoC 参数勘察、xTS 必测项清单、
-地址一致性自动校验、Skill 沉淀。
+### 已上板跑通
 
-唯一阻塞：**KICKPI-K7 的调试串口是哪一路 UART**，需原理图确认（见 `RECON.md` B1）。
+| 子系统 | 验证方式 |
+|---|---|
+| 启动 / MMU / 异常向量 / GICv2 / Generic Timer / PSCI | 稳定启动至 `nsh>` |
+| **SMP**（4× Cortex-A53） | `ps` 四核在线、`cmocka_sched_test` 16/16、`ostest` 退出 0、`smp_call_test` |
+| 串口（16550，12 路 UART 已勘察） | 控制台 1.5 Mbaud（与厂商 U-Boot 一致） |
+| **千兆网口**（GMAC + Maxio MAE0621A PHY） | 双向 ping 0% 丢包、1000M 全双工、TFTP 收发文件 |
+| eMMC / TF 卡（dwcmshc + dw-mshc） | 挂载读写；`cmocka_driver_block` |
+| GPIO / I2C / SPI / RNG / 看门狗 / RTC(HYM8563) | 对应 cmocka 驱动用例 |
+| 显示（VOP2 + MIPI DSI + 触摸 FT5x06） | 送屏出图 |
+| 音频（SAI） | `cmocka_driver_audio` |
+| **摄像头**（IMX415 → CSI D-PHY → CIF） | 取实帧，`INTSTAT=0x300`，动态范围正常 |
+| **图像处理**（去马赛克 GBRG + 灰世界 AWB + 面积平均缩放 + JPEG） | 1932×1096 与 1280×720 实拍图，白平衡 G/R=1.02 |
+| **V4L2**（`/dev/video0`） | `v4l2cap` 复刻 ai_agent 相机工具的调用序列，出 1280×720 JPEG |
+| **ai_agent** | 接 MiMo 后端（OpenAI 兼容），TLS 握手 + 真实对话，`status=ok` |
+| HDMI | 控制器探测：`CORE_ID` 读出 `"HQTX"`，电源域/时钟到位（尚未出图） |
+
+### 进行中
+
+| 项 | 状态 |
+|---|---|
+| HDMI 输出 | 硬件参数与 PHY 方案已定（见 `docs/` 与提交记录），待接显示器做链路 |
+| WiFi / 蓝牙（AP6256 = BCM4345C5） | 硬件与固件出处已确认，`dw-mshc` 已支持双实例，待接 SDIO 实例 |
+| M.2 SSD（PCIe + NVMe） | 勘察完成，见 `docs/pcie-nvme.md`；NuttX 无 NVMe 驱动，需移植 |
+| Linux + NuttX AMP | U-Boot 侧未通，见 `docs/smp-amp.md` |
+
+### 沉淀
+
+88 次提交；`notes/DEBUG-CASES.md` 20 例排查记录（现象—歧路—根因—修复—教训），
+其中多例是**上游缺陷**并已归档为可提交的补丁；1 个可复用 Skill。
 
 ## ★ RK3576 的三个坑（都属于"填错不报错、上板无输出"）
 
@@ -51,24 +77,36 @@ Image 魔数       ARMd（U-Boot booti 可直接加载）
 
 ```bash
 # 1. 拉取工程
-repo init -u https://github.com/open-vela/contest2026_423_nanshannan \
-  -b dev-ai-contest-2026 -m contest2026_423_nanshannan.xml
+repo init -u https://github.com/open-vela/manifests -b dev-ai-contest-2026 \
+  -m contest2026_423_nanshannan.xml
 repo sync -c -j8
 
-# 2. 编译
-cd contest2026_423_nanshannan && source scripts/env.sh
-cd ../nuttx
-./tools/configure.sh -e ../vendor/openvela/boards/contest2026_423_board/configs/nsh
-make -j$(nproc)
+# 2. ★ 把本仓接进构建树（必须，见下方说明）
+./contest2026_423_nanshannan/scripts/setup-workspace.sh
 
-# 3. 校验地址一致性
-../contest2026_423_nanshannan/scripts/check-addr.sh
+# 3. 编译
+source contest2026_423_nanshannan/scripts/env.sh
+cd nuttx
+cp ../contest2026_423_nanshannan/board/kickpi-k7/configs/nsh/defconfig .config
+make olddefconfig && make olddefconfig      # 需要两遍，见下
+make -j$(nproc)                             # 产出 nuttx.bin
+
+# 4. 烧录（全自动，不需要碰板子）
+cd ../contest2026_423_nanshannan && ./scripts/flash.sh
 ```
 
-板级代码在本仓 `board/kickpi-k7/`，由 manifest 的 `<linkfile>` 映射到
-`vendor/openvela/boards/contest2026_423_board`，**生产仓库零改动**。
+**第 2 步为什么必须。** 大赛 manifest 只为每队映射了三个**模板**目录
+（`app/hello_app`、`quickapp/hello_quickapp`、`board/contest_board`），
+而本作品的代码在 `board/kickpi-k7/`、`chip/rk3576/`、`app/{cam,v4l2cap,hdmi,
+spi_selftest}` 下。manifest 在组委会仓里改不了，所以这些映射、以及公共仓
+的适配补丁，由 `setup-workspace.sh` 建立（幂等，可重复执行）。跳过这一步
+的表现是"配置里找不到板子"，而原因离现象很远。
 
-烧录与上板步骤见 [`board/kickpi-k7/README_zh-cn.md`](board/kickpi-k7/README_zh-cn.md)。
+**`olddefconfig` 为什么要跑两遍。** 第一遍解析 `select`/`depends on` 之后
+才会显现出新的可见符号，第二遍才把它们的值定下来。只跑一遍会静默丢掉
+一部分配置 —— 编译不报错，只是功能不存在。
+
+烧录原理与恢复手段见 [`board/kickpi-k7/README_zh-cn.md`](board/kickpi-k7/README_zh-cn.md)。
 
 ## 目录说明
 
@@ -81,6 +119,11 @@ make -j$(nproc)
 | `bsp/vendor-rockchip-toplevel/` | 获奖后 PR 到 `vendor_rockchip` 所需的顶层 Kconfig / Make.defs / Makefile |
 | `docs/rk3576-soc-recon.md` | SoC 硬件参数勘察（GIC / CPU / 定时器 / 12 路 UART 全表） |
 | `docs/xts-checklist.md` | xTS 必测项清单 = 开发路线图与验收标准 |
+| `docs/smp-amp.md` | SMP 启用过程与 Linux+NuttX AMP 方案 |
+| `docs/ai-agent-setup.md` | ai_agent 后端配置与上板验证 |
+| `docs/pcie-nvme.md` | M.2 SSD（PCIe + NVMe）勘察与移植方案 |
+| `bsp/upstream/` | ★ **上游侧缺陷修复与适配补丁**（TFTP 空指针、agent 墙钟计时等），各自独立提 PR |
+| `app/` | 板级验证程序：`cam`（摄像头/图像）、`v4l2cap`（V4L2 全链路）、`hdmi`、`spi_selftest` |
 | `docs/m1a-gicv2-qemu.md` | M1a：QEMU 上 GICv2 路径验证与驱动分析 |
 | `docs/refs/` | 官方文档离线副本 |
 | `notes/DEBUG-CASES.md` | 踩坑记录（现象—排查—根因—修复—验证） |
