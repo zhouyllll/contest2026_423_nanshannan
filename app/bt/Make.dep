@@ -1,17 +1,15 @@
 # Gen Make.dep automatically
-spi_selftest_main.c.home.dministrator.openvela-amlogic.src.contest2026_423_nanshannan.app.spi_selftest.o: \
- spi_selftest_main.c \
+bt_main.c.home.dministrator.openvela-amlogic.src.contest2026_423_nanshannan.app.bt.o: \
+ bt_main.c \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/config.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/errno.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/compiler.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/fcntl.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/stdio.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/types.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/compiler.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/stdint.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/types.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/inttypes.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/limits.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/limits.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/stdio.h \
  /home/dministrator/openvela-amlogic/src/prebuilts/gcc/linux-x86_64/aarch64-none-elf/lib/gcc/aarch64-none-elf/13.4.0/include/stdarg.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/time.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/fs.h \
@@ -25,6 +23,7 @@ spi_selftest_main.c.home.dministrator.openvela-amlogic.src.contest2026_423_nansh
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/queue.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/mutex_type.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/semaphore_type.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/errno.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/semaphore.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/mm/gran.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/spawn.h \
@@ -47,23 +46,6 @@ spi_selftest_main.c.home.dministrator.openvela-amlogic.src.contest2026_423_nansh
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/atomic.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/lib/lib.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/stdlib.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/sys/ioctl.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/net/ioctl.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/input/ioctl.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wireless/ioctl.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/unistd.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/tls.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/sched.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/assert.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/clock.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/sys/timex.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/sys/time.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/sys/select.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/lib/math32.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/inttypes.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wdog.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/list_type.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/spi/spi_transfer.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/spi/spi.h
+ /home/dministrator/openvela-amlogic/src/nuttx/include/arch/board/board.h
 # No files specified for dependency generation
 # No files specified for dependency generation

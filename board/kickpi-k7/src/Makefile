@@ -27,6 +27,10 @@ CSRCS += kickpi_k7_appinit.c
 
 ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += kickpi_k7_gpio.c
+
+ifeq ($(CONFIG_BLUETOOTH_BCM4343X),y)
+CSRCS += kickpi_k7_bt.c kickpi_k7_bt_firmware.c
+endif
 endif
 
 ifeq ($(CONFIG_RK3576_I2C),y)

@@ -266,6 +266,12 @@ int kickpi_camera_jpeg(FAR const char *path, int phase, int quality);
 int rk3576_hdmi_prepare(void);
 int rk3576_hdmi_probe(void);
 
+/* 蓝牙（AP6256 / BCM4345C5，UART4）。由 `bt init` 命令手动触发 ——
+ * 不在启动路径上，理由见 kickpi_k7_appinit.c 里的说明。
+ */
+
+int kickpi_k7_bt_initialize(void);
+
 /* LSC（镜头阴影）与 CCM（色彩校正矩阵）。
  *
  * ★ 两者的系数都只能实测，默认恒等 —— 这一级存在但不改变画面。

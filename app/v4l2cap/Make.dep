@@ -64,6 +64,7 @@ v4l2cap_main.c.home.dministrator.openvela-amlogic.src.contest2026_423_nanshannan
  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/ioctl.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/net/ioctl.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/input/ioctl.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wireless/ioctl.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/mman.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/videoio.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/video_controls.h

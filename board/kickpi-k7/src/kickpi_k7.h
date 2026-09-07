@@ -126,6 +126,11 @@ int kickpi_imgproc_jpeg_scaled(FAR const uint16_t *raw, int stride_pix,
                                int quality, FAR uint8_t *out, size_t outlen);
 int kickpi_camera_jpeg(FAR const char *path, int phase, int quality);
 
+/* 蓝牙（AP6256 / BCM4345C5，UART4）。固件由 kickpi_k7_bt_firmware.c 提供。 */
+
+int kickpi_k7_bt_initialize(void);
+extern const long int g_bt_firmware_len;
+
 /* LSC（镜头阴影）与 CCM（色彩校正矩阵）。
  *
  * ★ 两者的系数都只能实测，默认恒等 —— 这一级存在但不改变画面。

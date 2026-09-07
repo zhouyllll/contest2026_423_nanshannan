@@ -504,6 +504,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+/* ★ 蓝牙**不在**启动路径上初始化，由 `bt init` 命令手动触发。
+ *
+ *   固件加载会等模组的 HCI 应答，而这条路在验证通过之前随时可能卡住。
+ *   board_app_initialize() 跑在 nsh 任务上下文 —— 它一卡，控制台就起不来，
+ *   连 loader 命令都发不进去，板子只能靠 MASKROM 恢复。
+ *
+ *   我已经这样把板子挂死过一次。未经验证的硬件启动流程放进启动路径，
+ *   失败代价是"整块板子进不去"，而收益只是省一条命令。
+ */
+
 #ifdef CONFIG_RK3576_RNG
   ret = rk3576_rng_initialize();
   if (ret < 0)
