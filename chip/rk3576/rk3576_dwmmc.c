@@ -47,6 +47,7 @@
 #include "rk3576_gpio.h"
 #include "rk3576_pinmux.h"
 #include "hardware/rk3576_memorymap.h"
+#include "rk3576_dwmmc.h"
 #include "hardware/rk3576_dwmmc.h"
 
 #ifdef CONFIG_RK3576_DWMMC
@@ -86,6 +87,117 @@
 #define PIN_DET             7
 #define PIN_PWR_BANK        0
 #define PIN_PWR             14
+
+/* SDIO 实例（WiFi，AP6256）。出处：原厂 dtb 与 SDK 的 clk-rk3576.c
+ *
+ *   /mmc@2a320000  dw-mshc 4bit + cap-sdio-irq + non-removable
+ *   CCLK_SRC_SDIO  CLKSEL_CON(104) mux@6(2位) div@0(6位)，
+ *                  gate CLKGATE_CON(42) bit 11
+ *   HCLK_SDIO      gate CLKGATE_CON(42) bit 12
+ *   SRST_H_SDIO    684
+ *   引脚（sdmmc1m0，全部功能 2）：
+ *     bus4 = GPIO1_B4..B7(12..15)  cmd = GPIO1_C0(16)  clk = GPIO1_C1(17)
+ */
+
+#define SDIO_GATE_CON       42
+#define SDIO_GATE_CCLK      11
+#define SDIO_GATE_HCLK      12
+#define SDIO_SEL_CON        104
+#define SDIO_SEL_MUX_SHIFT  6
+#define SDIO_SEL_DIV_SHIFT  0
+#define SDIO_SRST_H         684
+#define SDIO_PIN_FUNC       2
+#define SDIO_PIN_BANK       1
+#define SDIO_PIN_BUS_FIRST  12
+#define SDIO_PIN_CMD        16
+#define SDIO_PIN_CLK        17
+
+/* WiFi 模组的上电时序（/sdio-pwrseq）：
+ *   reset-gpios = GPIO1 pin22，**低有效**；post-power-on-delay-ms = 200
+ */
+
+#define WIFI_RST_BANK       1
+#define WIFI_RST_PIN        22
+#define WIFI_PWRON_DELAY_MS 200
+
+/* 一个控制器实例的硬件参数。
+ *
+ * ★ 板上两个 dw-mshc 的时钟、复位、引脚**完全不同**，只有寄存器布局
+ *   一样。把这些做成表而不是写死，是因为写死的那份在加第二个实例时
+ *   不会编译报错 —— 它会用 SD 的时钟去开 SDIO，表现为寄存器读得到、
+ *   卡不动，和"没插卡"分不开。
+ */
+
+struct dwmmc_hw_s
+{
+  uint32_t base;
+  uint8_t  gate_con;
+  uint8_t  gate_cclk;
+  uint8_t  gate_hclk;
+  uint8_t  sel_con;
+  uint8_t  sel_mux_shift;
+  uint8_t  sel_div_shift;
+  uint16_t srst_h;
+  uint8_t  pin_func;
+  uint8_t  bus_bank;
+  uint8_t  bus_first;
+  uint8_t  cmd_bank;
+  uint8_t  cmd_pin;
+  uint8_t  clk_bank;
+  uint8_t  clk_pin;
+  int8_t   det_bank;          /* <0：不可插拔，无插卡检测 */
+  int8_t   det_pin;
+  int8_t   pwr_bank;          /* <0：无控制器 PWREN 引脚   */
+  int8_t   pwr_pin;
+  bool     is_sdio;           /* 判据用 CMD5 而不是 CMD8   */
+};
+
+static const struct dwmmc_hw_s g_dwmmc_hw[] =
+{
+  {
+    .base = RK3576_DWMMC_SD_BASE,
+    .gate_con = DWMMC_GATE_CON, .gate_cclk = DWMMC_GATE_CCLK,
+    .gate_hclk = DWMMC_GATE_HCLK,
+    .sel_con = DWMMC_SEL_CON, .sel_mux_shift = DWMMC_SEL_MUX_SHIFT,
+    .sel_div_shift = DWMMC_SEL_DIV_SHIFT, .srst_h = DWMMC_SRST_H,
+    .pin_func = PIN_FUNC,
+    .bus_bank = PIN_BUS_BANK, .bus_first = PIN_BUS_FIRST,
+    .cmd_bank = PIN_CMD_BANK, .cmd_pin = PIN_CMD,
+    .clk_bank = PIN_CLK_BANK, .clk_pin = PIN_CLK,
+    .det_bank = PIN_DET_BANK, .det_pin = PIN_DET,
+    .pwr_bank = PIN_PWR_BANK, .pwr_pin = PIN_PWR,
+    .is_sdio = false,
+  },
+  {
+    .base = RK3576_DWMMC_SDIO_BASE,
+    .gate_con = SDIO_GATE_CON, .gate_cclk = SDIO_GATE_CCLK,
+    .gate_hclk = SDIO_GATE_HCLK,
+    .sel_con = SDIO_SEL_CON, .sel_mux_shift = SDIO_SEL_MUX_SHIFT,
+    .sel_div_shift = SDIO_SEL_DIV_SHIFT, .srst_h = SDIO_SRST_H,
+    .pin_func = SDIO_PIN_FUNC,
+    .bus_bank = SDIO_PIN_BANK, .bus_first = SDIO_PIN_BUS_FIRST,
+    .cmd_bank = SDIO_PIN_BANK, .cmd_pin = SDIO_PIN_CMD,
+    .clk_bank = SDIO_PIN_BANK, .clk_pin = SDIO_PIN_CLK,
+    .det_bank = -1, .det_pin = -1,     /* non-removable */
+    .pwr_bank = -1, .pwr_pin = -1,     /* 由 sdio-pwrseq 的 GPIO 管 */
+    .is_sdio = true,
+  },
+};
+
+static FAR const struct dwmmc_hw_s *dwmmc_hw(uint32_t base)
+{
+  size_t i;
+
+  for (i = 0; i < sizeof(g_dwmmc_hw) / sizeof(g_dwmmc_hw[0]); i++)
+    {
+      if (g_dwmmc_hw[i].base == base)
+        {
+          return &g_dwmmc_hw[i];
+        }
+    }
+
+  return NULL;
+}
 
 #define RESET_TIMEOUT_US    500000
 
@@ -161,6 +273,7 @@ static int dw_reset_ctrl(uint32_t base)
 
 int rk3576_dwmmc_probe(uint32_t base)
 {
+  FAR const struct dwmmc_hw_s *hw = dwmmc_hw(base);
   uint32_t verid;
   uint32_t hcon;
   uint32_t cdetect;
@@ -168,7 +281,14 @@ int rk3576_dwmmc_probe(uint32_t base)
   int      ret;
   int      i;
 
-  /* 1) 电源域。与 GMAC 同属 PD_SDGMAC。 */
+  if (hw == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: 0x%08" PRIx32 " 不是已知的 dw-mshc 实例\n",
+             base);
+      return -EINVAL;
+    }
+
+  /* 1) 电源域。两个实例与 GMAC 同属 PD_SDGMAC。 */
 
   ret = rk3576_power_on(RK3576_PD_SDGMAC);
   if (ret < 0)
@@ -186,28 +306,32 @@ int rk3576_dwmmc_probe(uint32_t base)
    *    分频；这里的 CLKSEL 分频是给控制器源时钟的，取 1 分频。
    */
 
-  rk3576_clk_setmux(DWMMC_SEL_CON, DWMMC_SEL_MUX_SHIFT, 2, 2);
-  rk3576_clk_setmux(DWMMC_SEL_CON, DWMMC_SEL_DIV_SHIFT, 6, 0);
-  rk3576_clk_gate(DWMMC_GATE_CON, DWMMC_GATE_CCLK, true);
-  rk3576_clk_gate(DWMMC_GATE_CON, DWMMC_GATE_HCLK, true);
+  rk3576_clk_setmux(hw->sel_con, hw->sel_mux_shift, 2, 2);
+  rk3576_clk_setmux(hw->sel_con, hw->sel_div_shift, 6, 0);
+  rk3576_clk_gate(hw->gate_con, hw->gate_cclk, true);
+  rk3576_clk_gate(hw->gate_con, hw->gate_hclk, true);
 
   /* 3) 解除模块复位 */
 
-  rk3576_reset(DWMMC_SRST_H, true);
+  rk3576_reset(hw->srst_h, true);
   up_udelay(20);
-  rk3576_reset(DWMMC_SRST_H, false);
+  rk3576_reset(hw->srst_h, false);
   up_udelay(100);
 
   /* 4) 引脚复用。全部功能号 1。 */
 
   for (i = 0; i < 4; i++)
     {
-      rk3576_pinmux_set(PIN_BUS_BANK, PIN_BUS_FIRST + i, PIN_FUNC);
+      rk3576_pinmux_set(hw->bus_bank, hw->bus_first + i, hw->pin_func);
     }
 
-  rk3576_pinmux_set(PIN_CMD_BANK, PIN_CMD, PIN_FUNC);
-  rk3576_pinmux_set(PIN_CLK_BANK, PIN_CLK, PIN_FUNC);
-  rk3576_pinmux_set(PIN_DET_BANK, PIN_DET, PIN_FUNC);
+  rk3576_pinmux_set(hw->cmd_bank, hw->cmd_pin, hw->pin_func);
+  rk3576_pinmux_set(hw->clk_bank, hw->clk_pin, hw->pin_func);
+
+  if (hw->det_pin >= 0)
+    {
+      rk3576_pinmux_set(hw->det_bank, hw->det_pin, hw->pin_func);
+    }
 
   /* 卡供电。
    *
@@ -217,9 +341,34 @@ int rk3576_dwmmc_probe(uint32_t base)
    *   上电时序联动。这里按厂商的来。
    */
 
-  rk3576_pinmux_set(PIN_PWR_BANK, PIN_PWR, PIN_FUNC);
-  dw_putreg(base, DWMMC_PWREN, 1);
-  up_mdelay(20);
+  if (hw->pwr_pin >= 0)
+    {
+      rk3576_pinmux_set(hw->pwr_bank, hw->pwr_pin, hw->pin_func);
+      dw_putreg(base, DWMMC_PWREN, 1);
+      up_mdelay(20);
+    }
+
+  /* 4b) WiFi 模组上电（仅 SDIO 实例）。
+   *
+   * ★ /sdio-pwrseq：reset-gpios = GPIO1_22，**低有效**，
+   *   post-power-on-delay-ms = 200。
+   *
+   *   必须在发任何命令之前完成，而且那 200ms 不能省 —— 模组内部要
+   *   等晶振起振并把 SDIO 从机准备好。省掉它的表现是 CMD5 无应答，
+   *   和"引脚配错"完全一样。
+   */
+
+  if (hw->is_sdio)
+    {
+      rk3576_pinmux_set(WIFI_RST_BANK, WIFI_RST_PIN, 0);   /* 功能 0 = GPIO */
+      rk3576_gpio_setdir(WIFI_RST_BANK, WIFI_RST_PIN, true);
+      rk3576_gpio_write(WIFI_RST_BANK, WIFI_RST_PIN, false);  /* 拉低=复位 */
+      up_mdelay(20);
+      rk3576_gpio_write(WIFI_RST_BANK, WIFI_RST_PIN, true);   /* 释放 */
+      up_mdelay(WIFI_PWRON_DELAY_MS);
+      syslog(LOG_INFO, "DWMMC: WiFi 模组已上电（GPIO%d_%d 释放后等 %d ms）\n",
+             WIFI_RST_BANK, WIFI_RST_PIN, WIFI_PWRON_DELAY_MS);
+    }
 
   /* 5) 判据一：版本与硬件配置寄存器。
    *
@@ -271,15 +420,28 @@ int rk3576_dwmmc_probe(uint32_t base)
 
   cdetect = dw_getreg(base, DWMMC_CDETECT);
 
-  syslog(LOG_INFO,
-         "DWMMC: FIFO 深度≈%" PRIu32 "（dtb 记载 256）"
-         " CDETECT=0x%08" PRIx32 " —— %s\n",
-         fifo_depth, cdetect,
-         DWMMC_CDETECT_PRESENT(cdetect) ? "检测到卡在位" : "未检测到卡");
+  /* ★ 不可插拔的实例（SDIO/WiFi）没有插卡检测线，CDETECT 恒读"没卡"。
+   *   对它套用这一判据会在一切正常时也直接退出。
+   */
 
-  if (!DWMMC_CDETECT_PRESENT(cdetect))
+  if (hw->det_pin >= 0)
     {
-      return -ENODEV;
+      syslog(LOG_INFO,
+             "DWMMC: FIFO 深度≈%" PRIu32 "（dtb 记载 256）"
+             " CDETECT=0x%08" PRIx32 " —— %s\n",
+             fifo_depth, cdetect,
+             DWMMC_CDETECT_PRESENT(cdetect) ? "检测到卡在位" : "未检测到卡");
+
+      if (!DWMMC_CDETECT_PRESENT(cdetect))
+        {
+          return -ENODEV;
+        }
+    }
+  else
+    {
+      syslog(LOG_INFO,
+             "DWMMC: FIFO 深度≈%" PRIu32 " 不可插拔实例，跳过插卡检测\n",
+             fifo_depth);
     }
 
   /* 7) 判据四：手工发 CMD0 + CMD8，直接看命令通路。
@@ -344,10 +506,29 @@ int rk3576_dwmmc_probe(uint32_t base)
      */
 
     dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);
-    dw_putreg(base, DWMMC_CMDARG, 0x1aa);
-    dw_putreg(base, DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG |
-                         DWMMC_CMD_RESP_EXP | DWMMC_CMD_RESP_CRC |
-                         DWMMC_CMD_INDX(8));
+
+    /* ★ SD 用 CMD8，SDIO 用 CMD5。
+     *
+     *   SDIO 卡不认 CMD8，对它发 CMD8 必然超时 —— 而超时同时也是
+     *   "线没通"的表现，两者分不开，判据就失效了。CMD5
+     *   (IO_SEND_OP_COND, arg=0) 才是 SDIO 的对应命令：SDIO 设备回
+     *   OCR（R4 短响应，**无 CRC**），非 SDIO 设备完全不应答。
+     */
+
+    if (hw->is_sdio)
+      {
+        dw_putreg(base, DWMMC_CMDARG, 0);
+        dw_putreg(base, DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG |
+                             DWMMC_CMD_RESP_EXP |
+                             DWMMC_CMD_INDX(5));
+      }
+    else
+      {
+        dw_putreg(base, DWMMC_CMDARG, 0x1aa);
+        dw_putreg(base, DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG |
+                             DWMMC_CMD_RESP_EXP | DWMMC_CMD_RESP_CRC |
+                             DWMMC_CMD_INDX(8));
+      }
 
     for (us = 0; us < 200000; us++)
       {
@@ -373,14 +554,31 @@ int rk3576_dwmmc_probe(uint32_t base)
 
     resp = dw_getreg(base, DWMMC_RESP0);
 
-    syslog(LOG_INFO,
-           "DWMMC: CMD8 RINTSTS=0x%08" PRIx32 " RESP0=0x%08" PRIx32
-           " —— %s\n",
-           sts, resp,
-           (sts & DWMMC_INT_RTO)      ? "响应超时：卡没被时钟驱动或命令线不通" :
-           (sts & DWMMC_INT_RCRC)     ? "CRC 错：采样时序有问题" :
-           ((resp & 0xfff) == 0x1aa)  ? "回显正确，命令通路正常" :
-                                        "回显不符，采样时序有问题");
+    if (hw->is_sdio)
+      {
+        /* R4 的 bit31 是 C（初始化完成），bit[30:28] 是功能单元个数，
+         * bit[23:0] 是 OCR 电压窗口。功能单元 >0 就证明对面是 SDIO。
+         */
+
+        syslog(LOG_INFO,
+               "DWMMC: CMD5 RINTSTS=0x%08" PRIx32 " RESP0=0x%08" PRIx32
+               " 功能单元=%" PRIu32 " OCR=0x%06" PRIx32 " —— %s\n",
+               sts, resp, (resp >> 28) & 0x7, resp & 0xffffff,
+               (sts & DWMMC_INT_RTO)      ? "无应答：模组未上电、时钟或命令线不通" :
+               (((resp >> 28) & 0x7) != 0) ? "检测到 SDIO 设备" :
+                                             "有响应但功能单元为 0，不像 SDIO");
+      }
+    else
+      {
+        syslog(LOG_INFO,
+               "DWMMC: CMD8 RINTSTS=0x%08" PRIx32 " RESP0=0x%08" PRIx32
+               " —— %s\n",
+               sts, resp,
+               (sts & DWMMC_INT_RTO)      ? "响应超时：卡没被时钟驱动或命令线不通" :
+               (sts & DWMMC_INT_RCRC)     ? "CRC 错：采样时序有问题" :
+               ((resp & 0xfff) == 0x1aa)  ? "回显正确，命令通路正常" :
+                                            "回显不符，采样时序有问题");
+      }
 
     dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);
   }

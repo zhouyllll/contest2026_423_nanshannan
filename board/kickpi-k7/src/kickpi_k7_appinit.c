@@ -488,6 +488,22 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_RK3576_DWMMC
+  /* WiFi 的 SDIO 控制器（AP6256 / BCM4345C5，见 docs 与 bsp 说明）。
+   *
+   * ★ 只探测，不注册块设备 —— SDIO 上挂的是 WiFi 从机，不是存储卡。
+   *   探测的意义在于把"整条链路通不通"和后面 bcmf 驱动的问题分开：
+   *   CMD5 有应答就说明电源、时钟、引脚、上电时序全对，后面再出问题
+   *   就只可能在协议层。反过来如果这里就无应答，去调 bcmf 是白费。
+   */
+
+  ret = rk3576_dwmmc_probe(RK3576_DWMMC_SDIO_BASE);
+  if (ret < 0)
+    {
+      syslog(LOG_WARNING, "WiFi SDIO: 探测失败 (%d)\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_RK3576_RNG
   ret = rk3576_rng_initialize();
   if (ret < 0)
