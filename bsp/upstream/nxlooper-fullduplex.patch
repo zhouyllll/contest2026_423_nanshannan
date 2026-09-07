@@ -1,0 +1,32 @@
+diff --git a/system/nxlooper/nxlooper.c b/system/nxlooper/nxlooper.c
+index a55b028..d0515e9 100644
+--- a/system/nxlooper/nxlooper.c
++++ b/system/nxlooper/nxlooper.c
+@@ -180,6 +180,27 @@ static int nxlooper_opendevice(FAR struct nxlooper_s *plooper)
+                        caps.ac_controls.b[0] & AUDIO_TYPE_OUTPUT)
+                     {
+                       plooper->playdev_fd = dev_fd;
++
++                      /* A full duplex device can serve both roles.
++                       *
++                       * The search below is an if/else-if chain, so a
++                       * single device advertising both INPUT and OUTPUT
++                       * was only ever taken as the playback device, and
++                       * the loop then ran out of devices and reported
++                       * "No suitable Audio Device found" -- a codec that
++                       * can do exactly what the loopback test needs was
++                       * rejected precisely because it can do both.
++                       *
++                       * Open it a second time so the record side gets its
++                       * own descriptor and the two paths stay independent.
++                       */
++
++                      if ((plooper->recorddev_fd == -1) &&
++                          (caps.ac_controls.b[0] & AUDIO_TYPE_INPUT))
++                        {
++                          plooper->recorddev_fd = open(path,
++                                                       O_RDWR | O_CLOEXEC);
++                        }
+                     }
+                   else if ((plooper->recorddev_fd == -1) &&
+                             caps.ac_controls.b[0] & AUDIO_TYPE_INPUT)
