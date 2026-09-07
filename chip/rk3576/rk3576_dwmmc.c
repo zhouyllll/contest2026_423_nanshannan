@@ -379,16 +379,24 @@ int rk3576_dwmmc_probe(uint32_t base)
    *   和"引脚配错"完全一样。
    */
 
+  /* ★ 只把模组按在复位里，**释放要等时钟起来之后**。
+   *
+   *   Linux 的顺序是 mmc_power_up（先供电、先起总线时钟）-> 再执行
+   *   pwrseq 的 post_power_on（释放复位）-> 才发命令。也就是说模组是
+   *   **在有时钟的情况下**出复位的。
+   *
+   *   我们原来反了：无时钟时就释放复位，等 200ms 才开时钟。SDIO 卡在
+   *   复位释放的那一刻会按引脚状态锁存工作配置，没有时钟就可能锁进错的
+   *   状态 —— 之后它照样会拉命令线应答，但帧的形状不对，正是我们看到的
+   *   "RESP_ERR 置位、无超时、无 CRC 错、RESP0 全 0"。
+   */
+
   if (hw->is_sdio)
     {
       rk3576_pinmux_set(WIFI_RST_BANK, WIFI_RST_PIN, 0);   /* 功能 0 = GPIO */
       rk3576_gpio_setdir(WIFI_RST_BANK, WIFI_RST_PIN, true);
-      rk3576_gpio_write(WIFI_RST_BANK, WIFI_RST_PIN, false);  /* 拉低=复位 */
+      rk3576_gpio_write(WIFI_RST_BANK, WIFI_RST_PIN, false);  /* 保持复位 */
       up_mdelay(20);
-      rk3576_gpio_write(WIFI_RST_BANK, WIFI_RST_PIN, true);   /* 释放 */
-      up_mdelay(WIFI_PWRON_DELAY_MS);
-      syslog(LOG_INFO, "DWMMC: WiFi 模组已上电（GPIO%d_%d 释放后等 %d ms）\n",
-             WIFI_RST_BANK, WIFI_RST_PIN, WIFI_PWRON_DELAY_MS);
     }
 
   /* 5) 判据一：版本与硬件配置寄存器。
@@ -482,23 +490,65 @@ int rk3576_dwmmc_probe(uint32_t base)
     uint32_t resp;
     int      us;
 
+    /* ★ SDIO 侧不走 HOLD 寄存器。
+     *
+     *   USE_HOLD_REG 决定命令/响应是否经过 HOLD 寄存器再采样。它影响的
+     *   正是采样时刻 —— 而我们的症状（RESP_ERR 置位、无超时、无 CRC 错、
+     *   RESP0 全 0）恰恰是"帧收到了但采错了位"的样子。SD 卡在 400kHz
+     *   下对此不敏感，SDIO 卡（SDR104）可能敏感。
+     */
+
+    uint32_t holdbit = hw->is_sdio ? 0 : DWMMC_CMD_USE_HOLD_REG;
+
     /* 先给足初始化时钟：400kHz 下 80 个时钟约 200us。 */
 
     /* SDIO 侧源时钟已在 CRU 分到 400kHz，控制器内部走旁路（与原厂一致）；
      * SD 侧维持原来的做法（已验证可用，不动它）。
      */
 
+    /* ★ 严格按原厂 dw_mmc.c 的顺序设时钟，每一步都要"通知 CIU"。
+     *
+     *   出处：kernel-6.1/drivers/mmc/host/dw_mmc.c 的 dw_mci_setup_bus()
+     *     CLKENA = 0        -> 通知 CIU     （先停，避免改分频时出毛刺）
+     *     CLKSRC = 0        -> 通知 CIU     （选分频器 0）
+     *     CLKDIV = div      -> 通知 CIU
+     *     CLKENA = ENABLE   -> 通知 CIU
+     *
+     *   我们原来少了前两步。CLKSRC 若残留非零值，控制器会去用另一个
+     *   未配置的分频器；而"通知 CIU"是 DW MMC 的硬性要求 —— 不发这条
+     *   命令，写进 CLKDIV/CLKENA 的值不会真正生效。
+     *
+     *   ★ CLKENA 只置 bit0(ENABLE)，**绝不能置 bit16(LOW_PWR)**：那会让
+     *     控制器在总线空闲时停掉时钟，而 SDIO 卡靠持续时钟应答与报中断。
+     *     原厂对 SDIO 也是特意不置这一位的。
+     */
+
+    dw_putreg(base, DWMMC_CLKENA, 0);
+    dw_update_clk(base);
+    dw_putreg(base, DWMMC_CLKSRC, 0);
+    dw_update_clk(base);
     dw_putreg(base, DWMMC_CLKDIV, hw->is_sdio ? 0 : 30);
     dw_update_clk(base);
     dw_putreg(base, DWMMC_CLKENA, DWMMC_CLKENA_ENABLE);
     dw_update_clk(base);
     up_mdelay(2);
 
+    /* 时钟已经在跑，现在才放模组出复位（见上面的说明） */
+
+    if (hw->is_sdio)
+      {
+        rk3576_gpio_write(WIFI_RST_BANK, WIFI_RST_PIN, true);
+        up_mdelay(WIFI_PWRON_DELAY_MS);
+        syslog(LOG_INFO,
+               "DWMMC: WiFi 模组在时钟运行下释放复位（GPIO%d_%d），等 %d ms\n",
+               WIFI_RST_BANK, WIFI_RST_PIN, WIFI_PWRON_DELAY_MS);
+      }
+
     /* CMD0 GO_IDLE_STATE，无响应，带初始化序列 */
 
     dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);
     dw_putreg(base, DWMMC_CMDARG, 0);
-    dw_putreg(base, DWMMC_CMD, DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG |
+    dw_putreg(base, DWMMC_CMD, DWMMC_CMD_START | holdbit |
                          DWMMC_CMD_INIT | DWMMC_CMD_INDX(0));
 
     for (us = 0; us < 200000; us++)
@@ -561,8 +611,44 @@ int rk3576_dwmmc_probe(uint32_t base)
             dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);
             dw_putreg(base, DWMMC_CMDARG, ocr);
             dw_putreg(base, DWMMC_CMD,
-                      DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG |
+                      DWMMC_CMD_START | holdbit |
                       DWMMC_CMD_RESP_EXP | DWMMC_CMD_INDX(5));
+
+            /* ★ 先看控制器有没有**接受**这条命令。
+             *
+             *   CMD 寄存器的 START 位是自清的：控制器把命令收进命令队列
+             *   后才清零。若它一直不清，说明控制器压根没受理 —— 那么
+             *   RINTSTS 里的任何位都不是这条命令的结果，据此判断响应
+             *   就完全跑偏了。
+             *
+             *   SD 卡成功时 RINTSTS=0x04(CMD_DONE)，而 SDIO 这边是
+             *   0x02(RESP_ERR) 且**没有 CMD_DONE** —— 正是这个反常促使
+             *   加上这一项。
+             */
+
+            {
+              int started = 0;
+
+              for (us = 0; us < 200000; us++)
+                {
+                  if ((dw_getreg(base, DWMMC_CMD) & DWMMC_CMD_START) == 0)
+                    {
+                      started = 1;
+                      break;
+                    }
+
+                  up_udelay(1);
+                }
+
+              if (!started && try == 0)
+                {
+                  syslog(LOG_ERR,
+                         "DWMMC: CMD5 的 START 位不自清 —— 控制器未受理命令，"
+                         "STATUS=0x%08" PRIx32 " CTRL=0x%08" PRIx32 "\n",
+                         dw_getreg(base, DWMMC_STATUS),
+                         dw_getreg(base, DWMMC_CTRL));
+                }
+            }
 
             for (us = 0; us < 200000; us++)
               {
@@ -618,7 +704,7 @@ int rk3576_dwmmc_probe(uint32_t base)
         dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);
         dw_putreg(base, DWMMC_CMDARG, 0);           /* 读 func0 的 0x00 */
         dw_putreg(base, DWMMC_CMD,
-                  DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG |
+                  DWMMC_CMD_START | holdbit |
                   DWMMC_CMD_RESP_EXP | DWMMC_CMD_RESP_CRC |
                   DWMMC_CMD_INDX(52));
 
