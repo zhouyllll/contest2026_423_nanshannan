@@ -188,6 +188,15 @@ static void sai_configure(struct rk3576_sai_dev_s *priv)
          SAI_XCR_VDJ_R;
   sai_putreg(RK3576_SAI_TXCR, txcr);
 
+  /* ★ 接收侧用同一组参数。
+   *
+   *   TXCR 与 RXCR 位定义相同，但**必须分别写** —— 只配 TXCR 的话录音
+   *   方向的位宽/声道数全是复位值，SAI 收不到有意义的数据，而且不报错：
+   *   表现就是缓冲区一个都不回来。
+   */
+
+  sai_putreg(RK3576_SAI_RXCR, txcr);
+
   /* 帧宽 = 每帧总位数；脉冲宽取一半，即标准 I2S 的 50% 占空 */
 
   sai_putreg(RK3576_SAI_FSCR,
@@ -252,6 +261,115 @@ static uint32_t rk3576_sai_getmclk(struct i2s_dev_s *dev)
  *     表现为播放起始处有杂音。
  *
  ****************************************************************************/
+
+static uint32_t rk3576_sai_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+{
+  struct rk3576_sai_dev_s *priv = (struct rk3576_sai_dev_s *)dev;
+
+  priv->samplerate = rate;
+  return rate;
+}
+
+static uint32_t rk3576_sai_rxdatawidth(struct i2s_dev_s *dev, int bits)
+{
+  struct rk3576_sai_dev_s *priv = (struct rk3576_sai_dev_s *)dev;
+
+  priv->datawidth = bits;
+  return bits;
+}
+
+static int rk3576_sai_rxchannels(struct i2s_dev_s *dev, uint8_t channels)
+{
+  struct rk3576_sai_dev_s *priv = (struct rk3576_sai_dev_s *)dev;
+
+  priv->channels = channels;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rk3576_sai_receive
+ *
+ * Description:
+ *   把一个缓冲区收满。与 send 对称的轮询实现。
+ *
+ *   ★ 这个函数原先**根本不存在** —— i2s_ops_s 里只有发送侧，
+ *     ES8388 驱动调 I2S_RECEIVE() 拿到的是空指针，于是录音时缓冲区
+ *     一个都回不来，而上层没有任何报错。当初这个 SAI 驱动是照放音写的。
+ *
+ ****************************************************************************/
+
+static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                              i2s_callback_t callback, void *arg,
+                              uint32_t timeout)
+{
+  struct rk3576_sai_dev_s *priv = (struct rk3576_sai_dev_s *)dev;
+  uint32_t *samples;
+  size_t nwords;
+  size_t got = 0;
+  int us;
+  int ret;
+
+  UNUSED(timeout);
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  sai_configure(priv);
+
+  sai_putreg(RK3576_SAI_XFER, SAI_XFER_CLK_EN | SAI_XFER_FSS_EN);
+  sai_putreg(RK3576_SAI_XFER,
+             SAI_XFER_CLK_EN | SAI_XFER_FSS_EN | SAI_XFER_RXS_EN);
+
+  samples = (uint32_t *)apb->samp;
+  nwords  = apb->nmaxbytes / 4;
+
+  while (got < nwords)
+    {
+      /* 等 FIFO 里有数据。**必须有上界** —— ADC 没上电或时钟没跑时
+       * FIFO 永远是空的，无上界的等待会把调用方一起挂住。
+       */
+
+      for (us = 0; us < 200000; us++)
+        {
+          if ((sai_getreg(RK3576_SAI_RXFIFOLR) & 0x3f) > 0)
+            {
+              break;
+            }
+
+          up_udelay(1);
+        }
+
+      if (us >= 200000)
+        {
+          if (got == 0)
+            {
+              auderr("SAI: RX FIFO 一直是空的 —— ADC 没出数据\n");
+              ret = -ETIMEDOUT;
+            }
+
+          break;
+        }
+
+      samples[got++] = sai_getreg(RK3576_SAI_RXDR);
+    }
+
+  sai_putreg(RK3576_SAI_XFER, 0);
+
+  apb->nbytes  = got * 4;
+  apb->curbyte = 0;
+
+  nxmutex_unlock(&priv->lock);
+
+  if (callback != NULL)
+    {
+      callback(dev, apb, arg, ret);
+    }
+
+  return ret;
+}
 
 static int rk3576_sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                            i2s_callback_t callback, void *arg,
@@ -336,6 +454,10 @@ static const struct i2s_ops_s g_sai_ops =
   .i2s_txsamplerate    = rk3576_sai_txsamplerate,
   .i2s_txdatawidth     = rk3576_sai_txdatawidth,
   .i2s_send            = rk3576_sai_send,
+  .i2s_rxchannels      = rk3576_sai_rxchannels,
+  .i2s_rxsamplerate    = rk3576_sai_rxsamplerate,
+  .i2s_rxdatawidth     = rk3576_sai_rxdatawidth,
+  .i2s_receive         = rk3576_sai_receive,
   .i2s_getmclkfrequency = rk3576_sai_getmclk,
 };
 
