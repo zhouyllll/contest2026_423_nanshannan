@@ -3,12 +3,14 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * 蓝牙手动初始化命令。
+ * 蓝牙命令。
  *
- * ★ 为什么不放在启动路径：固件加载要等模组的 HCI 应答，验证通过之前
- *   随时可能卡住；而 board_app_initialize() 跑在 nsh 任务上下文，它一卡
- *   控制台就起不来，loader 也发不进去，只能 MASKROM 恢复。做成命令之后，
- *   最坏情况只是这条命令不返回，板子仍然可以烧。
+ *   bt probe   最小握手（HCI Reset），有界、失败立刻返回
+ *   bt init    完整初始化，含 70KB 固件加载 —— 先 probe 通过再用
+ *
+ * ★ 分成两条命令是有代价换来的：init 在模组不应答时会长时间重试，
+ *   而它是前台任务，NSH 一直等着、控制台没有提示符、loader 发不进去，
+ *   板子只能 MASKROM 恢复。probe 让"模组在不在线"这个问题先有答案。
  ****************************************************************************/
 
 #include <nuttx/config.h>
@@ -22,13 +24,20 @@ int main(int argc, char *argv[])
 {
   int ret;
 
-  if (argc < 2 || strcmp(argv[1], "init") == 0)
+  if (argc >= 2 && strcmp(argv[1], "init") == 0)
     {
       ret = kickpi_k7_bt_initialize();
       printf("ret=%d\n", ret);
       return ret < 0 ? 1 : 0;
     }
 
-  printf("用法: bt init\n");
+  if (argc < 2 || strcmp(argv[1], "probe") == 0)
+    {
+      ret = kickpi_k7_bt_probe();
+      printf("ret=%d\n", ret);
+      return ret < 0 ? 1 : 0;
+    }
+
+  printf("用法: bt probe|init\n");
   return 1;
 }

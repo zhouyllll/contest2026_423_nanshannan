@@ -270,6 +270,7 @@ int rk3576_hdmi_probe(void);
  * 不在启动路径上，理由见 kickpi_k7_appinit.c 里的说明。
  */
 
+int kickpi_k7_bt_probe(void);
 int kickpi_k7_bt_initialize(void);
 
 /* LSC（镜头阴影）与 CCM（色彩校正矩阵）。
