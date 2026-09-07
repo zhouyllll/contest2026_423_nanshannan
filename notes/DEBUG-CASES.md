@@ -2098,3 +2098,48 @@ SDIO，没有 UART 蓝牙**。原厂 Android 里 `/sys/class/bluetooth/` 是空�
    干净的排除让"那就不是我们的问题"成为可信的判断，才促成了刷回原厂。
    **但顺序错了**：应该先用对照组定性，再用这些判据定位。
 
+
+### 案例 25 补充：SKW6621S 的真实软件架构（原厂 Android 实测）
+
+在原厂系统里把蓝牙打开后抓到的一手资料：
+
+**总线**：WiFi 与蓝牙**共用一条 SDIO**，靠私有的"ucom 虚拟端口"复用。
+
+```
+skw_sdio_probe: vendor=0x1ffe device=0x6621 clock=200000000 blksize=0x200
+skw_sdio2_handle_packet: LOOPCHECK channel received: BTREADY
+[SKWBOOT]: boot bt sucessfully!
+open_sdio_port portno=2 -> ucom[2] BTCMD
+open_sdio_port portno=3 -> ucom[3] BTAUDIO
+open_sdio_port portno=5 -> ucom[5] BTDATA
+wlan0: BTCOEXSCAN-STOP        ← 共存协调，两者会互相让路
+```
+
+**设备节点**（主设备号 508，全部是私有字符设备，**不注册标准 hci**）：
+
+```
+/dev/BTBOOT(13) /dev/BTCMD(3) /dev/BTAUDIO(4) /dev/BTDATA(6)
+/dev/BTISOC(5)  /dev/SKWDUMP(14)
+```
+
+**固件**（`/vendor/etc/firmware/`）：
+
+```
+SWT662M_SDIO.bin        356616   主固件
+SWT6621S_DRAM_SDIO.bin  193224   DRAM 固件
+SWT6621S_NV_SDIO.ini      9098   NV/标定
+EA6621Q_SEEKWAVE_R0000   11294
+```
+
+**内核模块**：`skw_sdio_lite`（总线层）+ `swt6621s_wifi`（WiFi），
+均为 out-of-tree。`wlan0` 驱动名 `sv6621x`，MAC 60:48:9c:xx。
+
+**对移植的含义**：要在 NuttX 上支持它，等于实现 SeekWave 的私有 SDIO
+多路复用（ucom 端口）、固件引导协议、以及 BT/WiFi 共存协调 —— 上游
+NuttX 没有任何相关代码，也没有公开协议文档。这不是"适配一个驱动"，
+是"逆向一套私有协议栈"。
+
+★ 与之对照：**以太网、摄像头、显示、音频这些走标准接口的外设，移植量
+  是可控的**（本项目已全部跑通）。私有无线协议栈是另一个量级的东西 ——
+  这个判断本该在**认准芯片型号的那一刻**就做出，而不是在为错误的芯片
+  写完 UART 蓝牙之后。
