@@ -259,6 +259,13 @@ int kickpi_camera_stream(bool on);
 
 int kickpi_camera_jpeg(FAR const char *path, int phase, int quality);
 
+/* HDMI（chip/rk3576/rk3576_hdmi.c）。声明放在 board.h 是为了让 app 能用 ——
+ * app 只能 include <arch/board/board.h>，够不到芯片层的私有头。
+ */
+
+int rk3576_hdmi_prepare(void);
+int rk3576_hdmi_probe(void);
+
 /* LSC（镜头阴影）与 CCM（色彩校正矩阵）。
  *
  * ★ 两者的系数都只能实测，默认恒等 —— 这一级存在但不改变画面。
