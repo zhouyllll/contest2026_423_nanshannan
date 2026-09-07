@@ -170,6 +170,28 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+  /* ★ RTC 必须在这里初始化，不能留到后面。
+   *
+   *   它不只是 /dev/rtc0 —— HYM8563 的 CLKOUT 给 WiFi/蓝牙模组提供
+   *   32.768kHz（原理图 K7_V2.1：32KOUT_RTC -> WIFIBT_32KIN_2T2R）。
+   *   原先它排在 SDIO 探测**之后** 70 多行，等于模组是在没有 32k 的
+   *   状态下被探测的，自然起不来。
+   *
+   *   顺序依赖不写下来就会在重排代码时悄悄失效，所以记在这里。
+   */
+
+#ifdef CONFIG_RTC_HYM8563
+  ret = kickpi_k7_rtc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: RTC 初始化失败: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "RTC: /dev/rtc0 就绪（HYM8563@I2C2:0x51）\n");
+    }
+#endif
+
 #ifdef CONFIG_RK3576_SPI
   ret = kickpi_k7_spi_initialize();
   if (ret < 0)
@@ -566,18 +588,6 @@ int board_app_initialize(uintptr_t arg)
           }
       }
   }
-#endif
-
-#ifdef CONFIG_RTC_HYM8563
-  ret = kickpi_k7_rtc_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: RTC 初始化失败: %d\n", ret);
-    }
-  else
-    {
-      syslog(LOG_INFO, "RTC: /dev/rtc0 就绪（HYM8563@I2C2:0x51）\n");
-    }
 #endif
 
 #ifdef CONFIG_RK3576_I2C
