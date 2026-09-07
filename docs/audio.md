@@ -57,3 +57,41 @@ dtb 里均为 `disabled`，`dummy-codec` 也是 disabled。唯一启用的音频
 - 修复后 `loopback 2 16 48000 1 0` 正常启动，待人耳确认出声
 - `nxrecorder` 仍报"No suitable Audio Device found"，其搜索除能力位外还多
   查一层格式匹配，未定位
+
+
+## 录音链路：已修好的五层，与仍未通的最后一层
+
+上层问题已逐层修掉（详见 DEBUG-CASES 案例 26）：
+
+| 层 | 问题 | 处置 |
+|---|---|---|
+| 应用 | nxlooper 拒绝全双工设备 | 已修，`bsp/upstream/nxlooper-fullduplex.patch` |
+| 应用 | nxrecorder 自动搜索失败 | 需显式 `device /dev/audio/pcm0` |
+| 设备 | `pcm0` 外套 `pcm_decode`（放音用的 WAV 解码器）会解析空的录音缓冲区 | 板级另注册裸编解码器为 `/dev/audio/pcm1` 专供录音 |
+| 上半部 | `ALLOCBUFFER` 成功却不分配 | 必须先调 `AUDIOIOC_GETBUFFERINFO`——`upper->nbuffers` 是被这个"查询"操作赋值的 |
+| 参数 | `CONFIGURE` 返回 ERANGE | 位深在 `ac_controls.b[2]`，不是 `b[3]` |
+
+**仍未通的是最底层：SAI 的接收侧。**
+
+原本 `i2s_ops_s` 里**只有发送**（`.i2s_send` 等），`I2S_RECEIVE()` 是空指针，
+所以录音方向永远产不出数据且不报错。已补上轮询式实现，但上板会**挂住板子**，
+需要物理复位。
+
+### 与原厂实现的差距（`kernel-6.1/sound/soc/rockchip/rockchip_sai.c`）
+
+| | 原厂 | 我们 |
+|---|---|---|
+| 数据搬运 | **DMA**（`rockchip_sai_dma_ctrl`） | 轮询 PIO |
+| 启停 | `regmap_update_bits` 只翻方向位，CLK/FSS 在别处配 | 整寄存器覆写 |
+| 清除 | 按方向分别清（放音 TXC / 录音 RXC），且在**停止时**清 | 配置前一起清 TXC\|FSC |
+| 清除超时 | 容忍（回退整体复位后仍返回 0） | 只告警 |
+
+★ 我们的发送侧用轮询能工作，是因为放音是"我们主动往 FIFO 里灌"；接收是
+  "等对方来数据"，轮询在时序上要脆弱得多。要做稳，接收侧应当照原厂走 DMA。
+
+### 下次继续的入手点
+
+1. 先按原厂改启停方式：只用读改写翻 `RXS` 位，不整寄存器覆写；清除按方向分开。
+2. 再考虑接收走 DMA（工作量明显更大，但这是原厂的做法）。
+3. 每次改动前确认：**上界设在整件事上**，不是每一次等待上（这个错误在本
+   项目里已犯三次，见案例 26 与提交记录）。
