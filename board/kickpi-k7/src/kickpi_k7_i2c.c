@@ -162,6 +162,49 @@ int kickpi_k7_rtc_initialize(void)
       return -ENODEV;
     }
 
+  /* ★ 使能 HYM8563 的 CLKOUT，32.768kHz —— WiFi/蓝牙模组靠它才能起来。
+   *
+   *   依据是板子原理图 K7_V2.1.pdf：
+   *       HYM8563TS 的 32KOUT_RTC -> 32KOUT_RTC2CON -> WIFIBT_32KIN_2T2R
+   *   即无线模组的 32kHz 输入**由这颗 RTC 提供**，没有别的来源。
+   *
+   *   HYM8563 的 CLKOUT 要显式打开：寄存器 0x0D，bit7=FE（输出使能），
+   *   bit1:0=FD（00 = 32.768kHz）。写 0x80 即"使能 + 32.768kHz"。
+   *
+   *   ★ 这一条本文件顶部的注释里早就写着（"同时给 SDIO WiFi 供
+   *     32.768kHz"），但代码从来没写过 —— 知道和做到是两回事。
+   *
+   *   ★ 也曾据"dtb 里没有节点引用 RTC 的时钟输出"否定过 32k 这条线索。
+   *     那个推理是错的：连接在硬件上，dtb 不引用只说明 Linux 侧没走
+   *     时钟框架，不代表模组不需要。**电路连接看原理图，不看设备树。**
+   */
+
+  {
+    struct i2c_msg_s msg;
+    uint8_t buf[2];
+    int ret;
+
+    buf[0] = 0x0d;          /* CLKOUT 控制寄存器 */
+    buf[1] = 0x80;          /* FE=1 使能，FD=00 -> 32.768kHz */
+
+    msg.frequency = 400000;
+    msg.addr      = BOARD_RTC_I2C_ADDR;
+    msg.flags     = 0;
+    msg.buffer    = buf;
+    msg.length    = 2;
+
+    ret = I2C_TRANSFER(i2c, &msg, 1);
+    if (ret < 0)
+      {
+        syslog(LOG_ERR, "ERROR: 使能 RTC 32.768kHz 输出失败: %d\n", ret);
+      }
+    else
+      {
+        syslog(LOG_INFO,
+               "RTC: CLKOUT 32.768kHz 已使能（供 WiFi/蓝牙模组）\n");
+      }
+  }
+
   return hym8563_rtc_initialize(0, i2c, BOARD_RTC_I2C_ADDR, 400000);
 }
 #endif
