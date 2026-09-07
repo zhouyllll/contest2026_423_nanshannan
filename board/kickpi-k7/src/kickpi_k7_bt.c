@@ -324,6 +324,20 @@ int kickpi_k7_bt_probe(void)
 
   bt_hw_reset();
 
+  /* ★ 回读引脚复用。
+   *
+   *   前面只回读了 GPIO 电平，从没验证过复用寄存器本身写进去没有。
+   *   复用没切成 UART 功能时，UART 照样有时钟、寄存器照样正常，
+   *   但信号根本没接到引脚上 —— 现象与"模组不应答"一模一样。
+   */
+
+  printf("引脚复用回读(期望 %d): TX(C4)=%d RX(C5)=%d CTS(C3)=%d RTS(C2)=%d\n",
+         UART4_PIN_FUNC,
+         rk3576_pinmux_get(UART4_PIN_BANK, UART4_PIN_TX),
+         rk3576_pinmux_get(UART4_PIN_BANK, UART4_PIN_RX),
+         rk3576_pinmux_get(UART4_PIN_BANK, UART4_PIN_CTS),
+         rk3576_pinmux_get(UART4_PIN_BANK, UART4_PIN_RTS));
+
   (void)uart4_loopback_test();
 
   /* ★ 先看模组自己驱动的那几根线，这能把"模组没活"和"UART 配错"分开。
@@ -413,6 +427,66 @@ int kickpi_k7_bt_probe(void)
       tio.c_cflag &= ~CRTSCTS;          /* RTS 已由 GPIO 摁住 */
       tcsetattr(fd, TCSANOW, &tio);
     }
+
+  /* ★ 验证最后一环：写 /dev/ttyS1 的字节确实进了 UART4 这块硬件。
+   *
+   *   在此之前"/dev/ttyS1 就是 UART4"只是配置上的假设（16550 驱动的
+   *   UART1 槽位填了 0x2ad70000）。若这个映射错了，我们一直在往别的
+   *   外设写字节，而现象仍然是"模组不应答"。
+   *
+   *   办法：连写一串，立刻读 DW UART 的发送 FIFO 深度(TFL, 0x80)。
+   *   非零就说明字节确实排在 UART4 的发送队列里。
+   */
+
+  {
+    static const uint8_t burst[64] =
+      {
+        0
+      };
+
+    uint32_t tfl_before = getreg32(UART4_BASE + 0x80);
+
+    write(fd, burst, sizeof(burst));
+
+    printf("TX 通路: TFL 写前=%u 写后=%u LSR=%02x —— %s\n",
+           (unsigned)tfl_before,
+           (unsigned)getreg32(UART4_BASE + 0x80),
+           (unsigned)getreg32(UART4_BASE + U16550_LSR),
+           getreg32(UART4_BASE + 0x80) > 0 ?
+             "字节进了 UART4 的发送 FIFO" :
+             "FIFO 里没东西（可能已发完，或 ttyS1 不是 UART4）");
+
+    usleep(20000);
+  }
+
+  /* ★ 最后一个没验证过的候选：真实波特率。
+   *
+   *   配置写的是"24MHz + 115200"，但 SCLK_UART4 实际是不是 24MHz、
+   *   驱动最终算出的分频是多少，从没读过。分频器错了，线上波特率就错，
+   *   模组收到的是乱码 —— 现象同样是"无应答"。
+   *
+   *   DW UART 的分频在 DLL/DLM，要先把 LCR 的 DLAB 置 1 才能访问，
+   *   读完立刻恢复。24MHz/115200 期望 divisor = 24e6/(16*115200) = 13。
+   */
+
+  {
+    uint32_t lcr = getreg32(UART4_BASE + 0x0c);
+    uint32_t dll;
+    uint32_t dlm;
+
+    putreg32(lcr | 0x80, UART4_BASE + 0x0c);       /* DLAB = 1 */
+    dll = getreg32(UART4_BASE + 0x00) & 0xff;
+    dlm = getreg32(UART4_BASE + 0x04) & 0xff;
+    putreg32(lcr, UART4_BASE + 0x0c);              /* 恢复 */
+
+    {
+      uint32_t div = (dlm << 8) | dll;
+      printf("波特率: divisor=%u LCR=%02x -> 若源为 24MHz 则实际 %u bps"
+             "（期望 divisor=13 / 115200）\n",
+             (unsigned)div, (unsigned)lcr,
+             (unsigned)(div ? 24000000u / (16u * div) : 0));
+    }
+  }
 
   n = write(fd, hci_reset, sizeof(hci_reset));
   printf("已发 HCI Reset (%d 字节)，等应答…\n", n);
