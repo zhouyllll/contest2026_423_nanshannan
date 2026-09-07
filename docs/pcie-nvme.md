@@ -121,6 +121,15 @@ SDIO 卡    mmc0:0001:1  vendor=0x1ffe device=0x6621  内部名 SV6160LITE
 
 ## 下一步（若继续）
 
-最值得试的是把原厂 `skw_sdio_main.c` 的**初始化寄存器序列**逐条比对：
-Rockchip dw_mmc 有采样/驱动相位寄存器（CLKSEL 的 degree 字段），我们从未
-设置过，而 SD 卡在低速下可能不敏感、SDIO 卡敏感。这是目前最具体的怀疑点。
+~~采样/驱动相位寄存器~~ —— **已排除**。查过 RK3576 的 CRU：没有
+SDIO/SDMMC 的 drv/sample 时钟，dtb 也只有 `biu`/`ciu` 两个时钟。
+`dw_mmc-rockchip.c` 里那套 `rockchip_mmc_set_phase()` 是给有这两个时钟的
+老 SoC 用的，本芯片不走那条路。（先查再实现，省下一次白工。）
+
+剩下的方向，按值得程度排：
+
+1. **逐条比对原厂 `skw_sdio_main.c` 的初始化寄存器序列**（尚未做）。
+2. 复查 `USE_HOLD_REG`、`PRV_DAT_WAIT` 等命令位在 SDIO 实例上的取值 ——
+   我们对两个实例一律相同，而 Rockchip 驱动会按速率/实例区别对待。
+3. 用示波器看 CMD 线的实际波形。软件侧能查的判据基本用尽了，
+   "卡在拉线但帧格式不对"再往下走需要物理层证据。
