@@ -306,7 +306,6 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   uint32_t *samples;
   size_t nwords;
   size_t got = 0;
-  int us;
   int ret;
 
   UNUSED(timeout);
@@ -326,35 +325,45 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   samples = (uint32_t *)apb->samp;
   nwords  = apb->nmaxbytes / 4;
 
-  while (got < nwords)
-    {
-      /* 等 FIFO 里有数据。**必须有上界** —— ADC 没上电或时钟没跑时
-       * FIFO 永远是空的，无上界的等待会把调用方一起挂住。
-       */
+  /* ★ 上界要设在**整个接收过程**上，不是每个字上。
+   *
+   *   我第一版给每个字设了 200ms 的等待上界，看起来"有界" —— 但循环要
+   *   收 2048 个字，最坏是 2048 x 200ms ≈ 409 秒，实际等于没有上界，
+   *   调用方（前台任务）跟着一起没了。
+   *
+   *   **逐次有界不等于总量有界。** 这个错误在本项目里已经犯到第三次：
+   *   先是 nxrecorder 把控制台带走，再是 mic 的 mq_receive 无超时，
+   *   现在是这里。上界必须设在"整件事"上。
+   *
+   *   总预算按数据量算：收满一个缓冲区在正常速率下只要几十毫秒，
+   *   给 1 秒足够宽裕；到点就带着已收到的部分返回。
+   */
 
-      for (us = 0; us < 200000; us++)
-        {
-          if ((sai_getreg(RK3576_SAI_RXFIFOLR) & 0x3f) > 0)
-            {
-              break;
-            }
+  {
+    int budget = 1000000;                 /* 总预算 1 秒，单位 us */
 
-          up_udelay(1);
-        }
+    while (got < nwords && budget > 0)
+      {
+        if ((sai_getreg(RK3576_SAI_RXFIFOLR) & 0x3f) > 0)
+          {
+            samples[got++] = sai_getreg(RK3576_SAI_RXDR);
+            continue;
+          }
 
-      if (us >= 200000)
-        {
-          if (got == 0)
-            {
-              auderr("SAI: RX FIFO 一直是空的 —— ADC 没出数据\n");
-              ret = -ETIMEDOUT;
-            }
+        up_udelay(10);
+        budget -= 10;
+      }
 
-          break;
-        }
-
-      samples[got++] = sai_getreg(RK3576_SAI_RXDR);
-    }
+    if (got == 0)
+      {
+        auderr("SAI: RX FIFO 全程为空 —— ADC 没有输出数据\n");
+        ret = -ETIMEDOUT;
+      }
+    else if (got < nwords)
+      {
+        audwarn("SAI: 只收到 %zu/%zu 字（预算用尽）\n", got, nwords);
+      }
+  }
 
   sai_putreg(RK3576_SAI_XFER, 0);
 
