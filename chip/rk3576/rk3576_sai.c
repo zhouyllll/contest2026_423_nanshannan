@@ -325,6 +325,32 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   samples = (uint32_t *)apb->samp;
   nwords  = apb->nmaxbytes / 4;
 
+  /* ★ 一次性诊断：把接收侧真实的寄存器状态打出来。
+   *
+   *   "FIFO 全程为空"有两种完全不同的原因 —— 时钟没输出（编解码器不被
+   *   驱动，自然不发数据），或 RXCR 配错（数据来了但控制器不收）。两者
+   *   事后分不开，必须在这里把状态摊开看。
+   */
+
+  {
+    static bool once = false;
+
+    if (!once)
+      {
+        once = true;
+        syslog(LOG_INFO,
+               "SAI RX: 参数 %" PRIu32 "Hz %dbit %dch nwords=%zu\n",
+               priv->samplerate, priv->datawidth, priv->channels, nwords);
+        syslog(LOG_INFO,
+               "SAI RX: XFER=0x%08" PRIx32 " RXCR=0x%08" PRIx32
+               " CKR=0x%08" PRIx32 " FSCR=0x%08" PRIx32
+               " RXFIFOLR=0x%08" PRIx32 "\n",
+               sai_getreg(RK3576_SAI_XFER), sai_getreg(RK3576_SAI_RXCR),
+               sai_getreg(RK3576_SAI_CKR), sai_getreg(RK3576_SAI_FSCR),
+               sai_getreg(RK3576_SAI_RXFIFOLR));
+      }
+  }
+
   /* ★ 上界要设在**整个接收过程**上，不是每个字上。
    *
    *   我第一版给每个字设了 200ms 的等待上界，看起来"有界" —— 但循环要
