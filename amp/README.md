@@ -28,6 +28,10 @@ RK3576 是 4×A53 + 4×A72。AMP 就是让两个簇各跑一个**完整的操作
 openvela 那一侧在 `../chip/rk3576/`（mailbox + rptun）和
 `../board/kickpi-k7/configs/amp-dual/`。
 
+**谁拥有哪个外设，见 [OWNERSHIP.md](OWNERSHIP.md)** —— AMP 里没有硬件
+隔离，两边都去初始化同一个控制器的后果不是报错，而是"某一侧偶发地不
+工作"，现场看起来像那一侧自己的 bug。
+
 ## 启动是怎么分核的
 
 U-Boot 跑在 MPIDR 0（A53 core0）。`bootamp` 读 FIT，按每个镜像的

@@ -41,11 +41,99 @@ index 9f0561ae..f4b4d6a0 100644
  	bool
  	default n
 diff --git a/arch/arm64/src/common/arm64_gicv2.c b/arch/arm64/src/common/arm64_gicv2.c
-index 5dcb1a14..8187d701 100644
+index 5dcb1a14..167a9f4d 100644
 --- a/arch/arm64/src/common/arm64_gicv2.c
 +++ b/arch/arm64/src/common/arm64_gicv2.c
-@@ -773,8 +773,10 @@ static int gic_validate_dist_version(void)
+@@ -771,10 +771,98 @@ static int gic_validate_dist_version(void)
+  *
+  ****************************************************************************/
  
++#ifdef CONFIG_ARM64_GICV2_SHARED_DIST
++
++/****************************************************************************
++ * Name: gic_own_cpumask
++ *
++ * Description:
++ *   本核在 GICD_ITARGETSR 里对应的那一位。
++ *
++ *   GICv2 规定 IRQ 0..31（SGI/PPI）的 ITARGETSR 是 banked 且只读，读回来
++ *   就是**正在读它的那颗核**的 mask。这是唯一不需要外部信息就能知道
++ *   "我是 GIC 眼里的哪个 CPU 接口"的办法 —— AMP 下尤其重要：MPIDR 和
++ *   GIC 的 CPU 接口编号没有保证的对应关系，两个簇更不能靠猜。
++ *
++ *   Linux 的 gic_get_cpumask() 用的就是这一招。
++ *
++ ****************************************************************************/
++
++static uint8_t gic_own_cpumask(void)
++{
++  uint32_t mask;
++  int i;
++
++  for (i = 0; i < 32; i += 4)
++    {
++      mask = getreg32(GIC_ICDIPTR(i));
++      mask |= mask >> 16;
++      mask |= mask >> 8;
++      mask &= 0xff;
++      if (mask != 0)
++        {
++          return (uint8_t)mask;
++        }
++    }
++
++  /* 读不出来就退回 CPU0。这只会发生在实现不遵守规范的 GIC 上。 */
++
++  sinfo("GICv2: 读不到本核的 ITARGETSR mask，退回 0x01\n");
++  return 0x01;
++}
++
++/****************************************************************************
++ * Name: gic_claim_spi
++ *
++ * Description:
++ *   把一个 SPI 的优先级和目标 CPU 改成本核的。
++ *
++ * ★ 为什么这件事在 AMP 下必须做
++ *
++ *   distributor 归对端（Linux）。Linux 的 gic_dist_init() 会把**所有**
++ *   SPI 的 ITARGETSR 都写成它自己那颗核 —— 它并不知道有一部分中断该
++ *   给另一个 OS。于是 openvela 即使把 ICDISER 的使能位置上了，中断也
++ *   只会送到 A72 那边，本核什么都收不到。
++ *
++ *   症状很有欺骗性：所有**轮询型**驱动（I2C、SPI、RTC）一切正常，日志
++ *   一路往下打；到第一个**依赖中断**的驱动（本项目是 SDHCI）就无声挂住。
++ *   看起来像"那个驱动有问题"，实际上整机一个中断都没有。
++ *
++ * ★ 为什么可以写，而不是像 trigger 那样只能校验
++ *
++ *   我一开始判断"共享寄存器不能读改写"，对 ITARGETSR / IPRIORITYR 是
++ *   **错的**：GICv2 规定这两个寄存器按字节寻址，每个 IRQ 独占一个字节。
++ *   写一个字节碰不到邻居，也就不存在丢对端更新的问题。
++ *
++ *   真正只能校验的是 ICDICFR（每个 IRQ 2 位，4 个挤在一个字节里），
++ *   那个仍然保持只读校验。
++ *
++ ****************************************************************************/
++
++static void gic_claim_spi(int irq)
++{
++  static uint8_t g_own_mask;
++
++  if (g_own_mask == 0)
++    {
++      g_own_mask = gic_own_cpumask();
++      sinfo("GICv2: 本核在 GIC 里的 mask = 0x%02x\n", g_own_mask);
++    }
++
++  /* 按字节写，不触碰相邻 IRQ 的配置 */
++
++  putreg8(GIC_ICCPMR_MASK / 2, MPCORE_ICD_VBASE + 0x400 + irq);
++  putreg8(g_own_mask, MPCORE_ICD_VBASE + 0x800 + irq);
++}
++
++#endif /* CONFIG_ARM64_GICV2_SHARED_DIST */
++
  static void arm_gic0_initialize(void)
  {
 +#ifndef CONFIG_ARM64_GICV2_SHARED_DIST
@@ -55,7 +143,7 @@ index 5dcb1a14..8187d701 100644
  
    /* Initialize SPIs.  The following should be done only by CPU0. */
  
-@@ -795,6 +797,7 @@ static void arm_gic0_initialize(void)
+@@ -795,6 +883,7 @@ static void arm_gic0_initialize(void)
  
    /* Registers with 1-bit per interrupt */
  
@@ -63,7 +151,7 @@ index 5dcb1a14..8187d701 100644
    for (irq = GIC_IRQ_SPI; irq < nlines; irq += 32)
      {
        putreg32(0x00000000, GIC_ICDISR(irq));   /* SPIs group 0 */
-@@ -815,6 +818,7 @@ static void arm_gic0_initialize(void)
+@@ -815,6 +904,7 @@ static void arm_gic0_initialize(void)
        putreg32(0x80808080, GIC_ICDIPR(irq));   /* SPI priority */
        putreg32(0x01010101, GIC_ICDIPTR(irq));  /* SPI on CPU0 */
      }
@@ -71,7 +159,7 @@ index 5dcb1a14..8187d701 100644
  
  #ifdef CONFIG_ARM64_GICV2M
    arm64_gic_v2m_initialize();
-@@ -845,7 +849,9 @@ static void arm_gic0_initialize(void)
+@@ -845,7 +935,9 @@ static void arm_gic0_initialize(void)
  static void arm_gic_initialize(void)
  {
    uint32_t iccicr;
@@ -81,7 +169,7 @@ index 5dcb1a14..8187d701 100644
  
    /* Initialize PPIs.  The following steps need to be done by all CPUs */
  
-@@ -961,14 +967,18 @@ static void arm_gic_initialize(void)
+@@ -961,14 +1053,18 @@ static void arm_gic_initialize(void)
    iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_ENABLEGRP1 |
               GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 |
               GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
@@ -100,7 +188,7 @@ index 5dcb1a14..8187d701 100644
  
  #endif
  
-@@ -976,11 +986,18 @@ static void arm_gic_initialize(void)
+@@ -976,11 +1072,18 @@ static void arm_gic_initialize(void)
  
    putreg32(iccicr, GIC_ICCICR);
  
@@ -119,7 +207,26 @@ index 5dcb1a14..8187d701 100644
  }
  
  /****************************************************************************
-@@ -1191,6 +1208,20 @@ int up_prioritize_irq(int irq, int priority)
+@@ -1120,6 +1223,18 @@ void up_enable_irq(int irq)
+     {
+       uintptr_t regaddr;
+ 
++#ifdef CONFIG_ARM64_GICV2_SHARED_DIST
++      /* distributor 归对端，它把所有 SPI 都路由给了自己。使能之前先把
++       * 这一条的目标 CPU 和优先级改成本核的，否则中断送不到这里来。
++       * 顺序重要：先路由后使能，避免中间那一拍中断落到对端。
++       */
++
++      if (irq >= GIC_IRQ_SPI)
++        {
++          gic_claim_spi(irq);
++        }
++#endif
++
+       /* Write '1' to the corresponding bit in the distributor Interrupt
+        * Set-Enable Register (ICDISER)
+        */
+@@ -1191,6 +1306,19 @@ int up_prioritize_irq(int irq, int priority)
  
        regaddr = GIC_ICDIPR(irq);
        regval  = getreg32(regaddr);
@@ -127,44 +234,43 @@ index 5dcb1a14..8187d701 100644
 +#ifdef CONFIG_ARM64_GICV2_SHARED_DIST
 +      if (irq >= GIC_IRQ_SPI)
 +        {
-+          /* 这个 32 位字里装着 4 个 IRQ 的优先级，其中三个可能属于对端。
-+           * 读改写会把它们一起写回去 —— 值没变，但那一瞬间对端若正在
-+           * 改同一个字，就会丢更新。所以只校验不写。
++          /* IPRIORITYR 按字节寻址，每个 IRQ 一个字节：写一个字节不会碰到
++           * 相邻 IRQ，共享 distributor 下也是安全的。
 +           */
 +
-+          return (regval & GIC_ICDIPR_ID_MASK(irq)) ==
-+                 GIC_ICDIPR_ID(irq, priority) ? OK : -EPERM;
++          putreg8((uint8_t)priority, MPCORE_ICD_VBASE + 0x400 + irq);
++          return OK;
 +        }
 +#endif
 +
        regval &= ~GIC_ICDIPR_ID_MASK(irq);
        regval |= GIC_ICDIPR_ID(irq, priority);
        putreg32(regval, regaddr);
-@@ -1222,9 +1253,23 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
+@@ -1222,6 +1350,23 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
  
        regaddr = GIC_ICDIPTR(irq);
        regval  = getreg32(regaddr);
 +
 +#ifdef CONFIG_ARM64_GICV2_SHARED_DIST
-+      /* SPI 的目标 CPU 由 distributor 的所有者按 AMP 的划分静态配好。
-+       * 这里默默照做会让调用方以为亲和性设上了，实际没有 —— 所以说出来。
++      /* ITARGETSR 同样按字节寻址，一个 IRQ 一个字节。
++       *
++       * 注意 cpuset 在 AMP 下是**本 OS 的**逻辑 CPU 编号位图，而这个
++       * 寄存器要的是 GIC 的 CPU 接口位图 —— 两者在单簇内恰好一致，
++       * 跨簇则不是。所以这里只接受"就放在本核上"这一种请求，别的一律
++       * 拒绝，免得把中断路由到对端的核上去。
 +       */
 +
-+      if ((regval & GIC_ICDIPTR_ID_MASK(irq)) != GIC_ICDIPTR_ID(irq, cpuset))
++      UNUSED(regval);
++      if (irq >= GIC_IRQ_SPI)
 +        {
-+          sinfo("GICv2: SPI %d 的目标 CPU 归对端所有，忽略本次设置\n", irq);
++          gic_claim_spi(irq);
++          return;
 +        }
-+
-+      return;
-+#else
++#endif
        regval &= ~GIC_ICDIPTR_ID_MASK(irq);
        regval |= GIC_ICDIPTR_ID(irq, cpuset);
        putreg32(regval, regaddr);
-+#endif
-     }
- }
- 
-@@ -1274,6 +1319,20 @@ int up_set_irq_type(int irq, int mode)
+@@ -1274,6 +1419,20 @@ int up_set_irq_type(int irq, int mode)
         */
  
        regval  = getreg32(regaddr);
