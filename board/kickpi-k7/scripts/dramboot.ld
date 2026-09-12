@@ -20,6 +20,8 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 OUTPUT_ARCH(aarch64)
 
 ENTRY(__start)
@@ -66,16 +68,23 @@ SECTIONS
    *
    *   BootROM -> TPL(ddr.bin) -> SPL -> U-Boot -> booti -> 搬运 -> 本镜像
    *
-   * ★ 本值必须与另外两处保持一致，改一处就要改三处
-   *   （scripts/check-addr.sh 会校验）：
-   *   - arch/arm64/include/rk3576/chip.h  的 CONFIG_LOAD_BASE
-   *   - configs/nsh/defconfig             的 CONFIG_RAM_START
-   *   - 本文件下面这一行
+   * ★ 2026-09-12 起这里直接用 CONFIG_RAM_START，不再写字面量。
+   *
+   *   本文件在链接前会过一遍 cpp（arch/arm64/src/Makefile 里
+   *   `$(addsuffix .tmp,$(ARCHSCRIPT))` 那条规则），所以能 include
+   *   nuttx/config.h。以前链接地址在三处各写一遍（chip.h 的
+   *   CONFIG_LOAD_BASE、defconfig 的 CONFIG_RAM_START、本文件），
+   *   靠 scripts/check-addr.sh 事后比对；现在只剩一处，"改漏一个地方"
+   *   这一整类故障从根上没有了。
+   *
+   *   这件事在 AMP 阶段变得必要：openvela 单跑时链在 0x40480000，
+   *   要和 Linux 共存时得挪到保留区，两个配置之间只应该差 defconfig
+   *   里的一行，不该还要改链接脚本。
    *
    * 地址填错的表现是串口完全没有输出且无任何报错 —— CPU 跳到的位置
    * 根本不是你的代码。上板后先用 md 确认镜像落点再 booti。
    */
-  . = 0x40480000;
+  . = CONFIG_RAM_START;
   _start = .;
   .text : {
         _stext = .;            /* Text section */

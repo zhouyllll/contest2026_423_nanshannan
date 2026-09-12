@@ -6,14 +6,19 @@
 # 每次改地址后跑一遍。
 set -u
 
+# 用法：scripts/check-addr.sh [配置名]   默认 nsh
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"   # 队伍仓根
 WS="$(cd "$ROOT/.." && pwd)"                              # openvela 工作区根
-CHIP="$WS/nuttx/arch/arm64/include/rk3576/chip.h"
+CHIP="$ROOT/chip/rk3576/chip.h"
 BOARD="$ROOT/board/kickpi-k7"
-DEFC="$BOARD/configs/nsh/defconfig"
+# 比对哪个配置。有了 amp 配置之后，默认的 nsh 不再总是对的那一个 ——
+# 拿 nsh 的 defconfig 去核 amp 的 .config，会在地址真的分叉时报"一致"。
+CFG="${1:-nsh}"
+DEFC="$BOARD/configs/$CFG/defconfig"
 LD="$BOARD/scripts/dramboot.ld"
-LOWPUTC="$WS/nuttx/arch/arm64/src/rk3576/rk3576_lowputc.S"
-MMAP="$WS/nuttx/arch/arm64/src/rk3576/hardware/rk3576_memorymap.h"
+LOWPUTC="$ROOT/chip/rk3576/rk3576_lowputc.S"
+MMAP="$ROOT/chip/rk3576/hardware/rk3576_memorymap.h"
 DOTC="$WS/nuttx/.config"                                  # ★ 实际参与编译的配置
 
 for f in "$CHIP" "$DEFC" "$LD" "$LOWPUTC" "$MMAP"; do
@@ -45,12 +50,18 @@ else
   for k in $KEYS; do
     x=$(grep -m1 "^$k=" "$DOTC"  | cut -d= -f2-)
     y=$(grep -m1 "^$k=" "$DEFC"  | cut -d= -f2-)
-    if [ "$x" != "$y" ]; then
-      printf '  ✗ %-32s .config=%-14s defconfig=%s\n' "$k" "${x:-<缺>}" "${y:-<缺>}"
+    # defconfig 里没有这一项不算错：make savedefconfig 生成的是**最小**
+    # defconfig，取默认值的项本来就不写（amp 配置就是这么存的）。
+    # 真正的故障是"两边都写了但不一样"——当年 .config 残留
+    # RAM_START=0x42000000 而 defconfig 是对的，正是这一种。
+    if [ -z "$y" ]; then
+      printf '  · %-32s defconfig 未列出（取默认值 %s）\n' "$k" "${x:-<无>}"
+    elif [ "$x" != "$y" ]; then
+      printf '  ✗ %-32s .config=%-14s defconfig=%s\n' "$k" "${x:-<缺>}" "$y"
       g0=1; fail=1
     fi
   done
-  [ $g0 -eq 0 ] && echo "  ✓ 关键项全部同步"
+  [ $g0 -eq 0 ] && echo "  ✓ 两边都写了的项全部一致"
   # config.h 是否比 .config 旧
   CH="$WS/nuttx/include/nuttx/config.h"
   if [ -f "$CH" ] && [ "$DOTC" -nt "$CH" ]; then
@@ -59,18 +70,22 @@ else
   fi
 fi
 
-# ---- 第 1 组：镜像加载地址（3 处）----
-a=$(grep -oP '^#define\s+CONFIG_LOAD_BASE\s+\K0x[0-9a-fA-F]+' "$CHIP")
-b=$(grep -oP '^CONFIG_RAM_START=\K0x[0-9a-fA-F]+' "$DEFC")
-c=$(grep -oP '^\s*\.\s*=\s*\K0x[0-9a-fA-F]+' "$LD" | head -1)
-echo "链接地址（= DRAM 基址 0x40000000 + text_offset 0x480000；U-Boot 从 kernel_addr_r=0x40400000 搬运至此）"
-printf '  %-44s %s\n' "chip.h CONFIG_LOAD_BASE"      "$(norm $a)"
-printf '  %-44s %s\n' "defconfig CONFIG_RAM_START"   "$(norm $b)"
-printf '  %-44s %s\n' "dramboot.ld 起始地址"          "$(norm $c)"
-if [ "$(norm $a)" = "$(norm $b)" ] && [ "$(norm $b)" = "$(norm $c)" ]; then
-  echo "  ✓ 三处一致"
+# ---- 第 1 组：镜像加载地址 ----
+#
+# 2026-09-12 起 dramboot.ld 直接写 CONFIG_RAM_START（链接脚本链接前会过
+# 一遍 cpp），加载地址只剩 .config 这一个出处。以前是三处各写一遍，
+# 改漏一处的表现是"上板完全没输出且不报错"——最难查的一类问题。
+# 这里改成检查那三处没有偷偷退回字面量。
+c=$(grep -oP '^\s*\.\s*=\s*\K\S+' "$LD" | head -1)
+echo "链接地址（唯一出处 = CONFIG_RAM_START；dramboot.ld 里不应再有字面量）"
+printf '  %-44s %s\n' "dramboot.ld 起始地址表达式" "$c"
+if [ "$c" = "CONFIG_RAM_START;" ]; then
+  echo "  ✓ 链接脚本跟随 .config"
 else
-  echo "  ✗ 不一致！上板会完全没有输出且不报错"; fail=1
+  echo "  ✗ dramboot.ld 里又出现了字面量地址 —— 它会和 .config 悄悄分叉"; fail=1
+fi
+if grep -q 'CONFIG_LOAD_BASE' "$CHIP" 2>/dev/null; then
+  echo "  ✗ chip.h 里又冒出 CONFIG_LOAD_BASE —— 加载地址只该有一个出处"; fail=1
 fi
 
 # ---- 第 2 组：调试串口基址（2 处：汇编字面量 vs defconfig）----
