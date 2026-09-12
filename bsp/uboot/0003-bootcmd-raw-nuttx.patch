@@ -1,0 +1,40 @@
+--- include/configs/evb_rk3576.h.orig	2026-09-12 14:17:40.630202517 +0800
++++ include/configs/evb_rk3576.h	2026-09-12 14:18:17.285432294 +0800
+@@ -18,8 +18,36 @@
+ 
+ #define CONFIG_SYS_MMC_ENV_DEV		0
+ 
++/*
++ * openvela/NuttX 直接启动：boot 分区里放**裸 nuttx.bin**，不再套 Android
++ * boot.img 的壳（header/ramdisk/dtb 三层在这里全是空的）。
++ *
++ * boot 分区布局（GPT: boot @LBA 0xC800，64MB）：
++ *   +0x0000 (LBA 0xC800)  nuttx.bin   —— 标准 arm64 Linux Image
++ *                                        （头部 MZ…ARMd，text_offset 0x480000）
++ *   +0x2000 (LBA 0xE800)  board.dtb   —— 仅为满足 booti，NuttX 自己不读它
++ *
++ * ★ 为什么必须带 dtb
++ *   arm64 的 booti 会把 FDT 地址放进 x0 传给内核，第三个参数给 '-' 时
++ *   U-Boot 仍会去解析，实测直接 Data Abort 在 U-Boot 自己身上：
++ *     "Synchronous Abort" handler, esr 0x96000006, PC = 0x40226b28
++ *   NuttX 的地址全是硬编的、根本不读设备树 —— 但这一关得过。
++ *
++ * ★ fdt 加载地址不用 fdt_addr_r(0x48300000)
++ *   那个地址落在 Rockchip sysmem 的保留区里，booti 会报
++ *   "Sysmem Error: Found there is region overflow!"。虽然还能启动，
++ *   但换到 0x4a000000（空闲区）就没有这条告警。
++ *
++ * 内核读 0x2000 扇区（4MB）是按布局取的上限，不是按当前镜像大小 ——
++ * nuttx.bin 长大时不用改这里；booti 按 Image 头里的实际大小处理。
++ */
+ #undef CONFIG_BOOTCOMMAND
+-#define CONFIG_BOOTCOMMAND	RKIMG_BOOTCOMMAND
++#define CONFIG_BOOTCOMMAND			\
++	"mmc dev 0;"				\
++	"mmc read ${kernel_addr_r} 0xC800 0x2000;"	\
++	"mmc read 0x4a000000 0xE800 0x400;"	\
++	"booti ${kernel_addr_r} - 0x4a000000;"	\
++	RKIMG_BOOTCOMMAND
+ 
+ #endif /* CONFIG_SPL_BUILD */
+ #endif /* __CONFIGS_RK3576_EVB_H */

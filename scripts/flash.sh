@@ -20,7 +20,12 @@
 #   ./scripts/flash.sh              打包 + 烧写 + 复位启动
 #   ./scripts/flash.sh --no-build   跳过打包，直接烧现有镜像
 #   ./scripts/flash.sh --stay       烧完停在下载模式，不复位
+#   ./scripts/flash.sh --raw        裸镜像启动（需自编 U-Boot，见 bsp/uboot/）
 set -e
+
+# --raw：走自编 U-Boot 的裸镜像启动（路径 B），不套 Android boot.img 壳。
+#        需要板上已烧入带新 bootcmd 的 U-Boot（见 bsp/uboot/）。
+do_raw=0
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WS="$(cd "$ROOT/.." && pwd)"
@@ -39,13 +44,16 @@ do_reset=1
 for a in "$@"; do
   case "$a" in
     --no-build) do_build=0 ;;
+    --raw)      do_raw=1 ;;
     --stay)     do_reset=0 ;;
     *) echo "未知参数: $a"; exit 1 ;;
   esac
 done
 
 # 1) 打包
-if [ "$do_build" = 1 ]; then
+if [ "$do_raw" = 1 ]; then
+  echo "裸镜像模式：boot 分区 = nuttx.bin + board.dtb（无 Android 壳）"
+elif [ "$do_build" = 1 ]; then
   [ -f "$NUTTX_BIN" ] || { echo "找不到 $NUTTX_BIN，先编译"; exit 1; }
   python3 "$ROOT/scripts/repack-bootimg.py" "$ORIG_IMG" "$NUTTX_BIN" "$BOOT_IMG" >/dev/null
   echo "已打包 $(stat -c%s "$BOOT_IMG") 字节"
@@ -98,7 +106,18 @@ fi
 
 # 3) 烧写
 echo "烧写中…"
-timeout 300 "$RKDEV" wl "$FLASH_LBA" "$BOOT_IMG" 2>&1 | tail -1
+if [ "$do_raw" = 1 ]; then
+  # 裸镜像：内核在分区起始，dtb 在分区内偏移 4MB（LBA +0x2000）
+  #
+  # ★ dtb 只是喂给 U-Boot 的 —— arm64 的 booti 第三个参数给 '-' 时它仍会
+  #   去解析 FDT，实测会在 U-Boot 自己身上 Data Abort。NuttX 不读设备树。
+  DTB="${DTB:-$ROOT/docs/refs/board.dtb}"
+  [ -f "$DTB" ] || { echo "找不到 $DTB（裸镜像模式需要一份 dtb 喂给 booti）"; exit 1; }
+  timeout 300 "$RKDEV" wl "$FLASH_LBA" "$NUTTX_BIN" 2>&1 | tail -1
+  timeout 300 "$RKDEV" wl $((FLASH_LBA + 0x2000)) "$DTB" 2>&1 | tail -1
+else
+  timeout 300 "$RKDEV" wl "$FLASH_LBA" "$BOOT_IMG" 2>&1 | tail -1
+fi
 
 # 4) 启动
 if [ "$do_reset" = 1 ]; then

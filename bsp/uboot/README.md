@@ -107,3 +107,78 @@ rkdeveloptool rd
 
 **所以现在是两段速率**：引导阶段 1500000，NuttX 起来后 115200。
 与 U-Boot 交互要用 1.5M，`scripts/flash.sh` 给 NSH 发 `loader` 用 115200。
+
+---
+
+# 路径 B：直接启动裸 nuttx.bin（已上板验证 2026-09-12）
+
+**结果**：上电后**全自动**从裸镜像进 NSH，不再经过 Android boot.img。
+
+## boot 分区布局（GPT: boot @LBA 0xC800，64MB）
+
+```
++0x0000 (LBA 0xC800)  nuttx.bin   标准 arm64 Linux Image（MZ…ARMd，text_offset 0x480000）
++0x2000 (LBA 0xE800)  board.dtb   仅为满足 booti，NuttX 自己不读它
+```
+
+## bootcmd（补丁 0003）
+
+```
+mmc dev 0;
+mmc read ${kernel_addr_r} 0xC800 0x2000;
+mmc read 0x4a000000 0xE800 0x400;
+booti ${kernel_addr_r} - 0x4a000000;
+RKIMG_BOOTCOMMAND            ← 失败时回落到原厂启动链，兜底
+```
+
+## 两个必须知道的坑
+
+**一、arm64 的 `booti` 不能没有设备树。**
+
+第三个参数给 `-` 时 U-Boot 仍会去解析 FDT，实测直接在**它自己身上**
+Data Abort：
+
+```
+Fdt Ramdisk skip relocation
+"Synchronous Abort" handler, esr 0x96000006
+* PC = 0000000040226b28      ← U-Boot 地址段，不是 NuttX
+```
+
+NuttX 的地址全是硬编的、根本不读设备树，但这一关得过 —— 所以在分区里
+带一份 dtb 纯粹是为了喂给 U-Boot。
+
+**二、FDT 别加载到 `fdt_addr_r`。**
+
+`fdt_addr_r=0x48300000` 落在 Rockchip sysmem 的保留区里（memory.rgn[0]
+= 0x40200000-0x48400000），`booti` 会报
+
+```
+Sysmem Error: Found there is region overflow!
+```
+
+虽然仍能启动，但换到 `0x4a000000`（空闲区 rgn[1]）就没有这条告警。
+
+## 地址是怎么定的（不要照抄，要会算）
+
+```
+nuttx.bin 头 +0x08  text_offset = 0x00480000
+DRAM 基址           0x40000000
+                  → 0x40480000 = CONFIG_RAM_START（nuttx/.config 实测一致）
+kernel_addr_r       0x40400000   booti 从这里读 Image 头，自己搬到 0x40480000
+```
+
+`mmc read` 读 0x2000 扇区（4MB）是按**分区布局的上限**取的，不是按当前
+镜像大小 —— nuttx.bin 长大时不必改 bootcmd，booti 按 Image 头里的实际
+大小处理。
+
+## 烧写
+
+```sh
+# 内核（裸镜像，不打包）
+rkdeveloptool wl 51200 nuttx.bin
+# 设备树（分区内偏移 4MB）
+rkdeveloptool wl 59392 board.dtb
+```
+
+`scripts/flash.sh --raw` 走这条路；不带参数仍走 Android boot.img 壳（路径 A
+时期的方式），两条路都保留，便于对照与回退。
