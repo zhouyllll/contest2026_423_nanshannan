@@ -118,7 +118,7 @@ rkdeveloptool rd
 
 ```
 +0x0000 (LBA 0xC800)  nuttx.bin   标准 arm64 Linux Image（MZ…ARMd，text_offset 0x480000）
-+0x2000 (LBA 0xE800)  board.dtb   仅为满足 booti，NuttX 自己不读它
++0x2000 (LBA 0xE800)  booti-stub.dtb  344 字节，仅为满足 booti
 ```
 
 ## bootcmd（补丁 0003）
@@ -145,7 +145,23 @@ Fdt Ramdisk skip relocation
 ```
 
 NuttX 的地址全是硬编的、根本不读设备树，但这一关得过 —— 所以在分区里
-带一份 dtb 纯粹是为了喂给 U-Boot。
+带一份 FDT 纯粹是为了喂给 U-Boot。
+
+**它只需要结构合法，不需要真实的板级描述。** 起初塞的是从原厂固件里抠出来
+的 `board.dtb`（264KB）—— 那让启动链依赖一个厂商二进制，纯属浪费。现在用
+自己的源码 `board/kickpi-k7/scripts/booti-stub.dts` 编出的 **344 字节**
+stub（只有 `/chosen` 和一个 `/memory` 节点），已上板验证可自动启动。
+
+两条更省的路都试过，不通：
+
+| 做法 | 结果 |
+|---|---|
+| `booti addr - -`（完全不给 FDT） | U-Boot 自己 Data Abort |
+| `booti addr - ${fdtcontroladdr}` | 该变量在本构建里未定义，展开成空，同样崩 |
+
+还有 `go 0x40480000`（直接跳转、不要 FDT）没试 —— `go` 不做
+`cleanup_before_linux()`（关 cache/MMU、关中断），等于跳过 arm64 的启动
+协议。为省 344 字节去换一个不确定的启动状态不划算。
 
 **二、FDT 别加载到 `fdt_addr_r`。**
 

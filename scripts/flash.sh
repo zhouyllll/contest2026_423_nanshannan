@@ -111,8 +111,14 @@ if [ "$do_raw" = 1 ]; then
   #
   # ★ dtb 只是喂给 U-Boot 的 —— arm64 的 booti 第三个参数给 '-' 时它仍会
   #   去解析 FDT，实测会在 U-Boot 自己身上 Data Abort。NuttX 不读设备树。
-  DTB="${DTB:-$ROOT/docs/refs/board.dtb}"
-  [ -f "$DTB" ] || { echo "找不到 $DTB（裸镜像模式需要一份 dtb 喂给 booti）"; exit 1; }
+  # ★ 用我们自己的 344 字节最小 FDT，不是原厂那份 264KB 的 board.dtb。
+  #
+  #   NuttX 根本不读设备树（arm64_head.S 里 x0 进 real_start 就被
+  #   switch_el 覆盖了），这份 FDT 纯粹是让 booti 不崩。既然只要"结构
+  #   合法"，就不该让启动链依赖一个从原厂固件里抠出来的二进制。
+  #   源码在 board/kickpi-k7/scripts/booti-stub.dts，已上板验证。
+  DTB="${DTB:-$ROOT/board/kickpi-k7/scripts/booti-stub.dtb}"
+  [ -f "$DTB" ] || { echo "找不到 $DTB（裸镜像模式需要一份 FDT 喂给 booti）"; exit 1; }
   timeout 300 "$RKDEV" wl "$FLASH_LBA" "$NUTTX_BIN" 2>&1 | tail -1
   timeout 300 "$RKDEV" wl $((FLASH_LBA + 0x2000)) "$DTB" 2>&1 | tail -1
 else

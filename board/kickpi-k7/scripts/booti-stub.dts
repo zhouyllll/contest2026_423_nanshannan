@@ -1,0 +1,38 @@
+/dts-v1/;
+
+/*
+ * 喂给 U-Boot booti 的最小设备树 —— NuttX 自己不读它。
+ *
+ * ★ 为什么需要这个文件
+ *
+ *   arm64 的 booti 会把 FDT 地址放进 x0 传给内核；第三个参数给 '-' 时
+ *   U-Boot 仍会去解析，实测直接在**它自己身上** Data Abort：
+ *     "Synchronous Abort" handler, esr 0x96000006, PC 在 U-Boot 地址段
+ *
+ *   而 NuttX 的 arch/arm64/src/common/arm64_head.S 里写着：
+ *     x0 = physical address to the FDT blob.
+ *         it will be used when NuttX support device tree in the future
+ *   —— 进 real_start 后第一条 switch_el 就把 x0 覆盖了，现在完全不用。
+ *
+ *   所以这里只要一份**结构合法**的 FDT 即可，不需要真实的板级描述。
+ *   原先塞的是原厂 264KB 的 board.dtb，纯属浪费，而且让构建依赖一个
+ *   从原厂固件里抠出来的二进制。这份约 200 字节，且是自己的源码。
+ *
+ * 编译：dtc -I dts -O dtb -o booti-stub.dtb booti-stub.dts
+ */
+
+/ {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	model = "KICKPI-K7 (openvela/NuttX, minimal FDT for booti)";
+	compatible = "rockchip,rk3576";
+
+	chosen {
+	};
+
+	/* booti 会查 /memory 来决定搬运目标是否落在 DRAM 内 */
+	memory@40000000 {
+		device_type = "memory";
+		reg = <0x0 0x40000000 0x0 0x40000000>;
+	};
+};
