@@ -16,7 +16,7 @@
 #include "rk3576-linux.dtsi"
 
 / {
-	model = "KICKPI-K7 AMP (Linux on A72 cluster)";
+	model = "KICKPI-K7 AMP debug (Linux on A72, owns UART0)";
 	compatible = "rockchip,rk3576-evb1-v10", "rockchip,rk3576";
 
 	/*
@@ -146,39 +146,15 @@
  */
 
 /*
- * ★ /chosen/bootargs 必须覆盖掉，不能只在 U-Boot 里 setenv bootargs。
+ * ★ 调试专用变体：把 UART0 让给 Linux。
  *
- *   rk3576-linux.dtsi 里带着厂商的那一串：
- *
- *     earlycon=uart8250,mmio32,0x2ad40000 console=ttyFIQ0
- *     root=PARTUUID=614e0000-0000 rw rootwait ...
- *
- *   而 U-Boot 的 bootargs_add_dtb_dtbo()（arch/arm/mach-rockchip/board.c）
- *   会把内核 DTB 里的 /chosen/bootargs **追加**到 env 的 bootargs 上。
- *   所以在 U-Boot 提示符下 `setenv bootargs 'panic=0'` 之后，内核实际拿到
- *   的仍然是 `panic=0 ... earlycon=uart8250,mmio32,0x2ad40000 ...`。
- *
- *   那个 earlycon 指向 **UART0**，而 UART0 归 openvela。两个 OS 同时往
- *   同一个 16550 写，表现是字符逐个交错、控制台彻底不可读，而且谁都不
- *   报错。这一条上板踩过：双 OS 跑起来后 openvela 的输出整段消失，
- *   看起来像 openvela 没起来，实际是它的字被 Linux 的 earlycon 冲掉了。
- *
- *   这一版 Linux **不需要控制台**：它是纯计算域，存活判据是 openvela 那边
- *   ampctl status 的"握手完成"（见 amp/OWNERSHIP.md）。真要看 Linux 日志，
- *   用 rk3576-kickpi-k7-amp-dbg.dts 那个变体，它把 UART0 让给 Linux，
- *   但**只能在不启 openvela 的隔离实验里用**。
- *
- *   panic=0：Linux 没有 rootfs，挂载根失败必然 panic。panic=0 让它停住
- *   而不是重启 —— 重启走的是 PSCI SYSTEM_RESET，**会把整片 SoC 连
- *   openvela 一起复位**。AMP 下一侧的"正常错误处理"就是另一侧的灾难。
+ * 只在"只启 Linux、不启 openvela"的隔离实验里用。双 OS 正式跑时
+ * UART0 必须归 openvela（见 amp/OWNERSHIP.md）—— 两个 OS 同时初始化
+ * 同一个 16550，表现是字符互相插队、波特率被对方改掉，而且谁都不报错。
  */
 
-&chosen {
-	bootargs = "panic=0";
-};
-
 &uart0 {
-	status = "disabled";
+	status = "okay";
 };
 
 &fiq_debugger {

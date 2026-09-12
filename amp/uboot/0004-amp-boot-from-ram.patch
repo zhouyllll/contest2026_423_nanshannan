@@ -1,7 +1,7 @@
-AMP 分核引导：新增 bootamp 命令、可配置的 Linux 加载方式、跳过 cpu-swap 检查
+AMP 分核引导：bootamp 命令、可配置的 Linux 加载方式、正确的 FDT、跳过 cpu-swap 检查
 
-三处改动，都是为了让 U-Boot 能把两个簇分给两个 OS。应用：在 u-boot/ 下
-`patch -p1 < 本文件`，然后 `./make.sh rk3576-amp CROSS_COMPILE=<tc>`。
+四处改动。应用：在 u-boot/ 下 `patch -p1 < 本文件`，然后
+`./make.sh rk3576-amp CROSS_COMPILE=<tc>`。
 
 一、bootamp <addr>：从内存里的 FIT 启动 AMP
 
@@ -13,41 +13,48 @@ AMP 分核引导：新增 bootamp 命令、可配置的 Linux 加载方式、跳
   bootamp 把 FIT 的来源换成内存，分区表一个字节不动；而且它是**手动**
   命令，默认 bootcmd 不变，AMP 试炸了下一次上电还是原来的样子。
 
-  真正的工作（解析 amp-dispatcher、加载 loadables、按 cpu 拉核、最后把
-  当前核送进非 Linux 的那个 OS）全在 brought_up_all_amp() 里，与 FIT 从
-  哪来无关，原样复用。
-
 二、amp_linux_cmd：Linux 从哪加载可配置
 
-  原来固定跑 boot_fit / boot_android，也就是只能从 boot 分区的镜像加载。
-  而 rkdeveloptool 这条 USB 通道**写不到 32MB 以上**（LBA >= 0x10000 的
-  写静默丢弃：命令报 100%，回读是 0xCC；已逐项验证 —— 65528 写入后回读
-  一致、70000 不一致；换 rkbin 的 spl_loader 用 db 重下一样；用
-  wlx <分区名> 走分区路径一样；而同一个 LBA 70000 用 U-Boot 的
-  mmc write 却成功，所以限制在 USB 通道，不在 eMMC）。
+  原来固定跑 boot_fit / boot_android，只能从 boot 分区的镜像加载。而
+  rkdeveloptool 这条 USB 通道写不到 32MB 以上（LBA >= 0x10000 的写静默
+  丢弃），boot 分区起点 25MB、到上限只剩 7MB，放不下完整镜像。改成可
+  配置之后，裸 Image 可以放在任意够得着的 LBA 上，mmc read 再 booti。
 
-  boot 分区从 LBA 51200 = 25MB 起，到上限只剩 7MB，放不下一个完整镜像。
-  改成可配置之后，裸 Image 可以放在任意够得着的 LBA 上，用 mmc read 搬
-  进内存再 booti：
+  booti 走的 do_booti() 同样经过 do_bootm_states()，bootm_states_unmask
+  对它一样有效（挡掉最后的 OS_GO，准备好但不跳转），不需要另写加载逻辑。
 
-      setenv amp_linux_cmd 'booti 0x40400000 - 0x4f000000'
+三、★ 传给 Linux 的 FDT：gd->fdt_blob → images.ft_addr
 
-  booti 走的 do_booti() 同样经过 do_bootm_states()，所以
-  bootm_states_unmask 对它一样有效（挡掉最后的 OS_GO，准备好但不跳转），
-  不需要另写加载逻辑。
+  原来这一行是 `args->arg0 = (ulong)gd->fdt_blob;`，这是一个**隐含假设**：
+  Rockchip 的正常启动流程会把内核 dtb 读到 fdt_addr_r，并在 kernel_dtb.c
+  里把 gd->fdt_blob 重新指过去（那里的注释写着 `"fdt_addr_r" *MUST* be
+  the fdt passed to kernel`）。所以在那条路上它恰好就是内核的 dtb。
 
-三、AMP 加载 Linux 时跳过 sanity_cpu_swap()
+  换成 amp_linux_cmd 走 booti 之后假设不成立，Linux 拿到的是 U-Boot 自己
+  那份控制 FDT。后果有两个，而且都不报错：
 
-  那个检查本来是给 "CPU swap"（换启动簇）做防呆的：loader 跑在 A53 而
-  内核 dtb 按 A72 先起编，内核会早期挂掉，所以宁可退到下载模式。
+    - 那份 FDT 没经过 image_setup_libfdt，/chosen 里没有 bootargs ——
+      Linux 连 earlycon 都拿不到，**一个字都不打**；
+    - 它带着全部 8 个 cpu 节点 —— Linux 会去 PSCI 拉起 A53 那四个核，
+      而那正是 openvela 在跑的地方，**整片 SoC 随后复位**。
 
-  但 AMP 里这两者**故意**不一样：U-Boot 跑在 MPIDR 0（A53 簇 core0，那颗
-  核接下来要进 openvela），Linux 的 dtb 只保留 A72 的四个 cpu 节点。第一个
-  cpu 节点的 reg 当然不等于当前 MPIDR —— 这正是分核的定义。
+  改用 images.ft_addr（bootm 状态机真正准备好的那一份，经过
+  BOOTM_STATE_FINDOTHER 定位、BOOTM_STATE_FDT 重定位与 fixup），假设就
+  消失了 —— boot_fit / boot_android / booti 三条路都对。
 
-  它的失败动作是 run_command("download")，会把板子直接丢进 rockusb，
-  AMP 就此中断。所以精确地只在 AMP 加载 Linux 那一刻跳过，其余路径
-  （正常启动、真的换簇）行为完全不变。
+  上板验证：改完之后 Linux 打出
+    Booting Linux on physical CPU 0x0000000100 [0x411fd080]
+    Machine model: KICKPI-K7 AMP debug (Linux on A72, owns UART0)
+    CPU1/2/3: Booted secondary processor 0x101/0x102/0x103
+    SMP: Total of 4 processors activated.
+  只拉 A72 四个核，完全没碰 A53。
+
+四、AMP 加载 Linux 时跳过 sanity_cpu_swap()
+
+  那个检查比对 dtb 第一个 cpu 节点的 reg 和当前 MPIDR。AMP 下这两者
+  **故意**不同（U-Boot 在 MPIDR 0，Linux 的 dtb 只有 0x100..0x103）。
+  它的失败动作是 run_command("download")，会把板子直接丢进 rockusb。
+  只在 AMP 加载 Linux 那一刻跳过，其余路径行为不变。
 
 --- a/drivers/cpu/rockchip_amp.c
 +++ b/drivers/cpu/rockchip_amp.c
@@ -69,11 +76,12 @@ AMP 分核引导：新增 bootamp 命令、可配置的 Linux 加载方式、跳
  static u32 os_amp_dispatcher_cpu[8];
  
  static u32 fit_get_u32_default(const void *fit, int noffset,
-@@ -115,14 +126,44 @@
+@@ -115,29 +126,87 @@
  {
  	static const char *boot_cmd[] = {
  		"boot_fit", "boot_android ${devtype} ${devnum}" };
 +	const char *user_cmd = env_get("amp_linux_cmd");
++	ulong fdt;
  	int i, ret;
  
 +	/*
@@ -118,7 +126,52 @@ AMP 分核引导：新增 bootamp 命令、可配置的 Linux 加载方式、跳
  	env_set("bootm_states_unmask", NULL);
  	if (ret) {
  		AMP_E("Load linux failed, ret=%d\n", ret);
-@@ -437,6 +478,54 @@
+ 		return ret;
+ 	}
+ 
+-	/* linux boot args */
++	/* linux boot args
++	 *
++	 * ★ 原来这里用的是 gd->fdt_blob，那是个**隐含假设**：
++	 *
++	 *   Rockchip 的正常启动流程（boot_fit / boot_android）会把内核 dtb
++	 *   读到 fdt_addr_r，并在 kernel_dtb.c 里把 gd->fdt_blob 重新指过去
++	 *   （那里的注释写着 `"fdt_addr_r" *MUST* be the fdt passed to
++	 *   kernel`）。所以在那条路上 gd->fdt_blob 恰好就是内核的 dtb。
++	 *
++	 *   换成 amp_linux_cmd 走 booti 之后这个假设不成立：dtb 在命令行
++	 *   给的地址上，gd->fdt_blob 仍是 U-Boot 自己那份控制 FDT。
++	 *
++	 *   后果有两个，而且都不报错：
++	 *     - 那份 FDT 没有经过 image_setup_libfdt，/chosen 里**没有
++	 *       bootargs** —— Linux 连 earlycon 都拿不到，一个字都不打；
++	 *     - 它带着全部 8 个 cpu 节点 —— Linux 会去 PSCI 拉起 A53 那四个
++	 *       核，而那正是 openvela 在跑的地方。整片 SoC 随后复位。
++	 *
++	 *   images.ft_addr 才是 bootm 状态机真正准备好的那一份（经过
++	 *   BOOTM_STATE_FINDOTHER 定位、BOOTM_STATE_FDT 重定位与 fixup）。
++	 *   用它就不依赖任何一条特定的加载路径 —— boot_fit / boot_android /
++	 *   booti 都对。
++	 */
++
++	fdt = images.ft_addr ? (ulong)images.ft_addr : (ulong)gd->fdt_blob;
++	AMP_I("linux fdt at 0x%08lx%s\n", fdt,
++	      images.ft_addr ? "" : " (fallback: gd->fdt_blob)");
++
+ 	if (aarch64) {
+-		args->arg0 = (ulong)gd->fdt_blob;
++		args->arg0 = fdt;
+ 		args->arg1 = 0;
+ 		args->arg2 = 0;
+ 	} else {
+ 		args->arg0 = 0;
+ 		args->arg1 = 0;
+-		args->arg2 = (ulong)gd->fdt_blob;
++		args->arg2 = fdt;
+ 	}
+ 
+ 	/* don't need call cleanup_before_linux() as this nonboot cpu is clean */
+@@ -437,6 +506,54 @@
  	return 0;
  }
  
