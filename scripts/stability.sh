@@ -22,7 +22,7 @@ set -e
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WS="$(cd "$ROOT/.." && pwd)"
 SERIAL="${SERIAL:-/dev/ttyUSB0}"
-BAUD="${BAUD:-1500000}"
+BAUD="${BAUD:-115200}"
 RKDEV="${RKDEV:-$HOME/rkdeveloptool/rkdeveloptool}"
 USBIPD="${USBIPD:-/mnt/c/Program Files/usbipd-win/usbipd.exe}"
 OUT="${OUT:-$ROOT/notes/xts-stability.md}"

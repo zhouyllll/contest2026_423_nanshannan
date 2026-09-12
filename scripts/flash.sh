@@ -31,7 +31,7 @@ BOOT_IMG="${BOOT_IMG:-$HOME/boot-nuttx.img}"
 RKDEV="${RKDEV:-$HOME/rkdeveloptool/rkdeveloptool}"
 USBIPD="${USBIPD:-/mnt/c/Program Files/usbipd-win/usbipd.exe}"
 SERIAL="${SERIAL:-/dev/ttyUSB0}"
-BAUD="${BAUD:-1500000}"
+BAUD="${BAUD:-115200}"
 FLASH_LBA="${FLASH_LBA:-51200}"
 
 do_build=1
