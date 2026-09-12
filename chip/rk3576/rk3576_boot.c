@@ -96,6 +96,27 @@ static const struct arm_mmu_region g_mmu_regions[] =
   MMU_REGION_FLAT_ENTRY("UBOOT_FB",
                         0xfdf00000, 0x400000,
                         MT_NORMAL | MT_RW | MT_SECURE),
+
+#ifdef CONFIG_RK3576_RPTUN
+
+  /* AMP 与 Linux 共享的 vring + rpmsg 缓冲池。
+   *
+   * ★ 为什么是 NORMAL_NC 而不是 NORMAL
+   *
+   *   Linux 那边用 ioremap() 映这片内存（rockchip_rpmsg_mbox.c 里还显式
+   *   清掉 RPMSG_CACHED_VRING），也就是**不过 cache**。我们要是映成
+   *   cacheable，同一块物理内存就有了两种互不相容的属性，描述符的可见性
+   *   要靠我们每次读写都做 cache 维护来保证 —— 漏掉一处的症状是偶发丢包
+   *   或者读到半新半旧的描述符，极难定位。直接不缓存，把这一整类问题去掉。
+   *
+   *   代价是 vring 访问慢一点。vring 里只有描述符（每条 16 字节），
+   *   真正的负载在缓冲池里按 512 字节搬，这点开销无所谓。
+   */
+
+  MMU_REGION_FLAT_ENTRY("AMP_SHM",
+                        CONFIG_RK3576_RPTUN_SHM_BASE, 0x400000,
+                        MT_NORMAL_NC | MT_RW | MT_SECURE),
+#endif
 };
 
 const struct arm_mmu_config g_mmu_config =

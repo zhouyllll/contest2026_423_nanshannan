@@ -75,7 +75,27 @@ ps:   PID 0 CPU0 IDLE Assigned / PID 1..3 CPU1..CPU3 IDLE Running
 
 ---
 
-## 二、AMP：Linux + NuttX（已完成机制调研，未开工）
+## 二、AMP：Linux + NuttX
+
+> **本节是 2026-09 早期的机制调研，部分结论已被后续工作取代。**
+> 传输层（mailbox + rptun/rpmsg）已经写完并上板验证，详见
+> **[amp.md](amp.md)**；下面保留调研原文，因为 U-Boot 侧的分析仍然有效。
+>
+> 一处**决策变更**：本节当时打算让 NuttX 占 A72 簇、Linux 留在 A53 簇
+> （理由是"Linux 侧是现成的，不用动"）。实际选了**反过来**：
+> openvela 占 A53 簇（含启动核 MPIDR 0），Linux 占 A72 簇。
+>
+> 换的理由有两条，都比"省事"更重要：
+>
+> 1. U-Boot 自己就跑在 MPIDR 0 上。让当前这颗核直接进 openvela，
+>    是 `rockchip_amp.c` 里最短、不需要核间迁移的那条路；反过来要把
+>    U-Boot 的执行流搬到另一个簇，多一步而且没有好处。
+> 2. openvela 要做的是实时与产品控制，A53 簇够用且功耗低；Linux 做
+>    NPU/ISP/重媒体，正需要 A72。按负载分簇比按"哪边现成"分更合理。
+>
+> 同届 contest2026_062_PharosTech 在同一块板上按这个拓扑跑通过 4+4，
+> 是选它的第三条理由（旁证，不是原因）。
+
 
 ### Rockchip 的 AMP 是怎么做的
 

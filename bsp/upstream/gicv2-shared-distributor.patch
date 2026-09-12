@@ -1,0 +1,187 @@
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 9f0561ae..f4b4d6a0 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -402,6 +402,37 @@ config ARM64_GIC_VERSION
+ 
+ if ARM64_GIC_VERSION = 2
+ 
++config ARM64_GICV2_SHARED_DIST
++	bool "GIC distributor is owned by another OS (AMP)"
++	default n
++	depends on !ARCH_TRUSTZONE_SECURE && !ARM64_GICV2M
++	---help---
++		在 AMP 里两个 OS 共用同一个 GIC。distributor（GICD）是**全局**
++		的：SPI 的使能、优先级、触发方式、目标 CPU 都放在按 IRQ 号打包
++		的共享寄存器里，一次 32 位写会连带覆盖相邻若干个 IRQ 的配置。
++		因此 distributor 只能有一个所有者。
++
++		选中本选项后，NuttX 放弃 distributor 的所有权：
++
++		  - 不复位 SPI（不写 ICDISR / ICDICER / ICDICFR / ICDIPR /
++		    ICDIPTR 的整字）
++		  - 不写 GICD_CTLR
++		  - up_prioritize_irq() / up_set_irq_type() 对 SPI 改为**校验**：
++		    请求值与所有者已配好的一致则返回 OK，不一致返回 -EPERM
++		  - up_affinity_irq() 对 SPI 不做任何写入
++
++		CPU 接口（GICC）和 banked 的 SGI/PPI 仍由各 OS 自己初始化 ——
++		那些寄存器每个核一份，互不影响。
++
++		★ 只用一个开关而不是拆成两个，是有意的：一旦 distributor 归别人，
++		  "不复位 SPI"和"不读改写共享字"必须同时成立。拆开就存在一种合法
++		  但致命的组合（不复位、却仍去读改写），它的表现是**悄悄改掉对端
++		  某几个中断的配置**，而本端一切正常。少一个开关就少一类这种状态。
++
++		前提：所有者必须在 NuttX 初始化中断之前配置完 distributor，并且
++		两边分到的 IRQ 不重叠。本选项只是不去动共享寄存器，它**不提供**
++		运行期的隔离。
++
+ config ARM64_GIC_EOIMODE
+ 	bool
+ 	default n
+diff --git a/arch/arm64/src/common/arm64_gicv2.c b/arch/arm64/src/common/arm64_gicv2.c
+index 5dcb1a14..8187d701 100644
+--- a/arch/arm64/src/common/arm64_gicv2.c
++++ b/arch/arm64/src/common/arm64_gicv2.c
+@@ -773,8 +773,10 @@ static int gic_validate_dist_version(void)
+ 
+ static void arm_gic0_initialize(void)
+ {
++#ifndef CONFIG_ARM64_GICV2_SHARED_DIST
+   unsigned int nlines = arm_gic_nlines();
+   unsigned int irq;
++#endif
+ 
+   /* Initialize SPIs.  The following should be done only by CPU0. */
+ 
+@@ -795,6 +797,7 @@ static void arm_gic0_initialize(void)
+ 
+   /* Registers with 1-bit per interrupt */
+ 
++#ifndef CONFIG_ARM64_GICV2_SHARED_DIST
+   for (irq = GIC_IRQ_SPI; irq < nlines; irq += 32)
+     {
+       putreg32(0x00000000, GIC_ICDISR(irq));   /* SPIs group 0 */
+@@ -815,6 +818,7 @@ static void arm_gic0_initialize(void)
+       putreg32(0x80808080, GIC_ICDIPR(irq));   /* SPI priority */
+       putreg32(0x01010101, GIC_ICDIPTR(irq));  /* SPI on CPU0 */
+     }
++#endif /* !CONFIG_ARM64_GICV2_SHARED_DIST */
+ 
+ #ifdef CONFIG_ARM64_GICV2M
+   arm64_gic_v2m_initialize();
+@@ -845,7 +849,9 @@ static void arm_gic0_initialize(void)
+ static void arm_gic_initialize(void)
+ {
+   uint32_t iccicr;
++#ifndef CONFIG_ARM64_GICV2_SHARED_DIST
+   uint32_t icddcr;
++#endif
+ 
+   /* Initialize PPIs.  The following steps need to be done by all CPUs */
+ 
+@@ -961,14 +967,18 @@ static void arm_gic_initialize(void)
+   iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_ENABLEGRP1 |
+              GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 |
+              GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
++#ifndef CONFIG_ARM64_GICV2_SHARED_DIST
+   icddcr  = (GIC_ICDDCR_ENABLEGRP0 | GIC_ICDDCR_ENABLEGRP1);
++#endif
+ 
+ #else
+   /* Enable the Group 1 interrupts and disable Group 1 bypass. */
+ 
+   iccicr |= (GIC_ICCICRU_ENABLEGRP1 | GIC_ICCICRU_FIQBYPDISGRP1 |
+              GIC_ICCICRU_IRQBYPDISGRP1);
++#ifndef CONFIG_ARM64_GICV2_SHARED_DIST
+   icddcr  = GIC_ICDDCR_ENABLE;
++#endif
+ 
+ #endif
+ 
+@@ -976,11 +986,18 @@ static void arm_gic_initialize(void)
+ 
+   putreg32(iccicr, GIC_ICCICR);
+ 
++#ifndef CONFIG_ARM64_GICV2_SHARED_DIST
+   /* Write the ICDDCR value to enable the forwarding of interrupt by the
+    * distributor.
++   *
++   * With CONFIG_ARM64_GICV2_SHARED_DIST the distributor belongs to the
++   * other OS, which has already enabled forwarding.  Writing it here would
++   * be harmless at best and, on a warm restart of this OS alone, would
++   * momentarily disable every interrupt the peer depends on.
+    */
+ 
+   putreg32(icddcr, GIC_ICDDCR);
++#endif
+ }
+ 
+ /****************************************************************************
+@@ -1191,6 +1208,20 @@ int up_prioritize_irq(int irq, int priority)
+ 
+       regaddr = GIC_ICDIPR(irq);
+       regval  = getreg32(regaddr);
++
++#ifdef CONFIG_ARM64_GICV2_SHARED_DIST
++      if (irq >= GIC_IRQ_SPI)
++        {
++          /* 这个 32 位字里装着 4 个 IRQ 的优先级，其中三个可能属于对端。
++           * 读改写会把它们一起写回去 —— 值没变，但那一瞬间对端若正在
++           * 改同一个字，就会丢更新。所以只校验不写。
++           */
++
++          return (regval & GIC_ICDIPR_ID_MASK(irq)) ==
++                 GIC_ICDIPR_ID(irq, priority) ? OK : -EPERM;
++        }
++#endif
++
+       regval &= ~GIC_ICDIPR_ID_MASK(irq);
+       regval |= GIC_ICDIPR_ID(irq, priority);
+       putreg32(regval, regaddr);
+@@ -1222,9 +1253,23 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
+ 
+       regaddr = GIC_ICDIPTR(irq);
+       regval  = getreg32(regaddr);
++
++#ifdef CONFIG_ARM64_GICV2_SHARED_DIST
++      /* SPI 的目标 CPU 由 distributor 的所有者按 AMP 的划分静态配好。
++       * 这里默默照做会让调用方以为亲和性设上了，实际没有 —— 所以说出来。
++       */
++
++      if ((regval & GIC_ICDIPTR_ID_MASK(irq)) != GIC_ICDIPTR_ID(irq, cpuset))
++        {
++          sinfo("GICv2: SPI %d 的目标 CPU 归对端所有，忽略本次设置\n", irq);
++        }
++
++      return;
++#else
+       regval &= ~GIC_ICDIPTR_ID_MASK(irq);
+       regval |= GIC_ICDIPTR_ID(irq, cpuset);
+       putreg32(regval, regaddr);
++#endif
+     }
+ }
+ 
+@@ -1274,6 +1319,20 @@ int up_set_irq_type(int irq, int mode)
+        */
+ 
+       regval  = getreg32(regaddr);
++
++#ifdef CONFIG_ARM64_GICV2_SHARED_DIST
++      if (irq >= GIC_IRQ_SPI)
++        {
++          /* ICDICFR 每个 IRQ 占 2 位，一个字装 16 个。GICv2 里只有高位
++           * （边沿/电平）可写，低位固定，所以只比高位。
++           */
++
++          return (regval & GIC_ICDICFR_ID(irq, INT_ICDICFR_EDGE)) ==
++                 GIC_ICDICFR_ID(irq, intcfg & INT_ICDICFR_EDGE) ?
++                 OK : -EPERM;
++        }
++#endif
++
+       regval &= ~GIC_ICDICFR_ID_MASK(irq);
+       regval |= GIC_ICDICFR_ID(irq, intcfg);
+       putreg32(regval, regaddr);

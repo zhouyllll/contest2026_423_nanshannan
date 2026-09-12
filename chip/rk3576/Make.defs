@@ -28,6 +28,7 @@ include common/Make.defs
 # 驱动本体在 drivers/serial/uart_16550.c，本文件只提供两个转发函数。
 
 CHIP_CSRCS  = rk3576_boot.c rk3576_serial.c rk3576_gpio.c
+CHIP_CSRCS += rk3576_addrenv.c
 CHIP_CSRCS += rk3576_cru.c rk3576_pinmux.c rk3576_power.c
 
 ifeq ($(CONFIG_RK3576_GMAC),y)
@@ -114,4 +115,12 @@ endif
 
 ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
 CHIP_ASRCS  = rk3576_lowputc.S
+endif
+
+ifeq ($(CONFIG_RK3576_MAILBOX),y)
+CHIP_CSRCS += rk3576_mailbox.c
+endif
+
+ifeq ($(CONFIG_RK3576_RPTUN),y)
+CHIP_CSRCS += rk3576_rptun.c
 endif

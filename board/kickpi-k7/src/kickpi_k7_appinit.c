@@ -57,6 +57,7 @@
 #include "rk3576_eth.h"
 #include "rk3576_vop2.h"
 #include "rk3576_sdhci.h"
+#include "rk3576_rptun.h"
 #include "kickpi_k7.h"
 
 /****************************************************************************
@@ -449,6 +450,22 @@ int board_app_initialize(uintptr_t arg)
 
       rk3576_vop2_check_scanning(0);
 #endif  /* KEEP_UBOOT_DISPLAY */
+    }
+#endif
+
+#ifdef CONFIG_RK3576_RPTUN
+  /* AMP：到另一个簇上 Linux 的 rpmsg 通道。
+   *
+   * 放在这里（外设之前）是有意的：对端 Linux 起得比我们快，它建好
+   * virtqueue 就会按第一次门铃，而那一次门铃是握手的唯一信号。晚注册
+   * 一点不会丢消息 —— mailbox 的 pending 位会一直挂着直到我们清它 ——
+   * 但越早注册，握手完成得越早，后面依赖 rpmsg 的东西才不用空等。
+   */
+
+  ret = rk3576_rptun_init(CONFIG_RK3576_RPTUN_CPUNAME);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: AMP rptun 初始化失败: %d\n", ret);
     }
 #endif
 

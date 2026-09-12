@@ -12,6 +12,12 @@
     <linkfile src="app/hello_app" dest="packages/demos/contest2026_423_hello_app"/>
     <linkfile src="app/spi_selftest" dest="packages/demos/contest2026_423_spi_selftest"/>
     <linkfile src="app/cam" dest="packages/demos/contest2026_423_cam"/>
+    <linkfile src="app/v4l2cap" dest="packages/demos/contest2026_423_v4l2cap"/>
+    <linkfile src="app/hdmi" dest="packages/demos/contest2026_423_hdmi"/>
+    <linkfile src="app/bt" dest="packages/demos/contest2026_423_bt"/>
+    <linkfile src="app/mic" dest="packages/demos/contest2026_423_mic"/>
+    <linkfile src="app/kickpi_ui" dest="packages/demos/contest2026_423_kickpi_ui"/>
+    <linkfile src="app/ampctl" dest="packages/demos/contest2026_423_ampctl"/>
     <linkfile src="quickapp/hello_quickapp" dest="packages/apps/contest2026_423_hello_quickapp"/>
     <linkfile src="board/kickpi-k7" dest="vendor/openvela/boards/contest2026_423_board"/>
   </project>

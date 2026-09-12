@@ -122,6 +122,16 @@
 #define RK3576_IRQ_UART10       RK3576_IRQ_SPI(86)    /* 118 */
 #define RK3576_IRQ_UART11       RK3576_IRQ_SPI(87)    /* 119 */
 
+/* Mailbox。出处：TRM Part1 V1.2 中断表（表里列的就是 GIC INTID，不用再 +32；
+ * 与 dtsi 的 mailbox0 = GIC_SPI 125 → 157 一致，两处互为旁证）。
+ *
+ * AP = B2A 方向的收端，BB = A2B 方向的收端。AMP 里 Linux 站 AP、
+ * openvela 站 BB，所以我们挂的是 BB 那一组。
+ */
+
+#define RK3576_IRQ_MAILBOX_AP(n) (157 + (n))   /* n = 0..13 */
+#define RK3576_IRQ_MAILBOX_BB(n) (171 + (n))   /* n = 0..13 */
+
 /* GMAC。出处同上：gmac0 macirq = SPI 293、gmac1 macirq = SPI 301。 */
 
 #define RK3576_IRQ_GMAC0        RK3576_IRQ_SPI(293)   /* 325 */

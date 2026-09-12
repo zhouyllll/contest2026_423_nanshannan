@@ -392,4 +392,69 @@ config RK3576_DMA
 		目前 SAI1 的 DMA 请求号 2/3 挂在 dmac0 上；SAI 接收侧的
 		数据搬运尚未切换为 DMA。
 
+config RK3576_MAILBOX
+	bool "Mailbox 核间门铃"
+	default n
+	---help---
+		RK3576 的 14 组 mailbox（0x2AE50000）。每组是一对单向门铃，
+		只有 CMD/DATA 两个字，没有 FIFO —— 只能当"你去看一眼共享内存"
+		的提示用，真正的数据走 vring。
+
+		AMP 里 Linux 固定站 TRM 说的 "AP" 端（发 A2B、收 B2A），
+		所以 openvela 站 "BB"：发 B2A，收中断 irq_mailbox_bbN。
+
+config RK3576_RPTUN
+	bool "AMP rpmsg 通道（openvela ←→ Linux）"
+	default n
+	depends on RPTUN
+	select RK3576_MAILBOX
+	---help---
+		把 openvela 接到 Rockchip 的 rpmsg-over-mailbox 链路上，对端是
+		跑在另一个簇上的 Linux（drivers/rpmsg/rockchip_rpmsg_mbox.c）。
+
+		这条链路不走标准 remoteproc 协议：线上没有 resource table，
+		vring 地址两边写死，握手靠对端的第一次门铃。细节见
+		chip/rk3576/rk3576_rptun.c 的文件头。
+
+if RK3576_RPTUN
+
+config RK3576_RPTUN_SHM_BASE
+	hex "共享内存窗口基址"
+	default 0x47800000
+	---help---
+		4MB 的窗口：前 64KB 是两个 vring，+2MB 处是 2MB 的 rpmsg 缓冲池。
+		必须和 Linux DTS 里 rockchip-rpmsg 的 reg 与 memory-region 对上，
+		并且要落在两个 OS 都不会拿去当普通内存用的那段保留区里。
+
+config RK3576_RPTUN_LINK_ID
+	int "链路 id"
+	default 3
+	range 0 255
+	---help---
+		对应 Linux DTS 的 rockchip,link-id。高 4 位是 master 的 cpu_id、
+		低 4 位是 remote 的。只是个标签，两边填一样即可。
+
+config RK3576_RPTUN_TX_GROUP
+	int "发送用的 mailbox group"
+	default 0
+	range 0 13
+	---help---
+		对应 Linux DTS mboxes 里名为 "rpmsg-rx" 的那一个。
+
+config RK3576_RPTUN_RX_GROUP
+	int "接收用的 mailbox group"
+	default 3
+	range 0 13
+	---help---
+		对应 Linux DTS mboxes 里名为 "rpmsg-tx" 的那一个。收发必须用
+		不同的 group：一组只有一格信箱，共用会互相覆盖。
+
+config RK3576_RPTUN_CPUNAME
+	string "对端名字"
+	default "linux"
+	---help---
+		出现在 /dev/rpmsg/<名字> 里。
+
+endif # RK3576_RPTUN
+
 endmenu # Rockchip RK3576 Peripheral Selection
