@@ -118,6 +118,22 @@
 
 #define WIFI_RST_BANK       1
 #define WIFI_RST_PIN        22
+
+/* ★ 模组有**两路独立使能**，此前只拉起了 WiFi 那一路。
+ *
+ *   原理图：WIFI_REG_ON_H = GPIO1_C6，BT_REG_ON_H = GPIO1_C7，两个独立信号。
+ *   原厂 dtb 也是分开声明的：
+ *     /sdio-pwrseq      reset-gpios  = <&gpio1 22 GPIO_ACTIVE_LOW>
+ *     /wireless-bluetooth BT,reset_gpio = <&gpio1 23 GPIO_ACTIVE_HIGH>
+ *
+ *   SKW6621S 是单 die 组合芯片，WiFi 与蓝牙共用同一条 SDIO。只拉 WiFi
+ *   一路时，芯片内部的启动可能停在半路 —— 而它正是应答 CMD5 的那一方。
+ *   现象与实测吻合：RESP_ERR、无 RTO、无 RCRC，即"有东西在拉命令线，
+ *   但回的帧不合法"。
+ */
+
+#define BT_RST_BANK         1
+#define BT_RST_PIN          23
 #define WIFI_PWRON_DELAY_MS 200
 
 /* 一个控制器实例的硬件参数。
@@ -394,6 +410,9 @@ int rk3576_dwmmc_probe(uint32_t base)
   if (hw->is_sdio)
     {
       rk3576_pinmux_set(WIFI_RST_BANK, WIFI_RST_PIN, 0);   /* 功能 0 = GPIO */
+      rk3576_pinmux_set(BT_RST_BANK, BT_RST_PIN, 0);
+      rk3576_gpio_setdir(BT_RST_BANK, BT_RST_PIN, true);
+      rk3576_gpio_write(BT_RST_BANK, BT_RST_PIN, false);   /* 先拉低 */
       rk3576_gpio_setdir(WIFI_RST_BANK, WIFI_RST_PIN, true);
       rk3576_gpio_write(WIFI_RST_BANK, WIFI_RST_PIN, false);  /* 保持复位 */
       up_mdelay(20);
@@ -538,10 +557,13 @@ int rk3576_dwmmc_probe(uint32_t base)
     if (hw->is_sdio)
       {
         rk3576_gpio_write(WIFI_RST_BANK, WIFI_RST_PIN, true);
+        rk3576_gpio_write(BT_RST_BANK, BT_RST_PIN, true);
         up_mdelay(WIFI_PWRON_DELAY_MS);
         syslog(LOG_INFO,
-               "DWMMC: WiFi 模组在时钟运行下释放复位（GPIO%d_%d），等 %d ms\n",
-               WIFI_RST_BANK, WIFI_RST_PIN, WIFI_PWRON_DELAY_MS);
+               "DWMMC: 模组释放复位 WIFI_REG_ON(GPIO%d_%d)=1 "
+               "BT_REG_ON(GPIO%d_%d)=1，等 %d ms\n",
+               WIFI_RST_BANK, WIFI_RST_PIN, BT_RST_BANK, BT_RST_PIN,
+               WIFI_PWRON_DELAY_MS);
       }
 
     /* CMD0 GO_IDLE_STATE，无响应，带初始化序列 */
