@@ -1,0 +1,29 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LVX_USE_DEMO_CONTEST2026_423_KICKPI_UI
+	tristate "KICKPI-K7 板级 UI 演示"
+	default n
+	depends on LV_USE_NUTTX
+	---help---
+		把 RK3576 BSP 的显示（/dev/fb0）与触摸（/dev/input0）接到 LVGL 上，
+		屏上给出可见反馈：圆点跟随手指、坐标与触摸次数实时更新。
+
+		触摸一下即可同时确认显示与输入两条链路，比只看串口日志可靠。
+
+if LVX_USE_DEMO_CONTEST2026_423_KICKPI_UI
+
+config LVX_DEMO_CONTEST2026_423_KICKPI_UI_PRIORITY
+	int "任务优先级"
+	default 100
+
+config LVX_DEMO_CONTEST2026_423_KICKPI_UI_STACKSIZE
+	int "任务栈大小"
+	default 32768
+	---help---
+		★ arm64 的栈帧比 32 位大得多，LVGL 的渲染调用层次又深，
+		  给小了会在渲染中途踩栈，表现为随机断言而非栈溢出报错。
+
+endif # LVX_USE_DEMO_CONTEST2026_423_KICKPI_UI

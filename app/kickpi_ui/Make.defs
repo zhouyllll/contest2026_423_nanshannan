@@ -1,0 +1,7 @@
+############################################################################
+# packages/demos/contest2026_423_kickpi_ui/Make.defs
+############################################################################
+
+ifneq ($(CONFIG_LVX_USE_DEMO_CONTEST2026_423_KICKPI_UI),)
+CONFIGURED_APPS += $(APPDIR)/packages/demos/contest2026_423_kickpi_ui
+endif
