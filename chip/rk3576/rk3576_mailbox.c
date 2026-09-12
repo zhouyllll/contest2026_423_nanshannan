@@ -153,6 +153,7 @@ static int rk3576_mailbox_interrupt(int irq, void *context, void *arg)
 int rk3576_mailbox_initialize(unsigned int rx_group)
 {
   uintptr_t base = mbox_base(rx_group);
+  bool pending;
   int ret;
 
   if (base == 0)
@@ -170,12 +171,33 @@ int rk3576_mailbox_initialize(unsigned int rx_group)
   rk3576_clk_gate(RK3576_CRU_MAILBOX_GATE_CON,
                   RK3576_CRU_MAILBOX_GATE_BIT, true);
 
-  /* 先关中断再清残留：上一次启动留下的 pending 位会让 enable 的瞬间
-   * 立刻进一次中断，而那时 vring 还没建好。
+  /* 先关中断，但**不清状态**。
+   *
+   * ★ 这里原来会把 pending 位清掉，理由是"上一次启动留下的残留会让
+   *   enable 的瞬间立刻进一次中断"。在 AMP 下这个理由是错的，而且代价
+   *   是丢掉握手。
+   *
+   *   引导器（U-Boot 的 amp_wait_linux_kick()）会**等** Linux 发出第一次
+   *   门铃再启动 openvela，并且故意不清那一位 —— 目的就是把这次门铃留
+   *   给我们。这样做有两个作用：
+   *
+   *     1. 保证 Linux 已经把 GIC 的 distributor 配完（rpmsg probe 远在
+   *        GIC 初始化之后），openvela 随后认领自己的 SPI 才不会被覆盖；
+   *     2. 那一位就是"对端 DRIVER_OK"的等价信号（见 rk3576_rptun.c
+   *        文件头的「握手」一节）。
+   *
+   *   STATUS 是 W1C 且电平有效：只要不清，register_callback() 一使能中断
+   *   就会立刻进一次 ISR，握手不丢。清掉它就再也等不到第二次 —— Linux
+   *   的 first_notify 只发一次。
+   *
+   *   代价：如果真有上一次启动的残留，会多进一次 ISR。而 rptun 的回调
+   *   对重复 kick 是幂等的（只是让它把两个 vring 再扫一遍），无害。
    */
 
   mbox_putreg(RK3576_MBOX_INT_UPDATE, base, RK3576_MBOX_A2B_INTEN);
-  mbox_putreg(RK3576_MBOX_INT_MASK, base, RK3576_MBOX_A2B_STATUS);
+
+  pending = (mbox_getreg(base, RK3576_MBOX_A2B_STATUS) &
+             RK3576_MBOX_INT_MASK) != 0;
 
   ret = irq_attach(g_mbox_rx_irq, rk3576_mailbox_interrupt, NULL);
   if (ret < 0)
@@ -185,8 +207,9 @@ int rk3576_mailbox_initialize(unsigned int rx_group)
       return ret;
     }
 
-  syslog(LOG_INFO, "mailbox: group%u @%08lx, 收 IRQ %d\n",
-         rx_group, (unsigned long)base, g_mbox_rx_irq);
+  syslog(LOG_INFO, "mailbox: group%u @%08lx, 收 IRQ %d%s\n",
+         rx_group, (unsigned long)base, g_mbox_rx_irq,
+         pending ? "，已有对端门铃在等（引导器留下的）" : "");
   return OK;
 }
 

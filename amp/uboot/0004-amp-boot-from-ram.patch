@@ -1,6 +1,6 @@
-AMP 分核引导：bootamp 命令、可配置的 Linux 加载方式、正确的 FDT、跳过 cpu-swap 检查
+AMP 分核引导：bootamp、可配置的 Linux 加载、正确的 FDT、等并保留对端门铃
 
-四处改动。应用：在 u-boot/ 下 `patch -p1 < 本文件`，然后
+五处改动。应用：在 u-boot/ 下 `patch -p1 < 本文件`，然后
 `./make.sh rk3576-amp CROSS_COMPILE=<tc>`。
 
 一、bootamp <addr>：从内存里的 FIT 启动 AMP
@@ -8,53 +8,64 @@ AMP 分核引导：bootamp 命令、可配置的 Linux 加载方式、正确的 
   官方 amp_cpus_on() 写死了从名为 "amp" 的分区读 FIT，而且在
   rk_board_late_init() 里无条件执行。板上这张 GPT 是 Android 的，没有
   amp 分区，要用就得改分区表 —— 而改分区表和刷 bootloader 一样只能靠
-  maskrom 恢复，不值得为一个还在调试的引导流程押上它。
-
-  bootamp 把 FIT 的来源换成内存，分区表一个字节不动；而且它是**手动**
-  命令，默认 bootcmd 不变，AMP 试炸了下一次上电还是原来的样子。
+  maskrom 恢复。bootamp 把来源换成内存，分区表一个字节不动；而且它是
+  手动命令，默认 bootcmd 不变，试炸了下一次上电还是原来的样子。
 
 二、amp_linux_cmd：Linux 从哪加载可配置
 
   原来固定跑 boot_fit / boot_android，只能从 boot 分区的镜像加载。而
-  rkdeveloptool 这条 USB 通道写不到 32MB 以上（LBA >= 0x10000 的写静默
-  丢弃），boot 分区起点 25MB、到上限只剩 7MB，放不下完整镜像。改成可
-  配置之后，裸 Image 可以放在任意够得着的 LBA 上，mmc read 再 booti。
+  rkdeveloptool 这条 USB 通道写不到 32MB 以上，boot 分区起点 25MB、
+  到上限只剩 7MB，放不下完整镜像。改成可配置后，裸 Image 放在任意够得
+  着的 LBA 上，mmc read 再 booti。
 
   booti 走的 do_booti() 同样经过 do_bootm_states()，bootm_states_unmask
-  对它一样有效（挡掉最后的 OS_GO，准备好但不跳转），不需要另写加载逻辑。
+  对它一样有效（挡掉 OS_GO，准备好但不跳转），不需要另写加载逻辑。
 
 三、★ 传给 Linux 的 FDT：gd->fdt_blob → images.ft_addr
 
-  原来这一行是 `args->arg0 = (ulong)gd->fdt_blob;`，这是一个**隐含假设**：
-  Rockchip 的正常启动流程会把内核 dtb 读到 fdt_addr_r，并在 kernel_dtb.c
-  里把 gd->fdt_blob 重新指过去（那里的注释写着 `"fdt_addr_r" *MUST* be
-  the fdt passed to kernel`）。所以在那条路上它恰好就是内核的 dtb。
+  原来是 args->arg0 = (ulong)gd->fdt_blob，这是个隐含假设：正常启动流程
+  会把内核 dtb 读到 fdt_addr_r 并在 kernel_dtb.c 里把 gd->fdt_blob 指过去
+  （那里注释写着 `"fdt_addr_r" *MUST* be the fdt passed to kernel`）。
+  走 booti 之后假设不成立，Linux 拿到 U-Boot 自己那份控制 FDT：
 
-  换成 amp_linux_cmd 走 booti 之后假设不成立，Linux 拿到的是 U-Boot 自己
-  那份控制 FDT。后果有两个，而且都不报错：
+    - /chosen 里没有 bootargs → Linux 连 earlycon 都没有，一个字不打；
+    - 带着全部 8 个 cpu 节点 → Linux 去 PSCI 拉 A53，而 openvela 在那
+      上面跑 → 整片 SoC 复位。
 
-    - 那份 FDT 没经过 image_setup_libfdt，/chosen 里没有 bootargs ——
-      Linux 连 earlycon 都拿不到，**一个字都不打**；
-    - 它带着全部 8 个 cpu 节点 —— Linux 会去 PSCI 拉起 A53 那四个核，
-      而那正是 openvela 在跑的地方，**整片 SoC 随后复位**。
+  改用 images.ft_addr（bootm 状态机真正准备好的那一份），假设消失，
+  boot_fit / boot_android / booti 三条路都对。
 
-  改用 images.ft_addr（bootm 状态机真正准备好的那一份，经过
-  BOOTM_STATE_FINDOTHER 定位、BOOTM_STATE_FDT 重定位与 fixup），假设就
-  消失了 —— boot_fit / boot_android / booti 三条路都对。
+四、★ 等对端的第一次门铃，并且**先使能接收**
 
-  上板验证：改完之后 Linux 打出
-    Booting Linux on physical CPU 0x0000000100 [0x411fd080]
-    Machine model: KICKPI-K7 AMP debug (Linux on A72, owns UART0)
-    CPU1/2/3: Booted secondary processor 0x101/0x102/0x103
-    SMP: Total of 4 processors activated.
-  只拉 A72 四个核，完全没碰 A53。
+  AMP 下 GIC 的 distributor 归 Linux。Linux 配完 GIC 才能保证 openvela
+  认领的中断不被覆盖，而"Linux 配完 GIC"有一个现成信号 —— 它的 rpmsg
+  驱动 probe 时发出的第一次 mailbox 门铃（rpmsg 是 platform driver，
+  远在 GIC 初始化之后）。
 
-四、AMP 加载 Linux 时跳过 sanity_cpu_swap()
+  关键是**先把 A2B 的接收使能位打开再等**。第一版只轮询 STATUS，超时；
+  加上寄存器 dump 才看清：
+
+    A2B INTEN=0x00000100 STATUS=0x00000000
+    CMD=0x00000003 DATA=0x524d5347      ← "RMSG"，Linux 确实按了门铃
+
+  CMD/DATA 都在，STATUS 却是 0。INTEN=0x100 说明 bit8（触发模式）是复位
+  值而 bit0（中断使能）是 0 —— TRM 17.3 写的是中断 "Enabled when
+  MAILBOX_A2B_INTEN is set to 1"，**使能位关着时状态位不锁存**。
+
+  所以引导器要替对侧把使能打开，等到门铃，然后**原样留着那一位**不清。
+  openvela 起来后关闭再重新使能（关闭不清 STATUS），一使能就立刻进 ISR。
+
+  超时不致命：继续启动 openvela，让它自己报"没收到门铃"。把板子丢进
+  下载模式反而更难查 —— 那样连 openvela 的日志都没有。
+
+五、AMP 加载 Linux 时跳过 sanity_cpu_swap()
 
   那个检查比对 dtb 第一个 cpu 节点的 reg 和当前 MPIDR。AMP 下这两者
-  **故意**不同（U-Boot 在 MPIDR 0，Linux 的 dtb 只有 0x100..0x103）。
-  它的失败动作是 run_command("download")，会把板子直接丢进 rockusb。
-  只在 AMP 加载 Linux 那一刻跳过，其余路径行为不变。
+  故意不同（U-Boot 在 MPIDR 0，Linux 的 dtb 只有 0x100..0x103）。它的
+  失败动作是 run_command("download")，会把板子直接丢进 rockusb。
+
+同届 contest2026_062_PharosTech 公开的方案里记录过第四条的同一个现象
+（"cmd/data 已写而 status 为 0"）。
 
 --- a/drivers/cpu/rockchip_amp.c
 +++ b/drivers/cpu/rockchip_amp.c
@@ -171,7 +182,188 @@ AMP 分核引导：bootamp 命令、可配置的 Linux 加载方式、正确的 
  	}
  
  	/* don't need call cleanup_before_linux() as this nonboot cpu is clean */
-@@ -437,6 +506,54 @@
+@@ -359,6 +428,138 @@
+ 	return 0;
+ }
+ 
++/*
++ * ★ 为什么启动器必须等 Linux 的第一次门铃，才能进 openvela
++ *
++ *   AMP 下 GIC 的 distributor 归 Linux。Linux 的 gic_dist_init() 会把
++ *   **所有** SPI 的 ITARGETSR 重写成它自己那颗核 —— 它不知道有一部分
++ *   中断属于另一个 OS。
++ *
++ *   openvela 那边已经做了对策：在 up_enable_irq() 里按字节把自己的 SPI
++ *   认领回本核（见 bsp/upstream/gicv2-shared-distributor.patch）。但这
++ *   只解决了"谁写最后一笔"，没解决**顺序**：
++ *
++ *     t+0.0s  U-Boot PSCI 拉起 Linux，随即跳进 openvela
++ *     t+0.1s  openvela 注册控制台、定时器 —— 认领了 IRQ 108、77
++ *     t+0.3s  Linux 的 gic_dist_init() 把所有 SPI 抢回去
++ *             ← openvela 早期认领的那些全被覆盖
++ *     t+60s   openvela 走完初始化，打 NuttShell 横幅时卡住
++ *             （控制台的 TX 中断已经送不到本核）
++ *
++ *   实测就是这个形态：openvela 全部外设初始化都过了（那些日志在 FIFO
++ *   里靠轮询挤出来），最后只打出横幅的第一个字母 "N" 就停住。
++ *
++ *   解法是把顺序倒过来：**等 Linux 把 GIC 配完再启动 openvela**。
++ *   而"Linux 配完了 GIC"这件事有一个现成的、可靠的信号 —— 它的 rpmsg
++ *   驱动 probe 时发出的第一次 mailbox 门铃。那一步在 GIC 初始化之后很
++ *   久（rpmsg 是 platform driver），收到它就意味着 GIC 早就配完了。
++ *
++ *   ★ 关键：**不能清掉那次门铃**。
++ *
++ *   mailbox 的 STATUS 是 W1C 且电平有效。只要不清，openvela 那边一旦
++ *   使能中断就会立刻进一次 ISR —— 握手不丢。所以这里只读不写。
++ *
++ * 出处：RK3576 TRM Part1 第 17 章（mailbox）；同届
++ * contest2026_062_PharosTech 的 tools/amp/BOARD_VALIDATION.md 记录了
++ * 同一个结论（"启动器预使能接收，保留首个 kick 给 openvela"）。
++ */
++
++#define AMP_MBOX_BASE		0x2ae50000
++#define AMP_MBOX_STRIDE		0x1000
++#define AMP_MBOX_A2B_INTEN	0x00
++#define AMP_MBOX_A2B_STATUS	0x04
++#define AMP_MBOX_A2B_CMD	0x08
++#define AMP_MBOX_A2B_DATA	0x0c
++#define AMP_MBOX_INT_MASK	BIT(0)
++
++/* pclk_mailbox0：CRU_GATE_CON17 bit13，高 16 位写使能，1 = 关 */
++#define AMP_CRU_BASE		0x27200000
++#define AMP_CRU_GATE_CON17	0x844
++#define AMP_CRU_MBOX_GATE_BIT	13
++
++static void amp_wait_linux_kick(void)
++{
++	u32 group = env_get_ulong("amp_kick_group", 10, 3);
++	u32 tmo_ms = env_get_ulong("amp_kick_timeout", 10, 3000);
++	void *base = (void *)(ulong)(AMP_MBOX_BASE + group * AMP_MBOX_STRIDE);
++	u32 i;
++
++	if (tmo_ms == 0) {
++		AMP_I("not waiting for peer kick (amp_kick_timeout=0)\n");
++		return;
++	}
++
++	/* 对端可能比 Linux 的时钟驱动先用到 mailbox，自己把 pclk 打开 */
++	writel(BIT(AMP_CRU_MBOX_GATE_BIT + 16),
++	       (void *)(ulong)(AMP_CRU_BASE + AMP_CRU_GATE_CON17));
++
++	/*
++	 * ★ 必须先把接收使能位打开，STATUS 才会锁存。
++	 *
++	 *   这一条是被寄存器 dump 打出来的。第一版只轮询 STATUS，结果超时，
++	 *   而 dump 显示：
++	 *
++	 *     A2B INTEN=0x00000100 STATUS=0x00000000
++	 *     CMD=0x00000003 DATA=0x524d5347     ← "RMSG"，Linux 确实按了门铃
++	 *
++	 *   CMD/DATA 都写进来了，STATUS 却是 0。INTEN=0x100 的含义是：bit8
++	 *   （触发模式）是复位值，而 **bit0（中断使能）是 0**。TRM 17.3 写的是
++	 *   中断 "Enabled when MAILBOX_A2B_INTEN is set to 1" —— 使能位关着
++	 *   的时候状态位根本不锁存。
++	 *
++	 *   所以引导器要做的不只是"等"，而是**先替对侧把接收使能打开**，
++	 *   再等，然后把锁存下来的那一位原样留给 openvela。
++	 *
++	 *   这样做安全：U-Boot 不用中断跑这段（纯轮询），而且
++	 *   setup_sync_bits_for_linux() 已经把 GICD 关掉了，IRQ 174 到不了
++	 *   CPU0。openvela 起来后会先把使能位关掉再重新打开（它自己的
++	 *   initialize / register_callback），而关闭使能**不清 STATUS**，
++	 *   所以那一位一直留着。
++	 *
++	 *   同一个现象与结论在同届 contest2026_062_PharosTech 的
++	 *   BOARD_VALIDATION.md 里有记录（"cmd/data 已写而 status 为 0"）。
++	 *   我此前读过那句但没读懂它在说什么 —— 寄存器摆出来才明白。
++	 */
++	writel(BIT(0 + 16) | BIT(0) | BIT(8 + 16) | BIT(8),
++	       base + AMP_MBOX_A2B_INTEN);
++
++	AMP_I("waiting for peer kick on mailbox%d (max %dms, INTEN=0x%08x) ...",
++	      group, tmo_ms, readl(base + AMP_MBOX_A2B_INTEN));
++
++	for (i = 0; i < tmo_ms; i++) {
++		if (readl(base + AMP_MBOX_A2B_STATUS) & AMP_MBOX_INT_MASK) {
++			printf("OK, cmd=0x%08x data=0x%08x (kept pending)\n",
++			       readl(base + AMP_MBOX_A2B_CMD),
++			       readl(base + AMP_MBOX_A2B_DATA));
++			return;
++		}
++		mdelay(1);
++	}
++
++	/*
++	 * 超时不是致命的：继续启动 openvela，让它自己去查为什么没有对端。
++	 * 把板子丢进下载模式反而更难排查 —— 那样连 openvela 的日志都没有。
++	 */
++	/*
++	 * 超时时把这一组的寄存器全打出来。没有这几行的话"没等到"是一条
++	 * 信息量为零的结论 —— 分不清是对端没发、还是我们读错了地方、
++	 * 还是 pclk 没开（pclk 关着时读回来全 0，和"没发"一模一样）。
++	 *
++	 * INTEN 的复位值是 0x00000100（bit8 = 触发模式），所以读到 0x100
++	 * 说明寄存器是活的；读到 0 说明 pclk 没开或地址不对。
++	 */
++	printf("TIMEOUT\n");
++	AMP_E("no kick from peer on mailbox%d @%p\n", group, base);
++	AMP_E("  A2B INTEN=0x%08x STATUS=0x%08x CMD=0x%08x DATA=0x%08x\n",
++	      readl(base + AMP_MBOX_A2B_INTEN),
++	      readl(base + AMP_MBOX_A2B_STATUS),
++	      readl(base + AMP_MBOX_A2B_CMD),
++	      readl(base + AMP_MBOX_A2B_DATA));
++	AMP_E("  CRU GATE_CON17=0x%08x (bit13=1 表示 pclk_mailbox0 被关着)\n",
++	      readl((void *)(ulong)(AMP_CRU_BASE + AMP_CRU_GATE_CON17)));
++	AMP_E("booting anyway, check peer side\n");
++}
++
+ static int brought_up_all_amp(void *fit, const char *fit_uname_cfg)
+ {
+ 	int loadables_index;
+@@ -383,6 +584,8 @@
+ 		ret = brought_up_amp(fit, linux_noffset, &g_bootcpu, 1);
+ 		if (ret)
+ 			return ret;
++		AMP_I("linux handed off, back on cpu[%x]\n",
++		      (u32)read_mpidr() & 0x0fff);
+ 	}
+ 
+ 	for (loadables_index = 0;
+@@ -416,7 +619,32 @@
+ 		}
+ 	}
+ 
++	AMP_I("loadables done, bootcpu entry 0x%08x boot_on %d\n",
++	      g_bootcpu.entry, g_bootcpu.boot_on);
++
++	/*
++	 * 到这里 Linux 已经被 PSCI 拉起来了，而 openvela 还没进。这正是
++	 * 等它把 GIC 配完的时机 —— 见 amp_wait_linux_kick() 的说明。
++	 */
++	if (linux_noffset > 0 && !g_bootcpu.linux_os && g_bootcpu.entry)
++		amp_wait_linux_kick();
++
+ 	if (!g_bootcpu.linux_os && g_bootcpu.entry) {
++		/*
++		 * ★ 这之后 CPU0 必须尽快跳走。
++		 *
++		 *   Linux 已经在另一个簇上跑起来了，而它的 /memory 覆盖了
++		 *   U-Boot 重定位后所在的那一段高位内存（U-Boot 在
++		 *   0x40200000 + reloc_off，本板约 0xfdc1b000）。Linux 的页
++		 *   分配器一旦开始工作，就可能把 U-Boot 正在执行的代码或它的
++		 *   栈分配出去 —— 表现是 CPU0 在任意一行上静默死掉，而 Linux
++		 *   一切正常。
++		 *
++		 *   正解是在 Linux 的 DTB 里把这一段 reserved-memory 掉（见
++		 *   amp/linux/rk3576-kickpi-k7-amp.dts 的 uboot_reserved），
++		 *   这里的打点只是为了让"到底死在哪一行"可观测。
++		 */
++		AMP_I("flushing dcache before jump\n");
+ 		flush_dcache_all();
+ 		AMP_I("Brought up primary cpu[%x, self] with state 0x%x, entry 0x%08x ...",
+ 		      (u32)read_mpidr() & 0x0fff, g_bootcpu.state, g_bootcpu.entry);
+@@ -437,6 +665,54 @@
  	return 0;
  }
  

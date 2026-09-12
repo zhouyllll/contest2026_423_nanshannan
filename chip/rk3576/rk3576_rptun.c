@@ -341,15 +341,36 @@ static void rk3576_rptun_setup_rsc(const char *cpuname)
   rsc->rpmsg_vdev.type       = RSC_VDEV;
   rsc->rpmsg_vdev.id         = VIRTIO_ID_RPMSG;
 
-  /* Linux 的 rk_rpmsg_get_features() 只返回 VIRTIO_RPMSG_F_NS。多宣告
-   * 一位（ACK / BUFSZ / CPUNAME 都是 openvela 的私有扩展）会让我们发出
-   * 对端解析不了的报文，所以这里只能是 NS。
+  /* ★ 这里要区分两类 feature，我一开始搞混了。
    *
-   * CPUNAME 那两个名字仍然填，它们只被本地的 /dev/rpmsg/<name> 用到，
-   * 不上线。
+   *   Linux 的 rk_rpmsg_get_features() 只返回 VIRTIO_RPMSG_F_NS。所以
+   *   **会改变线上行为**的扩展一位都不能宣告 —— ACK（要求对端回确认）、
+   *   BUFSZ（从 config 协商缓冲大小）都属于这一类，宣告了就会发出
+   *   Linux 解析不了的报文。
+   *
+   *   但 **CPUNAME 不属于这一类**。它唯一的作用是让 rpmsg_virtio 去读
+   *   本地 resource table 的 config 段里那两个名字（host_cpuname /
+   *   remote_cpuname），**不产生任何线上报文**。而这张表从头到尾只有
+   *   我们自己读 —— Linux 那套 rpmsg-over-mailbox 线上根本没有
+   *   resource table。
+   *
+   *   我最初只宣告了 NS，理由是"多宣告一位会让对端解析不了"。那条规则
+   *   本身对，但套用到 CPUNAME 上是错的。代价是上板直接断言：
+   *
+   *     Assertion failed : at file: rpmsg/rpmsg_virtio.c:835
+   *
+   *   那一行是 DEBUGASSERT(virtio_has_feature(vdev, VIRTIO_RPMSG_F_CPUNAME))
+   *   —— openvela 的 rpmsg_virtio **要求**这一位存在，否则它拿不到
+   *   cpu 名字。
+   *
+   *   同一个断言在同届 contest2026_062_PharosTech 的板测记录里也出现过
+   *   （"openvela 本地资源表缺 CPUNAME 配置，触发 rpmsg_virtio.c:835
+   *   断言"）。我读过那句，但当时没理解它和"只宣告 NS"是同一件事的
+   *   两面。
    */
 
-  rsc->rpmsg_vdev.dfeatures  = 1u << VIRTIO_RPMSG_F_NS;
+  rsc->rpmsg_vdev.dfeatures  = (1u << VIRTIO_RPMSG_F_NS) |
+                               (1u << VIRTIO_RPMSG_F_CPUNAME);
   rsc->rpmsg_vdev.config_len = sizeof(rsc->config);
   rsc->rpmsg_vdev.num_of_vrings = 2;
   rsc->rpmsg_vdev.notifyid   = RSC_NOTIFY_ID_ANY;

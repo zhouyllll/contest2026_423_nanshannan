@@ -14,6 +14,10 @@
 #include "rk3576.dtsi"
 #include "rk3576-kickpi-k7.dtsi"
 #include "rk3576-linux.dtsi"
+#include <dt-bindings/soc/rockchip-amp.h>
+
+/* MPIDR 的两段：低 8 位是簇内核号，高 8 位是簇号 */
+#define AMP_AFF(core, cluster)	(((core) << 0) | ((cluster) << 8))
 
 / {
 	model = "KICKPI-K7 AMP (Linux on A72 cluster)";
@@ -96,6 +100,105 @@
 			reg = <0x0 0x4a400000 0x0 0x04000000>;
 			no-map;
 		};
+
+		/*
+		 * ★ U-Boot 自己占的那一段，也必须保留。
+		 *
+		 *   AMP 里 U-Boot 在 PSCI 拉起 Linux **之后**还要继续跑几毫秒：
+		 *   处理 loadables、flush_dcache_all、最后才 armv8_switch_to_el2
+		 *   跳进 openvela。而它重定位后位于高位内存（本板
+		 *   0x40200000 + reloc_off ≈ 0xfdc1b000，栈和 malloc 在其下方）。
+		 *
+		 *   Linux 的 /memory 覆盖这一段。它的页分配器一旦工作，就可能把
+		 *   U-Boot 正在执行的代码或它的栈分配出去 —— 表现是 **CPU0 在
+		 *   任意一行上静默死掉，而 Linux 一切正常**，看起来像"openvela
+		 *   没被启动"。
+		 *
+		 *   这一条上板踩过：Linux 拿错 FDT 秒死的那几轮，CPU0 反而能顺利
+		 *   跳进 openvela；等 Linux 真的跑起来，CPU0 就再也走不到那一步。
+		 *   两个现象合在一起才指向这里。
+		 *
+		 *   ★ 范围不能按 relocaddr 往上算 —— 第一次就是这么错的。
+		 *
+		 *   日志里 `Relocation Offset: bda1b000` + TEXT_BASE 0x40200000
+		 *   = 0xfdc1b000，看起来从 0xfd000000 留 48MB 就够了。实际不够：
+		 *   relocaddr **下面**还有 FDT 拷贝、CONFIG_SYS_MALLOC_LEN 那个
+		 *   几十 MB 的 malloc 池、bd_info，然后才是向下生长的栈。
+		 *
+		 *   现场证据：U-Boot 崩在 `esr 0x86000006`（取指异常）、
+		 *   `ELR(PC) = 0`、`SP = 0xfb9f9b40` —— 栈在 0xfb9f9xxx，在
+		 *   0xfd000000 **外面**，被 Linux 分配掉之后返回地址变成 0，
+		 *   于是跳到 0。
+		 *
+		 *   所以从 0xf0000000 起留 256MB，把 relocaddr、malloc 池、栈、
+		 *   sysmem 全包进去。板上 4GB DDR，Linux 少 256MB 毫无影响 ——
+		 *   它在这套方案里只是计算域。
+		 */
+
+		uboot_reserved: uboot@f0000000 {
+			reg = <0x0 0xf0000000 0x0 0x10000000>;
+			no-map;
+		};
+	};
+
+	/*
+	 * ★ Rockchip 自带的 Linux 侧 AMP 支持。这一节是整份 DTS 里最关键的。
+	 *
+	 *   配上 CONFIG_ROCKCHIP_AMP=y 之后，Linux 的 gic_dist_init() 会读
+	 *   下面这张 amp-irqs 表，把表里的 IRQ 路由到**另一个 OS 的核**，
+	 *   而不是像默认那样全部指向自己（drivers/irqchip/irq-gic.c:525）：
+	 *
+	 *     for (j = 0; j < 4; j++) {
+	 *             if (rockchip_amp_need_init_amp_irq(i + j))
+	 *                     maskval |= rockchip_amp_get_irq_cpumask(i + j) << (j * 8);
+	 *             else
+	 *                     maskval |= cpumask << (j * 8);
+	 *     }
+	 *
+	 *   没有这一节的后果（实测）：Linux 在 ~0.3s 把所有 SPI 抢回自己
+	 *   那颗核，openvela 早期注册的控制台和定时器中断从此送不到本核；
+	 *   它的外设日志还能靠 FIFO 轮询挤出来，但打 NuttShell 横幅要走
+	 *   TX 中断，于是**只打出一个字母 "N" 就停住**。
+	 *
+	 *   这比在 openvela 侧按字节把 SPI 抢回来干净得多，而且**顺序竞争
+	 *   整个消失** —— 不需要让引导器等对端的第一次门铃再启动 openvela。
+	 *   （openvela 侧那个按字节认领的补丁保留着当兜底，防漏填。）
+	 *
+	 * ★ clocks = <&cru PCLK_MAILBOX0>
+	 *
+	 *   让 Linux 认为这个时钟**有人用**，clk_disable_unused() 就不会关它。
+	 *   这是声明式的，比在 bootargs 里加 clk_ignore_unused 那个大锤精确。
+	 *
+	 * ★ amp-cpu-aff-maskbits：MPIDR → GIC 的 CPU 接口位
+	 *
+	 *   A53 簇是 GIC 接口 0..3，A72 簇是 4..7。这个对应关系没有任何
+	 *   规范保证，必须显式声明（openvela 侧是从 IRQ 0..31 的 ITARGETSR
+	 *   读出来的，两处应当一致）。
+	 *
+	 * 这一节的做法来自同届 contest2026_062_PharosTech 公开的方案；
+	 * 机制本身是 Rockchip 自带的，我此前完全漏了，在 openvela 侧重新
+	 * 发明了一遍。
+	 */
+
+	rockchip_amp: rockchip-amp {
+		compatible = "rockchip,amp";
+		clocks = <&cru PCLK_MAILBOX0>;
+
+		amp-cpu-aff-maskbits = /bits/ 64 <
+			0x000 0x01 0x001 0x02 0x002 0x04 0x003 0x08
+			0x100 0x10 0x101 0x20 0x102 0x40 0x103 0x80>;
+
+		/* openvela 拥有的中断，全部路由到 A53 簇 core0。
+		 * 108 = UART0（调试口）      174 = mailbox3 BB（rpmsg 收）
+		 *  77 = bustimer0 CH0（闹钟）  64 = dmac0（PL330）
+		 */
+		amp-irqs = /bits/ 64 <
+			GIC_AMP_IRQ_CFG_ROUTE(108, 0x80, AMP_AFF(0, 0))
+			GIC_AMP_IRQ_CFG_ROUTE(174, 0x80, AMP_AFF(0, 0))
+			GIC_AMP_IRQ_CFG_ROUTE(77,  0x80, AMP_AFF(0, 0))
+			GIC_AMP_IRQ_CFG_ROUTE(64,  0x80, AMP_AFF(0, 0))>;
+
+		status = "okay";
 	};
 
 	/*
@@ -174,10 +277,78 @@
  */
 
 &chosen {
-	bootargs = "panic=0";
+	/*
+	 * ★ clk_ignore_unused / pd_ignore_unused 在 AMP 下是**必需**的，
+	 *   不是优化。
+	 *
+	 *   Linux 在 late_initcall 会跑 clk_disable_unused() 和电源域的
+	 *   同一套逻辑：把**没有 Linux 消费者**的时钟和电源域全部关掉。
+	 *   而 openvela 用的 UART0、SAI、VOP2、I2C、GMAC、CIF……在 Linux
+	 *   眼里全都"没人用"（它们的节点要么被删了、要么 disabled）。
+	 *
+	 *   于是 Linux 会把 openvela 脚下的时钟一个个抽掉。表现是
+	 *   **openvela 在初始化中途任意一行静默停住**（本次是 SAI 之后），
+	 *   而 Linux 一切正常 —— 看起来像 openvela 自己的 bug。
+	 *
+	 *   判据很硬：同一份 openvela、同一个配置，FIT 里不带 Linux 时
+	 *   一路跑到 NSH 并稳住；带上 Linux 就死在半路。
+	 *
+	 *   panic=0：Linux 没有 rootfs，挂根必然 panic。panic=0 让它停住而
+	 *   不是重启 —— 重启走 PSCI SYSTEM_RESET，会把整片 SoC 连 openvela
+	 *   一起复位。一侧的"正常错误处理"就是另一侧的灾难。
+	 */
+	/*
+	 * clk_ignore_unused / pd_ignore_unused 现在是**兜底**，不是主手段 ——
+	 * 主手段是上面 rockchip-amp 节点里声明 openvela 用到的资源。
+	 * 留着它们的理由：那张声明表难免漏，而漏掉一项的代价是 openvela
+	 * 在某一行静默死掉，排查成本远高于多留几个时钟。
+	 */
+	bootargs = "panic=0 clk_ignore_unused pd_ignore_unused";
 };
 
 &uart0 {
+	status = "disabled";
+};
+
+/*
+ * ★ 稳压器必须钉住。
+ *
+ *   vdd_cpu_lit_s0 是 **A53 簇的供电**，vdd_logic_s0 是逻辑域的供电。
+ *   Linux 的 regulator 框架会在初始化末尾把"没有消费者"的稳压器关掉 ——
+ *   而在 AMP 下 A53 簇的消费者（那四个 cpu 节点）已经被我们删掉了，
+ *   于是在 Linux 眼里它没人用。
+ *
+ *   后果不是报错。实测是 openvela 访问某个外设时拿到
+ *   **synchronous external abort**（ESR 0x96000010，FAR 0x27d80000 = DSI）
+ *   —— 总线拒绝，因为那一侧的供电被降了。看起来像"那个驱动有问题"。
+ *
+ *   regulator-state-mem 也要删：那是休眠时的目标电压，AMP 下不该有人
+ *   替另一个 OS 决定休眠电压。
+ */
+
+&vdd_cpu_lit_s0 {
+	/delete-property/ regulator-init-microvolt;
+	regulator-always-on;
+	regulator-boot-on;
+	/delete-node/ regulator-state-mem;
+};
+
+&vdd_logic_s0 {
+	/delete-property/ regulator-init-microvolt;
+	regulator-always-on;
+	regulator-boot-on;
+	/delete-node/ regulator-state-mem;
+};
+
+/*
+ * ★ DDR 变频必须关。
+ *
+ *   dmc 的 devfreq 会在运行时改 DDR 频率。openvela 的时序参数（串口
+ *   分频、SAI 的 MCLK、定时器）都建立在当前频率上，另一个 OS 在它脚下
+ *   改 DDR 频率是灾难性的，而且没有任何通知机制。
+ */
+
+&dmc {
 	status = "disabled";
 };
 

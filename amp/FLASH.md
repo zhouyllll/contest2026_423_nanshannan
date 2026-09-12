@@ -121,43 +121,64 @@ panic=0 让它停住而不是重启 —— **重启走 PSCI SYSTEM_RESET，会�
 要看 Linux 日志时用 `linux/rk3576-kickpi-k7-amp-dbg.dts`，它把 UART0 让给
 Linux，但**只能在不启 openvela 的隔离实验里用**。
 
-## 已经跑到哪一步（2026-09-12）
+## ★ 第四个坑：使能位关着时，mailbox 的状态位不锁存
 
-**分核在两个方向上都验证过了。**
-
-openvela 单跑（FIT 里不带 Linux）——一路到 NSH，稳住不挂，`ampctl status`
-正常输出（"握手完成：否"，因为没有对端，正确）：
+引导器要等对端的第一次门铃（理由见 `../amp/OWNERSHIP.md` 的 GIC 一节）。
+第一版只轮询 `A2B_STATUS`，超时。加上寄存器 dump 才看清：
 
 ```
-AMP: Brought up primary cpu[0, self] with state 0x12, entry 0x4a400000 ...OK
-[CPU0] AMP: rptun 就绪 对端=linux vring0=47800000 vring1=47808000 ...
-nsh> ampctl status
+AMP Error: no kick from peer on mailbox3 @0x2ae53000
+AMP Error:   A2B INTEN=0x00000100 STATUS=0x00000000
+             CMD=0x00000003 DATA=0x524d5347      ← "RMSG"，门铃确实按了
 ```
 
-只启 Linux（UART0 让给它）——起在 A72 簇，只拉 A72 四个核：
+`CMD`/`DATA` 都在，`STATUS` 是 0。`INTEN=0x100` 的含义是 bit8（触发模式）
+是复位值，而 **bit0（中断使能）是 0** —— TRM 17.3 写的是中断 "Enabled
+when MAILBOX_A2B_INTEN is set to 1"，**使能位关着时状态位根本不锁存**。
+
+所以引导器要做的不只是"等"，而是**先替对侧把接收使能打开**，等到门铃，
+然后原样留着那一位不清（openvela 关闭再重新使能时不会清 STATUS）。
+
+**这个坑的教训不是 mailbox 的细节，是"没等到"本身信息量为零。** 超时
+消息里必须带上寄存器值，否则分不清三件事：对端没发、我们读错了地方、
+还是 pclk 没开（pclk 关着时读回来全 0，和"没发"长得一模一样）。
+
+## 运行：已验证的完整命令序列（2026-09-13 跑通）
+
+烧好四样之后（见上面的布局表），串口 **1500000**，一直敲 Ctrl-C 打断
+autoboot，然后：
+
+```
+=> mmc dev 0
+=> mmc read 0x40400000 0xC000 0x39A5    # Linux Image ← LBA 49152
+=> mmc read 0x4f000000 0x3200 0x213     # Linux DTB   ← LBA 12800
+=> mmc read 0x60000000 0x2000 0x1089    # amp.itb     ← LBA 8192
+=> setenv amp_kick_timeout 8000
+=> setenv amp_linux_cmd 'booti 0x40400000 - 0x4f000000'
+=> bootamp 0x60000000
+```
+
+★ `mmc read` 的扇区数每次重新打包都会变，**必须按当前文件大小重算**
+（`(size + 511) / 512`）。少读几个扇区的表现是 FIT 的 `Bad Data Hash`，
+不是"少了一点数据"。
+
+成功的输出：
 
 ```
 AMP: linux fdt at 0x4f000000
-[   18.818583] Booting Linux on physical CPU 0x0000000100 [0x411fd080]
-Machine model: KICKPI-K7 AMP debug (Linux on A72, owns UART0)
-[   19.043478] CPU1: Booted secondary processor 0x0000000101
-[   19.044502] CPU2: Booted secondary processor 0x0000000102
-[   19.045474] CPU3: Booted secondary processor 0x0000000103
-[   19.050400] SMP: Total of 4 processors activated.
+AMP: Brought up cpu[100] with state 0x12, entry 0x40400000 ...OK
+AMP: waiting for peer kick on mailbox3 (max 8000ms, INTEN=0x00000101) ...
+     OK, cmd=0x00000003 data=0x524d5347 (kept pending)
+AMP: loadables done, bootcpu entry 0x4a400000 boot_on 1
+AMP: Brought up primary cpu[0, self] with state 0x12, entry 0x4a400000 ...OK
+[CPU0] mailbox: group3 @2ae53000, 收 IRQ 174，已有对端门铃在等（引导器留下的）
+...
+NuttShell (NSH)
+nsh> ampctl status
+  握手完成  : 是
+  收到门铃  : 1
+  /dev/rpmsg/linux 存在
 ```
-
-双 OS——Linux 侧的 rpmsg 已经上线，vring 地址和 openvela 逐字对上：
-
-```
-rockchip-rpmsg 47800000.rpmsg: rockchip rpmsg platform probe.
-rockchip-rpmsg 47800000.rpmsg: assigned reserved memory node rpmsg-dma@47a00000
-rockchip-rpmsg 47800000.rpmsg: rpdev vdev0: vring0 0x47800000, vring1 0x47808000
-virtio_rpmsg_bus virtio0: rpmsg host is online
-```
-
-剩下的是 openvela 侧确认收到了对端的第一次门铃（`ampctl status` 的
-"握手完成"变成"是"）。上一轮没看到，是因为 earlycon 抢了 UART0（见上），
-已修。
 
 ## 卡住之后怎么恢复
 

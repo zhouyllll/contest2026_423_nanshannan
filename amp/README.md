@@ -126,30 +126,70 @@ nsh> ampctl status
 那个门铃只有在 Linux 跑到 `rockchip_rpmsg` 的 probe、建好两个 virtqueue、
 填好接收缓冲之后才会发出来 —— 是一个相当靠后、相当可信的存活判据。
 
-## 状态
+## 状态：✅ 跑通（2026-09-13）
+
+**openvela 在 A53 簇、Linux 在 A72 簇，同时运行，rpmsg 传输已建立。**
+
+openvela 侧（`nsh>` 提示符下）：
+
+```
+nsh> ampctl status
+== rptun ==
+  已注册    : 是
+  握手完成  : 是
+  收到门铃  : 1
+  最后收到  : cmd=00000003 data=524d5347
+== 共享内存 ==
+  vring0(发) : 47800000   vring1(收) : 47808000   缓冲池 : 47a00000 + 2048K
+== rpmsg 设备 ==
+  /dev/rpmsg/linux 存在
+
+nsh> ls /dev/rpmsg
+/dev/rpmsg:
+ linux
+
+nsh> ps
+  PID  PRI POLICY  TYPE     STATE     COMMAND
+    0    0 FIFO    Kthread  Assigned  CPU0 IDLE
+    1    0 FIFO    Kthread  Running   CPU1 IDLE
+    2    0 FIFO    Kthread  Running   CPU2 IDLE
+    3    0 FIFO    Kthread  Running   CPU3 IDLE      ← 四个 A53
+    9  224 RR      Kthread  Waiting   rpmsg-linux-0  ← rpmsg 工作线程
+```
+
+引导器侧：
+
+```
+AMP: linux fdt at 0x4f000000
+AMP: Brought up cpu[100] with state 0x12, entry 0x40400000 ...OK
+AMP: waiting for peer kick on mailbox3 (max 8000ms, INTEN=0x00000101) ...
+     OK, cmd=0x00000003 data=0x524d5347 (kept pending)
+AMP: loadables done, bootcpu entry 0x4a400000 boot_on 1
+AMP: Brought up primary cpu[0, self] with state 0x12, entry 0x4a400000 ...OK
+[CPU0] mailbox: group3 @2ae53000, 收 IRQ 174，已有对端门铃在等（引导器留下的）
+```
+
+Linux 侧（隔离实验时把 UART0 让给它抓到的）：
+
+```
+[   18.818583] Booting Linux on physical CPU 0x0000000100 [0x411fd080]
+[   19.043478] CPU1: Booted secondary processor 0x0000000101
+[   19.044502] CPU2: Booted secondary processor 0x0000000102
+[   19.045474] CPU3: Booted secondary processor 0x0000000103
+[   19.050400] SMP: Total of 4 processors activated.        ← 只拉 A72，没碰 A53
+rockchip-rpmsg 47800000.rpmsg: rpdev vdev0: vring0 0x47800000, vring1 0x47808000
+virtio_rpmsg_bus virtio0: rpmsg host is online
+```
 
 | 步骤 | 状态 |
 |---|---|
-| 带 `bootamp` 的 U-Boot | ✅ 上板，`help bootamp` 有输出 |
-| Linux 内核 + 只含 A72 的 DTB | ✅ 7.6MB（原 43MB），DTB 里只有 4 个 A72 cpu 节点 |
+| 带 `bootamp` 的 U-Boot | ✅ |
+| Linux 内核 + 只含 A72 的 DTB | ✅ 7.6MB（原 43MB） |
 | openvela @ 0x4a400000 | ✅ |
-| AMP FIT | ✅ |
-| **U-Boot 把两个簇分给两个 OS** | ✅ **上板验证**（见下） |
-| openvela 在 A53 簇跑起来 | 🔶 卡在早期初始化，修掉一处、还在查 |
-| rpmsg 握手（端到端） | ⬜ 等 openvela 起来 |
+| U-Boot 把两个簇分给两个 OS | ✅ |
+| openvela 在 Linux 旁边活到 NSH | ✅ |
+| **rpmsg 握手 + /dev/rpmsg/linux** | ✅ |
+| 端到端收发一帧（需要 Linux 侧用户态） | ⬜ 下一步 |
 
-2026-09-12 上板日志：
-
-```
-AMP: Brought up cpu[100] with state 0x12, entry 0x40400000 ...OK
-I/TC: Secondary CPU 4 switching to normal world boot
-AMP: Brought up primary cpu[0, self] with state 0x12, entry 0x4a400000 ...OK
-- Ready to Boot Primary CPU / Boot from EL2 / Boot from EL1
-- Boot to C runtime for OS Initialize
-```
-
-Linux 起在 MPIDR 0x100（A72 簇 core0），openvela 拿到 MPIDR 0（A53 簇
-core0）并进到自己的 head.S —— **分核这件事成立了**。
-
-烧写与启动步骤、以及 rkdeveloptool 那个 32MB 静默截断的坑，见
-[FLASH.md](FLASH.md)。
+烧写与启动步骤、以及踩过的坑，见 [FLASH.md](FLASH.md)；
+谁拥有哪个外设见 [OWNERSHIP.md](OWNERSHIP.md)。

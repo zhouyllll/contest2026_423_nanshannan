@@ -171,7 +171,7 @@ PL330/SAI 上踩过一次 —— 当时缺的是**目的地在 DMA 前也要 cle
 | mailbox group0 / group3 | 共用 | openvela 发 B2A、收 A2B（IRQ 174）；见 [../docs/amp.md](../docs/amp.md) |
 | 0x47800000 + 4MB | 共用 | vring + rpmsg 缓冲池，映成 Normal-NonCacheable |
 
-## 三个分不掉的东西
+## 五个分不掉的东西
 
 这几个全芯片只有一份，只能定"谁说了算"，不能切开。
 
@@ -195,8 +195,8 @@ U-Boot 留下的频率再分频。
 
 ### 3. GIC distributor
 
-已经踩过，记在这里：Linux 的 `gic_dist_init()` 会把**所有** SPI 的
-`ITARGETSR` 都写成它自己那颗核 —— 它不知道有一部分中断属于另一个 OS。
+Linux 的 `gic_dist_init()` 会把**所有** SPI 的 `ITARGETSR` 都写成它自己
+那颗核 —— 它不知道有一部分中断属于另一个 OS。
 于是 openvela 即使把 `ICDISER` 的使能位置上了，中断也只送到 A72，
 本核一个都收不到。
 
@@ -214,6 +214,104 @@ GIC 的 CPU 接口编号没有保证的对应关系。
 
 只有 `ICDICFR`（触发方式，每个 IRQ 2 位、4 个挤一个字节）真的需要读改写，
 那一个保持只校验、不一致返回 `-EPERM`。
+
+#### ★ 但正解在 Linux 侧：`rockchip,amp` 节点
+
+上面那个 openvela 侧的认领只解决了"谁写最后一笔"，**没解决顺序**：
+
+```
+t+0.0s  U-Boot PSCI 拉起 Linux，随即跳进 openvela
+t+0.1s  openvela 注册控制台、定时器 —— 认领了 IRQ 108、77
+t+0.3s  Linux 的 gic_dist_init() 把所有 SPI 抢回去 ← 早期认领的全被覆盖
+t+60s   openvela 的外设日志靠 FIFO 轮询挤了出来，最后打 NuttShell 横幅
+        要走 TX 中断 → 送不到本核 → 只打出一个字母 "N" 就停住
+```
+
+**Rockchip 自带了 Linux 侧的 AMP 支持**，我此前完全漏了，在 openvela 侧
+重新发明了一遍。配上 `CONFIG_ROCKCHIP_AMP=y` 并在 DTS 里声明：
+
+```dts
+rockchip_amp: rockchip-amp {
+        compatible = "rockchip,amp";
+        clocks = <&cru PCLK_MAILBOX0>;
+        amp-cpu-aff-maskbits = /bits/ 64 <
+                0x000 0x01 0x001 0x02 0x002 0x04 0x003 0x08
+                0x100 0x10 0x101 0x20 0x102 0x40 0x103 0x80>;
+        amp-irqs = /bits/ 64 <
+                GIC_AMP_IRQ_CFG_ROUTE(108, 0x80, AMP_AFF(0, 0))   /* UART0 */
+                GIC_AMP_IRQ_CFG_ROUTE(174, 0x80, AMP_AFF(0, 0))   /* mailbox3 */
+                GIC_AMP_IRQ_CFG_ROUTE(77,  0x80, AMP_AFF(0, 0))   /* timer */
+                GIC_AMP_IRQ_CFG_ROUTE(64,  0x80, AMP_AFF(0, 0))>; /* dmac0 */
+};
+```
+
+之后 Linux 的 `gic_dist_init()` 自己就会尊重这张表
+（`drivers/irqchip/irq-gic.c:525`）：
+
+```c
+#ifdef CONFIG_ROCKCHIP_AMP
+        for (j = 0; j < 4; j++) {
+                if (rockchip_amp_need_init_amp_irq(i + j))
+                        maskval |= rockchip_amp_get_irq_cpumask(i + j) << (j * 8);
+                else
+                        maskval |= cpumask << (j * 8);   /* 自己那颗核 */
+        }
+#endif
+```
+
+**顺序竞争整个消失**。openvela 侧那个按字节认领的补丁保留着当兜底 ——
+这张表难免漏填，而漏一项的代价是 openvela 在某一行静默死掉。
+
+`amp-cpu-aff-maskbits` 是 MPIDR → GIC CPU 接口位的映射（A53 簇是接口
+0..3，A72 簇是 4..7）。这个对应关系没有任何规范保证，必须显式声明；
+openvela 侧是从 IRQ 0..31 的 `ITARGETSR` 读出来的，两处应当一致。
+
+这一节的做法来自同届 contest2026_062_PharosTech 公开的方案；机制本身是
+Rockchip 自带的。
+
+### 4. 稳压器（regulator）
+
+**这一项我最初完全没考虑，代价是一个极具误导性的故障。**
+
+`vdd_cpu_lit_s0` 是 **A53 簇的供电**，`vdd_logic_s0` 是逻辑域的供电。
+Linux 的 regulator 框架会在初始化末尾把"没有消费者"的稳压器关掉 ——
+而 AMP 下 A53 簇的消费者（那四个 cpu 节点）已经被我们从 DTB 里删掉了，
+于是在 Linux 眼里它没人用。
+
+后果不是报错。实测是 openvela 访问某个外设时拿到 **synchronous external
+abort**：
+
+```
+ESR_ELn: 0x96000010   (DABT, DFSC=0x10 = synchronous external abort)
+FAR_ELn: 0x27d80000   (MIPI DSI)
+task: nsh_main
+```
+
+总线拒绝访问，因为那一侧的供电被降了。现场看起来像"DSI 驱动有问题"。
+
+判据：同一份 openvela，FIT 里不带 Linux 时顺利过 VOP2/DSI；带上 Linux
+并给它 3 秒领先，就在 DSI 上被拒。**领先时间越长，症状越早出现** ——
+这类"时间相关"的现象几乎总意味着另一方在动共享资源。
+
+```dts
+&vdd_cpu_lit_s0 {
+        /delete-property/ regulator-init-microvolt;
+        regulator-always-on;
+        regulator-boot-on;
+        /delete-node/ regulator-state-mem;
+};
+```
+
+`regulator-state-mem` 也要删：那是休眠时的目标电压，AMP 下不该由一侧
+替另一侧决定。
+
+### 5. DDR 变频（dmc）
+
+`&dmc { status = "disabled"; }`。
+
+devfreq 会在运行时改 DDR 频率。openvela 的串口分频、SAI 的 MCLK、定时器
+换算全都建立在当前频率上，而另一个 OS 在它脚下改 DDR 频率**没有任何
+通知机制**。
 
 ## 一个连带后果：Linux 的 rootfs 从哪来
 
@@ -233,6 +331,22 @@ Linux 退成纯计算域之后更明显：NPU 的能力全在用户态（`librkn
 不过 stage 1 的 initramfs 可以很小：只要 busybox + `librknnrt` +
 一个模型 + 那个 carveout mmap 驱动，压缩后几 MB 量级。Linux 侧不需要
 网络、不需要显示、不需要存储 —— 这正是"纯计算域"的好处。
+
+## 已验证的完整清单（2026-09-13 跑通）
+
+按这套划分，双 OS 已经同时跑起来并完成 rpmsg 握手。生效的每一项：
+
+| 项 | 做法 |
+|---|---|
+| A53/A72 分核 | Linux DTB 删掉 A53 的 cpu 节点（不是标 disabled） |
+| 中断路由 | Linux 侧 `rockchip,amp` + `amp-irqs`；openvela 侧按字节认领兜底 |
+| 时钟 | amp 节点声明 `PCLK_MAILBOX0`；bootargs 加 `clk_ignore_unused` 兜底 |
+| 电源域 | bootargs 加 `pd_ignore_unused`；关 `CPU_FREQ`/`CPU_IDLE`/`SUSPEND` |
+| 稳压器 | `vdd_cpu_lit_s0` / `vdd_logic_s0` 钉 `always-on` + `boot-on` |
+| DDR 变频 | `&dmc` disabled |
+| U-Boot 自身内存 | Linux DTB 里 `uboot@f0000000` 保留 256MB |
+| 控制台 | UART0 归 openvela；Linux 的 `/chosen/bootargs` 必须覆盖掉（它自带 earlycon 指向 UART0） |
+| 错误处理 | Linux 侧 `panic=0` —— panic 重启走 PSCI SYSTEM_RESET，会连 openvela 一起复位 |
 
 ## 当前进度对照
 

@@ -9,26 +9,22 @@ openvela 拿 A53 做实时与产品控制，Linux 拿 A72 做 NPU / ISP / 重媒
 
 ---
 
-## 目前进展
+## 目前进展：✅ 双 OS 同时运行，rpmsg 握手完成（2026-09-13）
 
 | 层次 | 状态 | 证据 |
 |---|---|---|
-| mailbox 门铃驱动 | ✅ 上板验证 | `ampctl selftest` 正例+反例都过 |
-| rptun / rpmsg 传输层 | ✅ 已注册，等对端 | `ampctl status`，启动日志 |
-| `up_addrenv_*` 地址转换 | ✅ | 链接通过、rpmsg 起得来 |
-| GIC 共享 distributor 选项 | ✅ 代码就绪，默认关 | 两种配置都编过，目标文件 1341→1149 字节 |
-| Linux 侧内核 + DTS | ⬜ 未开始 | |
-| 双 OS 引导（核拆分） | ⬜ 未开始 | |
-| 端到端 rpmsg 通信 | ⬜ 需要对端 | |
+| mailbox 门铃驱动 | ✅ | `ampctl selftest` 正例+反例都过 |
+| rptun / rpmsg 传输层 | ✅ | `ampctl status` 握手完成=是，`/dev/rpmsg/linux` 存在 |
+| `up_addrenv_*` 地址转换 | ✅ | |
+| GIC 共享 distributor | ✅ | Linux 侧 `rockchip,amp` + `amp-irqs`；openvela 侧按字节认领兜底 |
+| Linux 内核 + 只含 A72 的 DTB | ✅ | 7.6MB（原 43MB），`SMP: Total of 4 processors activated` |
+| 双 OS 引导（核拆分） | ✅ | `bootamp`，见 `../amp/uboot/` |
+| **openvela(A53) + Linux(A72) 同时跑** | ✅ | `ps` 里四个 A53 的 IDLE + `rpmsg-linux-0` 线程 |
+| 端到端收发一帧 | ⬜ | 需要 Linux 侧用户态 |
 
-**能复现的一条命令**（板子单跑 openvela，不需要 Linux）：
-
-```
-nsh> ampctl selftest
-在空闲的 mailbox group5 上自检（不影响 rptun）
-  正例 ✓ 中断到达，读回 cmd=a5a50003 data=524d5347
-  反例 ✓ 不写 DATA 时如期超时 —— 说明正例测的确实是中断
-```
+板上输出与完整命令序列见 [../amp/README.md](../amp/README.md) 与
+[../amp/FLASH.md](../amp/FLASH.md)；资源划分见
+[../amp/OWNERSHIP.md](../amp/OWNERSHIP.md)。
 
 ---
 
