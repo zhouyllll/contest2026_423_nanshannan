@@ -126,9 +126,26 @@ nsh> ampctl status
 
 | 步骤 | 状态 |
 |---|---|
-| 带 `bootamp` 的 U-Boot | ✅ 已烧进板子，`help bootamp` 有输出 |
-| Linux 内核 + A72-only DTB | ✅ 编出来了（Image 43MB，DTB 271KB，只有 4 个 A72 cpu 节点） |
-| openvela @ 0x4a400000 | ✅ 编出来了，入口地址已确认 |
-| AMP FIT | ✅ 打好了 |
-| 烧 boot / amp 分区 | ⬜ |
-| 双 OS 同时在跑 | ⬜ |
+| 带 `bootamp` 的 U-Boot | ✅ 上板，`help bootamp` 有输出 |
+| Linux 内核 + 只含 A72 的 DTB | ✅ 7.6MB（原 43MB），DTB 里只有 4 个 A72 cpu 节点 |
+| openvela @ 0x4a400000 | ✅ |
+| AMP FIT | ✅ |
+| **U-Boot 把两个簇分给两个 OS** | ✅ **上板验证**（见下） |
+| openvela 在 A53 簇跑起来 | 🔶 卡在早期初始化，修掉一处、还在查 |
+| rpmsg 握手（端到端） | ⬜ 等 openvela 起来 |
+
+2026-09-12 上板日志：
+
+```
+AMP: Brought up cpu[100] with state 0x12, entry 0x40400000 ...OK
+I/TC: Secondary CPU 4 switching to normal world boot
+AMP: Brought up primary cpu[0, self] with state 0x12, entry 0x4a400000 ...OK
+- Ready to Boot Primary CPU / Boot from EL2 / Boot from EL1
+- Boot to C runtime for OS Initialize
+```
+
+Linux 起在 MPIDR 0x100（A72 簇 core0），openvela 拿到 MPIDR 0（A53 簇
+core0）并进到自己的 head.S —— **分核这件事成立了**。
+
+烧写与启动步骤、以及 rkdeveloptool 那个 32MB 静默截断的坑，见
+[FLASH.md](FLASH.md)。

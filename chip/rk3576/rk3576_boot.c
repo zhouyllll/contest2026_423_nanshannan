@@ -277,14 +277,61 @@ void arm64_el_init(void)
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: rk3576_mark
+ *
+ * Description:
+ *   启动早期的打点。**不经过任何串口驱动**：直接往 UART0 的 THR 里轮询
+ *   写字节（arm64_lowputc 就是干这个的）。
+ *
+ * ★ 为什么非要有这么一个东西
+ *
+ *   arm64_chip_boot() 跑在一段很窄的窗口里：MMU 刚要开、串口驱动还没
+ *   注册、syslog 还没有后端、异常向量表可能还没生效。这一段里出问题的
+ *   表现**统一是"串口最后一行是 arm64_head.S 的 Boot to C runtime，
+ *   之后彻底没输出、也没有异常信息"** —— 因为连报异常的路都还没铺好。
+ *
+ *   AMP 上板第一次就撞在这里。当时能拿到的唯一信息是"没输出"，而候选
+ *   原因有四个（MMU 映射、PSCI、板级初始化、串口早期初始化），一条
+ *   信息区分不了。排查方向一度跑去查 GIC 共享和 Linux 抢中断，全错。
+ *   真正的原因是 chip.h 里 CONFIG_RAMBANK1_ADDR 写死成 0x40480000，
+ *   而 amp-dual 把镜像链到了 0x4a400000 —— MMU 一开，正在执行的代码
+ *   就不在映射里了。
+ *
+ *   有了打点，这一段的每一步都有独立的证据，不用再猜。
+ *
+ *   代价几乎为零：只在 CONFIG_ARCH_EARLY_PRINT 下编进去，一行字符串。
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_EARLY_PRINT
+static void rk3576_mark(const char *s)
+{
+  while (*s != '\0')
+    {
+      arm64_lowputc(*s++);
+    }
+}
+#  define MARK(s) rk3576_mark("[boot] " s "\r\n")
+#else
+#  define MARK(s)
+#endif
+
 void arm64_chip_boot(void)
 {
-  /* MAP IO and DRAM, enable MMU. */
+  /* MAP IO and DRAM, enable MMU.
+   *
+   * 打点必须在 mmu_init **前后**各一次：这一步失败的唯一表现就是
+   * 之后再没有任何输出，只有"前"那一条能证明我们到过这里。
+   */
 
+  MARK("mmu_init 前");
   arm64_mmu_init(true);
+  MARK("mmu_init 后（MMU 已开，代码仍在映射内）");
 
 #if defined(CONFIG_ARM64_PSCI)
   arm64_psci_init("smc");
+  MARK("psci_init 后");
 
 #endif
 
@@ -293,6 +340,7 @@ void arm64_chip_boot(void)
    */
 
   rk3576_board_initialize();
+  MARK("board_initialize 后");
 
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
@@ -300,9 +348,11 @@ void arm64_chip_boot(void)
    */
 
   arm64_earlyserialinit();
+  MARK("earlyserialinit 后（此后走 syslog，波特率见 UART0_BAUD）");
 
 #endif
 
+  MARK("arm64_chip_boot 结束，进 nx_start");
 }
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)

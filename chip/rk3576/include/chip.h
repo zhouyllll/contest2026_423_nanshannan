@@ -113,16 +113,37 @@
  * 物理地址。
  */
 
-#define CONFIG_RAMBANK1_ADDR      0x40480000
-#define CONFIG_RAMBANK1_SIZE      MB(64)
+/* ★ 2026-09-12：改成跟着 CONFIG_RAM_START / CONFIG_RAM_SIZE 走，
+ *   不再写死。
+ *
+ *   这里原来硬编码 0x40480000，和 dramboot.ld 里那个字面量是同一类
+ *   问题：同一个地址在两个地方各写一遍，靠人记住一起改。
+ *
+ *   AMP 上它真的炸了。amp-dual 配置把 CONFIG_RAM_START 挪到
+ *   0x4a400000（Linux 要用 0x40400000），但 MMU 仍按 0x40480000 建 DRAM
+ *   映射 —— 于是 arm64_mmu_init(true) 打开 MMU 的那一拍，**正在执行的
+ *   代码不在映射里**，取指立刻异常。
+ *
+ *   现象极具误导性：串口最后一行是 arm64_head.S 的
+ *   "- Boot to C runtime for OS Initialize"，之后全无输出、也没有异常
+ *   信息（异常向量表所在页同样没映射）。当时第一反应是去查 GIC 共享、
+ *   查 Linux 抢中断 —— 方向完全偏了。
+ *
+ *   跟着 RAM_START 走之后，这一处再也不可能和链接地址分叉。
+ */
 
-/* ⚠️ 不要把 RAMBANK1_SIZE 放大到跨过 0x48400000。
+#define CONFIG_RAMBANK1_ADDR      CONFIG_RAM_START
+#define CONFIG_RAMBANK1_SIZE      CONFIG_RAM_SIZE
+
+/* ⚠️ RAM_START + RAM_SIZE 不能跨过 0x48400000。
  * 板上 bdinfo 显示 DRAM 分两段：
  *   bank0  0x40200000 .. 0x48400000  (130 MB)
  *   bank1  0x49400000 .. 0x100000000
  * 中间 0x48400000..0x49400000 这 16MB 是 OP-TEE(BL32) 的安全保留区，
  * 不属于任何 bank，映射并访问会被 TZC 拦截。
- * 当前 0x40680000 + 64MB = 0x44680000，稳落在 bank0 内。
+ *
+ *   nsh      0x40480000 + 64MB = 0x44480000  落在 bank0 内 ✓
+ *   amp-dual 0x4a400000 + 64MB = 0x4e400000  落在 bank1 内 ✓
  */
 
 /* 外设寄存器区。RK3576 的外设都在低位地址段：
