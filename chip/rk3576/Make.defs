@@ -76,6 +76,10 @@ ifeq ($(CONFIG_RK3576_FB),y)
 CHIP_CSRCS += rk3576_fb.c
 endif
 
+ifeq ($(CONFIG_RK3576_DMA),y)
+CHIP_CSRCS += rk3576_pl330.c
+endif
+
 ifeq ($(CONFIG_RK3576_SAI),y)
 CHIP_CSRCS += rk3576_sai.c
 endif

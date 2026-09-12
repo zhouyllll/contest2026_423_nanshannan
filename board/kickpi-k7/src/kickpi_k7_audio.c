@@ -22,6 +22,20 @@
 
 /* 音频：ES8388 codec + SAI1。
  *
+ * ★ 麦克风输入必须选 LINE2，出处是原理图 K7_V2.1 第 25 页（Audio-CODEC）：
+ *
+ *     ES8388(U7000) 24 LIN1 <- MIC_INP_PHONE  4 极耳机座上的麦克风
+ *                   23 RIN1 <- HP_GND         耳机地检测，不是麦克风
+ *                   22 LIN2 <- MIC2P  \
+ *                   21 RIN2 <- MIC2N  /      板上麦克风座 J7001
+ *
+ *   驱动默认的 LINE1 选中的是"耳机座麦克风 + 耳机地" —— 不插耳机时
+ *   LIN1 悬空、RIN1 就是地，**采到的必然是零**，而且每一层都不会报错。
+ *
+ *   注意 dtb 的 rockchip,audio-routing 里 LINPUT1/LINPUT2 都标着
+ *   "Main Mic" —— 那是 DAPM 的控件名，表示"这两条路都可以通到主麦"，
+ *   **不说明物理上接的是什么**。物理连接只有原理图算数（案例 27 同理）。
+ *
  * 板上连接（出处：原厂 dtb 的 es8388-sound 节点）：
  *     rockchip,cpu   = sai@2a610000   → SAI1
  *     rockchip,codec = es8388@10      → I2C3 上的 0x10

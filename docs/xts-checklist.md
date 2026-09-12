@@ -15,11 +15,12 @@
 
 ## 当前进度总表（截至 2026-09-06）
 
-必测 35 项：**通过 29、部分通过 5、待做 1**。不可行 0、格式边界 0。
+必测 35 项：**通过 30、部分通过 4、待做 1**。不可行 0、格式边界 0。
 
-- ✅ 29
-- ◐ 5：1.1.13（C++ 异常）、1.3.7（需从机模式）、1.3.11（发送方向）、
-  1.3.14（等 24h 复读）、1.3.15（看门狗关不掉，子项跑不完）
+- ✅ 30
+- ◐ 4：1.3.7（xTS 用例需对端板子，单板不可能）、1.3.11（发送方向）、
+  1.3.14（等 24h 复读）、1.3.15（看门狗关不掉，子项跑不完；两种 CRU
+  复位方案均实测会导致整板重启）
 - ☐ 1：3.1.1 12h 待机，需预留整天
 
 "已编入待实测"= 配置已开、程序已进 `builtin_list.h`、编译通过，只差在
@@ -39,7 +40,7 @@
 | 1.1.10 | Kernel-popen | ✅ | `popen` 实测：`popen("help")` 的输出经管道回来、`pclose()` 正常。之前"libc 无 popen"的判断是错的 —— 实现在 `apps/system/popen/popen.c` |
 | 1.1.11 | Kernel-pipe | ✅ | PASSED（含重定向） |
 | 1.1.12 | Kernel-md5 | ✅ | `md5_test -c 100` 全部同值 `01fbd2fa33f6ea48e11960f47c9b622b`（串口丢 1 行，收到 99 行） |
-| 1.1.13 | Kernel-C++ 功能 | ◐ | `cxxtest` 的 `std::vector`/`std::map`/RTTI 全过，**卡在 `Test Exception`**：arm64 上栈展开表没被注册（见下） |
+| 1.1.13 | Kernel-C++ 功能 | ✅ | **四项全过**：`std::vector` / `std::map` / RTTI / **`Test Exception` → `Catch Exception: runtime error`**。修法见下：`.eh_frame` 保留 + 补零终止符 + 启动时 `__register_frame_info()` |
 | 1.3.1 | 烧写测试 | ✅ | `scripts/flash.sh` 一条命令，串口触发 loader，**无需按 recovery** |
 | 1.3.2 | RAM 读写 | ✅ | `fstest -n 10 -m /tmp` → OK: 20, FAILED: 0 |
 | 1.3.3 | RAM 读写性能 | ✅ | `ramtest -w -s 1048576` 各阶段（marching 1/0、pattern、address-in-address）无报错 |
@@ -103,7 +104,7 @@
 | 1.1.10 | Kernel-popen | `popen` | ✅ 实现在 apps/system/popen |
 | 1.1.11 | Kernel-pipe | `pipe` | ✅ PASSED（含重定向） |
 | 1.1.12 | Kernel-md5 | `md5_test -f /tmp/1.txt -c 100` | ◆ 已编入，待实测 |
-| 1.1.13 | Kernel-C++ 功能 | `cxxtest` | ◐ 异常之外都过 |
+| 1.1.13 | Kernel-C++ 功能 | `cxxtest` | ✅ 四项全过（含异常）|
 
 公共前提配置：
 ```
@@ -284,15 +285,29 @@ CH1 不接中断，也就不需要知道它的 GIC 号 —— 设备树只声明
 ### ★ 1.3.15 的 cmocka 套件在这颗芯片上跑不完
 
 `cmocka_driver_watchdog` 有 4 个子项，第一个 `drivertest_watchdog_feeding`
-就会把板子复位，于是永远到不了汇总行。原因在硬件：
+就会把板子复位，于是永远到不了汇总行。
 
-> DesignWare 看门狗一旦使能，**软件无法关闭** —— WDT_CR 的使能位是
-> 「写一次生效、只能靠复位清除」的。
+DesignWare 看门狗的 `WDT_CR.EN` 是「写一次生效、只能靠复位清除」的。但
+**"这个寄存器位清不掉"不等于"这个模块停不下来"** —— Rockchip 给 WDT0 配了
+两个 CRU 软复位，理论上复位模块就能连使能位一起带回初值：
 
-用例做完自己那一段之后不再喂狗，板子就被复位。这不是移植缺陷，是这颗
-IP 的特性。xTS 对 1.3.15 的预期结果是「触发系统复位并恢复」，这一点是
-实测到的：复位发生，重启后 `soc warm boot, reset status: 0x1050`。
+```
+SRST_P_WDT0 = 263 -> SOFTRST_CON(16) bit 7   APB 寄存器域
+SRST_T_WDT0 = 264 -> SOFTRST_CON(16) bit 8   计数器 tclk 域
+```
 
+**两种组合都实测过，都不可用，而且失败方式不同**：
+
+| 做法 | 结果 |
+|---|---|
+| 两个域一起复位 | `WDT_CR` 确实从 `0x00000001` 变成 `0x00000008`（使能位清掉了），但紧接着整板重启 —— 复位 tclk 域让看门狗的**复位输出**产生毛刺 |
+| 只复位 APB 域 | 同样立刻重启。它只清掉寄存器副本，tclk 域锁存的使能与计数器没动，而 `WDT_TORR` 被清成最短档位 → 马上超时 |
+
+所以驱动的 `stop()` 如实返回 `-ENOSYS`。**假装成功的代价更大**：上层以为停了
+就不再喂狗，板子过一会儿"莫名其妙重启"，比一个明确的错误码难查得多。
+
+xTS 对 1.3.15 的预期结果是「触发系统复位并恢复」，这一点是实测到的：
+复位发生，重启后 `soc warm boot, reset status: 0x1050`。
 
 ## 一次烧写要跑完的命令清单
 
@@ -431,10 +446,10 @@ CONFIG_EXAMPLES_HELLOXX=y  CONFIG_TESTING_CXXTEST=y
 像"C++ 支持没配好"，其实只差一个库。已在 `board/kickpi-k7/scripts/Make.defs`
 里补一行（放板级而不是改公共仓的 Toolchain.defs，等效且不用维护补丁）。
 
-### ★ 1.1.13 卡在异常：arm64 的栈展开表从来没被注册过
+### ★ 1.1.13：arm64 上没人注册栈展开表（已解决）
 
 `cxxtest` 的 vector/map/RTTI 都过，`Test Exception` 崩在 `__cxa_throw`
-内部（`eh_throw.cc:97`）。查下来不是我们这块板特有的：
+内部。根因不是本移植特有的：
 
 - 链接脚本把 `.eh_frame` 放在 `/DISCARD/` 里 —— **上游 NuttX 的每一块
   arm64 板子都是这么写的**（pinephone、zcu111、vdk-armv8r 都一样）
@@ -442,13 +457,26 @@ CONFIG_EXAMPLES_HELLOXX=y  CONFIG_TESTING_CXXTEST=y
 - `_Unwind_RaiseException`、`__cxa_throw` 符号都在，`.gcc_except_table`
   （着陆点表）也在 —— 唯独 `_Unwind_Find_FDE` 要查的那张表找不到
 
-把 `.eh_frame` 从 DISCARD 挪进 `.rodata` 之后镜像大了 24KB（数据确实进去
-了），但展开器仍然找不到：并进 `.rodata` 就没有独立的 `PT_GNU_EH_FRAME`
-程序头了。要真正打通得二选一：给它一个独立输出段并让链接器生成
-`--eh-frame-hdr` 的程序头，或者在启动时调
-`__register_frame_info(__EH_FRAME_BEGIN__, &object)`。
+libgcc 找展开表有两条路：走 `dl_iterate_phdr` 查 `PT_GNU_EH_FRAME` 程序头
+（要动态加载器），或查 `__register_frame_info()` 注册过的对象链表。裸机
+没有前者，而后者平时由 **crtbegin.o 的构造函数**完成 —— 裸机链接不带
+crtbegin/crtend，于是没人注册。
 
-**结论：这是 arm64 NuttX 的一处普遍空缺，不是移植缺陷。** 如实记 ◐。
+**三处一起改才通**（缺任何一处现象都一样）：
+
+1. 链接脚本保留 `.eh_frame`，并给出 `__EH_FRAME_BEGIN__` 符号
+2. 表尾补一个 `LONG(0)` 作终止符 —— 正常由 crtend.o 提供，裸机没有。
+   缺它时展开器会扫过表尾读到垃圾，崩的位置和"表不存在"几乎一样
+3. `board_late_initialize()` 里调 `__register_frame_info(__EH_FRAME_BEGIN__, obj)`，
+   `obj` 必须是 static（libgcc 会长期持有）
+
+顺带：`CONFIG_BOARD_LATE_INITIALIZE` 要连带开
+`BOARD_INITTHREAD_PRIORITY/STACKSIZE`，否则 `nx_bringup.c` 编不过。
+
+实测：`Test Exception` → `Catch Exception: runtime error`，四项全过。
+
+> **可提上游**：这是 arm64 NuttX 的普遍空缺，任何开 C++ 异常的 arm64
+> 板子都会踩到。
 
 ## ★ 1.3.11 的症结：CONFIG_SERIAL_TERMIOS 没开
 

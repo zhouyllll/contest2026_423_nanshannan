@@ -1,0 +1,52 @@
+diff --git a/drivers/audio/es8388.c b/drivers/audio/es8388.c
+index a2867179..9c314b73 100644
+--- a/drivers/audio/es8388.c
++++ b/drivers/audio/es8388.c
+@@ -1046,14 +1046,23 @@ static int es8388_configure(FAR struct audio_lowerhalf_s *dev,
+             break;
+           }
+ 
+-        /* Save the current stream configuration */
++        es8388_audio_output(priv);
++        es8388_reset(priv);
++
++        /* Save the current stream configuration.
++         *
++         * This must happen *after* es8388_reset(), which puts samprate,
++         * nchannels and bpsamp back to their build-time defaults. Storing
++         * them first meant every requested sample rate, channel count and
++         * sample width was silently replaced by the default before
++         * es8388_setsamplerate() and es8388_setbitspersample() programmed
++         * the codec and the I2S driver.
++         */
+ 
+         priv->samprate  = caps->ac_controls.hw[0];
+         priv->nchannels = caps->ac_channels;
+         priv->bpsamp    = caps->ac_controls.b[2];
+ 
+-        es8388_audio_output(priv);
+-        es8388_reset(priv);
+         es8388_setsamplerate(priv);
+         es8388_setbitspersample(priv);
+ 
+@@ -1089,14 +1098,17 @@ static int es8388_configure(FAR struct audio_lowerhalf_s *dev,
+             break;
+           }
+ 
+-        /* Save the current stream configuration */
++        es8388_audio_input(priv);
++        es8388_reset(priv);
++
++        /* Save the current stream configuration after the reset; see the
++         * AUDIO_TYPE_OUTPUT case above.
++         */
+ 
+         priv->samprate  = caps->ac_controls.hw[0];
+         priv->nchannels = caps->ac_channels;
+         priv->bpsamp    = caps->ac_controls.b[2];
+ 
+-        es8388_audio_input(priv);
+-        es8388_reset(priv);
+         es8388_setsamplerate(priv);
+         es8388_setbitspersample(priv);
+ 

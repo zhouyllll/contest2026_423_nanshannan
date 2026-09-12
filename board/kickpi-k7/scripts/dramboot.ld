@@ -132,7 +132,20 @@ SECTIONS
         */
 
        *(.eh_frame_hdr)
+       __EH_FRAME_BEGIN__ = .;   /* 栈展开表起始（手动注册用） */
        KEEP(*(.eh_frame))
+
+       /* ★ 表尾必须有一个全零的 length 字段作终止符。
+        *
+        *   __register_frame_info() 注册的是一张**以零长度项结尾**的 FDE
+        *   链表，正常由工具链的 crtend.o 提供（它里面就是一个 LONG(0)）。
+        *   裸机链接不带 crtbegin/crtend，没人放这个 0 —— 展开器会一路扫
+        *   过表尾读到垃圾，表现是异常抛出时崩在展开器内部，和"表根本
+        *   不存在"几乎分不开。
+        */
+
+       LONG(0);
+       __EH_FRAME_END__ = .;     /* 栈展开表结束 */
   } :text
   . = ALIGN(4096);
   _erodata = .;                /* End of read-only data */

@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <syslog.h>
 #include <sys/boardctl.h>
 #include <stdint.h>
 #include <nuttx/board.h>
@@ -82,10 +83,54 @@ void rk3576_board_initialize(void)
  * Name: board_late_initialize
  ****************************************************************************/
 
+#ifdef CONFIG_HAVE_CXXINITIALIZE
+/****************************************************************************
+ * Name: kickpi_k7_register_eh_frame
+ *
+ * Description:
+ *   把 C++ 异常的栈展开表注册给 libgcc 的展开器。
+ *
+ *   ★ 为什么裸机上非做不可。
+ *
+ *     `throw` 时 _Unwind_RaiseException 要靠 _Unwind_Find_FDE 找到描述
+ *     每个栈帧如何回退的 CFI 表（.eh_frame）。libgcc 找它有两条路：
+ *
+ *       a) 走 dl_iterate_phdr 查 PT_GNU_EH_FRAME 程序头 —— 需要动态加载器
+ *       b) 查 __register_frame_info() 注册过的对象链表
+ *
+ *     裸机 NuttX 没有 (a)，而 (b) 平时由 crtbegin.o 的构造函数完成 ——
+ *     可我们不链接 crtbegin/crtend。于是表在镜像里、展开器却找不到，
+ *     现象是 vector/map/RTTI 全过、一 throw 就崩在展开器内部。
+ *
+ *     上游 NuttX 的每一块 arm64 板子都把 .eh_frame 丢进 /DISCARD/，
+ *     所以这不是本移植特有的问题 —— 只是纯 C 的板子碰不到。
+ *
+ *     必须在任何 C++ 异常之前注册，因此放在 board_late_initialize()。
+ *
+ ****************************************************************************/
+
+extern void __register_frame_info(FAR const void *begin, FAR void *ob);
+extern uint8_t __EH_FRAME_BEGIN__[];
+
+/* libgcc 的 struct object 是不透明的，这里给足空间让它存放注册信息。
+ * 它必须在整个运行期存活，所以是 static。
+ */
+
+static uintptr_t g_eh_object[8];
+
+static void kickpi_k7_register_eh_frame(void)
+{
+  __register_frame_info(__EH_FRAME_BEGIN__, g_eh_object);
+  syslog(LOG_INFO, "C++: 栈展开表已注册 @%p\n", __EH_FRAME_BEGIN__);
+}
+#endif
+
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  /* Perform board initialization */
+#ifdef CONFIG_HAVE_CXXINITIALIZE
+  kickpi_k7_register_eh_frame();
+#endif
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */
 

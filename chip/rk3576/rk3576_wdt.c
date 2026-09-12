@@ -52,6 +52,11 @@
 #define WDT_CCVR            0x08     /* 当前计数值   */
 #define WDT_CRR             0x0c     /* 喂狗         */
 #define WDT_CRR_KICK        0x76     /* 喂狗魔数     */
+
+/* CRU 软复位（rockchip,rk3576-cru.h），线性编号 = CON(id/16) 的 bit id%16 */
+
+#define WDT0_SRST_P         263      /* SRST_P_WDT0：APB 寄存器域 */
+#define WDT0_SRST_T         264      /* SRST_T_WDT0：计数器 tclk 域 */
 #define WDT_STAT            0x10
 #define WDT_EOI             0x14
 
@@ -150,15 +155,36 @@ static int rk3576_wdt_stop(FAR struct watchdog_lowerhalf_s *lower)
 {
   FAR struct rk3576_wdt_s *priv = (FAR struct rk3576_wdt_s *)lower;
 
-  /* ★ DesignWare 看门狗一旦使能，**软件无法关闭** —— WDT_CR 的使能位
-   *   是「写一次生效、只能靠复位清除」的。这里如实返回不支持，而不是
-   *   假装成功：上层若以为已经停了而不再喂狗，会在超时后被复位，
-   *   现象是"莫名其妙重启"，极难追查。
+  /* ★ 这颗看门狗使能后停不下来，而且**两条看似可行的路都实测走不通**。
+   *
+   *   DesignWare 的 WDT_CR.EN 是「写一次生效、只能靠复位清除」。但
+   *   "这个寄存器位清不掉"不等于"这个模块停不下来" —— Rockchip 给 WDT0
+   *   配了两个 CRU 软复位，理论上复位模块就能连使能位一起带回初值：
+   *
+   *     SRST_P_WDT0 = 263 -> SOFTRST_CON(16) bit 7   APB 寄存器域
+   *     SRST_T_WDT0 = 264 -> SOFTRST_CON(16) bit 8   计数器 tclk 域
+   *
+   *   实测两种组合都失败，而且失败方式不同：
+   *
+   *   ① 两个域一起复位：WDT_CR 确实从 0x00000001 变成 0x00000008（使能位
+   *      清掉了），但紧接着整块板子重启 —— 复位 tclk 域会让看门狗的
+   *      **复位输出**产生毛刺，直接触发 SoC 复位。
+   *
+   *   ② 只复位 APB 域：同样立刻重启。原因是它只清掉了寄存器副本，
+   *      tclk 域里锁存的使能与计数器没有被复位，而 WDT_TORR 被清成最短
+   *      档位，于是马上超时。
+   *
+   *   所以这里如实返回不支持。**假装成功的代价更大**：上层以为停了就不再
+   *   喂狗，板子过一会儿"莫名其妙重启"，比一个明确的 -ENOSYS 难查得多。
+   *
+   *   对 xTS 1.3.15 的影响：cmocka 的 4 个子项跑不完（第一个之后板子被
+   *   复位），但用例要求的「触发系统复位并恢复」本身是实测到的 ——
+   *   复位发生，重启后可读到 soc warm boot, reset status: 0x1050。
    */
 
   UNUSED(priv);
   syslog(LOG_WARNING,
-         "WDT: DesignWare 看门狗使能后不能由软件关闭，忽略 stop\n");
+         "WDT: 使能后无法停止（CRU 复位两种组合均实测会导致整板重启）\n");
   return -ENOSYS;
 }
 

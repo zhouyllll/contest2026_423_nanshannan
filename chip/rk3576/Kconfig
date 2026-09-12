@@ -384,4 +384,12 @@ config RK3576_ETH_BUFSIZE
 
 endif # RK3576_ETH
 
+config RK3576_DMA
+	bool "PL330 DMA 控制器"
+	default n
+	---help---
+		RK3576 的 DMA 是 ARM PrimeCell PL330（dmac0@0x2ab90000）。
+		目前 SAI1 的 DMA 请求号 2/3 挂在 dmac0 上；SAI 接收侧的
+		数据搬运尚未切换为 DMA。
+
 endmenu # Rockchip RK3576 Peripheral Selection

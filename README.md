@@ -59,8 +59,10 @@ CPU              4× Cortex-A53 SMP（A72 簇未启用）
 
 ### 沉淀
 
-88 次提交；`notes/DEBUG-CASES.md` 20 例排查记录（现象—歧路—根因—修复—教训），
-其中多例是**上游缺陷**并已归档为可提交的补丁；1 个可复用 Skill。
+111 次提交；`notes/DEBUG-CASES.md` 29 例排查记录（现象—歧路—根因—修复—教训），
+其中多例是**上游缺陷**并已归档为可提交的补丁；**3 个可复用 Skill**
+（硬件参数勘察 / 板级时钟排查 / 有界 bring-up），均从本项目的真实返工中提炼，
+不绑定 RK3576。
 
 ## ★ RK3576 的三个坑（都属于"填错不报错、上板无输出"）
 
@@ -128,7 +130,9 @@ spi_selftest}` 下。manifest 在组委会仓里改不了，所以这些映射�
 | `docs/refs/` | 官方文档离线副本 |
 | `notes/DEBUG-CASES.md` | 踩坑记录（现象—排查—根因—修复—验证） |
 | `scripts/` | `env.sh` / `check-addr.sh` / `sync-bsp.sh` / `logs.sh` / `run-qemu.sh` |
-| `.claude/skills/soc-hw-recon` | ★ Skill 沉淀：新 SoC 硬件参数勘察方法论 |
+| `.claude/skills/soc-hw-recon` | ★ Skill：无寄存器手册时勘察并**验证**新 SoC 的硬件参数 |
+| `.claude/skills/board-clock-bringup` | ★ Skill：板级时钟排查 —— 门控/分频/PCLK/功能时钟分层证伪，识别"整条链自洽地跑错频率" |
+| `.claude/skills/bounded-bringup` | ★ Skill：有界 bring-up —— 上界界在整件事上，以及"串口没反应"的四种成因 |
 | `logs/` | AI Coding 日志 |
 | `archive/` | 前身项目（Amlogic A311Y2）产物，不参与构建 |
 | `PLAN.md` / `RECON.md` / `VelaPort-K7-项目描述.md` | 方案、待核实问题、★ 报名正文 |

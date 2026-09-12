@@ -2,20 +2,23 @@
 mic_main.c.home.dministrator.openvela-amlogic.src.contest2026_423_nanshannan.app.mic.o: \
  mic_main.c \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/config.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/stdio.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/sys/types.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/malloc.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/stdlib.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/compiler.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/sys/types.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/stdint.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/types.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/inttypes.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/limits.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/limits.h \
- /home/dministrator/openvela-amlogic/src/prebuilts/gcc/linux-x86_64/aarch64-none-elf/lib/gcc/aarch64-none-elf/13.4.0/include/stdarg.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/time.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/fs.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/i2c/i2c_master.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/ioctl.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/stdbool.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/serial/tioctl.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/stdio.h \
+ /home/dministrator/openvela-amlogic/src/prebuilts/gcc/linux-x86_64/aarch64-none-elf/lib/gcc/aarch64-none-elf/13.4.0/include/stdarg.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/time.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/fs.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/uio.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/uio.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/dirent.h \
@@ -45,7 +48,6 @@ mic_main.c.home.dministrator.openvela-amlogic.src.contest2026_423_nanshannan.app
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/spinlock_type.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/atomic.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/lib/lib.h \
- /home/dministrator/openvela-amlogic/src/nuttx/include/stdlib.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/fcntl.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/unistd.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/tls.h \

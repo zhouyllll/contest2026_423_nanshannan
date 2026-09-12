@@ -54,6 +54,9 @@
 #define RK3576_SAI_CKR         0x0018  /* 时钟分频           */
 #define RK3576_SAI_TXFIFOLR    0x001c  /* 发送 FIFO 水位     */
 #define RK3576_SAI_RXFIFOLR    0x0020
+#define SAI_RXFIFOLR_FULL       (1 << 23)   /* RX FIFO 满标志(实测: FIFO=8 时 0x208208 满位=0) */
+#define SAI_RXFIFOLR_FULL2      (1 << 13)   /* FIFO=32 时 0x820820 满位=1 */
+
 #define RK3576_SAI_DMACR       0x0024
 #define RK3576_SAI_INTCR       0x0028
 #define RK3576_SAI_INTSR       0x002c
@@ -62,6 +65,20 @@
 #define RK3576_SAI_PATH_SEL    0x0038
 #define RK3576_SAI_TX_DATA_CNT 0x005c
 #define RK3576_SAI_RX_DATA_CNT 0x0060
+
+/* ★ 帧同步移位寄存器 —— 本文件此前**完全没有**这两个寄存器。
+ *
+ *   标准 I2S 的定义是"数据比帧同步边沿延后一个 BCLK"。这个延迟在
+ *   RK3576 的 SAI 上就是靠 XSHIFT 实现的（原厂 rockchip_sai.c 的
+ *   SND_SOC_DAIFMT_I2S 分支写 SAI_XSHIFT_RIGHT(2)）。不写它，控制器
+ *   在错误的位位置上采样 —— 时钟、帧率、位宽全都对，只有数据不对。
+ */
+
+#define RK3576_SAI_TX_SHIFT    0x0064
+#define RK3576_SAI_RX_SHIFT    0x0068
+
+#define SAI_XSHIFT_RIGHT(x)    (x)          /* [23:0] 右移拍数 */
+#define SAI_XSHIFT_LEFT(x)     ((x) << 24)  /* [25:24]        */
 #define RK3576_SAI_STATUS      0x006c
 #define RK3576_SAI_VERSION     0x0070  /* 只读，版本号       */
 
@@ -101,6 +118,8 @@
 #define SAI_XCR_SNB(x)         (((x) - 1) << 11)  /* 每帧槽数 */
 #define SAI_XCR_VDJ_L          (1 << 10)
 #define SAI_XCR_VDJ_R          0
+#define SAI_XCR_EDGE_SHIFT_1   (1 << 22)
+#define SAI_XCR_EDGE_SHIFT_0   0
 #define SAI_XCR_SBW(x)         (((x) - 1) << 5)   /* 槽位宽   */
 #define SAI_XCR_VDW(x)         (((x) - 1) << 0)   /* 有效数据位宽 */
 
@@ -120,6 +139,19 @@
 #define SAI_CKR_CKP_NORMAL     0
 #define SAI_CKR_FSP_INVERTED   (1 << 0)
 #define SAI_CKR_FSP_NORMAL     0
+
+/* DMACR —— DMA 控制。出处：Linux sound/soc/rockchip/rockchip_sai.h
+ *   bit24 RDE  RX DMA 请求使能
+ *   bits20:16 RDL  RX FIFO 水位（FIFO 里攒满多少个 32 位 entry 就拉
+ *                 DMA 请求线；写入值为 entry 数减一）
+ *   bit8  TDE  TX DMA 请求使能
+ *   bits4:0 TDL  TX FIFO 水位
+ */
+
+#define SAI_DMACR_RDE           (1 << 24)
+#define SAI_DMACR_RDL(x)        (((x) - 1) << 16)
+#define SAI_DMACR_TDE           (1 << 8)
+#define SAI_DMACR_TDL(x)        ((x) << 0)
 
 #define RK3576_SAI_BASECLK_HZ  12288000   /* dtb 的 assigned-clock-rates */
 

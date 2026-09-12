@@ -2216,3 +2216,69 @@ CLKOUT 需要显式使能（寄存器 0x0D，bit7=FE 输出使能，bit1:0=FD �
 ★ 另外值得记：原理图里 `WIFI_REG_ON_H` 与 `BT_REG_ON_H` 是**两个独立信号**
   （分别对应 GPIO1_C6/C7），dtb 里却把 C6 同时叫作 `wifi-poweren-gpio`
   和 sdio-pwrseq 的 reset，容易让人以为只有一根脚。
+
+
+## 案例 28：PL330 初始化失败 —— 8 位 ID 寄存器被 32 位读截断
+
+接入 PL330（dmac0@0x2ab90000）后板上打印 `ERROR: PL330 初始化失败`
+（appinit 调用点）；驱动内部的失败原因看不到 —— `dmaerr()` 在
+CONFIG_DEBUG_DMA 未开时展开为空，静默吞掉。
+
+**实测读回**（加临时 LOG_INFO 诊断）：
+
+```
+PERIPH_ID(32 位读 0xfe0) = 0x00000030   ← 只有低字节
+ID0=0x30  ID1=0x13  ID2=0x24  ID3=0x00
+CID0=0x0d CID1=0xf0                     ← 标准 ARM PrimeCell 标识
+CR0=0x001ff075                          ← 8 通道/32 外设口/16 事件
+```
+
+硬件完全正常：PART=0x330（ID0 + ID1 低 4 位）、DESIGNER=0x1=ARM
+（ID1 高 4 位）、CID 0x0d/0xf0 标准。**问题是读法**：PL330 的 Peripheral
+ID 寄存器是 8 位宽，本 SoC 上 32 位读 0xfe0 只回低字节（PID0），高 24
+位恒 0，`(pid & 0xfff) != 0x330` 校验必挂。
+
+**修复**：8 位逐字节读 0xfe0/0xfe4/0xfe8 再拼装，得到 0x241330，
+与 Linux（32 位读拿全值）等价。校验逻辑本身不用动。
+
+**两个教训**
+
+1. **寄存器位宽决定读法。** ARM PrimeCell 的 ID 寄存器是 8 位宽
+   （0xfe0-0xfec、0xff0-0xffc），读完整 PART/DESIGNER 要么 8 位逐字节
+   拼，要么确认该 SoC 的 32 位读不会截断。别假设"读 32 位一定能拿全"。
+2. **失败路径别用会被编译期关掉的日志宏。** `dmaerr()` 在
+   CONFIG_DEBUG_DMA=n 时是空操作，排查时等于没有。初始化这种单次执行
+   的路径，失败用 `syslog(LOG_ERR, ...)`，成功用 `syslog(LOG_INFO, ...)`。
+
+## 案例 29：g_rtc_enabled 多重定义 —— Kconfig choice + .config 残留 + 归档残留
+
+接入 PL330 后链接报 `multiple definition of 'g_rtc_enabled'`
+（libdrivers.a 里 arch_rtc.o 与 ds3231.o 各定义一份）。板子实际 RTC 是
+HYM8563，DS3231 压根不该编。
+
+**根因是一条链，四层**：
+
+1. defconfig 里 `CONFIG_RTC_DSXXXX=y` 让 Maxim 系列 choice 生效
+   （choice 默认 RTC_DS3231）→ ds3231.c 被编译。
+2. HYM8563 之前被塞进 RTC_DSXXXX 的 choice 里且带 `default n` —— choice
+   成员不许带 default，kconfiglib 直接当 error 报。
+3. 只跑 `make olddefconfig` 不会删除 .config 里已存在的使能项
+   （defconfig 移除后必须重新 configure，或手动从 .config 删行）。
+4. 即使 .config 清干净，旧的 `drivers/ds3231.o`（对象在 drivers/ 顶层
+   —— 不在 timers/ 子目录！）仍被 `ar` 归档进 libdrivers.a，ar 只增不删。
+
+**修复**：① HYM8563 移出 DS choice，改成独立选项（仿 RTC_PCF85263：
+`default n / select I2C / select RTC_DATETIME / depends on RTC_EXTERNAL`）；
+② defconfig 移除 `CONFIG_RTC_DSXXXX=y`；③ 从 .config 删除 DS 符号再
+olddefconfig；④ 删除残留 `drivers/ds3231.o` 与 drivers/staging 两个
+libdrivers.a 强制重建。
+
+**三个教训**
+
+1. **改 defconfig 后要重新 configure，olddefconfig 不清已存在项。**
+   这是"明明删了为什么还编"的头号来源。
+2. **禁用驱动要清残留 .o。** NuttX 的 `ar` 归档只增不删，对象文件在
+   源码目录树里的落点（drivers/ 顶层 vs 子目录）和直觉不一致，按
+   `find . -name '*.o'` 找全再删。
+3. **choice 成员不许带 default**，外部 RTC 这类独立外设做成独立选项，
+   别图省事塞进别人的 choice。

@@ -44,6 +44,7 @@
 #include <arch/board/board.h>
 
 #include "arm64_internal.h"
+#include "rk3576_pl330.h"
 #include "rk3576_power.h"
 #include "rk3576_sai.h"
 #include "rk3576_dcphy.h"
@@ -77,6 +78,26 @@ int board_app_initialize(uintptr_t arg)
 #if defined(CONFIG_FS_PROCFS) || defined(CONFIG_DEV_GPIO) || \
     defined(CONFIG_RK3576_I2C)
   int ret;
+#endif
+
+#ifdef CONFIG_CXX_EXCEPTION
+  /* C++ 异常：注册栈展开表（.eh_frame）。
+   *
+   *   arm64 NuttX 上游的普遍空缺：链接脚本曾把 .eh_frame 丢进
+   *   /DISCARD/（已改回保留在 .rodata），但 _Unwind_Find_FDE 找表
+   *   要靠 __register_frame_info 主动注册 —— 全树无人调用，导致
+   *   cxxtest 的 Test Exception 一 throw 就崩（xTS 1.1.13 ◐）。
+   *
+   *   这里在首个 C++ 代码运行前注册（nsh/cxxtest 之前）。
+   *   g_fde_object 对应 libgcc 未公开的 struct object，给足 64 字节。
+   */
+
+  extern void __register_frame_info(const void *, void *);
+  extern const uint8_t __EH_FRAME_BEGIN__[];
+  static uint8_t g_fde_object[64] __attribute__((aligned(8)));
+
+  __register_frame_info(__EH_FRAME_BEGIN__, g_fde_object);
+  syslog(LOG_INFO, "CXX: .eh_frame 已注册 @%p\n", __EH_FRAME_BEGIN__);
 #endif
 
 #ifdef CONFIG_FS_TMPFS
@@ -428,6 +449,18 @@ int board_app_initialize(uintptr_t arg)
 
       rk3576_vop2_check_scanning(0);
 #endif  /* KEEP_UBOOT_DISPLAY */
+    }
+#endif
+
+#ifdef CONFIG_RK3576_DMA
+  /* PL330 DMA 控制器（dmac0）。必须在 SAI 之前初始化 —— 音频的
+   * DMA 搬运挂在它上面（SAI1 TX/RX 请求号 2/3）。
+   */
+
+  struct dma_dev_s *dma = rk3576_pl330_initialize(0);
+  if (dma == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: PL330 初始化失败\n");
     }
 #endif
 

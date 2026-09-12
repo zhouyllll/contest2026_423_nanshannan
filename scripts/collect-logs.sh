@@ -29,11 +29,19 @@ WS="$(cd "$ROOT/.." && pwd)"
 TOOLS="$WS/.claude/skills/contest-log-collector/tools"
 
 # ★ 白名单：只有这里列出的会话会被导出
+#
+#   ~/.claude/projects/ 下的目录是按**工作目录**分的，不是按项目分的。
+#   本项目的会话 cwd 在 /home/dministrator/linux，那个目录下还跑过论文
+#   排版、面试题整理、算法题等完全无关的会话 —— 一次 --backfill 会把它们
+#   一并导入。参赛仓是 public 的，那等于公开私人对话。
+#
+#   实测曾有 6 个无关会话（共 19MB）混进 logs/，已清除。新增会话时务必
+#   确认它确属本项目再往下面加。
 SESSIONS=(
-  # RK3576 / KICKPI-K7 适配主力会话（cwd 在工作区外，不会被自动采集）
+  # RK3576 / KICKPI-K7 BSP 适配 —— 摄像头/音频/PL330 等（当前会话）
+  6da36939-72ed-45a4-8311-5cc9b1b96e52
+  # RK3576 / KICKPI-K7 BSP 适配 —— 显示调试（VOP2 / DSI / LCD）等前期工作
   6396523f-2861-4bec-8d27-a68bbd63cfc3
-  # openvela-rk3568 前身项目
-  0b612fdc-dabd-4706-b76b-9ef79306f36c
 )
 
 [ -f "$TOOLS/export-session.py" ] || {
