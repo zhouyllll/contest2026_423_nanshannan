@@ -10,6 +10,12 @@
 并按 page_size 重新排布后续各段（ramdisk / second / recovery_dtbo / dtb）。
 
   ./repack-bootimg.py <原boot.img> <新kernel> <输出boot.img>
+                      [--dtb <file>] [--cmdline <str>]
+
+AMP 阶段多出两个可选参数。换 kernel 的同时必须能换 dtb：AMP 用的
+rk3576-kickpi-k7-amp.dtb 只保留 A72 的四个 cpu 节点，而原厂那份八个核
+全在 —— Linux 会按它去 PSCI 拉起 A53，而 A53 上正跑着 openvela。
+cmdline 也要能换，原厂那句里的 console=ttyFIQ0 在 AMP 下是关掉的。
 """
 import struct, sys, pathlib, hashlib
 
@@ -21,9 +27,18 @@ def pad(n, page):
 
 
 def main():
-    if len(sys.argv) != 4:
+    argv = sys.argv[1:]
+    newdtb = newcmdline = None
+    while len(argv) > 3:
+        if argv[3] == '--dtb' and len(argv) > 4:
+            newdtb = pathlib.Path(argv[4]); del argv[3:5]
+        elif argv[3] == '--cmdline' and len(argv) > 4:
+            newcmdline = argv[4]; del argv[3:5]
+        else:
+            print(__doc__); return 1
+    if len(argv) != 3:
         print(__doc__); return 1
-    src, newk, dst = map(pathlib.Path, sys.argv[1:4])
+    src, newk, dst = map(pathlib.Path, argv)
     d = src.read_bytes()
     if d[:8] != HDR_MAGIC:
         print(f"✗ {src} 不是 Android boot.img（魔数 {d[:8]!r}）"); return 1
@@ -50,6 +65,11 @@ def main():
     recovery_dtbo = take(rec_sz) if hver >= 1 else b''
     dtb = take(dtb_sz) if hver >= 2 else b''
 
+    if newdtb is not None:
+        dtb = newdtb.read_bytes()
+        if dtb[:4] != b'\xd0\x0d\xfe\xed':
+            print(f"✗ {newdtb} 不是 FDT（魔数 {dtb[:4]!r}）"); return 1
+
     knew = newk.read_bytes()
     if knew[0x38:0x3c] != b'ARM\x64':
         print(f"⚠ {newk} 偏移 0x38 不是 ARM64 Image 魔数（读到 {knew[0x38:0x3c]!r}），"
@@ -66,13 +86,21 @@ def main():
     #     v2: + dtb
     hdr = bytearray(d[:page])
     struct.pack_into('<I', hdr, 8, len(knew))
+    if hver >= 2 and newdtb is not None:
+        struct.pack_into('<I', hdr, 1648, len(dtb))
+    if newcmdline is not None:
+        # cmdline 在 header 偏移 64，512 字节，NUL 结尾
+        cl = newcmdline.encode()
+        if len(cl) >= 512:
+            print("✗ cmdline 超过 511 字节"); return 1
+        hdr[64:64 + 512] = cl + b'\0' * (512 - len(cl))
 
     h = hashlib.sha1()
     order = [(knew, len(knew)), (ramdisk, rsz), (second, ssz)]
     if hver >= 1:
         order.append((recovery_dtbo, rec_sz))
     if hver >= 2:
-        order.append((dtb, dtb_sz))
+        order.append((dtb, len(dtb)))
     for seg, size in order:
         h.update(seg)
         h.update(struct.pack('<I', size))
@@ -91,7 +119,12 @@ def main():
     print(f"    ramdisk  {rsz:>10}     保留")
     print(f"    second   {ssz:>10}     保留")
     if hver >= 2:
-        print(f"    dtb      {dtb_sz:>10}     保留")
+        if newdtb is not None:
+            print(f"    dtb      {dtb_sz:>10} -> {len(dtb):<10} ({newdtb.name})")
+        else:
+            print(f"    dtb      {dtb_sz:>10}     保留")
+    if newcmdline is not None:
+        print(f"    cmdline  已替换: {newcmdline}")
     print(f"    总大小   {len(d):>10} -> {len(out)}")
     return 0
 

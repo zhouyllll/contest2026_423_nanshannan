@@ -1,0 +1,76 @@
+/*
+ * KICKPI-K7 AMP：哪个镜像跑在哪颗核上。
+ *
+ * 这份 FIT 是 AMP 的**全部契约**。U-Boot（drivers/cpu/rockchip_amp.c）
+ * 读它，按 cpu 属性里的 MPIDR 把核分掉：
+ *
+ *   cpu = <0x000>  A53 簇 core0 —— 也就是 U-Boot 自己正跑在上面的那颗。
+ *                  它是"boot cpu"，U-Boot 不会 PSCI 拉它，而是在最后
+ *                  armv8_switch_to_el2() 直接跳进去。openvela 走这条路。
+ *   cpu = <0x100>  A72 簇 core0。U-Boot 用 PSCI CPU_ON 把它拉起来跑 Linux。
+ *
+ * 两个簇里剩下的三颗核**不在这里**：各自的 OS 起来以后自己拉
+ * （openvela 的 SMP 走 arm64_cpustart.c，Linux 走它的 DTB）。
+ *
+ * ★ Linux 的镜像不在这份 FIT 里
+ *
+ *   rockchip_amp.c 的 load_linux_for_nonboot_cpu() 是去跑 `boot_fit` /
+ *   `boot_android`，也就是**走正常启动流程从 boot 分区读**。所以 linux
+ *   节点只描述"跑在哪颗核、什么执行状态"，镜像本身在 boot 分区的
+ *   boot.img 里（见 amp/linux/ 和 scripts/repack-bootimg.py）。
+ *
+ * ★ 顺序是 Linux 先起
+ *
+ *   brought_up_all_amp() 先处理 linux 节点，再处理 loadables，最后才把
+ *   当前核送进 openvela。这个顺序是必须的：GIC 的 distributor 归 Linux，
+ *   它得先配完，openvela 那边才能带着
+ *   CONFIG_ARM64_GICV2_SHARED_DIST=y 接着用。
+ *
+ * 打包：
+ *   mkimage -f amp.its -E -p 0xe00 amp.itb
+ */
+
+/dts-v1/;
+/ {
+	description = "KICKPI-K7 AMP: openvela on A53 cluster, Linux on A72 cluster";
+	#address-cells = <1>;
+
+	images {
+		openvela {
+			description  = "openvela (NuttX) on A53 cluster";
+			data         = /incbin/("./openvela-amp.bin");
+			type         = "firmware";	/* 必须是 firmware */
+			compression  = "none";
+			arch         = "arm64";
+			cpu          = <0x000>;		/* MPIDR：A53 core0 = 启动核 */
+			thumb        = <0>;
+			hyp          = <0>;		/* EL1。NuttX 自己会降到 EL1 */
+			load         = <0x4a400000>;	/* = CONFIG_RAM_START */
+			hash {
+				algo = "sha256";
+			};
+		};
+	};
+
+	configurations {
+		default = "conf";
+		conf {
+			description = "openvela + Linux";
+			loadables = "openvela";
+
+			/*
+			 * Linux 跑 A72 簇 core0。地址由 U-Boot 的
+			 * kernel_addr_r / fdt_addr_r / ramdisk_addr_r 决定，
+			 * 这里给 load 会覆盖 kernel_addr_r。
+			 */
+			linux {
+				description  = "Linux on A72 cluster";
+				arch         = "arm64";
+				cpu          = <0x100>;
+				thumb        = <0>;
+				hyp          = <0>;
+				udelay       = <200000>;
+			};
+		};
+	};
+};

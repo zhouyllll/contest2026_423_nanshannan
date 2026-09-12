@@ -1,0 +1,154 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * KICKPI-K7 AMP：Linux 只占 A72 簇，A53 簇留给 openvela。
+ *
+ * 复制到 kernel-6.1/arch/arm64/boot/dts/rockchip/ 后编译。
+ * 基线是 SDK 自带的 rk3576-kickpi-k7-linux.dts（K7 在 SDK 里是有板级
+ * 支持的，不用拿 EVB 凑）。
+ *
+ * Copyright (c) 2026 contest2026_423_nanshannan
+ */
+
+/dts-v1/;
+
+#include "rk3576.dtsi"
+#include "rk3576-kickpi-k7.dtsi"
+#include "rk3576-linux.dtsi"
+
+/ {
+	model = "KICKPI-K7 AMP (Linux on A72 cluster)";
+	compatible = "rockchip,rk3576-evb1-v10", "rockchip,rk3576";
+
+	/*
+	 * ★ A53 的四个 cpu 节点必须**删掉**，不能只标 status = "disabled"。
+	 *
+	 * 这版 vendor 内核枚举 CPU 时不看 status，标 disabled 它照样会去
+	 * PSCI CPU_ON 那四个核 —— 而那四个核此刻正在跑 openvela。结果是
+	 * 两个 OS 同时以为自己拥有同一颗核。
+	 *
+	 * 这一条来自同届 contest2026_062_PharosTech 的板测结论
+	 * （其 tools/amp/TOPOLOGY.md），不是我们自己试出来的。
+	 *
+	 * 删 cpu 节点会留下悬空引用，所以 cpu-map 和 PMU 的 interrupt-affinity
+	 * 也要一起改。
+	 */
+
+	cpus {
+		/delete-node/ cpu@0;
+		/delete-node/ cpu@1;
+		/delete-node/ cpu@2;
+		/delete-node/ cpu@3;
+
+		cpu-map {
+			/delete-node/ cluster0;
+		};
+	};
+
+	/*
+	 * 删掉 cpu_l* 会留下两处悬空的 phandle 引用。dtc 会直接报错，不会让
+	 * 你带着它们编过去 —— 这一点恰恰比 status = "disabled" 好：后者编得过，
+	 * 错误留到运行期才炸。
+	 *
+	 *   pmu-a53 的 interrupt-affinity → cpu_l0..l3
+	 *   little-core-thermal 的 map0   → cpu_l0（A53 簇的调频降温，
+	 *                                  这个簇的频率现在归 openvela）
+	 */
+
+	/delete-node/ pmu-a53;
+
+	/*
+	 * AMP 共享内存。这三段必须和 openvela 侧对上：
+	 *   chip/rk3576/include/amp.h 的 RK3576_RPTUN_*
+	 *   board/kickpi-k7/configs/amp/defconfig 的 CONFIG_RK3576_RPTUN_SHM_BASE
+	 *
+	 * no-map：不能让 Linux 把它当普通内存用。Rockchip 的 rpmsg 驱动对
+	 * vring 用 ioremap()，对缓冲池用 shared-dma-pool，两者都要求这块
+	 * 内存不在内核的线性映射里。
+	 */
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		rpmsg_vring: rpmsg@47800000 {
+			reg = <0x0 0x47800000 0x0 0x00100000>;
+			no-map;
+		};
+
+		rpmsg_dma: rpmsg-dma@47a00000 {
+			compatible = "shared-dma-pool";
+			reg = <0x0 0x47a00000 0x0 0x00200000>;
+			no-map;
+		};
+
+		/*
+		 * openvela 自己那一块。Linux 完全不碰，只是占位，免得内核把它
+		 * 分配出去。
+		 *
+		 * 起点 = openvela 的 CONFIG_RAM_START，长度 = CONFIG_RAM_SIZE
+		 * （64MB）。这两个数必须和 board/kickpi-k7/configs/amp/defconfig
+		 * 一致：写小了 Linux 会把 openvela 的堆当成自己的内存分出去，
+		 * 表现是两边随机踩对方的数据，谁先崩不一定。
+		 */
+
+		openvela_reserved: openvela@4a400000 {
+			reg = <0x0 0x4a400000 0x0 0x04000000>;
+			no-map;
+		};
+	};
+
+	/*
+	 * Rockchip 的 rpmsg-over-mailbox。Linux 站 master。
+	 *
+	 * mboxes 的两个名字容易和方向搞混：
+	 *   "rpmsg-rx" = Linux 收，对应 openvela 的发送 group（0）
+	 *   "rpmsg-tx" = Linux 发，对应 openvela 的接收 group（3）
+	 *
+	 * reg 是 vring 区：驱动按 vdev-nums 从这里依次切两段 0x8000。
+	 */
+
+	rpmsg: rpmsg@47800000 {
+		compatible = "rockchip,rpmsg";
+		reg = <0x0 0x47800000 0x0 0x00100000>;
+		memory-region = <&rpmsg_dma>;
+		mboxes = <&mailbox0 0>, <&mailbox3 0>;
+		mbox-names = "rpmsg-rx", "rpmsg-tx";
+		rockchip,link-id = <0x03>;
+		rockchip,vdev-nums = <1>;
+		status = "okay";
+	};
+};
+
+&little_core_thermal {
+	/delete-node/ cooling-maps;
+};
+
+&mailbox0 {
+	status = "okay";
+};
+
+&mailbox3 {
+	status = "okay";
+};
+
+/*
+ * UART0 是 openvela 的调试口（CH340 那一路）。两个 OS 同时初始化同一个
+ * 16550 的表现是字符互相插队、波特率被对方改掉，而且谁都不报错。
+ *
+ * 所以 Linux 这边彻底关掉它。Linux 在这一版**没有控制台** —— 它活着的
+ * 证据是 openvela 那边 `ampctl status` 的"握手完成"变成"是"：那个信号
+ * 只有在 Linux 跑到 rockchip_rpmsg 的 probe、建好两个 virtqueue、填好
+ * 接收缓冲之后才会发出来，是一个相当靠后、相当可信的存活判据。
+ *
+ * 真要看 Linux 的日志，40pin 上还有 UART5_M0（21/23 脚）等几路可以接
+ * 第二个 USB-TTL；那属于调试时的可选项，不是这一版的前提。
+ */
+
+&uart0 {
+	status = "disabled";
+};
+
+&fiq_debugger {
+	status = "disabled";
+};
