@@ -36,8 +36,37 @@ bootamp 不带参数时自己从 eMMC 把三块料读进来
   `bootamp <addr>` 的老用法保留不变，给"FIT 已经在内存里"的场合用。
   已经手工 setenv 过的 amp_linux_cmd 不会被覆盖。
 
---- a/cmd/bootamp.c
-+++ b/cmd/bootamp.c
+★ 顺带修掉一个空指针：devtype 没设时 booti 会炸
+
+  改完之后第一次跑 `bootamp`，命令这回是对的了：
+
+    AMP: linux via amp_linux_cmd: booti 0x40400000 - 0x4f000000
+    ## Flattened Device Tree blob at 0x4f000000
+    "Synchronous Abort" handler, esr 0x96000006
+    PC = strcmp+8, x0 = 0, x1 -> "usb"
+
+  调用链（栈回溯符号化之后）是
+  do_bootamp → amp_cpus_on_at → brought_up_all_amp → brought_up_amp →
+  cmd_process → do_booti → bootm_disable_interrupts，那里是
+
+    if (!strcmp(env_get("devtype"), "usb"))
+
+  **没有判空**。平时 devtype/devnum 由 setup_boot_dev() 设好；但关掉
+  CONFIG_USING_KERNEL_DTB（0005 补丁）之后它跑在环境变量初始化**之前**
+  —— 日志里从 `Bootdev(atags): mmc 0` 变成了 `Bootdev(atags): <NULL> <NULL>`，
+  env_set 落了空。
+
+  两处都修：bootamp 自己把 devtype/devnum 补成真实值（这条路本来就是从
+  eMMC 读的），common/bootm.c 那个 strcmp 加判空 —— 后者才是根因，
+  任何不走 USING_KERNEL_DTB 的配置都会踩。
+
+  这个故障的现场极具误导性：报错停在"Booting using the fdt blob"之后，
+  看起来像 dtb 有问题，实际和 dtb 毫无关系。**栈回溯符号化（nm + 逐个
+  地址查）是这里唯一有效的一步**，靠读日志猜不出来。
+
+diff -urN a/cmd/bootamp.c b/cmd/bootamp.c
+--- a/cmd/bootamp.c	2026-09-13 11:20:36.664409377 +0800
++++ b/cmd/bootamp.c	2026-09-13 11:20:36.664409377 +0800
 @@ -5,11 +5,21 @@
   * Copyright (c) 2026 contest2026_423_nanshannan
   *
@@ -64,7 +93,7 @@ bootamp 不带参数时自己从 eMMC 把三块料读进来
   *
   * ★ 这条命令不会返回。
   *
-@@ -27,16 +37,89 @@
+@@ -27,16 +37,111 @@
  #include <common.h>
  #include <amp.h>
  #include <command.h>
@@ -118,6 +147,28 @@ bootamp 不带参数时自己从 eMMC 把三块料读进来
 +	if (ret)
 +		return ret;
 +
++	/* ★ devtype/devnum 必须有值，否则 booti 会在 strcmp(NULL) 上炸
++	 *
++	 *   common/bootm.c 的 bootm_disable_interrupts() 里是
++	 *
++	 *       if (!strcmp(env_get("devtype"), "usb"))
++	 *
++	 *   没有判空。平时这两个变量由 setup_boot_dev() 设好，但关掉
++	 *   CONFIG_USING_KERNEL_DTB 之后（见 0005 补丁）它跑在环境变量初始化
++	 *   **之前** —— 日志里是 `Bootdev(atags): <NULL> <NULL>`，而原来是
++	 *   `Bootdev(atags): mmc 0`。于是 env_get 返回 NULL，booti 走到
++	 *   bootm_disable_interrupts() 就 data abort：
++	 *
++	 *       "Synchronous Abort" handler, esr 0x96000006
++	 *       PC = strcmp+8, x0 = 0, x1 -> "usb"
++	 *
++	 *   我们这条路本来就是从 eMMC 读的，直接把真实值补上。
++	 *   （bootm.c 那个判空也一并修了，见同一份补丁。）
++	 */
++
++	env_set("devtype", "mmc");
++	env_set("devnum", "0");
++
 +	/* 已经设过就不动 —— 手工覆盖优先于默认值。 */
 +
 +	if (!env_get("amp_linux_cmd")) {
@@ -156,7 +207,7 @@ bootamp 不带参数时自己从 eMMC 把三块料读进来
  
  	printf("AMP: booting from FIT at %p\n", fit);
  
-@@ -51,9 +134,11 @@
+@@ -51,9 +156,11 @@
  
  U_BOOT_CMD(
  	bootamp, 2, 0, do_bootamp,
@@ -171,3 +222,27 @@ bootamp 不带参数时自己从 eMMC 把三块料读进来
  	"\n"
  	"The FIT describes which image runs on which CPU (by MPIDR).\n"
  	"On success this command does not return: the current CPU enters\n"
+diff -urN a/common/bootm.c b/common/bootm.c
+--- a/common/bootm.c	2026-09-13 11:20:36.668809377 +0800
++++ b/common/bootm.c	2026-09-13 11:20:36.668809377 +0800
+@@ -566,8 +566,18 @@
+ 	 * Do not go further if usb is boot device,
+ 	 * We may access usb at late sequence.
+ 	 */
+-	if (!strcmp(env_get("devtype"), "usb"))
+-		return 0;
++	{
++		/* env_get() 可能返回 NULL（环境还没初始化、或者这块板子根本
++		 * 没走 setup_boot_dev()）。原来直接喂给 strcmp，空指针解引用
++		 * 会变成一次 data abort，而现场看起来像"booti 把 dtb 当内核"
++		 * 这种完全不相干的故障。
++		 */
++
++		const char *devtype = env_get("devtype");
++
++		if (devtype && !strcmp(devtype, "usb"))
++			return 0;
++	}
+ 
+ 	/*
+ 	 * We have reached the point of no return: we are going to
