@@ -56,5 +56,39 @@ fi
 
 python3 "$TOOLS/validate-log.py" "$ROOT/logs/zhouyllll"
 
+# ★ 脱敏：会话日志里会出现运行时配置过的密钥
+# ------------------------------------------------
+# 白名单只解决"哪些会话该进仓"，解决不了"会话里说了什么"。本仓是 public，
+# 而调试期在板子上 `set_llm` 配过的 MiMo API key 会**原样出现在对话记录里**
+# —— 实测一份日志里出现 7 次，并且已经随一次提交进了历史（未推送，已用
+# git-filter-repo 全量重写清掉）。
+#
+# 所以导出之后、提交之前必须再过一遍脱敏。放在这里而不是 .gitignore：
+# .gitignore 管的是"哪些文件不进仓"，而日志是**必须**进仓的，要处理的是
+# 文件内容。
+#
+# 新增密钥模式时往下面加一行 sed。
+
+scrub() {
+  local n
+  n=$(grep -roE 'tp-[a-z0-9]{40,}|sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}' \
+        "$ROOT/logs" 2>/dev/null | wc -l)
+  if [ "$n" -gt 0 ]; then
+    grep -rlE 'tp-[a-z0-9]{40,}|sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}' \
+        "$ROOT/logs" 2>/dev/null |
+      while read -r f; do
+        sed -i -E 's/tp-[a-z0-9]{40,}/***REDACTED-API-KEY***/g;
+                   s/sk-[A-Za-z0-9]{20,}/***REDACTED-API-KEY***/g;
+                   s/ghp_[A-Za-z0-9]{30,}/***REDACTED-TOKEN***/g' "$f"
+        echo "  脱敏: $f"
+      done
+    echo "  ★ 共处理 $n 处密钥；请确认 git diff 之后再提交"
+  else
+    echo "  脱敏检查: 未发现密钥"
+  fi
+}
+
+scrub
+
 echo
 echo "提交： git add logs/ && git commit -s -m 'logs: 更新 AI Coding 日志'"
