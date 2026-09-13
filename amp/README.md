@@ -20,7 +20,8 @@ RK3576 是 4×A53 + 4×A72。AMP 就是让两个簇各跑一个**完整的操作
 
 | 路径 | 是什么 |
 |---|---|
-| `uboot/0004-bootamp-from-ram.patch` | U-Boot：新增 `bootamp <addr>` 命令 |
+| `uboot/0004-amp-boot-from-ram.patch` | U-Boot：新增 `bootamp <addr>` 命令 |
+| `uboot/0005-display-without-kernel-dtb.patch` | U-Boot：用自己的完整控制 dtb 点亮 5 寸 MIPI 屏 |
 | `linux/rk3576-kickpi-k7-amp.dts` | Linux 的 DTB：只保留 A72 的四个 cpu 节点 |
 | `linux/amp.config` | Linux 的配置增量 |
 | `fit/amp.its` | 哪个镜像跑在哪颗核上 —— AMP 的全部契约 |
@@ -85,9 +86,13 @@ make -j
 
 # 4. 带 AMP 的 U-Boot
 cd ~/rk3576-amp/u-boot
-patch -p1 < <本仓>/amp/uboot/0004-bootamp-from-ram.patch
-patch -p0 < <本仓>/bsp/uboot/0001-defconfig-bootdelay.patch   # 要有提示符才能敲 bootamp
-./make.sh rk3576-amp CROSS_COMPILE=$TC
+patch -p1 < <本仓>/amp/uboot/0004-amp-boot-from-ram.patch
+patch -p1 < <本仓>/amp/uboot/0005-display-without-kernel-dtb.patch
+./make.sh rk3576-kickpi-k7 CROSS_COMPILE=$TC   # 这个配置自带 BOOTDELAY=3
+
+# 主机需要 dtc（内核树里有一份：kernel-6.1/scripts/dtc/dtc），
+# make.sh 还会检查 `python2` 是否存在 —— 它其实没被用到，
+# 给一个转发到 python3 的壳脚本就行。
 
 # 5. AMP FIT
 cp nuttx.bin amp/fit/openvela-amp.bin

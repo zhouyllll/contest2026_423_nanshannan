@@ -1,0 +1,704 @@
+AMP 下点亮 5 寸 MIPI 屏：U-Boot 用自己的完整控制设备树，不再依赖内核 dtb
+
+应用：在 u-boot/ 下 `patch -p1 < 本文件`，然后
+`./make.sh rk3576-kickpi-k7 CROSS_COMPILE=<tc>`。
+（本文件叠在 0004-amp-boot-from-ram.patch 之上。）
+
+★ 问题
+
+  U-Boot 的显示驱动绑在 display-subsystem 节点上，Rockchip 的设计是从
+  boot 分区 resource 段里的**内核 dtb** 取它（CONFIG_USING_KERNEL_DTB）。
+  AMP 这条路把 boot 分区换成了裸 Linux Image，没有 resource 段，U-Boot
+  退回自己那份 fdtgrep 剪过的 rk3576-evb 控制 dtb —— 里面没有面板。
+
+  后果不止"没有开机 logo"：openvela 是**接管** U-Boot 已经点亮的链路
+  （board/kickpi-k7 的 KEEP_UBOOT_DISPLAY），时序从 VOP2 寄存器读回。
+  屏没点亮时读到的是上电默认值：
+
+    VP1_HTOTAL_HS_END 0x032000c8   htotal=800
+    VP1_HACT_ST_END   0x01900258   active 400..600 → 宽 200
+    VP1_VACT_ST_END   0x000a00fa   active  10..250 → 高 240
+    ESMART0/1 CTRL/MST 全 0        → 没有图层
+
+  /dev/fb0 就成了 200x240，LVGL 界面无处可画。
+
+★ 走过的两条弯路
+
+  1) 给控制 dtb 的显示链逐个打 u-boot,dm-pre-reloc 标签。dt.dtb 从 9006
+     涨到 13162 字节，simple-panel-dsi 留下了，但 display-subsystem 的
+     **route 子节点**仍被剪掉（fdtgrep 会丢掉被保留节点下没打标签的子
+     节点），rockchip_display_probe() 拿不到 route 就直接返回。
+
+  2) CONFIG_EMBED_KERNEL_DTB + EMBED_KERNEL_DTB_ALWAYS。dtb 确实被采用
+     （日志里 "DTB: dts/kern.dtb" / "Model: KICKPI-K7 + 5\" MIPI 720x1280"），
+     但 `dm tree` 显示 init_kernel_dtb() 之后绑出来的是**控制 dtb 的第二份
+     拷贝**（节点集合一模一样，只少了被 dm_rm_kernel_dev() 摘掉的 crypto），
+     i2c/vop/dsi 一个都没有 —— of_live_build() 没有按新 blob 重建。
+
+★ 这份补丁做的三件事
+
+  一、configs/rk3576-kickpi-k7.config：关掉 USING_KERNEL_DTB
+
+     dts/Makefile 里控制 dtb 是否过 fdtgrep 就看这一个开关：
+
+       ifneq ($(CONFIG_USING_KERNEL_DTB)$(CONFIG_SUPPORT_USBPLUG),)
+               $(obj)/dt.dtb: ... fdtgrep ...     # 裁
+       else
+               $(obj)/dt.dtb: $(DTB) FORCE        # 原样拷贝
+       endif
+
+     关掉之后 dt.dtb 就是完整的 141667 字节，面板、route、vop、dsi 全在，
+     一个标签都不用打，也不依赖任何分区内容。
+
+  二、arch/arm/dts/rk3576-kickpi-k7.dts：新的控制设备树
+
+     面板节点移植自 kernel-6.1 的
+     rk3576-kickpi-lcd-mipi-5-720-1280-F050008M01.dtsi。另外三处是关掉
+     USING_KERNEL_DTB 之后必须自己补的：
+
+       - &vop / &vop_mmu 打开（U-Boot 的 rk3576.dtsi 里默认 disabled，
+         平时靠内核 dtb 打开）。不打开就是
+         `Warn: can't find crtc driver -19`。
+       - adc-keys 从 rk3576-evb.dts 搬过来（board_late_init 要读按键）。
+       - &crypto 删掉 assigned-clocks / assigned-clock-rates。原因见
+         dts 里的注释：属性裁剪（CONFIG_OF_U_BOOT_REMOVE_PROPS）也一起
+         停了，crypto 驱动看到 assigned-clock-rates 就去 clk_set_defaults()，
+         而 U-Boot 的 rk3576 cru 设不了这两路，探测失败 →
+         `Can't find expected crypto device` → FIT 校验 `Bad Data Hash`。
+
+  三、drivers/video/drm/rockchip_display.c：logo 读不到时的退路
+
+     display_logo() 是整个文件里唯一会调 display_init()/display_enable()
+     的地方，而 rockchip_show_logo() 只在 load_bmp_logo() 成功后才调它。
+     AMP 下没有 resource 段，logo 永远读不到，链路就永远不会被配置。
+
+     新增 display_blank()：按面板自己的时序分配一块全黑的全屏缓冲，走同一条
+     display_logo() 把链路点亮。openvela 的帧缓冲是它自己在 heap 上分配再写
+     进 VOP2 的 MST（chip/rk3576/rk3576_fb.c），并不复用 U-Boot 这一块，
+     所以这里不需要有图可画。
+
+★ 板上验证（2026-09-13）
+
+  No resource file: logo.bmp
+  failed to display uboot logo
+  Rockchip UBOOT DRM driver version: v1.0.1
+  VOP have 1 active VP / vp1 have layer nr:1[3 ], primary plane: 3
+  dsi@27d80000:  detailed mode clock 84000 kHz, flags[a]
+      H: 0720 0752 0767 0799
+      V: 1280 1301 1316 1328
+  VOP update mode to: 720x1280p79, type: MIPI0 for VP1
+  VP1 set crtc_clock to 83334KHz
+  display blank 720x1280 @00000000fdf00000 (no resource logo)
+  VOP VP1 enable Esmart1[720x1280->720x1280@0x0] fmt[0] addr[0xfdf00000]
+  DSI-Link bandwidth: 555560 Kbps x 4
+
+  —— 和原厂固件走内核 dtb 时的时序、图层、帧缓冲地址完全一致，区别只是
+  画面是黑的而不是 Rockchip logo。
+
+diff -urN a/arch/arm/dts/rk3576-kickpi-k7.dts b/arch/arm/dts/rk3576-kickpi-k7.dts
+--- a/arch/arm/dts/rk3576-kickpi-k7.dts	2026-09-13 10:18:31.128294274 +0800
++++ b/arch/arm/dts/rk3576-kickpi-k7.dts	2026-09-13 10:18:31.128294274 +0800
+@@ -0,0 +1,449 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * KICKPI-K7 的 U-Boot 控制设备树。
++ *
++ * ★ 为什么需要它
++ *
++ *   U-Boot 的显示驱动（drivers/video/drm/）是绑在 **display-subsystem**
++ *   节点上的，而它平时用的是从 boot 分区 resource 段读出来的**内核 dtb**
++ *   （rockchip_read_dtb_file → gd->fdt_blob 重新指过去）。原厂固件靠
++ *   SARADC 分压识别接的是哪块屏，选中
++ *   rk3576-kickpi-k7-android-mipi-5-720-1280-F050008M01 那一份。
++ *
++ *   AMP 这条路把 boot 分区换成了裸 Linux Image，没有 resource 段，于是
++ *   U-Boot 退回自己的 rk3576-evb 控制 dtb —— 那里面**没有面板节点**，
++ *   display 列表是空的，rockchip_show_logo() 一行输出都没有，屏不亮。
++ *
++ *   后果不是"没有开机 logo"这么轻：openvela 的 VOP2 驱动是**接管** U-Boot
++ *   已经点亮的链路（KEEP_UBOOT_DISPLAY），它从 VOP2 寄存器读回时序。
++ *   屏没点亮时读到的是上电默认值：
++ *
++ *     VP1_HTOTAL_HS_END 0x032000c8   htotal=800  hs_end=200
++ *     VP1_HACT_ST_END   0x01900258   active 400..600 → 宽 200
++ *     VP1_VACT_ST_END   0x000a00fa   active  10..250 → 高 240
++ *     ESMART0/1 CTRL/MST 全 0        → 没有图层
++ *
++ *   于是 /dev/fb0 变成 200x240，LVGL 界面无处可画。
++ *
++ *   把面板描述放进 U-Boot **自己的**控制 dtb，就不再依赖任何分区内容 ——
++ *   无论 boot 分区放的是 Android 镜像、裸 Image 还是空的，屏都会亮。
++ *
++ * 面板：5 寸 720x1280 MIPI DSI，4 lane，RGB888，像素钟 84MHz。
++ *       节点内容移植自 kernel-6.1 的
++ *       rk3576-kickpi-lcd-mipi-5-720-1280-F050008M01.dtsi
++ *       （U-Boot 的 drivers/video/drm/rockchip_panel.c 与内核的
++ *       panel-simple 用同一套 panel-init-sequence 格式）。
++ *
++ * 不移植的部分：背光亮度表（U-Boot 只需要能点亮，默认占空比够）、
++ *       触摸（U-Boot 不用）、以及内核侧的 GT9xx 配置 —— 顺带一提，
++ *       本板实测触摸是 **FT8756**（openvela 探到 芯片ID=0x8756），
++ *       和这份 dtsi 里写的 goodix 不一致，取参数时只用它的面板部分。
++ */
++
++/dts-v1/;
++
++#include <dt-bindings/media/rockchip_mipi_dsi.h>
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++#include "rk3576.dtsi"
++#include "rk3576-u-boot.dtsi"
++
++/ {
++	model = "KICKPI-K7 (RK3576) for U-Boot";
++	compatible = "rockchip,kickpi-k7", "rockchip,rk3576";
++
++	chosen {
++		stdout-path = &uart0;
++	};
++
++	/* 面板供电。内核那份还挂了 vin-supply = <&vcc_3v3_s0>（PMIC 的轨），
++	 * U-Boot 的控制 dtb 里没有 rk806 节点，所以这里不写 vin-supply ——
++	 * 那一轨在 U-Boot 阶段本来就是上电默认开的。
++	 */
++	vcc3v3_lcd_n: vcc3v3-lcd0-n {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc3v3_lcd0_n";
++		regulator-boot-on;
++		enable-active-high;
++		gpio = <&gpio0 RK_PC6 GPIO_ACTIVE_HIGH>;
++	};
++
++	/* 从 rk3576-evb.dts 搬过来。DEFAULT_DEVICE_TREE 换成本文件之后，
++	 * 原来 evb 提供的这个节点就没了 —— 而 board_late_init() 的
++	 * setup_download_mode()/scan_run_cmd() 要靠它读按键。
++	 */
++	adc-keys {
++		compatible = "adc-keys";
++		io-channels = <&saradc 1>;
++		io-channel-names = "buttons";
++		keyup-threshold-microvolt = <1800000>;
++		u-boot,dm-pre-reloc;
++		status = "okay";
++
++		volumeup-key {
++			u-boot,dm-pre-reloc;
++			linux,code = <KEY_VOLUMEUP>;
++			label = "volume up";
++			press-threshold-microvolt = <1750>;
++		};
++	};
++
++	backlight: backlight {
++		compatible = "pwm-backlight";
++		pwms = <&pwm1_6ch_1 0 25000 0>;
++		brightness-levels = <0 255>;
++		default-brightness-level = <200>;
++	};
++};
++
++&pwm1_6ch_1 {
++	status = "okay";
++};
++
++/* U-Boot 的 rk3576.dtsi 里 vop/vop_mmu 默认 disabled —— 平时靠内核 dtb
++ * 打开。关掉 USING_KERNEL_DTB 之后就得自己开，否则
++ * rockchip_display_probe() 找不到 crtc：
++ *   Warn: can't find crtc driver -19
++ */
++&vop {
++	status = "okay";
++};
++
++&vop_mmu {
++	status = "okay";
++};
++
++&mipidcphy0 {
++	status = "okay";
++};
++
++&dsi {
++	status = "okay";
++
++	dsi_panel: panel@0 {
++		status = "okay";
++		compatible = "simple-panel-dsi";
++		reg = <0>;
++		backlight = <&backlight>;
++		power-supply = <&vcc3v3_lcd_n>;
++
++		reset-gpios = <&gpio0 RK_PA2 GPIO_ACTIVE_LOW>;
++
++		reset-delay-ms = <120>;
++		enable-delay-ms = <120>;
++		prepare-delay-ms = <120>;
++		init-delay-ms = <120>;
++		unprepare-delay-ms = <60>;
++		disable-delay-ms = <60>;
++
++		width-mm = <68>;
++		height-mm = <121>;
++
++		dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST |
++		      MIPI_DSI_MODE_LPM | MIPI_DSI_MODE_EOT_PACKET
++		      /* ★ 同一位 BIT(9)，两边名字相反：
++		       *   内核 dt-bindings/display/drm_mipi_dsi.h  NO_EOT_PACKET
++		       *   U-Boot dt-bindings/media/rockchip_mipi_dsi.h  EOT_PACKET
++		       *     （注释写的是 "disable EoT packets in HS mode"）
++		       *   语义一致，只是 U-Boot 少了 NO_ 前缀。 */)>;
++		dsi,format = <MIPI_DSI_FMT_RGB888>;
++		dsi,lanes  = <4>;
++
++		panel-init-sequence = [
++		// CMD2 ENABLE
++		15 00 02 00 00
++		39 00 04 FF 87 56 01
++		15 00 02 00 80
++		39 00 03 FF 87 56
++		// Panel Resolution 720x1280
++		15 00 02 00 A1
++		39 00 07 B3 02 D0 05 00 20 FC
++		// TCON
++		15 00 02 00 80
++		39 00 07 C0 00 F6 00 10 00 24
++		15 00 02 00 90
++		39 00 07 C0 00 F6 00 10 00 24
++		15 00 02 00 A0
++		39 00 07 C0 02 14 00 10 00 24
++		15 00 02 00 B0
++		39 00 07 C0 00 F6 00 10 00 24
++		15 00 02 00 C1
++		39 00 09 C0 01 27 00 EA 00 C5 01 5F
++		15 00 02 00 D7
++		39 00 07 C0 00 C5 00 10 00 24
++		15 00 02 00 A3
++		39 00 07 C1 00 20 00 20 00 02
++		15 00 02 00 80
++		39 00 11 CE 01 81 09 13 00 78 00 78 00 50 00 50 00 78 00 78
++		15 00 02 00 90
++		39 00 10 CE 00 8E 0E B6 00 8E 80 09 13 00 04 00 1C 1F 16
++		15 00 02 00 A0
++		39 00 04 CE 20 00 00
++		15 00 02 00 B0
++		39 00 04 CE 22 00 00
++		15 00 02 00 D1
++		39 00 08 CE 00 00 01 00 00 00 00
++		15 00 02 00 E1
++		39 00 0C CE 08 02 4D 02 4D 02 4D 00 00 00 00
++		15 00 02 00 F1
++		39 00 0A CE 0C 06 0A 00 E9 00 E9 00 F8
++		15 00 02 00 B0
++		39 00 05 CF 00 00 6E 72
++		15 00 02 00 B5
++		39 00 05 CF 02 02 94 98
++		15 00 02 00 C0
++		39 00 05 CF 04 04 D8 DC
++		15 00 02 00 C5
++		39 00 05 CF 00 00 08 0C
++		// Scan Mode
++		15 00 02 00 E8
++		15 00 02 C0 40
++		// VST1&VST2
++		15 00 02 00 80
++		39 00 09 C2 84 00 05 89 83 00 05 89
++		// CKV1-3
++		15 00 02 00 A0
++		39 00 10 C2 82 04 00 05 89 81 04 00 05 89 00 04 00 05 89
++		// CKV4-6
++		15 00 02 00 B0
++		39 00 10 C2 01 04 00 05 89 02 04 00 05 89 03 04 00 05 89
++		// CKV7-8
++		15 00 02 00 C0
++		39 00 0B C2 04 04 00 05 89 05 04 00 05 89
++		15 00 02 00 E0
++		39 00 05 C2 77 77 77 77
++		15 00 02 00 C0
++		39 00 05 C3 99 99 99 99
++		15 00 02 00 80
++		39 00 11 CB 00 C5 00 00 05 05 00 05 0A 05 C5 00 05 05 00 C0
++		15 00 02 00 90
++		39 00 11 CB 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++		15 00 02 00 A0
++		39 00 05 CB 00 00 00 00
++		15 00 02 00 B0
++		39 00 05 CB 10 51 94 50
++		15 00 02 00 C0
++		39 00 05 CB 10 51 94 50
++		15 00 02 00 80
++		39 00 11 CC 2D 2D 2D 2D 07 09 0B 0D 25 25 03 2D 22 2D 24 2D
++		15 00 02 00 90
++		39 00 09 CC 29 16 17 18 19 1A 1B 26
++		15 00 02 00 80
++		39 00 11 CD 2D 2D 2D 2D 06 08 0A 0C 25 00 02 2D 22 2D 24 2D
++		15 00 02 00 90
++		39 00 09 CD 29 16 17 18 19 1A 1B 26
++		15 00 02 00 A0
++		39 00 11 CC 2D 2D 2D 2D 08 06 0C 0A 25 25 02 2D 24 2D 23 2D
++		15 00 02 00 B0
++		39 00 09 CC 29 16 17 18 19 1A 1B 26
++		15 00 02 00 A0
++		39 00 11 CD 2D 2D 2D 2D 09 07 0D 0B 25 00 03 2D 24 2D 23 2D
++		15 00 02 00 B0
++		39 00 09 CD 29 16 17 18 19 1A 1B 26
++		15 00 02 00 80
++		15 00 02 A7 13 //0x13  RGBBGR  0x16  RGBRGB
++		15 00 02 00 82
++		39 00 03 A7 22 02
++		15 00 02 00 85
++		15 00 02 C4 1C
++		15 00 02 00 A0
++		39 00 04 C4 8D D8 8D
++		15 00 02 00 93
++		15 00 02 C5 37
++		15 00 02 00 97
++		15 00 02 C5 37
++		15 00 02 00 B6
++		39 00 03 C5 2D 2D
++		15 00 02 00 9A
++		15 00 02 C5 19
++		15 00 02 00 9C
++		15 00 02 C5 19
++		15 00 02 00 97
++		15 00 02 C4 01
++		15 00 02 00 9B
++		15 00 02 F5 4B
++		15 00 02 00 93
++		39 00 03 F5 00 00
++		15 00 02 00 9D
++		15 00 02 F5 49
++		15 00 02 00 82
++		39 00 03 F5 00 00
++		15 00 02 00 8C
++		39 00 04 C3 00 00 00
++		15 00 02 00 84
++		39 00 03 C5 28 28
++		15 00 02 00 A4
++		15 00 02 D7 00
++		15 00 02 00 80
++		39 00 03 F5 59 59
++		15 00 02 00 84
++		39 00 04 F5 59 59 59
++		15 00 02 00 96
++		15 00 02 F5 59
++		15 00 02 00 A6
++		15 00 02 F5 59
++		15 00 02 00 CA
++		15 00 02 C0 80
++		15 00 02 00 B1
++		15 00 02 F5 1F
++		15 00 02 00 00
++		39 00 03 D8 29 2D
++		15 00 02 00 86
++		39 00 07 C0 01 04 01 01 22 03
++		15 00 02 00 96
++		39 00 07 C0 01 04 01 01 1B 03
++		15 00 02 00 A6
++		39 00 07 C0 01 04 01 01 3E 03
++		15 00 02 00 E9
++		39 00 07 C0 01 04 01 01 1B 03
++		15 00 02 00 A3
++		39 00 07 CE 01 04 01 01 1B 03
++		15 00 02 00 B3
++		39 00 07 CE 01 04 01 01 1B 03
++		// gamma2.2
++		15 00 02 00 00
++		39 00 29 E1 05 06 09 10 69 1A 22 28 33 98 3A 41 47 4C E5 51 59 60 67 05 6E 75 7C 85 08 8F 94 9B A2 22 AB B6 C4 CE 9E DA EA F7 FF 7B
++		15 00 02 00 00
++		39 00 29 E2 05 06 09 10 69 1A 22 28 33 98 3A 41 47 4C E5 51 59 60 67 05 6E 75 7C 85 08 8F 94 9B A2 22 AB B6 C4 CE 9E DA EA F7 FF 7B
++		15 00 02 00 00
++		39 00 29 E3 05 06 09 10 69 1A 22 28 33 98 3A 41 47 4C E5 51 59 60 67 05 6E 75 7C 85 08 8F 94 9B A2 22 AB B6 C4 CE 9E DA EA F7 FF 7B
++		15 00 02 00 00
++		39 00 29 E4 05 06 09 10 69 1A 22 28 33 98 3A 41 47 4C E5 51 59 60 67 05 6E 75 7C 85 08 8F 94 9B A2 22 AB B6 C4 CE 9E DA EA F7 FF 7B
++		15 00 02 00 00
++		39 00 29 E5 05 06 09 10 69 1A 22 28 33 98 3A 41 47 4C E5 51 59 60 67 05 6E 75 7C 85 08 8F 94 9B A2 22 AB B6 C4 CE 9E DA EA F7 FF 7B
++		15 00 02 00 00
++		39 00 29 E6 05 06 09 10 69 1A 22 28 33 98 3A 41 47 4C E5 51 59 60 67 05 6E 75 7C 85 08 8F 94 9B A2 22 AB B6 C4 CE 9E DA EA F7 FF 7B
++		// EN GND 4 frame
++		15 00 02 00 CC
++		15 00 02 C0 13
++		// LVD detect Voltage
++		15 00 02 00 82
++		15 00 02 C5 35
++		15 00 02 00 94
++		39 00 04 C5 02 01 01
++		15 00 02 00 98
++		39 00 03 C5 25 01
++		15 00 02 00 9B
++		15 00 02 C5 21
++		15 00 02 00 9D
++		15 00 02 C5 25
++		// Write ID
++		15 00 02 00 D0
++		15 00 02 D0 56
++		//LCD initial code End
++		05 78 01 11
++		05 00 01 29
++		15 00 02 35 00
++		];
++
++		panel-exit-sequence = [
++		05 00 01 28
++		05 00 01 10
++		];
++
++		disp_timings0: display-timings {
++		native-mode = <&dsi_timing0>;
++		dsi_timing0: timing0 {
++			clock-frequency = <84000000>;
++			hactive = <720>;
++			vactive = <1280>;
++			hfront-porch = <32>;
++			hsync-len = <15>;
++			hback-porch = <32>;
++			vfront-porch = <21>;
++			vsync-len = <15>;
++			vback-porch = <12>;
++			hsync-active = <0>;
++			vsync-active = <0>;
++			de-active = <0>;
++			pixelclk-active = <0>;
++		};
++		};
++	};
++};
++
++&dsi_in_vp0 {
++	status = "disabled";
++};
++
++&dsi_in_vp1 {
++	status = "okay";
++};
++
++&dsi_in_vp2 {
++	status = "disabled";
++};
++
++&route_dsi {
++	status = "okay";
++	connect = <&vp1_out_dsi>;
++};
++
++/*
++ * ★ 关掉 USING_KERNEL_DTB 的一个副作用：dt.dtb 不再被剪属性
++ *
++ *   dts/Makefile 的 fdtgrep 有两段。第一段按标签剪节点，第二段剪属性：
++ *     CONFIG_OF_U_BOOT_REMOVE_PROPS = "pinctrl-0 pinctrl-names clock-names
++ *       interrupt-parent assigned-clocks assigned-clock-rates
++ *       assigned-clock-parents"
++ *   走 `shipped` 这条路两段都不跑，于是这些属性**第一次**出现在 U-Boot
++ *   自己的控制 dtb 里。
++ *
++ *   crypto 驱动对此很敏感（drivers/crypto/rockchip/crypto_v2.c）：
++ *
++ *     if (dev_read_size(dev, "assigned-clock-rates") > 0)
++ *             return clk_set_defaults(dev);
++ *
++ *   属性被剪掉时这一支不走，探测直接成功；现在属性在了，就去
++ *   clk_set_defaults()，而 U-Boot 的 rk3576 cru 设不了 ACLK_CRYPTO /
++ *   CLK_PKA_CRYPTO 这两路，探测失败。表现是 bootamp 校验 FIT 时：
++ *
++ *     Can't find expected crypto device
++ *     hw_fit_calculate_hash: algo sha256 failed
++ *     Bad Data Hash
++ *
++ *   —— 硬件 sha256 没了，FIT 的完整性校验就过不去。
++ *
++ *   这里只摘掉 crypto 这一个节点的两条属性，而不是全局恢复属性裁剪：
++ *   显示链（vop/dsi/dcphy）是靠**完整属性**的内核 dtb 跑通的，全局剪回去
++ *   等于把一个已定位的问题换成一批未定位的问题。
++ */
++&crypto {
++	/delete-property/ assigned-clocks;
++	/delete-property/ assigned-clock-rates;
++};
++
++&uart0 {
++	status = "okay";
++};
++
++/*
++ * ★ 这里曾经有一批 u-boot,dm-pre-reloc 标签，现在不需要了
++ *
++ *   dts/Makefile 对 U-Boot 自己的控制 dtb 是否过 fdtgrep，取决于
++ *   CONFIG_USING_KERNEL_DTB：
++ *
++ *     ifneq ($(CONFIG_USING_KERNEL_DTB)$(CONFIG_SUPPORT_USBPLUG),)
++ *             $(obj)/dt.dtb: ... fdtgrep -b u-boot,dm-pre-reloc -b u-boot,dm-spl
++ *     else
++ *             $(obj)/dt.dtb: $(DTB) FORCE      # 原样拷贝，不裁
++ *     endif
++ *
++ *   Rockchip 敢裁到只剩标签节点，是因为它设计上从**内核 dtb** 取真正的
++ *   配置（USING_KERNEL_DTB）—— 控制 dtb 只需要够 SPL 和早期 DM 用。
++ *
++ *   我先试过"保留 USING_KERNEL_DTB + 给显示链逐个打标签"：dt.dtb 从
++ *   9006 涨到 13162 字节，simple-panel-dsi 也留下了，但
++ *   display-subsystem 的 **route 子节点**还是被剪掉了（fdtgrep 会丢掉
++ *   被保留节点下没打标签的子节点），rockchip_display_probe() 拿不到
++ *   route 就直接返回，display 列表还是空的。要救就得把
++ *   route/ports/endpoint 整条链逐个打标签，而它们大多没有 label。
++ *
++ *   AMP 这条路本来就读不到内核 dtb（boot 分区是裸 Linux Image），
++ *   USING_KERNEL_DTB 只剩坏处：既剪掉了我们要的节点，又要为一份读不到
++ *   的 dtb 留代码。所以 configs/rk3576-kickpi-k7.config 直接把它关掉，
++ *   dt.dtb 变成这份 dts 的完整编译结果，标签也就一个都不用打了。
++ *
++ *   顺带一个好处：这些节点不再进 SPL 的 dt-spl.dtb（同一份标签列表），
++ *   3KB 的 panel-init-sequence 不会白占 SPL 的 dtb。
++ */
+diff -urN a/configs/rk3576-kickpi-k7.config b/configs/rk3576-kickpi-k7.config
+--- a/configs/rk3576-kickpi-k7.config	2026-09-13 10:18:31.132613382 +0800
++++ b/configs/rk3576-kickpi-k7.config	2026-09-13 10:18:31.136932491 +0800
+@@ -0,0 +1,66 @@
++# KICKPI-K7：让 U-Boot 用自己的完整控制设备树点亮 5 寸 MIPI 屏。
++#
++# 链式：rk3576_defconfig → rk3576-amp.config → 本文件
++# 用法：./make.sh rk3576-kickpi-k7 CROSS_COMPILE=<tc>
++#
++# ★ 要解决的问题
++#
++#   U-Boot 的显示驱动绑在 display-subsystem 节点上，而 Rockchip 的设计是
++#   从 boot 分区 resource 段里的**内核 dtb** 取它（CONFIG_USING_KERNEL_DTB）。
++#   AMP 这条路把 boot 分区换成了裸 Linux Image，没有 resource 段，
++#   U-Boot 退回自己那份 rk3576-evb 控制 dtb —— 里面没有面板，屏不亮。
++#
++#   屏不亮的后果不止"没有开机 logo"：openvela 是**接管** U-Boot 已经点亮
++#   的链路（KEEP_UBOOT_DISPLAY），时序从 VOP2 寄存器读回。屏黑时读到的是
++#   上电默认值，/dev/fb0 变成 200x240，LVGL 界面无处可画。
++#
++# ★ 走过的两条弯路（都记在这里，省得再走）
++#
++#   1) 给 U-Boot 控制 dtb 的显示链逐个打 u-boot,dm-pre-reloc。
++#      dt.dtb 9006 → 13162 字节，simple-panel-dsi 留下了，但
++#      display-subsystem 的 route 子节点仍被 fdtgrep 剪掉
++#      （被保留节点下没打标签的子节点也会丢），display 列表还是空的。
++#
++#   2) CONFIG_EMBED_KERNEL_DTB + EMBED_KERNEL_DTB_ALWAYS，把一份完整内核
++#      dtb 拼到 u-boot.bin 尾部。dtb 确实被采用了（日志里 "DTB: dts/kern.dtb"
++#      和 "Model: KICKPI-K7 + 5\" MIPI 720x1280"），但 `dm tree` 显示
++#      init_kernel_dtb() 之后**绑出来的是 U-Boot 控制 dtb 的第二份拷贝**
++#      （节点集合一模一样，只少了被 dm_rm_kernel_dev() 摘掉的 crypto），
++#      i2c/vop/dsi 一个都没有 —— of_live_build() 没有按新 blob 重建。
++#      继续往下查要在 U-Boot 里加打印反复烧写，而下面这条路根本不需要
++#      运行时换 dtb。
++#
++# ★ 现在这条路
++#
++#   dts/Makefile:
++#     ifneq ($(CONFIG_USING_KERNEL_DTB)$(CONFIG_SUPPORT_USBPLUG),)
++#             $(obj)/dt.dtb: ... fdtgrep ...     # 裁
++#     else
++#             $(obj)/dt.dtb: $(DTB) FORCE        # 原样拷贝
++#     endif
++#
++#   把 USING_KERNEL_DTB 关掉，dt.dtb 就是 arch/arm/dts/rk3576-kickpi-k7.dts
++#   的完整编译结果 —— 面板、route、i2c、vop、dsi 全在，一个标签都不用打，
++#   也不依赖任何分区内容。SPL 的 dt-spl.dtb 仍旧过 fdtgrep（标签在
++#   rk3576-u-boot.dtsi 里），存储那条链不受影响。
++#
++#   代价说清楚：
++#     - 失去"按 SARADC 分压自动识别接的是哪块屏"的能力。这份控制 dtb
++#       写死了 5 寸 720x1280 F050008M01。换屏要改 dts 重编。
++#     - PMIC（rk8060 在 i2c1 上）不在 U-Boot 的 dts 里，所以
++#       regulators_enable_boot_on() 不再调压，各轨用上电默认值。
++#       U-Boot 阶段本来就够用；真跑不动会在 VOP aclk 上暴露出来。
++CONFIG_BASE_DEFCONFIG="rk3576-amp.config"
++CONFIG_BOOTDELAY=3
++CONFIG_DEFAULT_DEVICE_TREE="rk3576-kickpi-k7"
++# CONFIG_USING_KERNEL_DTB is not set
++
++# 完整控制 dtb（约 140KB）把 uboot.img 的 FIT 顶过默认 2MB 上限。
++# uboot 分区是 4MB（GPT: LBA 16384..24575），提到 3MB 仍有余量。
++CONFIG_SPL_FIT_IMAGE_KB=3072
++
++# 默认 MULTIPLE=2 会在分区里放两份 FIT 做冗余，3MB x 2 = 6MB 装不进 4MB。
++# 代价：失去"第一份校验失败时回退到第二份"。eMMC 有坏块管理、而且每次
++# 烧写都做全量回读校验（见 amp/FLASH.md），这个冗余价值不大 —— 但它确实
++# 是一项被放弃的保护。
++CONFIG_SPL_FIT_IMAGE_MULTIPLE=1
+diff -urN a/drivers/video/drm/rockchip_display.c b/drivers/video/drm/rockchip_display.c
+--- a/drivers/video/drm/rockchip_display.c	2026-09-13 10:18:31.119656055 +0800
++++ b/drivers/video/drm/rockchip_display.c	2026-09-13 10:18:31.119656055 +0800
+@@ -1557,6 +1557,72 @@
+ 	return ret;
+ }
+ 
++/*
++ * AMP 路径下的退路：没有 resource 段也要把显示链点亮。
++ *
++ * ★ 为什么需要
++ *
++ *   display_logo() 是整个文件里**唯一**会调用 display_init() /
++ *   display_enable() 的地方 —— 也就是唯一会真正配置面板初始化序列、
++ *   D-PHY、DSI 和 VOP2 时序的地方。而 rockchip_show_logo() 只在
++ *   load_bmp_logo() 成功之后才调它。
++ *
++ *   load_bmp_logo() 读的是 resource 段里的 logo.bmp。AMP 这条路把 boot
++ *   分区换成了裸 Linux Image，没有 resource 段，于是 logo 读不到、
++ *   display_logo() 不被调用、屏幕全黑 —— 日志里连一行 DRM 输出都没有。
++ *
++ *   后果不是"少个开机 logo"这么轻：openvela 的显示驱动是**接管** U-Boot
++ *   已经点亮的链路（board/kickpi-k7 的 KEEP_UBOOT_DISPLAY），时序是从
++ *   VOP2 寄存器读回来的。屏没点亮时读到的是上电默认值（VP1 400x240），
++ *   /dev/fb0 就成了 200x240，LVGL 无处可画。
++ *
++ * ★ 为什么"全黑的缓冲"就够
++ *
++ *   openvela 的帧缓冲是它自己在 heap 上分配、再写进 VOP2 的 MST
++ *   （chip/rk3576/rk3576_fb.c），并不复用 U-Boot 的那一块。它需要 U-Boot
++ *   留下的只有"链路已配好 + 时序正确"这两点。所以这里不需要有图可画，
++ *   按面板自己的时序给一块全黑的全屏缓冲、走同一条 display_logo() 即可。
++ */
++static int display_blank(struct display_state *state)
++{
++	struct logo_info *logo = &state->logo;
++	void *fb;
++	int w, h, size;
++
++	if (display_init(state) || !state->is_init)
++		return -ENODEV;
++
++	w = state->conn_state.mode.crtc_hdisplay;
++	h = state->conn_state.mode.vdisplay;
++	if (w <= 0 || h <= 0)
++		return -EINVAL;
++
++	size = w * h * 4;
++	fb = get_display_buffer(size);
++	if (!fb)
++		return -ENOMEM;
++
++	memset(fb, 0, size);
++	flush_dcache_range((ulong)fb,
++			   ALIGN((ulong)fb + size, CONFIG_SYS_CACHELINE_SIZE));
++
++	/* src 和 crtc 同尺寸，不经缩放 —— FULLSCREEN 和居中在这里等价，
++	 * 但两个字段都写上，免得日后 display_logo() 只看其中一个。
++	 */
++	state->logo_mode = ROCKCHIP_DISPLAY_FULLSCREEN;
++
++	memset(logo, 0, sizeof(*logo));
++	logo->mode   = ROCKCHIP_DISPLAY_FULLSCREEN;
++	logo->mem    = fb;
++	logo->width  = w;
++	logo->height = h;
++	logo->bpp    = 32;
++
++	printf("display blank %dx%d @%p (no resource logo)\n", w, h, fb);
++
++	return display_logo(state);
++}
++
+ int rockchip_show_logo(void)
+ {
+ 	struct display_state *s;
+@@ -1569,6 +1635,7 @@
+ 		s->logo.rotate = s->logo_rotate;
+ 		if (load_bmp_logo(&s->logo, s->ulogo_name)) {
+ 			printf("failed to display uboot logo\n");
++			ret = display_blank(s);
+ 		} else {
+ 			ret = display_logo(s);
+ 			if (ret == -EAGAIN)
