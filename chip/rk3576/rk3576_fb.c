@@ -71,6 +71,74 @@ static int rk3576_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
   return OK;
 }
 
+#ifdef CONFIG_FB_UPDATE
+
+/****************************************************************************
+ * Name: rk3576_updatearea
+ *
+ * Description:
+ *   把被改动的那几行从 D-cache 刷回 DRAM。
+ *
+ * ★ 这就是"花屏"的原因
+ *
+ *   帧缓冲在 openvela 自己的堆里，而那段 DRAM 是按 MT_NORMAL（写回式
+ *   可缓存）映射的。CPU 画完的像素先停在 cache 里，而 VOP2 是直接读
+ *   DRAM 的非一致性主控 —— 它取到的是尚未写回的旧数据，屏上就是花的。
+ *
+ *   LVGL 的 NuttX 帧缓冲驱动每刷完一帧都会调 ioctl(FBIO_UPDATE)
+ *   （lv_nuttx_fbdev.c）。我们**没实现这个回调**，ioctl 直接返回
+ *   -ENOTTY，而 LVGL 的错误日志因为 LV_USE_LOG 默认关着也看不到 ——
+ *   于是两边都不报错，只有屏上是花的。
+ *
+ *   chip/rk3576/rk3576_boot.c 里那条"自己在堆里分配的缓冲，VOP2 取出来
+ *   的内容是错乱的，原因尚未查清"说的就是这件事，现在查清了。
+ *
+ *   只刷改动的行，不是整屏：720x1280x4 = 3.6MB，整屏刷会把每帧的开销
+ *   都花在 cache 维护上。
+ *
+ ****************************************************************************/
+
+static int rk3576_updatearea(struct fb_vtable_s *vtable,
+                             const struct fb_area_s *area)
+{
+  uintptr_t start;
+  uintptr_t end;
+
+  UNUSED(vtable);
+
+  if (g_fbmem == NULL || area == NULL)
+    {
+      return -ENODEV;
+    }
+
+  /* ★ 先整屏刷，不按 dirty area 刷。
+   *
+   *   板上现象是"绝大部分正常，少数几条**黑色细横条纹**"。黑色正是
+   *   帧缓冲初始化时 memset(0) 的值 —— 也就是说那几行 LVGL 画过了，
+   *   但没被写回 DRAM。两种可能都会造成这个：
+   *
+   *     1. 刷新范围按行算，而行宽 2880 字节不是 cache line 的整数倍
+   *        （128 字节行时 2880/128 = 22.5），两端的半条 line 如果被
+   *        向内取整就漏掉了；
+   *     2. LVGL 报告的 dirty area 没覆盖它实际写过的全部行。
+   *
+   *   整屏刷对两者都成立，先用它把"是不是刷新覆盖问题"验掉 —— 一次
+   *   3.6MB 的 clean 在这块 A53 上大约 1ms，而这是个每秒刷 4 次的
+   *   仪表盘，代价可以接受。确认之后再收窄回按行刷（那时要把范围向外
+   *   对齐到 cache line，而不是向内）。
+   */
+
+  UNUSED(area);
+
+  start = (uintptr_t)g_fbmem;
+  end   = start + g_planeinfo.fblen;
+
+  up_flush_dcache(start, end);
+  return OK;
+}
+
+#endif /* CONFIG_FB_UPDATE */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -140,6 +208,9 @@ int up_fbinitialize(int display)
 
   g_fb_vtable.getvideoinfo = rk3576_getvideoinfo;
   g_fb_vtable.getplaneinfo = rk3576_getplaneinfo;
+#ifdef CONFIG_FB_UPDATE
+  g_fb_vtable.updatearea    = rk3576_updatearea;
+#endif
 
   syslog(LOG_INFO,
          "FB: %" PRIu32 "x%" PRIu32 " ARGB8888 %zu 字节 @%p\n",

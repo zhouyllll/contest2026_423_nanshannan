@@ -193,10 +193,49 @@
 		 *  77 = bustimer0 CH0（闹钟）  64 = dmac0（PL330）
 		 */
 		amp-irqs = /bits/ 64 <
-			GIC_AMP_IRQ_CFG_ROUTE(108, 0x80, AMP_AFF(0, 0))
-			GIC_AMP_IRQ_CFG_ROUTE(174, 0x80, AMP_AFF(0, 0))
-			GIC_AMP_IRQ_CFG_ROUTE(77,  0x80, AMP_AFF(0, 0))
-			GIC_AMP_IRQ_CFG_ROUTE(64,  0x80, AMP_AFF(0, 0))>;
+                /* ★ 这张表必须列全 openvela 用到的**每一条** SPI。
+                 *
+                 *   Linux 的 gic_dist_init()/gic_dist_config() 会按这张表
+                 *   设目标 CPU 和优先级，没列到的一律按"归 Linux"处理 ——
+                 *   目标指向 A72 簇，openvela 那边就再也收不到。
+                 *
+                 *   漏一条的现象非常局部、也非常难猜：这次漏的是 GPIO0
+                 *   （185），后果是**触摸完全没反应**，而 /dev/input0 存在、
+                 *   驱动日志正常、LVGL 也报"触摸 可用" —— 因为中断根本
+                 *   没到 CPU，驱动那一侧什么都不知道。
+                 *
+                 *   编号是 GIC 绝对中断号 = dtsi 里的 SPI 号 + 32，和
+                 *   openvela 侧 irq_attach() 用的是同一套。
+                 */
+
+                /* 串口控制台 UART0（SPI 76） */
+                GIC_AMP_IRQ_CFG_ROUTE(108, 0x80, AMP_AFF(0, 0))
+
+                /* mailbox0 group3 BB 侧接收（SPI 142）—— AMP 的门铃 */
+                GIC_AMP_IRQ_CFG_ROUTE(174, 0x80, AMP_AFF(0, 0))
+
+                /* 系统定时器 timer5（SPI 45） */
+                GIC_AMP_IRQ_CFG_ROUTE(77,  0x80, AMP_AFF(0, 0))
+
+                /* PL330 dmac0 的两条中断线（SPI 32/33） */
+                GIC_AMP_IRQ_CFG_ROUTE(64,  0x80, AMP_AFF(0, 0))
+                GIC_AMP_IRQ_CFG_ROUTE(65,  0x80, AMP_AFF(0, 0))
+
+                /* GPIO 五个 bank（SPI 153/157/161/165/169）。
+                 * bank 内 32 个引脚共用一条线，触摸中断在 bank0。
+                 */
+                GIC_AMP_IRQ_CFG_ROUTE(185, 0x80, AMP_AFF(0, 0))
+                GIC_AMP_IRQ_CFG_ROUTE(189, 0x80, AMP_AFF(0, 0))
+                GIC_AMP_IRQ_CFG_ROUTE(193, 0x80, AMP_AFF(0, 0))
+                GIC_AMP_IRQ_CFG_ROUTE(197, 0x80, AMP_AFF(0, 0))
+                GIC_AMP_IRQ_CFG_ROUTE(201, 0x80, AMP_AFF(0, 0))
+
+                /* GMAC1：macirq（SPI 301）与 DMA 通道线（SPI 304） */
+                GIC_AMP_IRQ_CFG_ROUTE(333, 0x80, AMP_AFF(0, 0))
+                GIC_AMP_IRQ_CFG_ROUTE(336, 0x80, AMP_AFF(0, 0))
+
+                /* CIF（SPI 318）—— 摄像头 */
+                GIC_AMP_IRQ_CFG_ROUTE(350, 0x80, AMP_AFF(0, 0))>;
 
 		status = "okay";
 	};
