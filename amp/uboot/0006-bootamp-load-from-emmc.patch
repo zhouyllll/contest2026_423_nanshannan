@@ -1,0 +1,173 @@
+bootamp 不带参数时自己从 eMMC 把三块料读进来
+
+应用：叠在 0004 之上，在 u-boot/ 下 `patch -p1 < 本文件`。
+
+★ 起因是一次真实的事故，不是"顺手优化"
+
+  原来每轮都要在 1.5M 的串口上敲六条命令：
+
+    mmc dev 0
+    mmc read 0x40400000 0xC000 0x39A5
+    mmc read 0x4f000000 0x3800 0x212
+    mmc read 0x60000000 0x2000 0x1362
+    setenv amp_linux_cmd 'booti 0x40400000 - 0x4f000000'
+    bootamp 0x60000000
+
+  某一轮里第五条到板子那边变成了
+
+    AMP: linux via amp_linux_cmd: booti 0x4f000000
+
+  —— 中间 `0x40400000 - ` 整段被吞了。1.5M 没有硬件流控，板子刚跑完一条
+  mmc read 正忙的时候，UART 的 RX FIFO 溢出，**丢掉的字节没有任何提示**。
+  于是 U-Boot 拿 Linux 的 dtb 当内核启动，data abort，板子挂到串口和 USB
+  一起消失，只能按 RESET。
+
+  根因不是哪条命令写错了，而是**每一轮都要在一条会静默丢字节的通道上传
+  六条长命令**。把布局写进代码之后只剩一条 `bootamp`，出错面积小一个
+  数量级。（主机侧也配了逐字节发送，两头一起收窄。）
+
+★ 布局写死在哪、怎么改
+
+  三对 LBA/扇区数在 cmd/bootamp.c 顶部的宏里，和 amp/FLASH.md 那张表
+  一一对应，挪位置要同时改这两处。扇区数取的是**上限**而不是精确值：
+  多读几个扇区没有副作用，写精确值则意味着每次镜像变大都要同步两处，
+  漏一处就是"FIT 少了尾巴"这种很难看出来的故障。
+
+  `bootamp <addr>` 的老用法保留不变，给"FIT 已经在内存里"的场合用。
+  已经手工 setenv 过的 amp_linux_cmd 不会被覆盖。
+
+--- a/cmd/bootamp.c
++++ b/cmd/bootamp.c
+@@ -5,11 +5,21 @@
+  * Copyright (c) 2026 contest2026_423_nanshannan
+  *
+  * 用法：
+- *	bootamp <FIT 在内存里的地址>
++ *	bootamp			—— 自己从 eMMC 把三块料读进来再启动
++ *	bootamp <FIT 地址>	—— FIT 已经在内存里，只负责启动
+  *
+- * 例：
+- *	mmc read 0x60000000 0xC800 0x4000
+- *	bootamp 0x60000000
++ * ★ 为什么加了不带参数的那一种
++ *
++ *   原来每轮都要在串口上敲六条命令：mmc dev / 三条 mmc read / setenv
++ *   amp_linux_cmd / bootamp。1.5M 波特率没有流控，实测**会丢字节** ——
++ *   有一次 `setenv amp_linux_cmd 'booti 0x40400000 - 0x4f000000'` 到板子
++ *   那边成了 `booti 0x4f000000`，于是 U-Boot 拿 dtb 当内核启动，data
++ *   abort，板子挂死到只能按 RESET。
++ *
++ *   这类事故的根因不是哪条命令写错了，而是**每轮要在易错通道上传六条
++ *   长命令**。把布局写进代码，一条 `bootamp` 就够，出错面积小一个数量级。
++ *   挪位置就改下面那几个宏（和 amp/FLASH.md 那张表一起改）；如果之前
++ *   已经手工 setenv 过 amp_linux_cmd，这条命令不会覆盖它。
+  *
+  * ★ 这条命令不会返回。
+  *
+@@ -27,16 +37,89 @@
+ #include <common.h>
+ #include <amp.h>
+ #include <command.h>
++#include <environment.h>
++
++/* eMMC 上的默认布局，和 amp/FLASH.md 那张表一一对应。
++ *
++ * 扇区数取的是**上限**而不是精确值：多读几个扇区没有副作用，而写死精确
++ * 值意味着每次镜像变大都要同步改两处（这里和文档），漏一处就是"读进来
++ * 的 FIT 少了尾巴"这种很难看出来的故障。上限都留在各自分区内：
++ *   FIT   8192 + 5120 = 13312 < 14336（dtb）
++ *   dtb  14336 +  544 = 14880 < 16384（uboot 分区）
++ *   内核 49152 +14848 = 64000 < 65536（rkdeveloptool 写得到的上限）
++ */
++
++#define AMP_FIT_LBA		0x2000		/*  8192 */
++#define AMP_FIT_CNT		0x1400		/*  5120 扇区 = 2.5MB 上限 */
++#define AMP_DTB_LBA		0x3800		/* 14336 */
++#define AMP_DTB_CNT		0x220		/*   544 扇区 = 272KB 上限 */
++#define AMP_KERNEL_LBA		0xC000		/* 49152 */
++#define AMP_KERNEL_CNT		0x3A00		/* 14848 扇区 = 7.25MB 上限 */
++
++#define AMP_FIT_ADDR		0x60000000
++#define AMP_DTB_ADDR		0x4f000000
++#define AMP_KERNEL_ADDR		0x40400000
++
++static int amp_load_from_mmc(void)
++{
++	char cmd[128];
++	int ret;
++
++	ret = run_command("mmc dev 0", 0);
++	if (ret)
++		return ret;
++
++	snprintf(cmd, sizeof(cmd), "mmc read 0x%x 0x%x 0x%x",
++		 AMP_KERNEL_ADDR, AMP_KERNEL_LBA, AMP_KERNEL_CNT);
++	ret = run_command(cmd, 0);
++	if (ret)
++		return ret;
++
++	snprintf(cmd, sizeof(cmd), "mmc read 0x%x 0x%x 0x%x",
++		 AMP_DTB_ADDR, AMP_DTB_LBA, AMP_DTB_CNT);
++	ret = run_command(cmd, 0);
++	if (ret)
++		return ret;
++
++	snprintf(cmd, sizeof(cmd), "mmc read 0x%x 0x%x 0x%x",
++		 AMP_FIT_ADDR, AMP_FIT_LBA, AMP_FIT_CNT);
++	ret = run_command(cmd, 0);
++	if (ret)
++		return ret;
++
++	/* 已经设过就不动 —— 手工覆盖优先于默认值。 */
++
++	if (!env_get("amp_linux_cmd")) {
++		snprintf(cmd, sizeof(cmd), "booti 0x%x - 0x%x",
++			 AMP_KERNEL_ADDR, AMP_DTB_ADDR);
++		env_set("amp_linux_cmd", cmd);
++	}
++
++	printf("AMP: loaded kernel@0x%x dtb@0x%x fit@0x%x from eMMC\n",
++	       AMP_KERNEL_ADDR, AMP_DTB_ADDR, AMP_FIT_ADDR);
++
++	return 0;
++}
+ 
+ static int do_bootamp(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
+ {
+ 	void *fit;
+ 	int ret;
+ 
+-	if (argc != 2)
++	if (argc > 2)
+ 		return CMD_RET_USAGE;
+ 
+-	fit = (void *)simple_strtoul(argv[1], NULL, 16);
++	if (argc == 1) {
++		ret = amp_load_from_mmc();
++		if (ret) {
++			printf("AMP: load from eMMC failed, ret=%d\n", ret);
++			return CMD_RET_FAILURE;
++		}
++
++		fit = (void *)AMP_FIT_ADDR;
++	} else {
++		fit = (void *)simple_strtoul(argv[1], NULL, 16);
++	}
+ 
+ 	printf("AMP: booting from FIT at %p\n", fit);
+ 
+@@ -51,9 +134,11 @@
+ 
+ U_BOOT_CMD(
+ 	bootamp, 2, 0, do_bootamp,
+-	"boot an AMP FIT that is already in memory",
+-	"<addr>\n"
+-	"    - <addr>: hex address of the AMP FIT image\n"
++	"boot the AMP pair (openvela on A53 + Linux on A72)",
++	"\n"
++	"    - no argument: read kernel/dtb/FIT from eMMC, then boot\n"
++	"bootamp <addr>\n"
++	"    - <addr>: hex address of an AMP FIT already in memory\n"
+ 	"\n"
+ 	"The FIT describes which image runs on which CPU (by MPIDR).\n"
+ 	"On success this command does not return: the current CPU enters\n"

@@ -87,10 +87,25 @@ AMP 调试期这一点很要命）。
 `Hit key to stop autoboot('CTRL+C')`），然后：
 
 ```
+=> bootamp
+```
+
+就一条。`bootamp` 不带参数时自己按 `cmd/bootamp.c` 里写死的布局把内核、
+dtb、FIT 三块料从 eMMC 读进来，再启动。
+
+**为什么不再手敲六条命令**：1.5M 波特率没有硬件流控，板子忙的时候
+UART 会静默丢字节。实测有一轮 `setenv amp_linux_cmd 'booti 0x40400000 -
+0x4f000000'` 到板子那边成了 `booti 0x4f000000`，U-Boot 拿 dtb 当内核启动
+→ data abort → 串口和 USB 一起消失，只能按 RESET。详见
+`uboot/0006-bootamp-load-from-emmc.patch`。
+
+老的手动形式仍然可用（FIT 已经在内存里时）：
+
+```
 => mmc dev 0
-=> mmc read 0x40400000 0xC000 0x39A5    # Linux Image ← LBA 49152, 14757 扇区
-=> mmc read 0x4f000000 0x3800 0x212     # Linux DTB   ← LBA 14336, 530 扇区
-=> mmc read 0x60000000 0x2000 0x10D9    # amp.itb     ← LBA 8192, 4313 扇区
+=> mmc read 0x40400000 0xC000 0x39A5    # Linux Image ← LBA 49152
+=> mmc read 0x4f000000 0x3800 0x212     # Linux DTB   ← LBA 14336
+=> mmc read 0x60000000 0x2000 0x1362    # amp.itb     ← LBA 8192
 => setenv amp_linux_cmd 'booti 0x40400000 - 0x4f000000'
 => bootamp 0x60000000
 ```
