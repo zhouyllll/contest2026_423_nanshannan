@@ -9,7 +9,7 @@ openvela 拿 A53 做实时与产品控制，Linux 拿 A72 做 NPU / ISP / 重媒
 
 ---
 
-## 目前进展：✅ 双 OS 同时运行，rpmsg 握手完成（2026-09-13）
+## 目前进展：✅ 双 OS 同时运行 + 屏上有界面，rpmsg 握手完成（2026-09-13）
 
 | 层次 | 状态 | 证据 |
 |---|---|---|
@@ -20,7 +20,25 @@ openvela 拿 A53 做实时与产品控制，Linux 拿 A72 做 NPU / ISP / 重媒
 | Linux 内核 + 只含 A72 的 DTB | ✅ | 7.6MB（原 43MB），`SMP: Total of 4 processors activated` |
 | 双 OS 引导（核拆分） | ✅ | `bootamp`，见 `../amp/uboot/` |
 | **openvela(A53) + Linux(A72) 同时跑** | ✅ | `ps` 里四个 A53 的 IDLE + `rpmsg-linux-0` 线程 |
+| 5 寸 MIPI 屏（AMP 路径） | ✅ | U-Boot 用自己的完整控制 dtb 点亮，openvela 接管：`/dev/fb0` 720x1280 |
+| LVGL 仪表盘 | ✅ | `kickpi_ui` 开机自启，屏上四页（AMP/DEV/LIVE/ABOUT） |
+| 触摸（FT8756）接进 LVGL | ✅ | ft5x06 补 `TSIOC_GETMAXPOINTS`，见 `../bsp/upstream/` |
 | 端到端收发一帧 | ⬜ | 需要 Linux 侧用户态 |
+
+### 这一轮踩到的三个「静默失败」
+
+把 UI 接到 AMP 配置上的过程里，有三个 bug 的共同点是**没有任何一侧报错**，
+现场看起来都指向别处。记在这里，因为它们的查法比结论更有价值：
+
+| 现象 | 看起来像 | 实际是 |
+|---|---|---|
+| `booti` 在 "Booting using the fdt blob" 之后 data abort | dtb 坏了 | `bootm_disable_interrupts()` 对 `env_get("devtype")` 没判空；关掉 `USING_KERNEL_DTB` 后 `setup_boot_dev()` 跑在环境变量初始化之前，`Bootdev(atags)` 从 `mmc 0` 变成 `<NULL> <NULL>`（见 `../amp/uboot/0006`） |
+| openvela 打印到 NSH 横幅后串口彻底安静 | 死机 | 活着但聋了：Linux 的 `gic_dist_config()` 无条件清掉所有 SPI 的使能位，把 openvela 的 UART0(108)/mailbox(174) 一起关了。启动期日志走轮询式 `up_putc()` 所以一直有输出，NSH 第一次走字符设备就卡住（见 `../amp/linux/0001`） |
+| 界面出来了但触摸没反应 | 触摸驱动没起来 | `/dev/input0` 正常；LVGL 的 `lv_nuttx_touchscreen_create()` 第一件事是 `ioctl(TSIOC_GETMAXPOINTS)`，ft5x06 驱动没实现，返回 `-ENOTTY` 就放弃了，而 `LV_USE_LOG` 默认关着（见 `../bsp/upstream/ft5x06-*`） |
+
+第二个之所以能分开"死了"和"聋了"，是因为把 LVGL 界面改成了开机自启 ——
+它每 250ms 刷一次，成了一个**不依赖串口的旁路心跳**。串口哑而画面在动
+= 活着但聋了；两个都停 = 真死了。没有这个旁路，光看串口两种情况一模一样。
 
 板上输出与完整命令序列见 [../amp/README.md](../amp/README.md) 与
 [../amp/FLASH.md](../amp/FLASH.md)；资源划分见
