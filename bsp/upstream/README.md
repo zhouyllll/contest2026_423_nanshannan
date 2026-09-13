@@ -12,6 +12,7 @@ openvela 工程的其它仓里。按《新平台适配指南》「不得修改�
 | `frameworks-uv.patch` | `frameworks/system/utils/uv` | `uv_aes.c` / `uv_hkdf.c` / `uv_ecdh.c` 照 mbedtls 2.x 写的，直接访问 `mbedtls_cipher_context_t` 的 `cipher_info` / `add_padding` / `get_padding`。树里是 mbedtls 3.4.0，这些成员已被 `MBEDTLS_PRIVATE()` 包起来。加 `-DMBEDTLS_ALLOW_PRIVATE_ACCESS`。 |
 | `0002-nuttx-include-tls-task-header.patch` | `apps/system/libuv` | libuv 的 nuttx 移植只 include 了 `nuttx/tls.h`，但用的是 `task_tls_*`，那些声明在 `nuttx/tls_task.h`。**注意这是给下载源码打的补丁**：libuv 源码是构建时从 GitHub 拉的，直接改工作副本会在干净构建时丢失，所以必须以 `000*.patch` 的形式放进 `apps/system/libuv/`（Makefile 会 `sort $(wildcard 000*.patch)` 全部应用）。 |
 | `apps.patch` | `apps` | `drivertest_spidev_master.c` 一处格式符 `%d` -> `%zu`。 |
+| `ft5x06-tsioc-getmaxpoints.patch` | `nuttx` | **触摸能上报、LVGL 却绑不上**：`lv_nuttx_touchscreen_create()` 打开设备后第一件事是 `ioctl(fd, TSIOC_GETMAXPOINTS, &maxpoint)`，失败就 close 并返回 NULL，于是 `lv_nuttx_init()` 的 `result->indev` 是空的 —— 界面出得来、触摸完全没反应，而且 `LV_USE_LOG` 默认关着，一行日志都没有。ft5x06 本来就按多点上报（`ft5x06_multitouch` 里有 `npoints`），只是 ioctl 里没有这一条，补上 `FT5X06_MAX_TOUCHES`。 |
 | `tftpc-null-blockno.patch` | `apps` | **空指针解引用**：`netutils/tftpc/tftpc_put.c` 等 WRQ 首个 ACK 时传 `blockno = NULL`（那个块号必然为 0，调用方不关心），但 `tftp_rcvack()` 无条件写 `*blockno = rblockno`。**任何一次握手成功的 TFTP put 都会 panic**。单独成补丁而不并进 `apps.patch`，因为这是个可独立提 PR 的真实缺陷，跟那边的格式符清理不是一回事。 |
 
 ## 另外两个必须记住的配置坑

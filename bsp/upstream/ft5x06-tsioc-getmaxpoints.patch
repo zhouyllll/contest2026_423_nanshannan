@@ -1,0 +1,34 @@
+diff --git a/drivers/input/ft5x06.c b/drivers/input/ft5x06.c
+index 34eb7303..4d3a72a5 100644
+--- a/drivers/input/ft5x06.c
++++ b/drivers/input/ft5x06.c
+@@ -945,6 +945,29 @@ static int ft5x06_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+         }
+         break;
+ 
++      /* ★ 没有这一条，LVGL 的 NuttX 触摸驱动就绑不上
++       *
++       *   apps/graphics/lvgl 的 lv_nuttx_touchscreen_create() 打开设备之后
++       *   第一件事就是
++       *
++       *       ioctl(fd, TSIOC_GETMAXPOINTS, &maxpoint)
++       *
++       *   失败就直接 close 并返回 NULL —— 于是 lv_nuttx_init() 的
++       *   result->indev 是空的，界面出得来但**触摸完全没反应**，而且
++       *   （LV_USE_LOG 默认关着）一行日志都没有。
++       *
++       *   ft5x06 本来就按多点上报（见 ft5x06_multitouch 里的 npoints），
++       *   把 FT5X06_MAX_TOUCHES 报出去即可，没有别的成本。
++       */
++
++      case TSIOC_GETMAXPOINTS:  /* arg: Pointer to int */
++        {
++          FAR int *ptr = (FAR int *)((uintptr_t)arg);
++          DEBUGASSERT(ptr != NULL);
++          *ptr = FT5X06_MAX_TOUCHES;
++        }
++        break;
++
+       default:
+         ret = -ENOTTY;
+         break;
