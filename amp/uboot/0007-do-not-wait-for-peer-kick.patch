@@ -1,0 +1,117 @@
+默认不再等 Linux 的第一次门铃 —— 那个等待本身就是 bug
+
+应用：叠在 0004 之上，在 u-boot/ 下 `patch -p1 < 本文件`。
+
+★ 现场
+
+  devtype 那个空指针（0006）修好之后，Linux 确实起来了：
+
+    AMP: Brought up cpu[100] with state 0x12, entry 0x40400000 ...OK
+    AMP: linux handed off, back on cpu[0]
+    AMP: loadables done, bootcpu entry 0x4a400000 boot_on 1
+    AMP: waiting for peer kick on mailbox3 (max 3000ms, INTEN=0x00000101) ...
+    "Synchronous Abort" handler, esr 0x86000006
+    * Reason:   Exception from an Instruction abort
+    * ELR(PC)  = 0000000000000000
+    * LR       = 0000000000000000
+    * Reloc Off= 0000000000000000
+
+  ELR 和 LR 都是 0，**连 gd->reloc_off 都读成 0** —— U-Boot 的整个上下文
+  没了，不是某一行写错了。
+
+★ 结论：等待时间就是危险窗口的长度
+
+  brought_up_all_amp() 自己的注释早就写着：
+
+      ★ 这之后 CPU0 必须尽快跳走。
+        Linux 已经在另一个簇上跑起来了，而它的 /memory 覆盖了 U-Boot
+        重定位后所在的那一段高位内存……
+
+  而 amp_wait_linux_kick() 做的事情恰恰相反：**在这个窗口里停 3 秒**。
+  DTB 里的 uboot@f0000000 reserved-memory 把地址段保住了，但保不住
+  "booti 的 OS_PREP 阶段已经跑过 cleanup_before_linux()、DM 设备都被摘掉
+  了"这一点 —— 此后 mdelay/WATCHDOG_RESET 这类还会碰 DM 的路径本身就不
+  安全。两件事叠在一起，3 秒足够炸。
+
+  这个 bug 之所以拖到现在才暴露，是因为它和"窗口里发生了什么"有关：以前
+  显示链路没起来、DM 设备少，cleanup 摘掉的东西也少，同样的 3 秒就侥幸
+  活了下来。**每加一件事就换一次运气，这不是能留着的设计。**
+
+★ 为什么可以不等
+
+  当初加等待的理由是"让 Linux 先把 GIC 配完"。但这件事 Linux 侧已经有
+  正规机制：rockchip,amp 节点里的
+
+      amp-irqs = <GIC_AMP_IRQ_CFG_ROUTE(174, 0x80, AMP_AFF(0, 0)) ...>
+
+  会在 gic_dist_init() 里按我们指定的亲和性把这几条 SPI 配好，openvela
+  先 claim 还是后 claim 都对得上。等待是当初还不确定这一点时加的保险，
+  现在这份保险的保费比风险本身贵得多。
+
+  两条寄存器写（mailbox pclk 门控 + A2B 接收使能）**保留** —— 它们不花
+  时间，而且使能位不开的话对端的门铃根本不会锁存到 STATUS，openvela 起来
+  就看不到那一次 kick（这一条是 0004 里用寄存器 dump 才查出来的）。
+
+  要单独调试 mailbox 时可以把等待打开：`setenv amp_kick_timeout 3000`。
+
+--- a/drivers/cpu/rockchip_amp.c	2026-09-13 11:28:05.230913150 +0800
++++ b/drivers/cpu/rockchip_amp.c	2026-09-13 11:28:05.217713150 +0800
+@@ -480,15 +480,10 @@
+ static void amp_wait_linux_kick(void)
+ {
+ 	u32 group = env_get_ulong("amp_kick_group", 10, 3);
+-	u32 tmo_ms = env_get_ulong("amp_kick_timeout", 10, 3000);
++	u32 tmo_ms = env_get_ulong("amp_kick_timeout", 10, 0);
+ 	void *base = (void *)(ulong)(AMP_MBOX_BASE + group * AMP_MBOX_STRIDE);
+ 	u32 i;
+ 
+-	if (tmo_ms == 0) {
+-		AMP_I("not waiting for peer kick (amp_kick_timeout=0)\n");
+-		return;
+-	}
+-
+ 	/* 对端可能比 Linux 的时钟驱动先用到 mailbox，自己把 pclk 打开 */
+ 	writel(BIT(AMP_CRU_MBOX_GATE_BIT + 16),
+ 	       (void *)(ulong)(AMP_CRU_BASE + AMP_CRU_GATE_CON17));
+@@ -523,6 +518,41 @@
+ 	writel(BIT(0 + 16) | BIT(0) | BIT(8 + 16) | BIT(8),
+ 	       base + AMP_MBOX_A2B_INTEN);
+ 
++	/*
++	 * ★ 默认**不等**（amp_kick_timeout 默认 0）。
++	 *
++	 *   一开始这里要等 Linux 的第一次门铃，理由是"让 Linux 先把 GIC 配完
++	 *   再放 openvela 进去"。但这个等待本身就是 bug：
++	 *
++	 *     AMP: waiting for peer kick on mailbox3 (max 3000ms, ...) ...
++	 *     "Synchronous Abort" handler, esr 0x86000006
++	 *     ELR(PC) = 0   LR = 0   Reloc Off = 0
++	 *
++	 *   ELR 和 LR 都是 0、连 gd->reloc_off 都读成 0 —— U-Boot 的上下文
++	 *   整个没了。原因就写在下面那段注释里：**Linux 已经在另一个簇上跑，
++	 *   而 U-Boot 还赖在内存里**。等待时间就是这个危险窗口的长度。
++	 *   （booti 的 OS_PREP 阶段已经跑过 cleanup_before_linux()，DM 设备
++	 *   都被摘掉了，此后再走 mdelay/WATCHDOG_RESET 这类还会碰 DM 的路径
++	 *   本身也不安全。）
++	 *
++	 *   GIC 的次序其实不需要靠等来保证：Linux 侧的 rockchip,amp 节点
++	 *   （amp-irqs = GIC_AMP_IRQ_CFG_ROUTE(...)）会在 gic_dist_init() 里
++	 *   把这几条 SPI 按我们指定的亲和性配好，openvela 先claim 还是后
++	 *   claim 都对得上。等待是当初还不确定这一点时加的保险，现在这份
++	 *   保险的保费比风险本身还贵。
++	 *
++	 *   上面那两条寄存器写（pclk 门控 + A2B 接收使能）**必须保留** ——
++	 *   它们不花时间，而且使能位不开的话对端的门铃根本不会锁存到
++	 *   STATUS，openvela 起来就看不到那一次 kick。
++	 *
++	 *   要重新打开等待（例如单独调试 mailbox）：setenv amp_kick_timeout 3000
++	 */
++	if (tmo_ms == 0) {
++		AMP_I("mailbox%d armed (INTEN=0x%08x), not waiting for peer\n",
++		      group, readl(base + AMP_MBOX_A2B_INTEN));
++		return;
++	}
++
+ 	AMP_I("waiting for peer kick on mailbox%d (max %dms, INTEN=0x%08x) ...",
+ 	      group, tmo_ms, readl(base + AMP_MBOX_A2B_INTEN));
+ 
