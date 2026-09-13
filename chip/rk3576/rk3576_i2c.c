@@ -61,6 +61,7 @@
 #include <string.h>
 #include <syslog.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/arch.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/mutex.h>
@@ -92,11 +93,30 @@ static const uint32_t g_i2c_src_hz[4] =
   200000000, 100000000, 50000000, 24000000
 };
 
-/* 轮询超时。按最慢 50kHz、单次最多 32 字节估算，一次事务约 6ms；
- * 取两个数量级的余量，超时即认为总线卡死（从机拉低 SCL 不放等）。
+/* 轮询超时。分两档，因为两件事的时间尺度差三个数量级。
+ *
+ * ★ 原来两档都用 100ms，代价在启动时间上暴露了出来
+ *
+ *   板上带时间戳抓启动日志（主机侧记录每个字节到达的时刻，不用改板子）
+ *   看到：openvela 从显示就绪(4.0s)到摄像头探测(35.8s)之间的 **32 秒**
+ *   全部花在 I2C3 上，一百三十多次事务，每次稳定 0.234s。
+ *
+ *   而 0.234s ≈ 两次 100ms 超时。日志里那一百多行
+ *   `I2C3 写-起始条件 ...` 只在 rk3576_i2c_start() **失败**时才打 ——
+ *   也就是说每一次都是"等起始条件超时"。
+ *
+ *   起始条件在 100kHz 下约 10us 就发完了，用 100ms 等它是一万倍的余量，
+ *   等不到时就白白烧掉 100ms。数据相位才需要按字节数给余量。
+ *
+ *   分开之后，就算 I2C3 仍然有毛病（ES8388 那条总线的确还没修好，见
+ *   docs/ 里音频采集全零那一条），代价也从 32 秒降到 0.7 秒。
+ *
+ *   这不是把问题藏起来：失败照样报错、照样有诊断行（只是限流了），
+ *   只是**超时值终于和它所等待的事件同一个量级**。
  */
 
-#define I2C_POLL_TIMEOUT_US       100000
+#define I2C_START_TIMEOUT_US      5000      /* 起始/停止：~10us 的 500 倍 */
+#define I2C_XFER_TIMEOUT_US       50000     /* 数据相位：32 字节 @50kHz 约 6ms */
 
 /****************************************************************************
  * Private Types
@@ -352,12 +372,12 @@ static inline void i2c_putreg(struct rk3576_i2c_priv_s *priv,
  ****************************************************************************/
 
 static uint32_t rk3576_i2c_wait(struct rk3576_i2c_priv_s *priv,
-                                uint32_t mask)
+                                uint32_t mask, int timeout_us)
 {
   uint32_t ipd;
   int us;
 
-  for (us = 0; us < I2C_POLL_TIMEOUT_US; us++)
+  for (us = 0; us < timeout_us; us++)
     {
       ipd = i2c_getreg(priv, RK3576_I2C_IPD);
       if ((ipd & mask) != 0)
@@ -395,7 +415,7 @@ static int rk3576_i2c_start(struct rk3576_i2c_priv_s *priv, uint32_t mode)
   con = I2C_CON_EN | mode | I2C_CON_START | I2C_CON_ACT2NAK;
   i2c_putreg(priv, RK3576_I2C_CON, con);
 
-  if (rk3576_i2c_wait(priv, I2C_INT_START) == 0)
+  if (rk3576_i2c_wait(priv, I2C_INT_START, I2C_START_TIMEOUT_US) == 0)
     {
       return -ETIMEDOUT;
     }
@@ -418,12 +438,35 @@ static int rk3576_i2c_start(struct rk3576_i2c_priv_s *priv, uint32_t mode)
 static void rk3576_i2c_diag(struct rk3576_i2c_priv_s *priv,
                             const char *what, uint8_t addr)
 {
+  /* ★ 限流。
+   *
+   *   一条坏掉的总线会把同一行刷几百遍（实测 ES8388 初始化一次就有
+   *   一百三十多行），既淹掉别的日志，也让人误以为"在忙"。
+   *   每个端口只完整打前 3 次，之后每 64 次打一行汇总。
+   */
+
+  static uint32_t fails[nitems(g_i2c_config)];
+  uint32_t n;
+
+  if (priv->port >= nitems(g_i2c_config))
+    {
+      return;
+    }
+
+  n = ++fails[priv->port];
+
+  if (n > 3 && (n % 64) != 0)
+    {
+      return;
+    }
+
   syslog(LOG_ERR,
          "I2C%u %s a=%02x hit=%02" PRIx32 " ipd=%02" PRIx32
-         " fcnt=%" PRIu32 "\n",
+         " fcnt=%" PRIu32 "%s\n",
          priv->port, what, addr, g_last_hit,
          i2c_getreg(priv, RK3576_I2C_IPD),
-         i2c_getreg(priv, RK3576_I2C_FCNT));
+         i2c_getreg(priv, RK3576_I2C_FCNT),
+         n > 3 ? "（同类失败已限流）" : "");
 }
 
 /****************************************************************************
@@ -439,7 +482,7 @@ static void rk3576_i2c_stop(struct rk3576_i2c_priv_s *priv)
 {
   i2c_putreg(priv, RK3576_I2C_IPD, I2C_INT_ALL);
   i2c_putreg(priv, RK3576_I2C_CON, I2C_CON_EN | I2C_CON_STOP);
-  rk3576_i2c_wait(priv, I2C_INT_STOP);
+  rk3576_i2c_wait(priv, I2C_INT_STOP, I2C_START_TIMEOUT_US);
   i2c_putreg(priv, RK3576_I2C_CON, 0);
 }
 
@@ -496,7 +539,8 @@ static int rk3576_i2c_write_msg(struct rk3576_i2c_priv_s *priv,
 
   i2c_putreg(priv, RK3576_I2C_MTXCNT, total);
 
-  hit = rk3576_i2c_wait(priv, I2C_INT_MBTF | I2C_INT_NAKRCV);
+  hit = rk3576_i2c_wait(priv, I2C_INT_MBTF | I2C_INT_NAKRCV,
+                        I2C_XFER_TIMEOUT_US);
   if (hit == 0)
     {
       rk3576_i2c_diag(priv, "写-数据相位", msg->addr);
@@ -561,7 +605,8 @@ static int rk3576_i2c_read_msg(struct rk3576_i2c_priv_s *priv,
 
   i2c_putreg(priv, RK3576_I2C_MRXCNT, msg->length);
 
-  hit = rk3576_i2c_wait(priv, I2C_INT_MBRF | I2C_INT_NAKRCV);
+  hit = rk3576_i2c_wait(priv, I2C_INT_MBRF | I2C_INT_NAKRCV,
+                        I2C_XFER_TIMEOUT_US);
   if (hit == 0)
     {
       rk3576_i2c_diag(priv, "读-数据相位", msg->addr);
@@ -645,7 +690,8 @@ static int rk3576_i2c_regread(struct rk3576_i2c_priv_s *priv,
 
   i2c_putreg(priv, RK3576_I2C_MRXCNT, rmsg->length);
 
-  hit = rk3576_i2c_wait(priv, I2C_INT_MBRF | I2C_INT_NAKRCV);
+  hit = rk3576_i2c_wait(priv, I2C_INT_MBRF | I2C_INT_NAKRCV,
+                        I2C_XFER_TIMEOUT_US);
   if (hit == 0)
     {
       rk3576_i2c_diag(priv, "组合读-数据相位", wmsg->addr);

@@ -1267,7 +1267,11 @@ int rk3576_gmac_probe(int port)
          * 数秒，一次读不到不代表永远读不到。
          */
 
-        for (i = 0; i < 5 && (bmsr == 0xffff || !(bmsr & (1u << 2))); i++)
+        /* 失败路径上的复读也从 5 次减到 1 次：它是"再看一眼"，
+         * 不是"等着它好"，而每一次都要 1 秒。
+         */
+
+        for (i = 0; i < 1 && (bmsr == 0xffff || !(bmsr & (1u << 2))); i++)
           {
             up_mdelay(1000);
             gmac_mdio_read(port, GMAC_PHY_ADDR, 1, &bmsr);
@@ -1306,23 +1310,28 @@ int rk3576_gmac_probe(int port)
   {
     uint16_t bmsr = 0;
     uint16_t lp = 0;
-    int i;
 
-    for (i = 1; i <= 8; i++)
-      {
-        up_mdelay(500);
-        gmac_mdio_read(port, GMAC_PHY_ADDR, 1, &bmsr);
-        if (bmsr & (1u << 2))
-          {
-            break;
-          }
-      }
+    /* ★ 只读一次，不再等着链路起来。
+     *
+     *   这里原来是 `for (i = 1; i <= 8; i++) { up_mdelay(500); ... }` ——
+     *   最多等 4 秒，**只为了打一行链路状态**，而且等到与否都 return OK。
+     *
+     *   带时间戳抓启动日志量出来的代价：GMAC0（没插线）4500ms +
+     *   GMAC1 3000ms = 7.5 秒，占当时整个启动的六分之一。
+     *
+     *   链路状态是有用的诊断，但它是**随时间变化的量**，在启动路径上
+     *   阻塞着等一个"迟早会变"的位，本来就不是它该待的地方 —— 自协商
+     *   没完成不影响 openvela 继续启动，netinit 线程和 ifconfig 随后
+     *   都会再看。所以改成读一次、如实报告"还在协商"。
+     */
 
+    gmac_mdio_read(port, GMAC_PHY_ADDR, 1, &bmsr);
     gmac_mdio_read(port, GMAC_PHY_ADDR, 5, &lp);
     syslog(LOG_INFO,
-           "GMAC%d: 链路=%s 自协商=%s 对端能力 LP=0x%04x（%d00ms）\n",
+           "GMAC%d: 链路=%s 自协商=%s 对端能力 LP=0x%04x"
+           "（探测结束即时读取，未完成不等）\n",
            port, (bmsr & (1u << 2)) ? "已建立" : "未建立",
-           (bmsr & (1u << 5)) ? "已完成" : "未完成", lp, i * 5);
+           (bmsr & (1u << 5)) ? "已完成" : "未完成", lp);
   }
 
   return OK;
