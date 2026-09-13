@@ -52,20 +52,26 @@ boot 分区的 Android 镜像格式（那样太占地方）：
 
 | LBA | 大小 | 内容 | 原分区 |
 |---:|---:|---|---|
-| 8192 | 2.2MB | `amp.itb`（AMP FIT，里面是 openvela） | security |
-| 12800 | 272KB | `rk3576-kickpi-k7-amp.dtb`（只含 4 个 A72 核） | security |
-| 16384 | 4MB | `uboot-amp.img`（带 AMP + bootamp） | uboot |
+| 8192 | 2.5MB | `amp.itb`（AMP FIT，里面是 openvela） | security |
+| 14336 | 272KB | `rk3576-kickpi-k7-amp.dtb`（只含 4 个 A72 核） | security |
+| 16384 | 3MB | `uboot-amp.img`（带 AMP + bootamp + 面板） | uboot |
 | 49152 | 7.6MB | `Image-amp`（裸 Linux Image） | vbmeta + boot 头部 |
 
 `Image` 之所以能压到 7.6MB（原来 43MB），见 `linux/amp-minimal.config`
 ——削掉的都是 AMP 下归 openvela 的外设，既省地方也是资源划分本身。
+
+★ dtb 原来在 LBA 12800，后来往后挪到 14336：openvela 加上 LVGL 界面之后
+`amp.itb` 从 2.17MB 涨到 2.54MB（4961 扇区，8192..13153），正好压过去。
+**每次 openvela 变大都要重算这条边界** —— 这种越界不会报错，只会让 dtb
+读出来是 FIT 的尾巴，然后 Linux 在一个看不出所以然的地方停住。
+security 分区是 8192..16384，14336 之后还有 2048 扇区（1MB）余量。
 
 ## 烧
 
 ```bash
 RK=~/rkdeveloptool/rkdeveloptool
 $RK wl  8192 out/amp.itb
-$RK wl 12800 out/rk3576-kickpi-k7-amp.dtb
+$RK wl 14336 out/rk3576-kickpi-k7-amp.dtb
 $RK wl 16384 out/uboot-amp.img
 $RK wl 49152 out/Image-amp
 # 每一段都回读对比，见上
@@ -83,7 +89,7 @@ AMP 调试期这一点很要命）。
 ```
 => mmc dev 0
 => mmc read 0x40400000 0xC000 0x39A5    # Linux Image ← LBA 49152, 14757 扇区
-=> mmc read 0x4f000000 0x3200 0x212     # Linux DTB   ← LBA 12800, 530 扇区
+=> mmc read 0x4f000000 0x3800 0x212     # Linux DTB   ← LBA 14336, 530 扇区
 => mmc read 0x60000000 0x2000 0x10D9    # amp.itb     ← LBA 8192, 4313 扇区
 => setenv amp_linux_cmd 'booti 0x40400000 - 0x4f000000'
 => bootamp 0x60000000
@@ -151,7 +157,7 @@ autoboot，然后：
 ```
 => mmc dev 0
 => mmc read 0x40400000 0xC000 0x39A5    # Linux Image ← LBA 49152
-=> mmc read 0x4f000000 0x3200 0x213     # Linux DTB   ← LBA 12800
+=> mmc read 0x4f000000 0x3800 0x213     # Linux DTB   ← LBA 14336
 => mmc read 0x60000000 0x2000 0x1089    # amp.itb     ← LBA 8192
 => setenv amp_kick_timeout 8000
 => setenv amp_linux_cmd 'booti 0x40400000 - 0x4f000000'
