@@ -387,41 +387,6 @@ int board_app_initialize(uintptr_t arg)
         {
           syslog(LOG_INFO, "显示: /dev/fb0 就绪\n");
 
-#ifdef CONFIG_LVX_USE_DEMO_CONTEST2026_423_KICKPI_UI
-          /* 屏一就绪就把仪表盘拉起来，不等 NSH。
-           *
-           * ★ 两个理由，第二个是调试用的
-           *
-           *   一、这是块带屏的板子，上电就该有界面，不该要人先敲一行命令。
-           *
-           *   二、它同时是**唯一一个不依赖串口的活体指示**。AMP 双核跑
-           *      的时候观察到过：openvela 一路打印到 NSH 横幅，然后串口
-           *      彻底安静、敲回车也没有回显。这种现象有两种完全不同的
-           *      解释 ——「openvela 死了」和「openvela 活着但收不到
-           *      UART 的接收中断」—— 光看串口分不开，因为两种情况下
-           *      串口都是哑的。
-           *
-           *      界面一直在刷（LIVE 页的曲线和 uptime 每 250ms 动一次），
-           *      屏幕就成了旁路的心跳：串口哑而画面在动 = 活着但聋了，
-           *      两个都停 = 真死了。
-           */
-
-          {
-            int pid = task_create("kickpi_ui",
-                                  CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_PRIORITY,
-                                  CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_STACKSIZE,
-                                  kickpi_ui_main, NULL);
-
-            if (pid < 0)
-              {
-                syslog(LOG_ERR, "ERROR: 启动 kickpi_ui 失败: %d\n", pid);
-              }
-            else
-              {
-                syslog(LOG_INFO, "界面: kickpi_ui 已启动（pid %d）\n", pid);
-              }
-          }
-#endif
         }
 #endif
 #else
@@ -831,6 +796,39 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_INFO, "看门狗: /dev/watchdog0 就绪\n");
     }
+#endif
+
+#ifdef CONFIG_LVX_USE_DEMO_CONTEST2026_423_KICKPI_UI
+  /* ★ 仪表盘放在**所有设备都注册完之后**再拉起来。
+   *
+   *   一、它要用 /dev/fb0 和 /dev/input0 两个节点，而触摸是在显示之后
+   *      才注册的。一开始图省事放在 fb_register() 后面，结果每次都是
+   *      「警告：打不开 /dev/input0 —— 触摸不可用，仅显示」 ——
+   *      不是触摸坏了，是**界面比触摸先起来**。
+   *
+   *   二、开机自启本身有两个理由：这是块带屏的板子，上电就该有画面；
+   *      而且它每 250ms 刷一次，是一个**不依赖串口的旁路心跳**。
+   *      AMP 调试期观察到过 openvela 打印到 NSH 横幅后串口彻底安静，
+   *      「死了」和「活着但收不到 UART 中断」在串口上长得一模一样，
+   *      靠屏幕动不动才分得开（那次是 Linux 的 gic_dist_config() 把
+   *      openvela 的中断使能位清掉了，见 amp/linux/0001）。
+   */
+
+  {
+    int pid = task_create("kickpi_ui",
+                          CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_PRIORITY,
+                          CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_STACKSIZE,
+                          kickpi_ui_main, NULL);
+
+    if (pid < 0)
+      {
+        syslog(LOG_ERR, "ERROR: 启动 kickpi_ui 失败: %d\n", pid);
+      }
+    else
+      {
+        syslog(LOG_INFO, "界面: kickpi_ui 已启动（pid %d）\n", pid);
+      }
+  }
 #endif
 
   return OK;
