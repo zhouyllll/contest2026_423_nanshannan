@@ -171,30 +171,38 @@ int rk3576_mailbox_initialize(unsigned int rx_group)
   rk3576_clk_gate(RK3576_CRU_MAILBOX_GATE_CON,
                   RK3576_CRU_MAILBOX_GATE_BIT, true);
 
-  /* 先关中断，但**不清状态**。
+  /* ★ 既不关中断，也不清状态 —— 两件事都会丢掉握手。
    *
-   * ★ 这里原来会把 pending 位清掉，理由是"上一次启动留下的残留会让
-   *   enable 的瞬间立刻进一次中断"。在 AMP 下这个理由是错的，而且代价
-   *   是丢掉握手。
+   *   不清状态的理由（原来就有）：
    *
-   *   引导器（U-Boot 的 amp_wait_linux_kick()）会**等** Linux 发出第一次
-   *   门铃再启动 openvela，并且故意不清那一位 —— 目的就是把这次门铃留
-   *   给我们。这样做有两个作用：
+   *     STATUS 是 W1C 且电平有效。Linux 的 first_notify **只发一次**，
+   *     清掉就再也等不到第二次；留着的话，register_callback() 一使能
+   *     GIC 上的那条 SPI 就会立刻进一次 ISR，握手不丢。
+   *     代价是万一真有上次启动的残留会多进一次 ISR —— rptun 的回调对
+   *     重复 kick 是幂等的（只是把两个 vring 再扫一遍），无害。
    *
-   *     1. 保证 Linux 已经把 GIC 的 distributor 配完（rpmsg probe 远在
-   *        GIC 初始化之后），openvela 随后认领自己的 SPI 才不会被覆盖；
-   *     2. 那一位就是"对端 DRIVER_OK"的等价信号（见 rk3576_rptun.c
-   *        文件头的「握手」一节）。
+   *   不关使能的理由（这一条是后来在板上补的）：
    *
-   *   STATUS 是 W1C 且电平有效：只要不清，register_callback() 一使能中断
-   *   就会立刻进一次 ISR，握手不丢。清掉它就再也等不到第二次 —— Linux
-   *   的 first_notify 只发一次。
+   *     这里原来会先写 INT_UPDATE 把 inten 关掉，注释里写着"关闭使能
+   *     不清 STATUS"。**那个假设是错的。** 板上实测：Linux 已经把门铃
+   *     写进来了（A2B_CMD=0x00000003 A2B_DATA=0x524d5347，就是 "RMSG"），
+   *     而 A2B_STATUS 是 0，握手永远完不成。
    *
-   *   代价：如果真有上一次启动的残留，会多进一次 ISR。而 rptun 的回调
-   *   对重复 kick 是幂等的（只是让它把两个 vring 再扫一遍），无害。
+   *     已知的硬件事实是「inten 关着时状态位不锁存」（TRM 17.3，也是
+   *     0004 补丁里用寄存器 dump 查出来的）。从现场看，关掉 inten 同时
+   *     会让已经锁存的那一位消失 —— 也就是说这个开关不只是"以后不锁存"，
+   *     它把当前值也一并带走了。
+   *
+   *     关一下再开在这块硬件上就是一个**丢门铃的窗口**，而我们恰恰只有
+   *     一次门铃可丢。所以改成防御性地**确保它是开的**。
+   *
+   *     这样做不会有"attach 之前就来中断"的风险：GIC 上那条 SPI 要到
+   *     register_callback() 里 up_enable_irq() 才使能，在那之前中断到
+   *     不了 CPU。
    */
 
-  mbox_putreg(RK3576_MBOX_INT_UPDATE, base, RK3576_MBOX_A2B_INTEN);
+  mbox_putreg(RK3576_MBOX_INT_UPDATE | RK3576_MBOX_INT_MASK, base,
+              RK3576_MBOX_A2B_INTEN);
 
   pending = (mbox_getreg(base, RK3576_MBOX_A2B_STATUS) &
              RK3576_MBOX_INT_MASK) != 0;
