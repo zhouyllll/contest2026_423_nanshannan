@@ -25,6 +25,7 @@ RK3576 是 4×A53 + 4×A72。AMP 就是让两个簇各跑一个**完整的操作
 | `uboot/0006-bootamp-load-from-emmc.patch` | U-Boot：`bootamp` 不带参数时自己从 eMMC 读三块料 |
 | `uboot/0007-do-not-wait-for-peer-kick.patch` | U-Boot：不再在「Linux 已跑、U-Boot 未退」的窗口里干等 |
 | `linux/rk3576-kickpi-k7-amp.dts` | Linux 的 DTB：只保留 A72 的四个 cpu 节点 |
+| `linux/0001-gic-keep-amp-irqs-enabled.patch` | Linux：gic_dist_config() 别把对端 OS 已使能的 SPI 关掉 |
 | `linux/amp.config` | Linux 的配置增量 |
 | `fit/amp.its` | 哪个镜像跑在哪颗核上 —— AMP 的全部契约 |
 

@@ -1,0 +1,90 @@
+gic: AMP 下不要把对端 OS 已经使能的 SPI 关掉
+
+应用：在 kernel-6.1/ 下 `patch -p1 < 本文件`。
+
+★ 症状：串口看起来死了，其实 OS 活着
+
+  双核跑起来之后，openvela 一路打印到 NSH 横幅，然后串口**彻底安静** ——
+  敲回车没有回显，看上去像是死机。但它其实活着：
+
+    启动期的日志走 syslog，而 CONFIG_SYSLOG_DEFAULT 在设备就绪前用的是
+    **轮询式的 up_putc()**，不需要中断；
+    NSH 的第一次写走的是串口字符设备，**发送完成中断**永远不来，于是
+    卡在那一行上。
+
+  两种解释（「死了」和「活着但聋了」）在串口上长得一模一样，这是这个 bug
+  最难查的地方。后来把 LVGL 界面改成开机自启当旁路心跳才分得开。
+
+★ 原因
+
+  Rockchip 的 AMP 支持（CONFIG_ROCKCHIP_AMP + DTS 里的 amp-irqs）教会了
+  gic_dist_init()/gic_dist_config() 哪些 SPI 属于对端 OS：
+
+    - 目标 CPU（GIC_DIST_TARGET）  —— 已处理，见 irq-gic.c
+    - 优先级（GIC_DIST_PRI）       —— 已处理，见本文件上方
+
+  但**使能位没处理**。gic_dist_config() 最后那个循环无条件地往
+  GIC_DIST_ENABLE_CLEAR 写 0xffffffff，把对端已经使能的中断全部关掉。
+
+  所以这件事取决于两个 OS 的先后顺序：
+    openvela 先 claim → Linux 的 gic_dist_init() 把它关掉  ✗
+    Linux 先 init     → openvela 之后 claim，没事           ✓
+
+  之前能跑通是因为引导器在启动 openvela 前**等了 3 秒**对端门铃，恰好把
+  顺序固定成后者。但那 3 秒本身是危险的（Linux 已在跑而 U-Boot 还没退，
+  见 ../uboot/0007），去掉之后顺序反转，这个 bug 就露出来了。
+
+★ 改法
+
+  把对端拥有的那些位从 ENABLE_CLEAR 的掩码里剔掉。这样**顺序就不再重要**：
+  谁先使能自己的 SPI，另一个都不会把它清掉。
+
+  没有动的地方：GIC_DIST_ACTIVE_CLEAR 仍然全清（清的是 active 状态，不是
+  使能），以及上面那个把所有 SPI 设成电平触发的循环 —— ICDICFR 每个中断
+  占 2 位，要跳过就得逐字读改写，而本板对端用到的几条（UART0 108、
+  mailbox 174、PL330 64、77）本来就是电平触发，暂不动。这一条记在这里，
+  不是没想到。
+
+--- a/drivers/irqchip/irq-gic-common.c
++++ b/drivers/irqchip/irq-gic-common.c
+@@ -132,11 +132,39 @@
+ 	/*
+ 	 * Deactivate and disable all SPIs. Leave the PPI and SGIs
+ 	 * alone as they are in the redistributor registers on GICv3.
++	 *
++	 * ★ AMP: do not disable the IRQs that belong to the other OS.
++	 *
++	 *   Rockchip's AMP support already teaches this function which SPIs
++	 *   belong to the peer OS -- the target CPU (gic_dist_init) and the
++	 *   priority (just above) are both honoured. The enable bit is not,
++	 *   so a plain gic_dist_init() silently switches off every interrupt
++	 *   the peer had already enabled.
++	 *
++	 *   On RK3576 running openvela on the A53 cluster and Linux on the
++	 *   A72 cluster that is fatal and very hard to read: openvela keeps
++	 *   printing for its whole boot (early syslog is polled up_putc()),
++	 *   and only goes quiet the moment NSH does its first interrupt
++	 *   driven write. The console looks dead while the OS is in fact
++	 *   alive -- and nothing anywhere reports an error.
++	 *
++	 *   Preserving the bit also removes an ordering requirement between
++	 *   the two OSes: whoever enables its own SPIs first, the other one
++	 *   no longer clobbers it.
+ 	 */
+ 	for (i = 32; i < gic_irqs; i += 32) {
++		u32 clr = GICD_INT_EN_CLR_X32;
++#ifdef CONFIG_ROCKCHIP_AMP
++		unsigned int j;
++
++		for (j = 0; j < 32; j++) {
++			if (rockchip_amp_need_init_amp_irq(i + j))
++				clr &= ~BIT(j);
++		}
++#endif
+ 		writel_relaxed(GICD_INT_EN_CLR_X32,
+ 			       base + GIC_DIST_ACTIVE_CLEAR + i / 8);
+-		writel_relaxed(GICD_INT_EN_CLR_X32,
++		writel_relaxed(clr,
+ 			       base + GIC_DIST_ENABLE_CLEAR + i / 8);
+ 	}
+ 

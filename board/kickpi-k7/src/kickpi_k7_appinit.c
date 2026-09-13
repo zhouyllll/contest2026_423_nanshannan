@@ -37,6 +37,7 @@
 #include <nuttx/timers/oneshot.h>
 #include "arm64_arch_timer.h"
 #include <stdint.h>
+#include <sched.h>
 #include <nuttx/board.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
@@ -59,6 +60,16 @@
 #include "rk3576_sdhci.h"
 #include "rk3576_rptun.h"
 #include "kickpi_k7.h"
+
+
+/* 板级 late init 里直接把界面拉起来，见下面 fb_register 之后那一段。
+ * Application.mk 会把应用的 main 重命名成 <PROGNAME>_main，所以这里
+ * 声明的就是 apps 侧那个入口。
+ */
+
+#ifdef CONFIG_LVX_USE_DEMO_CONTEST2026_423_KICKPI_UI
+int kickpi_ui_main(int argc, FAR char *argv[]);
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -375,6 +386,42 @@ int board_app_initialize(uintptr_t arg)
       else
         {
           syslog(LOG_INFO, "显示: /dev/fb0 就绪\n");
+
+#ifdef CONFIG_LVX_USE_DEMO_CONTEST2026_423_KICKPI_UI
+          /* 屏一就绪就把仪表盘拉起来，不等 NSH。
+           *
+           * ★ 两个理由，第二个是调试用的
+           *
+           *   一、这是块带屏的板子，上电就该有界面，不该要人先敲一行命令。
+           *
+           *   二、它同时是**唯一一个不依赖串口的活体指示**。AMP 双核跑
+           *      的时候观察到过：openvela 一路打印到 NSH 横幅，然后串口
+           *      彻底安静、敲回车也没有回显。这种现象有两种完全不同的
+           *      解释 ——「openvela 死了」和「openvela 活着但收不到
+           *      UART 的接收中断」—— 光看串口分不开，因为两种情况下
+           *      串口都是哑的。
+           *
+           *      界面一直在刷（LIVE 页的曲线和 uptime 每 250ms 动一次），
+           *      屏幕就成了旁路的心跳：串口哑而画面在动 = 活着但聋了，
+           *      两个都停 = 真死了。
+           */
+
+          {
+            int pid = task_create("kickpi_ui",
+                                  CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_PRIORITY,
+                                  CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_STACKSIZE,
+                                  kickpi_ui_main, NULL);
+
+            if (pid < 0)
+              {
+                syslog(LOG_ERR, "ERROR: 启动 kickpi_ui 失败: %d\n", pid);
+              }
+            else
+              {
+                syslog(LOG_INFO, "界面: kickpi_ui 已启动（pid %d）\n", pid);
+              }
+          }
+#endif
         }
 #endif
 #else
