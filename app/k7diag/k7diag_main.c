@@ -572,6 +572,124 @@ static int diag_touch(int secs)
   return 0;
 }
 
+
+/****************************************************************************
+ * Name: diag_vsync
+ *
+ * ★ 把 VP1 的帧开始标志量清楚，别再靠推断
+ *
+ *   翻页要压到帧边界上，就得知道"帧开始"这个标志到底怎么用。原厂
+ *   rockchip_vop2_reg.c 给了寄存器（VP1 的中断块在 0xB0，bit0 = FS_INTR），
+ *   但**这些位是不是要先使能中断才锁存、清除是不是 hiword 掩码写**，
+ *   手册没说清，而这两点都踩过坑（mailbox 的 IPD 就是不使能不锁存）。
+ *
+ *   这里连续采样 120ms（60Hz 下应当有 7 个帧开始），分别看：
+ *     INT_RAW    原始状态
+ *     INT_STATUS 屏蔽后状态
+ *   并在中途做一次清除，看清除有没有效果。
+ ****************************************************************************/
+
+#define VOP2_BASE            0x27d00000
+#define VP1_INT_EN           0x00b0
+#define VP1_INT_CLR          0x00b4
+#define VP1_INT_STATUS       0x00b8
+#define VP1_INT_RAW          0x00bc
+#define VP1_INT_FS           (1u << 0)
+
+static uint32_t vop_rd(uint32_t off)
+{
+  return *(volatile uint32_t *)((uintptr_t)VOP2_BASE + off);
+}
+
+static void vop_wr(uint32_t off, uint32_t v)
+{
+  *(volatile uint32_t *)((uintptr_t)VOP2_BASE + off) = v;
+}
+
+static int diag_vsync(void)
+{
+  int raw_hi = 0;
+  int raw_tr = 0;
+  int st_hi  = 0;
+  int st_tr  = 0;
+  int praw   = -1;
+  int pst    = -1;
+  int i;
+
+  printf("初始: EN=%08" PRIx32 " CLR=%08" PRIx32 " STATUS=%08" PRIx32
+         " RAW=%08" PRIx32 "\n",
+         vop_rd(VP1_INT_EN), vop_rd(VP1_INT_CLR),
+         vop_rd(VP1_INT_STATUS), vop_rd(VP1_INT_RAW));
+
+  /* 先按 hiword 掩码清一次 FS，立刻回读看清掉没有 */
+
+  vop_wr(VP1_INT_CLR, (VP1_INT_FS << 16) | VP1_INT_FS);
+  printf("清除后(立即): STATUS=%08" PRIx32 " RAW=%08" PRIx32 "\n",
+         vop_rd(VP1_INT_STATUS), vop_rd(VP1_INT_RAW));
+
+  /* 采样 120ms —— 60Hz 下应当有 7 个帧开始 */
+
+  for (i = 0; i < 12000; i++)
+    {
+      int r = (vop_rd(VP1_INT_RAW) & VP1_INT_FS) ? 1 : 0;
+      int t = (vop_rd(VP1_INT_STATUS) & VP1_INT_FS) ? 1 : 0;
+
+      raw_hi += r;
+      st_hi  += t;
+      if (praw >= 0 && r != praw)
+        {
+          raw_tr++;
+        }
+
+      if (pst >= 0 && t != pst)
+        {
+          st_tr++;
+        }
+
+      praw = r;
+      pst  = t;
+      up_udelay(10);
+    }
+
+  printf("120ms 采样 12000 次: RAW 高=%d 跳变=%d | STATUS 高=%d 跳变=%d\n",
+         raw_hi, raw_tr, st_hi, st_tr);
+  printf("  判读: 跳变>0 说明该位会自己置位、可用来等帧边界；\n"
+         "        恒 1 说明清除没生效；恒 0 说明不使能就不锁存\n");
+
+  /* 再试一次：开 FS 的中断使能之后重采（只在本命令内，退出前关掉）。
+   * 不注册中断处理，只看锁存行为 —— 与 mailbox IPD/IEN 那次同样的验法。
+   */
+
+  vop_wr(VP1_INT_EN, (VP1_INT_FS << 16) | VP1_INT_FS);
+  vop_wr(VP1_INT_CLR, (VP1_INT_FS << 16) | VP1_INT_FS);
+  raw_tr = 0; st_tr = 0; praw = -1; pst = -1;
+
+  for (i = 0; i < 12000; i++)
+    {
+      int r = (vop_rd(VP1_INT_RAW) & VP1_INT_FS) ? 1 : 0;
+      int t = (vop_rd(VP1_INT_STATUS) & VP1_INT_FS) ? 1 : 0;
+
+      if (praw >= 0 && r != praw)
+        {
+          raw_tr++;
+        }
+
+      if (pst >= 0 && t != pst)
+        {
+          st_tr++;
+        }
+
+      praw = r;
+      pst  = t;
+      up_udelay(10);
+    }
+
+  vop_wr(VP1_INT_EN, (VP1_INT_FS << 16) | 0);   /* 关掉，别留下中断源 */
+
+  printf("开使能后再采: RAW 跳变=%d | STATUS 跳变=%d\n", raw_tr, st_tr);
+  return 0;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -630,6 +748,11 @@ int main(int argc, char *argv[])
       return 0;
     }
 
+  if (argc >= 2 && strcmp(argv[1], "vsync") == 0)
+    {
+      return diag_vsync();
+    }
+
   if (argc >= 2 && strcmp(argv[1], "anim") == 0)
     {
       return diag_anim(argc >= 3 ? atoi(argv[2]) : 10);
@@ -649,6 +772,7 @@ int main(int argc, char *argv[])
   printf("  k7diag stat           读常驻采样的累计结果（不用对时）\n");
   printf("  k7diag tp [秒]        现场采样触摸中断脚\n");
   printf("  k7diag fb ramp|bars|grid   绕开 LVGL 写测试图案\n");
+  printf("  k7diag vsync               量 VP1 的帧开始标志（清除/使能行为）\n");
   printf("  k7diag anim [秒]           绕开 LVGL 的双缓冲翻页动画（查撕裂/黑线）\n");
   printf("  k7diag touch [秒]          绕开 LVGL 的色块点击测试（查触摸链路）\n");
   return 1;

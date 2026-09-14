@@ -32,6 +32,8 @@
 #include <syslog.h>
 
 #include <nuttx/timers/watchdog.h>
+#include <nuttx/wdog.h>
+#include <nuttx/clock.h>
 
 #include "arm64_internal.h"
 #include "rk3576_cru.h"
@@ -77,6 +79,11 @@ struct rk3576_wdt_s
   uint32_t                    timeout_ms;   /* 上层请求的值 */
   uint32_t                    actual_ms;    /* 实际生效的档位 */
   bool                        started;
+
+  /* ★ stop() 之后由驱动自己接手喂狗用的定时器。见 rk3576_wdt_stop()。 */
+
+  struct wdog_s               autofeed;
+  bool                        autofeeding;
 };
 
 /****************************************************************************
@@ -134,6 +141,31 @@ static uint32_t wdt_top_for_ms(uint32_t ms, FAR uint32_t *actual_ms)
  * 下半部接口
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: rk3576_wdt_autofeed_cb
+ *
+ * Description:
+ *   stop() 之后接管喂狗。硬件停不下来，但只要有人按时喂，它就不会复位 ——
+ *   这正是 Linux 侧 WDOG_HW_RUNNING 的语义。
+ *
+ ****************************************************************************/
+
+static void rk3576_wdt_autofeed_cb(wdparm_t arg)
+{
+  FAR struct rk3576_wdt_s *priv = (FAR struct rk3576_wdt_s *)arg;
+
+  wdt_putreg(WDT_CRR, WDT_CRR_KICK);
+
+  if (priv->autofeeding)
+    {
+      /* 按实际档位的 1/4 重装，留足余量 */
+
+      wd_start(&priv->autofeed,
+               MSEC2TICK(priv->actual_ms ? priv->actual_ms / 4 : 250),
+               rk3576_wdt_autofeed_cb, (wdparm_t)priv);
+    }
+}
+
 static int rk3576_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
 {
   FAR struct rk3576_wdt_s *priv = (FAR struct rk3576_wdt_s *)lower;
@@ -147,6 +179,11 @@ static int rk3576_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
    */
 
   wdt_putreg(WDT_CR, WDT_CR_EN);
+  /* 上层重新接管了，取消驱动自己的喂狗 */
+
+  priv->autofeeding = false;
+  wd_cancel(&priv->autofeed);
+
   priv->started = true;
   return OK;
 }
@@ -182,10 +219,57 @@ static int rk3576_wdt_stop(FAR struct watchdog_lowerhalf_s *lower)
    *   复位发生，重启后可读到 soc warm boot, reset status: 0x1050。
    */
 
-  UNUSED(priv);
-  syslog(LOG_WARNING,
-         "WDT: 使能后无法停止（CRU 复位两种组合均实测会导致整板重启）\n");
-  return -ENOSYS;
+  /* ★ 停不掉硬件，但可以让它**永远不超时** —— 这就是原厂的做法。
+   *
+   *   从板子 dump 出来的原厂 dtb 里，看门狗节点是这样的：
+   *
+   *     watchdog@2ace0000 {
+   *         compatible = "snps,dw-wdt";
+   *         clocks = <&cru 0xa8 &cru 0xa7>;
+   *         clock-names = "tclk", "pclk";
+   *         interrupts = <0 0x28 4>;
+   *         // 没有 resets
+   *     };
+   *
+   *   **故意不给 resets**。对应 Linux drivers/watchdog/dw_wdt.c：
+   *
+   *     static int dw_wdt_stop(struct watchdog_device *wdd)
+   *     {
+   *         if (!dw_wdt->rst) {
+   *             set_bit(WDOG_HW_RUNNING, &wdd->status);
+   *             return 0;              // 不复位，返回成功
+   *         }
+   *         reset_control_assert(dw_wdt->rst);
+   *         reset_control_deassert(dw_wdt->rst);
+   *         return 0;
+   *     }
+   *
+   *   置上 WDOG_HW_RUNNING 之后，看门狗框架会**继续替它喂**。也就是说
+   *   原厂对"停不下来"的回答不是报错，而是"接管喂狗"。
+   *
+   *   这里原来返回 -ENOSYS，理由是"假装成功的代价更大：上层以为停了就
+   *   不再喂狗，板子过一会儿莫名其妙重启"。这个顾虑本身是对的，但它只在
+   *   **驱动不接手**时成立 —— 原厂正是靠接手喂狗来避免它。所以改成：
+   *   返回成功，同时自己起一个定时器按档位的 1/4 周期喂。
+   *
+   *   两条 CRU 复位路实测都会让整板重启（一起复位会让复位输出产生毛刺；
+   *   只复位 APB 域则 TORR 被清成最短档位后立刻超时），那个结论仍然成立，
+   *   所以这里不去碰 CRU。
+   */
+
+  priv->started     = false;
+  priv->autofeeding = true;
+
+  wdt_putreg(WDT_CRR, WDT_CRR_KICK);
+  wd_start(&priv->autofeed,
+           MSEC2TICK(priv->actual_ms ? priv->actual_ms / 4 : 250),
+           rk3576_wdt_autofeed_cb, (wdparm_t)priv);
+
+  syslog(LOG_INFO,
+         "WDT: 硬件停不掉（DW 的 CR.EN 写一次生效），改由驱动按 %" PRIu32
+         "ms 接管喂狗 —— 与原厂 dw_wdt 的 WDOG_HW_RUNNING 等价\n",
+         priv->actual_ms ? priv->actual_ms / 4 : 250);
+  return OK;
 }
 
 static int rk3576_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)

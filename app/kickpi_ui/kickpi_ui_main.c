@@ -40,6 +40,10 @@
 #include <inttypes.h>
 #include <malloc.h>
 #include <stdio.h>
+#include <nuttx/video/fb.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -667,6 +671,125 @@ static void build_ui(void)
  * Public Functions
  ****************************************************************************/
 
+struct kickpi_fb_s
+{
+  int       fd;
+  uint8_t  *mem;
+  uint32_t  stride;
+  uint32_t  xres;
+  uint32_t  yres;
+  size_t    fblen;
+  size_t    drawbytes;
+};
+
+static struct kickpi_fb_s g_kfb;
+
+/* ★ 绘制缓冲必须在堆上分配，不能写成静态数组。
+ *
+ *   第一版写成 static uint32_t g_draw[720*60]，两块共 345KB 全进了 BSS，
+ *   镜像从 4993 扇区涨到 5665 扇区。而 U-Boot 的 bootamp 读 FIT 用的是
+ *   **写死的扇区数 5120**（cmd/bootamp.c 的编译期宏），于是读进来的是
+ *   截断的镜像，校验直接失败：
+ *
+ *     Verifying Hash Integrity ... sha256 Bad hash: ...
+ *     Bad Data Hash / AMP Error: Load loadables, ret=-13
+ *
+ *   现象是"板子起不来"，但根因既不在代码逻辑也不在 LVGL —— 是镜像超过了
+ *   引导器愿意读的长度。运行期的缓冲放堆上，镜像一个字节都不会涨。
+ */
+
+#define KICKPI_DRAW_LINES 60
+static uint32_t *g_draw1;
+static uint32_t *g_draw2;
+
+static void kickpi_flush_cb(lv_display_t *disp, const lv_area_t *area,
+                            uint8_t *px_map)
+{
+  struct kickpi_fb_s *fb = lv_display_get_driver_data(disp);
+  struct fb_area_s    up;
+  int32_t             w = lv_area_get_width(area);
+  int32_t             y;
+
+  for (y = area->y1; y <= area->y2; y++)
+    {
+      memcpy(fb->mem + (size_t)y * fb->stride + (size_t)area->x1 * 4,
+             px_map + (size_t)(y - area->y1) * w * 4,
+             (size_t)w * 4);
+    }
+
+  up.x = area->x1;
+  up.y = area->y1;
+  up.w = w;
+  up.h = lv_area_get_height(area);
+  ioctl(fb->fd, FBIO_UPDATE, (unsigned long)&up);
+
+  lv_display_flush_ready(disp);
+}
+
+static lv_display_t *kickpi_disp_create(const char *path)
+{
+  struct fb_videoinfo_s vinfo;
+  struct fb_planeinfo_s pinfo;
+  lv_display_t         *disp;
+
+  g_kfb.fd = open(path, O_RDWR);
+  if (g_kfb.fd < 0)
+    {
+      return NULL;
+    }
+
+  memset(&pinfo, 0, sizeof(pinfo));
+  if (ioctl(g_kfb.fd, FBIOGET_VIDEOINFO, (unsigned long)&vinfo) < 0 ||
+      ioctl(g_kfb.fd, FBIOGET_PLANEINFO, (unsigned long)&pinfo) < 0)
+    {
+      close(g_kfb.fd);
+      return NULL;
+    }
+
+  g_kfb.xres   = vinfo.xres;
+  g_kfb.yres   = vinfo.yres;
+  g_kfb.stride = pinfo.stride;
+  g_kfb.fblen  = pinfo.fblen;
+  g_kfb.mem    = mmap(NULL, pinfo.fblen, PROT_READ | PROT_WRITE,
+                      MAP_SHARED | MAP_FILE, g_kfb.fd, 0);
+  if (g_kfb.mem == MAP_FAILED)
+    {
+      close(g_kfb.fd);
+      return NULL;
+    }
+
+  {
+    size_t bufbytes = (size_t)vinfo.xres * KICKPI_DRAW_LINES * 4;
+
+    g_draw1 = malloc(bufbytes);
+    g_draw2 = malloc(bufbytes);
+    if (g_draw1 == NULL || g_draw2 == NULL)
+      {
+        printf("绘制缓冲分配失败 (%zu x2)\n", bufbytes);
+        close(g_kfb.fd);
+        return NULL;
+      }
+
+    g_kfb.drawbytes = bufbytes;
+  }
+
+  disp = lv_display_create(vinfo.xres, vinfo.yres);
+  if (disp == NULL)
+    {
+      return NULL;
+    }
+
+  lv_display_set_driver_data(disp, &g_kfb);
+  lv_display_set_color_format(disp, LV_COLOR_FORMAT_XRGB8888);
+  lv_display_set_flush_cb(disp, kickpi_flush_cb);
+  lv_display_set_buffers(disp, g_draw1, g_draw2, g_kfb.drawbytes,
+                         LV_DISPLAY_RENDER_MODE_PARTIAL);
+
+  printf("\u663e\u793a: %" PRIu32 "x%" PRIu32 " PARTIAL, \u7ed8\u5236\u7f13\u51b2 %d \u884c\n",
+         g_kfb.xres, g_kfb.yres, KICKPI_DRAW_LINES);
+  return disp;
+}
+
 int main(int argc, char *argv[])
 {
   lv_nuttx_dsc_t    dsc;
@@ -679,8 +802,46 @@ int main(int argc, char *argv[])
 
   lv_init();
 
+  /* ★ 不用 lv_nuttx_init() 建显示，只借它建触摸。
+   *
+   *   lv_nuttx_fbdev.c 写死了 LV_DISPLAY_RENDER_MODE_DIRECT，而且只要
+   *   驱动报了 yres_virtual = 2*yres 就自动走双缓冲 + FBIOPAN_DISPLAY。
+   *   这条路在这块板子上一直不干净：
+   *
+   *     - DIRECT + 双缓冲要求两块缓冲逐帧同步（LVGL 用
+   *       refr_sync_areas() 把上一帧脏区从前缓冲拷到后缓冲），
+   *       任何一环对不上，屏上就是"上一帧没清干净" ——
+   *       实测滑动时闪烁并出现黑色短线条；
+   *     - 翻页的 CFG_DONE 要等 VSYNC 才 latch，而 VOP2 的中断我们
+   *       没接，只能轮询 VP1 的 FS 标志。实测那个标志是**粘滞**
+   *       的（120ms 里只跳变 3 次，60Hz 本该 ~14 次），拿它当帧
+   *       边界并不可靠，k7diag anim 仍跑到 78fps（屏是 60Hz）。
+   *
+   *   PARTIAL 模式把这一整类问题从根上去掉：LVGL 只往一块很小的
+   *   RAM 缓冲里画，flush_cb 负责把它拷进帧缓冲。帧缓冲**始终是
+   *   一份完整一致的画面**，没有两块缓冲要同步，也就不需要翻页和
+   *   vsync 门控。代价是每帧多一次内存拷贝，对这个仪表盘可以忽略。
+   *
+   *   这是绝大多数嵌入式 LVGL 的标准接法 —— 我们绕了远路才回到它。
+   */
+
+  /* ★ 顺序不能反：先建显示，再建触摸。
+   *
+   *   lv_indev_create() 会把输入设备绑到**当时的默认显示**上。先建触摸
+   *   的话那时还没有显示，indev 的 display 是空的，随后
+   *   process_single_touch() 里 lv_indev_get_display() 取到 NULL，
+   *   一点屏幕就崩。第一版就是这么写的，板子直接起不来。
+   */
+
+  result.disp = kickpi_disp_create("/dev/fb0");
+  if (result.disp == NULL)
+    {
+      printf("建立显示失败\n");
+      return -1;
+    }
+
   lv_nuttx_dsc_init(&dsc);
-  dsc.fb_path    = "/dev/fb0";
+  dsc.fb_path    = NULL;               /* 显示上面已经建好 */
   dsc.input_path = "/dev/input0";
 
   lv_nuttx_init(&dsc, &result);

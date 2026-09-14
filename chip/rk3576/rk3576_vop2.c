@@ -454,6 +454,61 @@ int rk3576_vop2_fb_pan(uintptr_t buffer)
              (uint32_t)buffer);
   vop_cfg_done(RK3576_VOP2_MIPI_VP);
 
+  /* ★ 等这次翻页真的在帧边界生效再返回 —— 没有这一步就是"没有 vsync"。
+   *
+   *   CFG_DONE 只是"请求提交"，真正 latch 发生在下一个 VSYNC。而我们的
+   *   pandisplay 为了不让 poll 卡死会把 fb 的 paninfo 队列立刻排空，于是
+   *   上层（LVGL）完全不受约束地往下画。实测 k7diag anim 能跑到 99fps，
+   *   而屏是 60Hz —— LVGL 比硬件快，就会往**正在被扫描的那一块**里画。
+   *
+   *   板上现象正是"刷新时上一帧没清干净、有花屏和黑色短线"。这不是帧率
+   *   太低，是快得没有节制。
+   *
+   *   做法照原厂：VP1 的中断块里 bit0 是 FS（帧开始）。先把它清掉，再等
+   *   它重新置位 —— 等到就说明中间经过了一个帧边界，CFG_DONE 已经 latch。
+   *   这样一次 pandisplay 最多阻塞一帧（60Hz 约 17ms），上层自然被压到
+   *   屏幕的刷新率上。
+   *
+   *   只读 INT_RAW（原始状态，不受使能位影响），不去开 VP 的中断使能 ——
+   *   NuttX 侧没有注册 VOP2 的中断处理，开了却没人应答会变成中断风暴。
+   */
+
+  {
+    int us;
+
+    vop_putreg(RK3576_VOP2_VP1_INT_CLR,
+               (RK3576_VOP2_INT_FS << 16) | RK3576_VOP2_INT_FS);
+
+    for (us = 0; us < 25000; us++)     /* 25ms > 60Hz 的一帧 16.7ms */
+      {
+        if ((vop_getreg(RK3576_VOP2_VP1_INT_RAW) & RK3576_VOP2_INT_FS) != 0)
+          {
+            break;
+          }
+
+        up_udelay(1);
+      }
+
+    if (us >= 25000)
+      {
+        /* 等不到帧开始就别一直等下去 —— 宁可这一帧不同步，也不要把
+         * 上层卡死。只报一次，避免刷屏。
+         */
+
+        static bool warned = false;
+
+        if (!warned)
+          {
+            warned = true;
+            syslog(LOG_WARNING,
+                   "VOP2: 等不到 VP%d 的帧开始（INT_RAW=0x%08" PRIx32
+                   "），翻页未与 vsync 同步\n",
+                   RK3576_VOP2_MIPI_VP,
+                   vop_getreg(RK3576_VOP2_VP1_INT_RAW));
+          }
+      }
+  }
+
   return OK;
 }
 

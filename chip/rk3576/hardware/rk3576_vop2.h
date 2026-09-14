@@ -107,6 +107,27 @@
 
 #define RK3576_VOP2_VP0_BASE         0x0c00
 #define RK3576_VOP2_VP1_BASE         0x0d00
+
+/* ★ VP 的中断块**不在 VP 寄存器块里**，是另一段绝对偏移。
+ *
+ *   出处：原厂 drivers/gpu/drm/rockchip/rockchip_vop_reg.h
+ *     RK3568_VP0_INT_EN 0xA0 / VP1 0xB0，每个 VP 占 0x10
+ *     RK3568_VP1_INT_EN 0xB0  INT_CLR 0xB4  INT_STATUS 0xB8  INT_RAW 0xBC
+ *
+ *   rockchip_vop2_reg.c 里 RK3576 直接复用 rk3568_vp1_intr，而且
+ *   RK3568_VP1_DSP_CTRL = 0xD00 与我们的 VP1_BASE 一致 —— 说明这套偏移
+ *   在 RK3576 上通用。
+ *
+ *   状态位的位号就是 rk3568_vop_intrs[] 的下标：
+ *     0 FS_INTR（帧开始）  1 FS_NEW  2 LINE_FLAG  3 LINE_FLAG1
+ *     4 POST_BUF_EMPTY     5 FS_FIELD  6 DSP_HOLD_VALID
+ */
+
+#define RK3576_VOP2_VP1_INT_EN       0x00b0
+#define RK3576_VOP2_VP1_INT_CLR      0x00b4
+#define RK3576_VOP2_VP1_INT_STATUS   0x00b8
+#define RK3576_VOP2_VP1_INT_RAW      0x00bc
+#define RK3576_VOP2_INT_FS           (1u << 0)
 #define RK3576_VOP2_VP2_BASE         0x0e00
 
 /* 视频端口内的偏移（相对 VPn_BASE） */
