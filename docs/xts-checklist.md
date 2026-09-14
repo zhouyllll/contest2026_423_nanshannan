@@ -62,7 +62,9 @@ SOH 块0 补码   文件名      长度              CRC-16/XMODEM（已核算�
 
 注意：**WiFi 属于选测**，不在及格线内。方案 B 的 `ai_agent` 联网是加分项，不是必需项。
 
-## 当前进度总表（截至 2026-09-06）
+## 当前进度总表（截至 2026-09-06；内部功能进度）
+
+> 严格按原版 xTS 审查的未闭环项及长测后复测顺序见 [xTS 严格口径复测清单](../notes/xts-strict-audit.md)。本节原有 ✅ 是历史功能验证记录，不能直接等同原版 xTS PASS；其中 2.1.3 现有 4795 ms 已超过原文 4 秒门槛。长测结束前不复测、不刷机。
 
 必测 35 项：**通过 31、部分通过 3、待做 1**。不可行 0、格式边界 0。
 
@@ -95,7 +97,7 @@ SOH 块0 补码   文件名      长度              CRC-16/XMODEM（已核算�
 | 1.3.4 | RAM 随机读写 | ✅ | `mkrd -m 10 -s 512 2048` + `cmocka_driver_block -m /dev/ram10` → 3/3 OK |
 | 1.3.5 | Flash 功能 | ✅ | `mkfatfs -F 32 /dev/mmcsd1` → `mount -t vfat` → `fstest -n 10 -m /mnt` **OK: 20, FAILED: 0**；文件读写往返也正确。卡是 16GB，必须 `-F 32`（自动只试 FAT12/16）。**不能对 eMMC 跑** |
 | 1.3.6 | GPIO 功能 | ✅ | **4/4**（bool / loop / rw / interrupt）。中断子项要把**排针第 5 脚（GPIO4_A4）↔ 第 7 脚（GPIO4_A6）**用杜邦线短接。此前"挂死"的真正原因是输入脚上永远等不到边沿 —— 原先选的 GPIO4_A7/B3 没引到连接器，线根本插不上 |
-| 1.3.7 | I2C / SPI 功能 | ◐ | **xTS 用例需对端板子**，单板不可能通过（见下文）。SPI 环回自检的第三层要短接 **第 10 脚（MOSI/GPIO4_B1）↔ 第 12 脚（MISO/GPIO4_B2）**。I2C 由板上真实器件（RTC@0x51、触摸@0x38）证实 |
+| 1.3.7 | I2C / SPI 功能 | ◐ | **原版用例要求 BMI160，尚未按原步骤测试**（见严格口径复测清单）。SPI 环回自检的第三层要短接 **第 10 脚（MOSI/GPIO4_B1）↔ 第 12 脚（MISO/GPIO4_B2）**。I2C 由板上真实器件（RTC@0x51、触摸@0x38）证实 |
 | 1.3.10 | UART 串口功能 | ✅ | `cmocka_driver_uart` 1/1 |
 | 1.3.11 | UART 文件传输 | ✅ | **收发双向均通**。接收：主机 `sb --ymodem` → 板端 `rb -f /mnt`。发送：板端 `sb /tmp/big` → 主机 `rb --ymodem`，4 个块 4096 字节全零校验通过。**根因不在 YMODEM 实现，在链路速率**：1.5Mbps 下这条 CH340 链路丢 7~16% 字节，控制台降到 115200 后零丢失（见下）|
 | 1.3.12 | RTC 时钟 | ✅ | HYM8563 读写 + 掉电后时间保持 |
@@ -112,7 +114,9 @@ SOH 块0 补码   文件名      长度              CRC-16/XMODEM（已核算�
 | 2.1.4 | Reboot 启动时间 | ✅ | 平均 4744 ms |
 | 3.1.1 | 12h 待机稳定性 | ☐ | 需预留一整天 |
 
-### ★ 1.3.7 的 xTS 用例在单板上不可能通过
+### ★ 1.3.7：原版 BMI160 用例与另一些双设备测试不同
+
+> 更正：原版 `cmocka_driver_i2c_spi` 要求连接 BMI160 传感器，**不要求另一块开发板**。下面关于 `cmocka_driver_spidev_master` / `cmocka_driver_i2cdev_master` 的讨论针对其他成对测试，不能据此判定 1.3.7 不可运行。详见 [原版用例](refs/openvela_xts_test_cases.md) 和 [严格口径复测清单](../notes/xts-strict-audit.md)。
 
 `cmocka_driver_spidev_master`、`cmocka_driver_i2cdev_master`、
 `cmocka_driver_i2c_read/write` 全部是**主机对从机**的成对用例：主机发传输
