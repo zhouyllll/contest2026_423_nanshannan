@@ -78,6 +78,32 @@
 #define BT_WAKEHOST_BANK 0
 #define BT_WAKEHOST_PIN  9               /* GPIO0_B1，BT,wake_host_irq */
 
+/* ★ 整个 AP6256 模组的复位脚 —— 不是"WIFI_EN"。
+ *
+ *   出处：原厂 Android 镜像里 dump 出来的板级 dtb
+ *
+ *     sdio-pwrseq {
+ *         compatible = "mmc-pwrseq-simple";
+ *         post-power-on-delay-ms = <0xc8>;        // 200ms
+ *         reset-gpios = <&gpio1 0x16 0x01>;       // GPIO1_C6，**低有效**
+ *     };
+ *
+ *   低有效意味着：拉低 = 摁住复位，拉高 = 放开。mmc-pwrseq-simple 在
+ *   post_power_on 里把它置成**非**有效电平（即高），然后等
+ *   post-power-on-delay-ms。
+ *
+ *   这根脚归 SDIO 电源时序管，但 AP6256 是 WiFi/BT 二合一，**同一颗芯片
+ *   共用这一个复位**。我们没跑 WiFi，就没人放开它 —— 于是模组一直被摁
+ *   在复位里，BT 的 CTS 永远不会变低，而 UART4 本身一切正常（LSR=0x60、
+ *   字节能进 TX FIFO），看起来像"固件加载失败"。
+ *
+ *   之前这里只把它读出来打印、标一句"期望1"，却从来没有驱动过。
+ */
+
+#define BT_MODULE_RST_BANK   1
+#define BT_MODULE_RST_PIN   22               /* GPIO1_C6，低有效 */
+#define BT_MODULE_RST_DELAY 200              /* post-power-on-delay-ms */
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -127,6 +153,21 @@ static void bt_hw_reset(void)
    *     与 CONFIG_16550_UART1_CLOCK=24000000 一致
    *   复位：SRST_P_UART4=221  SRST_S_UART4=236
    */
+
+  /* ★ 第一步：放开整个模组的复位。见 BT_MODULE_RST_PIN 处的说明。
+   *
+   *   必须在 UART4 和 BT 自身的复位序列**之前**做，并且要等满 200ms ——
+   *   原厂 sdio-pwrseq 的 post-power-on-delay-ms 就是这个值。
+   */
+
+  rk3576_pinmux_set(BT_MODULE_RST_BANK, BT_MODULE_RST_PIN,
+                    RK3576_PINMUX_GPIO);
+  rk3576_gpio_setdir(BT_MODULE_RST_BANK, BT_MODULE_RST_PIN, true);
+  rk3576_gpio_write(BT_MODULE_RST_BANK, BT_MODULE_RST_PIN, true);
+  up_mdelay(BT_MODULE_RST_DELAY);
+
+  syslog(LOG_INFO, "BT: 模组复位已放开 GPIO1_C6=%d（低有效，1=放开）\n",
+         rk3576_gpio_read(BT_MODULE_RST_BANK, BT_MODULE_RST_PIN));
 
   rk3576_clk_gate(UART4_PCLK_CON, UART4_PCLK_BIT, true);
   rk3576_clk_setmux(UART4_SEL_CON, UART4_SEL_MUX_SHIFT, 3, 3);   /* xin24m */
