@@ -1,5 +1,5 @@
 diff --git a/drivers/input/ft5x06.c b/drivers/input/ft5x06.c
-index 34eb7303..16afeaa3 100644
+index 34eb7303..dd630386 100644
 --- a/drivers/input/ft5x06.c
 +++ b/drivers/input/ft5x06.c
 @@ -108,6 +108,20 @@ struct ft5x06_dev_s
@@ -245,7 +245,41 @@ index 34eb7303..16afeaa3 100644
  /****************************************************************************
   * Name: ft5x06_sample
   ****************************************************************************/
-@@ -532,8 +712,10 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
+@@ -525,6 +705,33 @@ drop:
+   return 0;  /* No new touches read. */
+ }
+ #else
++
++/****************************************************************************
++ * Name: ft5x06_padsample
++ *
++ * Description:
++ *   把没用到的点位清零，并按**调用方的容量**返回长度。
++ *
++ *   npoints 仍然是权威的"有几个点有效"；补齐只是为了让一次 read 的长度
++ *   固定 —— 上层（LVGL）是按 SIZEOF_TOUCH_SAMPLE_S(maxpoints) 做严格相等
++ *   判断的，长度浮动会让样本被整个丢掉。
++ *
++ ****************************************************************************/
++
++static ssize_t ft5x06_padsample(FAR struct touch_sample_s *sample,
++                                unsigned int ntouches,
++                                unsigned int maxtouches)
++{
++  unsigned int i;
++
++  for (i = ntouches; i < maxtouches; i++)
++    {
++      memset(&sample->point[i], 0, sizeof(struct touch_point_s));
++    }
++
++  return SIZEOF_TOUCH_SAMPLE_S(maxtouches);
++}
++
+ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
+                              size_t len)
+ {
+@@ -532,13 +739,20 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
    FAR struct ft5x06_touch_point_s *touch;
    FAR struct touch_sample_s *sample;
    FAR struct touch_point_s *point;
@@ -256,7 +290,17 @@ index 34eb7303..16afeaa3 100644
    int i;
  
    maxtouches = (len - sizeof(int)) / sizeof(struct touch_point_s);
-@@ -548,21 +730,64 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
+   DEBUGASSERT(maxtouches > 0);  /* Already verified */
+ 
++  if (maxtouches > FT5X06_MAX_TOUCHES)
++    {
++      maxtouches = FT5X06_MAX_TOUCHES;
++    }
++
+   if (!priv->valid)
+     {
+       return 0;  /* Nothing to read */
+@@ -548,21 +762,64 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
  
    raw      = (FAR struct ft5x06_touch_data_s *)priv->touchbuf;
    touch    = raw->touch;
@@ -325,11 +369,11 @@ index 34eb7303..16afeaa3 100644
 +
 +      priv->downcount = 0;
 +      g_ft5x06_delivered += ntouches;
-+      return SIZEOF_TOUCH_SAMPLE_S(ntouches);
++      return ft5x06_padsample(sample, ntouches, maxtouches);
      }
  
    /* User data buffer points (sink) */
-@@ -573,27 +798,39 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
+@@ -573,29 +830,41 @@ static ssize_t ft5x06_sample(FAR struct ft5x06_dev_s *priv, FAR char *buffer,
    /* Return the number of touches read */
  
    sample->npoints = ntouches;
@@ -375,9 +419,38 @@ index 34eb7303..16afeaa3 100644
  
 +  priv->downcount = ndown;
    priv->valid = false;
-   return SIZEOF_TOUCH_SAMPLE_S(ntouches);
+-  return SIZEOF_TOUCH_SAMPLE_S(ntouches);
++  return ft5x06_padsample(sample, ntouches, maxtouches);
  }
-@@ -945,6 +1182,29 @@ static int ft5x06_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+ #endif /* CONFIG_FT5X06_SINGLEPOINT */
+ 
+@@ -893,7 +1162,24 @@ static ssize_t ft5x06_read(FAR struct file *filep, FAR char *buffer,
+         }
+     }
+ 
+-  ret = SIZEOF_TOUCH_SAMPLE_S(1);
++  /* ★ 不能无条件返回 SIZEOF_TOUCH_SAMPLE_S(1)。
++   *
++   *   ft5x06_sample() 已经返回了真实字节数，这里把它丢掉改成"1 个点的
++   *   长度"，于是**报出去的 maxpoints 和实际返回的长度对不上**。
++   *
++   *   LVGL 的 NuttX 触摸驱动是严格相等判断：
++   *     lv_nuttx_touchscreen.c touchscreen_read_sample()
++   *       nbytes = read(fd, sample, SIZEOF_TOUCH_SAMPLE_S(maxpoint));
++   *       return nbytes == SIZEOF_TOUCH_SAMPLE_S(maxpoint);
++   *
++   *   maxpoint 来自 TSIOC_GETMAXPOINTS（我们报 5），而 read 返回 1 个点的
++   *   长度 —— 不相等，**每一个样本都被丢掉**。板上的表现是：中断在进、
++   *   I2C 读得到、坐标也对、驱动统计里"交付"在涨，而 LVGL 完全没反应，
++   *   并且没有任何一层报错。
++   *
++   *   ft5x06_sample() 现在会把没用到的点位清零并按调用方容量补齐长度，
++   *   这里直接用它的返回值即可：npoints 说明有几个点有效，长度固定。
++   */
+ 
+ errout:
+   nxmutex_unlock(&priv->devlock);
+@@ -945,6 +1231,44 @@ static int ft5x06_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
          }
          break;
  
@@ -396,9 +469,24 @@ index 34eb7303..16afeaa3 100644
 +       *   把 FT5X06_MAX_TOUCHES 报出去即可，没有别的成本。
 +       */
 +
-+      case TSIOC_GETMAXPOINTS:  /* arg: Pointer to int */
++      case TSIOC_GETMAXPOINTS:  /* arg: Pointer to uint8_t */
 +        {
-+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
++          /* ★ 必须按 uint8_t 写，不能按 int。
++           *
++           *   include/nuttx/input/touchscreen.h 写得很清楚：
++           *     TSIOC_GETMAXPOINTS  arg: Pointer to uint8_t max touch point
++           *
++           *   调用方 lv_nuttx_touchscreen.c 也确实是
++           *     uint8_t maxpoint;
++           *     ioctl(fd, TSIOC_GETMAXPOINTS, &maxpoint);
++           *
++           *   按 int * 写就是往一个 1 字节的对象里写 4 字节 —— 踩掉调用方
++           *   栈上相邻的 3 个字节。小端下 maxpoint 恰好拿到正确的低字节，
++           *   于是"看起来是对的"，但旁边的局部变量已经被清零了。这种
++           *   破坏不会当场报错，只会在别处莫名其妙地发作。
++           */
++
++          FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
 +          DEBUGASSERT(ptr != NULL);
 +          *ptr = FT5X06_MAX_TOUCHES;
 +        }

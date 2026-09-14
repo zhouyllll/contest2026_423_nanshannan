@@ -314,8 +314,30 @@ static void sai_reset(void)
   rk3576_reset(SAI1_SRST_M, false);
   up_udelay(10);
 
+  /* ★ 复位之后把送给编解码器的 MCLK 门控**重新开一遍**。
+   *
+   *   实测（复用不动、只设方向的正确量法）：
+   *     SAI RX: MCLK(b4-2) 高=0 跳变=0 | SCLK 高=89 跳变=19
+   *   同一段代码里 SCLK 在跳、MCLK 恒低 —— 仪器是好的，MCLK 确实没出来。
+   *   而回读 CLKGATE_CON(9) = 0x2000，bit13 正是 CLK_SAI1_MCLKOUT，
+   *   置 1 在 Rockchip 的语义里就是**关断**。
+   *
+   *   门控是在初始化里开过的，但那是在 CRU 复位**之前**。这里复位之后
+   *   补开一次，并把回读打出来 —— 如果补开之后 MCLK 就跳了，说明复位
+   *   （或复位之后的某一步）把它又关上了；如果仍然是 0x2000，那就是
+   *   写没落到这个位上，得回去查寄存器地址。
+   *
+   *   没有 MCLK 的后果很隐蔽：SAI 作为主机照常产生 SCLK/LRCK、FIFO 照常
+   *   按采样率填充，但从模式的编解码器不工作，ASDOUT 恒低 —— 采到的每
+   *   一个样本都是 0，而每一层都不报错。
+   */
+
+  rk3576_clk_gate(SAI1_MCLKOUT_CON, SAI1_MCLKOUT_BIT, true);
+
   syslog(LOG_INFO, "SAI: CRU 复位后 CLR=0x%08" PRIx32 " XFER=0x%08" PRIx32
-         "\n", sai_getreg(RK3576_SAI_CLR), sai_getreg(RK3576_SAI_XFER));
+         " CLKGATE9=0x%08" PRIx32 "\n",
+         sai_getreg(RK3576_SAI_CLR), sai_getreg(RK3576_SAI_XFER),
+         getreg32(RK3576_CRU_ADDR + RK3576_CRU_CLKGATE_CON(9)));
 }
 
 
@@ -870,9 +892,21 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
         int sk_hi = 0, sk_tr = 0, sk_prev = -1;
         int q;
 
-        rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_MCLK, 0);
+        /* ★ 量输出脚**不能先切复用**。
+         *
+         *   MCLK/SCLK 是 SoC 往外送的。把复用切成 GPIO，SAI 的输出驱动
+         *   就从焊盘上断开了 —— 此时读到的必然是恒定电平，跟"时钟有没有
+         *   出来"毫无关系。据此得出的"MCLK 跳变=0，时钟没到引脚"是个
+         *   **自己造出来的结论**。
+         *
+         *   本项目 GMAC 那边早就写过正确做法：复用态下 GPIO 输入缓冲仍能
+         *   读到焊盘电平。所以保持功能复用不动，只把方向设成输入再采样。
+         *
+         *   （SDI0 是输入脚，由编解码器驱动，切不切复用都读得到，所以
+         *     上面那段不受影响。）
+         */
+
         rk3576_gpio_setdir(SAI1_PIN_BANK, SAI1_PIN_MCLK, false);
-        rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_SCLK, 0);
         rk3576_gpio_setdir(SAI1_PIN_BANK, SAI1_PIN_SCLK, false);
 
         for (q = 0; q < 200; q++)
@@ -904,8 +938,42 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
             sk_prev = sv;
           }
 
-        rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_MCLK, SAI1_PIN_FUNC);
-        rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_SCLK, SAI1_PIN_FUNC);
+        /* ★ 先证明这根脚的寄存器通路本身是通的，再谈"时钟没出来"。
+         *
+         *   到这一步，门控、选源、父时钟（SCLK 在跳即可证明）、引脚功能号
+         *   （<4 RK_PA2 1>，与原厂 pinctrl 逐字一致）全部核对过，MCLK 却
+         *   恒低。那就有两种可能，必须先分开：
+         *     a) 时钟路由的问题 —— 通路是好的，只是没信号
+         *     b) 我们对这个引脚的寄存器访问压根没生效 —— 回读一致只是因为
+         *        读写用的是同一个错地址，自己和自己对上了
+         *
+         *   把它切成 GPIO 输出自己推高再推低：电平跟得上就排除 (b)。
+         *   测完必须还原成功能复用，否则后面的现象都是自己造出来的。
+         */
+
+        {
+          int padhi;
+          int padlo;
+
+          rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_MCLK,
+                            RK3576_PINMUX_GPIO);
+          rk3576_gpio_setdir(SAI1_PIN_BANK, SAI1_PIN_MCLK, true);
+          rk3576_gpio_write(SAI1_PIN_BANK, SAI1_PIN_MCLK, true);
+          up_udelay(50);
+          padhi = rk3576_gpio_read(SAI1_PIN_BANK, SAI1_PIN_MCLK);
+          rk3576_gpio_write(SAI1_PIN_BANK, SAI1_PIN_MCLK, false);
+          up_udelay(50);
+          padlo = rk3576_gpio_read(SAI1_PIN_BANK, SAI1_PIN_MCLK);
+
+          rk3576_gpio_setdir(SAI1_PIN_BANK, SAI1_PIN_MCLK, false);
+          rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_MCLK, SAI1_PIN_FUNC);
+
+          syslog(LOG_INFO,
+                 "SAI RX: MCLK 焊盘自检 推高读到=%d 推低读到=%d —— %s\n",
+                 padhi, padlo,
+                 (padhi == 1 && padlo == 0) ? "通路正常，恒低是时钟没来" :
+                                        "★寄存器通路不通，之前的读数全部作废");
+        }
 
         syslog(LOG_INFO,
                "SAI RX: MCLK(b%d-%d) 高=%d 跳变=%d | SCLK(-%d) 高=%d 跳变=%d\n",
