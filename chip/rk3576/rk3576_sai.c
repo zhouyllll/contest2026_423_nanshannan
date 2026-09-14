@@ -107,6 +107,37 @@
 #define SAI1_MCLKOUT_CON     9
 #define SAI1_MCLKOUT_BIT     13
 
+/* ★ MCLK 要出到引脚，还有**第二道门**，而且它不在 CRU 里。
+ *
+ *   出处：原厂 Android 镜像里 dump 出来的板级 dtb
+ *     （model = "Rockchip RK3576 KICKPI K7 Board"）
+ *
+ *     mclkout-sai1@26046400 {
+ *         compatible = "rockchip,clk-out";
+ *         reg = <0x26046400 0x04>;
+ *         clocks = <&cru 0x61>;
+ *         clock-output-names = "mclk_sai1_to_io";
+ *         rockchip,bit-shift = <0x01>;
+ *         rockchip,bit-set-to-disable;
+ *     };
+ *
+ *   一个独立的寄存器（在 IOC_GRF 区，不是 CRU），每个 SAI 占一位：
+ *   sai0 -> bit0、sai1 -> bit1。名字里的 "to_io" 说得很清楚 ——
+ *   它管的就是"这路时钟送不送到焊盘"。
+ *
+ *   我们此前只开了 CRU 的 CLK_SAI1_MCLKOUT 门控（CLKGATE_CON(9) bit13），
+ *   所以时钟在片内是活的、SCLK 也照常输出，唯独 MCLK 出不去。实测：
+ *     MCLK(b4-2) 高=0 跳变=0 | SCLK(-3) 高=97 跳变=36
+ *   而 ES8388 是从模式，没有 MCLK 就不工作，ASDOUT 恒低 —— 录到的每个
+ *   样本都是 0，且 I2C/SAI/DMA 每一层都不报错。
+ *
+ *   驱动 clk-out.c 用的是 CLK_GATE_HIWORD_MASK，所以写法和 CRU 门控一样：
+ *   高 16 位是写使能掩码。bit-set-to-disable 意味着**写 0 才是开**。
+ */
+
+#define RK3576_MCLKOUT_IO_REG   0x26046400
+#define SAI1_MCLKOUT_IO_BIT     1
+
 /* ★ 复位。出处：原厂 dts 的 resets = <&cru SRST_M_SAI1_8CH>,
  *   <&cru SRST_H_SAI1_8CH>，编号取自 rockchip,rk3576-cru.h。
  *
@@ -232,6 +263,23 @@ static bool g_rx_nohs_done  = false;
 static bool g_rx_cpuprobe   = false;
 static bool g_rx_pinprobe   = false;
 
+/****************************************************************************
+ * Name: sai1_mclkout_to_io
+ *
+ * Description:
+ *   开/关 "mclk_sai1_to_io" —— MCLK 送到焊盘的那道门。见上面常量处的说明。
+ *
+ ****************************************************************************/
+
+static void sai1_mclkout_to_io(bool enable)
+{
+  /* bit-set-to-disable：开 = 写 0，关 = 写 1。高 16 位是写使能掩码。 */
+
+  putreg32((1u << (SAI1_MCLKOUT_IO_BIT + 16)) |
+           ((enable ? 0u : 1u) << SAI1_MCLKOUT_IO_BIT),
+           RK3576_MCLKOUT_IO_REG);
+}
+
 static inline uint32_t sai_getreg(uint32_t off)
 {
   return getreg32(SAI1_BASE + off);
@@ -333,6 +381,7 @@ static void sai_reset(void)
    */
 
   rk3576_clk_gate(SAI1_MCLKOUT_CON, SAI1_MCLKOUT_BIT, true);
+  sai1_mclkout_to_io(true);
 
   syslog(LOG_INFO, "SAI: CRU 复位后 CLR=0x%08" PRIx32 " XFER=0x%08" PRIx32
          " CLKGATE9=0x%08" PRIx32 "\n",
@@ -1487,6 +1536,10 @@ int rk3576_sai_probe(void)
   /* 送到编解码器引脚的那一路 —— 不开它，从模式的 codec 永远不工作 */
 
   rk3576_clk_gate(SAI1_MCLKOUT_CON, SAI1_MCLKOUT_BIT, true);
+  sai1_mclkout_to_io(true);
+
+  syslog(LOG_INFO, "SAI: mclk_to_io 已开 0x%08" PRIx32 " = 0x%08" PRIx32 "\n",
+         (uint32_t)RK3576_MCLKOUT_IO_REG, getreg32(RK3576_MCLKOUT_IO_REG));
 
   /* ★ 时钟开了还要解复位，顺序照原厂 rockchip_sai_reset()：
    *   先 hclk 域、再 mclk 域，每步之间留 10us。
