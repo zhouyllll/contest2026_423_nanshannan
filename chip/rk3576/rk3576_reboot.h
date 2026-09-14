@@ -30,4 +30,16 @@ void rk3576_reboot_loader(void);
 
 void rk3576_reboot_normal(void);
 
+/****************************************************************************
+ * Name: rk3576_reboot_maskrom
+ *
+ * Description:
+ *   重启进 BootROM 的下载模式（maskrom），等价于按住 recovery 键上电。
+ *   比 rk3576_reboot_loader() 可靠：走 BootROM 自己的 USB，
+ *   不经过 U-Boot 那个在本机枚举不出来的 rockusb gadget。
+ *
+ ****************************************************************************/
+
+void rk3576_reboot_maskrom(void);
+
 #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_REBOOT_H */

@@ -50,6 +50,32 @@
 #define RK3576_REBOOT_LOADER      0x5242c301
 #define RK3576_REBOOT_RECOVERY    0x5242c303
 
+/* ★ 直接回 BootROM 的下载模式（maskrom），等价于按住 recovery 键上电。
+ *
+ *   出处：U-Boot 的 `rbrom` 命令，cmd/boot.c do_reboot_brom()
+ *       writel(BOOT_BROM_DOWNLOAD, CONFIG_ROCKCHIP_BOOT_MODE_REG);
+ *       do_reset(...);
+ *   魔数在 arch/arm/include/asm/arch-rockchip/boot_mode.h，
+ *   寄存器就是上面这个 0x26024040（本板 .config 里
+ *   CONFIG_ROCKCHIP_BOOT_MODE_REG=0x26024040，和 mode-normal 同一个）。
+ *   读它的是 SPL（arch/arm/mach-rockchip/spl.c 的 brom_download()），
+ *   读到就 back_to_bootrom()。
+ *
+ * ★ 为什么要它，而不是用已有的 LOADER
+ *
+ *   LOADER 进的是 **U-Boot 自己的 rockusb gadget**。它复位没问题，但那个
+ *   gadget 在本机枚举不出来 —— 本项目早就记过"板子进了 loader 但主机看
+ *   不见它"，这次又复现了一遍。
+ *
+ *   MASKROM 用的是 **BootROM 自己的 USB**，不经过 U-Boot 的 gadget。
+ *   整场调试里它每次都枚举成功。
+ *
+ *   有了它，烧写流程就不再需要"复位后抢 U-Boot 提示符再敲 rbrom"这种
+ *   有竞争的动作：nsh> reboot 2 一条命令直达。
+ */
+
+#define RK3576_REBOOT_MASKROM     0xef08a53c
+
 /* CRU 全局软复位。写入 0xfdb9 触发第一级全局复位。 */
 
 #define RK3576_CRU_GLB_SRST_FST   0x0c08
@@ -104,4 +130,12 @@ void rk3576_reboot_normal(void)
 {
   syslog(LOG_INFO, "正在重启\n");
   rk3576_do_reset(RK3576_REBOOT_NORMAL);
+}
+
+void rk3576_reboot_maskrom(void)
+{
+  syslog(LOG_INFO,
+         "即将重启进 maskrom（BootROM 下载模式），无需按 recovery 键。\n"
+         "之后直接 rkdeveloptool db + wl 烧写。\n");
+  rk3576_do_reset(RK3576_REBOOT_MASKROM);
 }

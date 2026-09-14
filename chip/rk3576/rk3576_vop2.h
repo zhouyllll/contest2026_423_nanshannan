@@ -122,6 +122,17 @@ int rk3576_vop2_takeover(uintptr_t buffer, uint32_t *width, uint32_t *height,
 int rk3576_vop2_get_mode(uint32_t *width, uint32_t *height);
 
 /****************************************************************************
+ * Name: rk3576_vop2_fb_pan
+ *
+ * Description:
+ *   翻页：把 ESMART1 的取数地址切到 buffer。只写 YRGB_MST + CFG_DONE，
+ *   在下一个 VSYNC 整帧原子生效 —— 双缓冲靠它避免撕裂。
+ *
+ ****************************************************************************/
+
+int rk3576_vop2_fb_pan(uintptr_t buffer);
+
+/****************************************************************************
  * Name: rk3576_vop2_fb_setup
  *
  * Description:

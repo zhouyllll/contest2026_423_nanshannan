@@ -275,7 +275,26 @@ config RK3576_FB
 	bool "VOP2 帧缓冲 (/dev/fb0)"
 	default n
 	depends on RK3576_VOP2 && VIDEO_FB
+	select FB_UPDATE
 	---help---
+		★ 必须 select FB_UPDATE，这不是可选项。
+
+		  帧缓冲在 openvela 自己的堆里，按 MT_NORMAL（写回式可缓存）
+		  映射，而 VOP2 是直接读 DRAM 的非一致性主控。不刷回，它取到的
+		  就是旧数据。rk3576_updatearea() 就是干这个的，而它整个包在
+		  #ifdef CONFIG_FB_UPDATE 里。
+
+		  FB_UPDATE 在上游是个**没有提示符的 bool**（drivers/video/Kconfig
+		  里只有 `bool` 没有字符串），只能被 select，在 defconfig 里直接写
+		  `CONFIG_FB_UPDATE=y` 会被 olddefconfig 静默剥掉。本项目就栽在
+		  这上面：它只写进了 amp-dual 的 defconfig，编 amp 时被丢掉，于是
+		  **一次 cache 都没刷过** —— 板上表现是"平时正常、一刷新就冒黑色
+		  细横线"，而 LVGL 那边 ioctl 返回 -ENOTTY 也不报错（LV_USE_LOG
+		  默认关着），整条链零告警。
+
+		  写成 select，配置就不可能漏。
+
+
 		把 VOP2 的 ESMART1 图层接到 NuttX 的 fb 框架上。
 
 		★ 本驱动不初始化显示链路，只接管出厂 U-Boot 已经跑起来的那条。
@@ -334,6 +353,18 @@ config RK3576_GMAC
 		以及 PHY（Maxio MAE0621A）的厂商初始化 —— 不做这一步
 		PHY 的模拟前端不工作，MDIO 却照常可读写，很有迷惑性。
 		收发由 RK3576_ETH 提供。
+
+config RK3576_GMAC_DIAG
+	bool "GMAC 链路诊断（拖慢启动约 2.8 秒）"
+	depends on RK3576_GMAC
+	default n
+	---help---
+		DMA 软复位超时后跑一整套 PHY 排查：时钟脚采样、MDIO 32 地址
+		扫描、PHY 软复位轮询、自协商等待。每个口都要跑，实测给启动
+		加了约 2.8 秒 —— 而这条路径只在 PHY 侧本来就没起来时才走，
+		日常启动带着它没有意义。
+
+		网口调试时再开。代码本身保留，那是好几轮排查换来的判据。
 
 config RK3576_ETH
 	bool "以太网收发（DWMAC 4.x 网络设备）"

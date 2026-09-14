@@ -278,11 +278,44 @@ static void sai_reset(void)
       up_udelay(1);
     }
 
-  syslog(LOG_ERR, "SAI: 复位超时，未清位 CLR=0x%08" PRIx32 " (%s%s%s)\n",
+  syslog(LOG_WARNING,
+         "SAI: CLR 自清超时 CLR=0x%08" PRIx32 " (%s%s%s)，退到 CRU 复位\n",
          sai_getreg(RK3576_SAI_CLR),
          (sai_getreg(RK3576_SAI_CLR) & SAI_CLR_TXC) ? "TXC " : "",
          (sai_getreg(RK3576_SAI_CLR) & SAI_CLR_RXC) ? "RXC " : "",
          (sai_getreg(RK3576_SAI_CLR) & SAI_CLR_FSC) ? "FSC" : "");
+
+  /* ★ CLR 清不掉就退到 CRU 级复位 —— 这是原厂的做法，不是兜底。
+   *
+   *   rockchip_sai.c 的 rockchip_sai_clear()：轮询超时后直接调
+   *   rockchip_sai_reset() 并**返回成功**。也就是说厂商预期这条路会走到，
+   *   CLR 自清本来就依赖 mclk 域在跑，而从模式下外部没有时钟输入时它清
+   *   不掉。
+   *
+   *   之前这里只打一条 LOG_ERR 就往下走，控制器停在没复位完的状态：
+   *   RXFIFOLR 恒为 0，DMA 照常搬运，搬的全是 0 —— 表现就是"麦克风采到
+   *   的全是静音"，而每一层都不报错。
+   *
+   *   顺序照 rockchip_sai_reset()：先 hclk 域再 mclk 域，各留 10us。
+   *   原厂注释说明了原因：从模式且外部无时钟时，单独复位 mclk 域会失败，
+   *   先复位 hclk 域把控制器拉回主机状态，再复位 mclk 域。
+   *
+   *   复位会清掉寄存器配置 —— 这没问题，sai_reset() 只在 sai_configure()
+   *   的开头调用，后面紧接着就把所有寄存器重写一遍。原厂那边对应的是
+   *   regcache_sync()。
+   */
+
+  rk3576_reset(SAI1_SRST_H, true);
+  up_udelay(10);
+  rk3576_reset(SAI1_SRST_H, false);
+  up_udelay(10);
+  rk3576_reset(SAI1_SRST_M, true);
+  up_udelay(10);
+  rk3576_reset(SAI1_SRST_M, false);
+  up_udelay(10);
+
+  syslog(LOG_INFO, "SAI: CRU 复位后 CLR=0x%08" PRIx32 " XFER=0x%08" PRIx32
+         "\n", sai_getreg(RK3576_SAI_CLR), sai_getreg(RK3576_SAI_XFER));
 }
 
 

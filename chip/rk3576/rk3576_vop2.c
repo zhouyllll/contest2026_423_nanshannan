@@ -407,6 +407,57 @@ int rk3576_vop2_takeover(uintptr_t buffer, uint32_t *width, uint32_t *height,
 }
 
 /****************************************************************************
+ * Name: rk3576_vop2_fb_pan
+ *
+ * Description:
+ *   把 ESMART1 的取数地址切到另一个缓冲（翻页）。
+ *
+ * ★ 为什么需要翻页 —— 这才是"花屏"的真正原因
+ *
+ *   之前只有**一个**帧缓冲：LVGL 往里画的同时，VOP2 正在把同一块内存
+ *   逐行扫出去。LVGL 重画一个控件时是"先用背景色填满脏矩形，再把文字
+ *   画上去"；扫描线如果正好在这两步之间经过那几行，扫出去的就是**只有
+ *   背景、还没有内容**的一条横带。
+ *
+ *   这完全对得上板上的现象：
+ *     - 条纹是**横的**，因为扫描是按行的；
+ *     - 条纹**很细**，因为它只有一个控件脏矩形那么高；
+ *     - 条纹出现在"shared 下面""第三行"这些**正在刷新的标签**处；
+ *     - **一触摸就出现**，因为触摸触发重画；
+ *     - k7diag 的 ramp / bars 图案**完全正常**，因为那是一次性写完
+ *       就不再改的静态图，没有"边扫边改"。
+ *
+ *   所以问题从来不在 VOP2 取数（地址/跨距/格式/刷 cache 全是对的），
+ *   而在于没有双缓冲。这也是为什么在显示链路上查了几轮都查不到。
+ *
+ * ★ 参考实现
+ *
+ *   nuttx/arch/arm/src/stm32h7/stm32_ltdc.c   yres_virtual = HEIGHT * 2
+ *   nuttx/arch/sim/src/sim/sim_framebuffer.c  同上
+ *   lv_nuttx_fbdev.c 自己就带双缓冲分支：
+ *     double_buffer = (pinfo.yres_virtual == vinfo.yres * 2)
+ *   —— 驱动不报 yres_virtual，LVGL 就只能走单缓冲那条会撕裂的路。
+ *
+ *   翻页只改一个寄存器：REGION0_YRGB_MST。它是影子寄存器，CFG_DONE
+ *   之后在**下一个 VSYNC** 整帧原子生效，所以切换本身不会撕裂。
+ *
+ ****************************************************************************/
+
+int rk3576_vop2_fb_pan(uintptr_t buffer)
+{
+  if (buffer == 0)
+    {
+      return -EINVAL;
+    }
+
+  vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_YRGB_MST,
+             (uint32_t)buffer);
+  vop_cfg_done(RK3576_VOP2_MIPI_VP);
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: rk3576_vop2_fb_setup
  *
  * Description:
@@ -612,6 +663,48 @@ int rk3576_vop2_fb_setup(uintptr_t buffer, uint32_t width, uint32_t height,
 
   vop_putreg(RK3576_VOP2_ESMART1_BASE + RK3576_SMART_REGION0_CTRL,
              ctrl | RK3576_SMART_REGION0_CTRL_EN);
+
+  /* ★ 打开这个 VP 的取数紧急度。
+   *
+   *   厂商驱动只给 VP0 配了 urgency（rk3576_vp_data[] 里 VP1/VP2 的
+   *   .urgency 是空的），因为 U-Boot 单独跑时没人跟它抢 DDR。AMP 下
+   *   四核 A72 的 Linux 一起压 DDR，VP1 的行缓冲会见底 —— 屏上就是
+   *   几条黑色细横条纹。详见 hardware/rk3576_vop2.h 里的长注释。
+   *
+   *   三个寄存器都是普通读改写：前两个是 IMD（立即生效），
+   *   COLOR_BAR_CTRL 是影子寄存器，跟着下面那次 CFG_DONE 一起提交。
+   */
+
+  {
+    uint32_t v;
+    int vp = RK3576_VOP2_MIPI_VP;
+
+    v = vop_getreg(RK3576_VOP2_SYS_AXI_HURRY_CTRL0_IMD);
+    vop_putreg(RK3576_VOP2_SYS_AXI_HURRY_CTRL0_IMD,
+               v | (1u << (RK3576_AXI_PORT_URGENCY_EN_SHIFT + vp)));
+
+    v = vop_getreg(RK3576_VOP2_SYS_AXI_HURRY_CTRL1_IMD);
+    vop_putreg(RK3576_VOP2_SYS_AXI_HURRY_CTRL1_IMD,
+               v | (1u << (RK3576_AXI_PORT_URGENCY_EN_SHIFT + vp)));
+
+    /* bit0 是内置彩条使能，必须保持原样（0）。 */
+
+    v = vop_getreg(VP1(RK3576_VP_COLOR_BAR_CTRL));
+    v &= ~((RK3576_VP_URGENCY_TH_MASK << RK3576_VP_URGENCY_THL_SHIFT) |
+           (RK3576_VP_URGENCY_TH_MASK << RK3576_VP_URGENCY_THH_SHIFT));
+    v |= RK3576_VP_URGENCY_EN |
+         ((uint32_t)RK3576_VP_URGENCY_THL << RK3576_VP_URGENCY_THL_SHIFT) |
+         ((uint32_t)RK3576_VP_URGENCY_THH << RK3576_VP_URGENCY_THH_SHIFT);
+    vop_putreg(VP1(RK3576_VP_COLOR_BAR_CTRL), v);
+
+    syslog(LOG_INFO,
+           "VOP2: VP%d 取数紧急度已开 HURRY0=%08" PRIx32 " HURRY1=%08" PRIx32
+           " COLOR_BAR_CTRL=%08" PRIx32 "\n",
+           vp,
+           vop_getreg(RK3576_VOP2_SYS_AXI_HURRY_CTRL0_IMD),
+           vop_getreg(RK3576_VOP2_SYS_AXI_HURRY_CTRL1_IMD),
+           vop_getreg(VP1(RK3576_VP_COLOR_BAR_CTRL)));
+  }
 
   vop_cfg_done(RK3576_VOP2_MIPI_VP);
 

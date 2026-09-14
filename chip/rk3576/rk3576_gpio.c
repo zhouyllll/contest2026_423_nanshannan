@@ -55,6 +55,7 @@
 #include <nuttx/arch.h>
 
 #include "arm64_internal.h"
+#include "rk3576_cru.h"
 #include "rk3576_gpio.h"
 #include "hardware/rk3576_gpio.h"
 #include "hardware/rk3576_memorymap.h"
@@ -126,6 +127,43 @@ static struct rk3576_gpio_isr_s
  *
  ****************************************************************************/
 
+/* ★ bank 级 ISR 的进入次数与最近一次的 INT_STATUS。
+ *
+ *   排查"中断到底有没有到 CPU"时，这是唯一不依赖串口时序的证据：
+ *   在中断上下文里打日志会改变时序、也会被 1.5M 无流控的串口丢掉，
+ *   而计数器可以事后从容读。
+ */
+
+static volatile uint32_t g_gpio_isr_count[RK3576_GPIO_NBANKS];
+static volatile uint32_t g_gpio_isr_last[RK3576_GPIO_NBANKS];
+
+/* 读某个 bank 的中断原始状态（未经屏蔽）。诊断用。 */
+
+uint32_t rk3576_gpio_rawstatus(int bank)
+{
+  if (bank < 0 || bank >= RK3576_GPIO_NBANKS)
+    {
+      return 0;
+    }
+
+  return getreg32(g_gpio_base[bank] + RK3576_GPIO_INT_RAWSTATUS);
+}
+
+uint32_t rk3576_gpio_irq_count(int bank, uint32_t *last_status)
+{
+  if (bank < 0 || bank >= RK3576_GPIO_NBANKS)
+    {
+      return 0;
+    }
+
+  if (last_status != NULL)
+    {
+      *last_status = g_gpio_isr_last[bank];
+    }
+
+  return g_gpio_isr_count[bank];
+}
+
 static int rk3576_gpio_interrupt(int irq, void *context, void *arg)
 {
   int bank = (int)(intptr_t)arg;
@@ -137,6 +175,9 @@ static int rk3576_gpio_interrupt(int irq, void *context, void *arg)
 
   base   = g_gpio_base[bank];
   status = getreg32(base + RK3576_GPIO_INT_STATUS);
+
+  g_gpio_isr_count[bank]++;
+  g_gpio_isr_last[bank] = status;
 
   /* ★ 状态为 0 的伪中断也必须清一次，否则直接返回会让中断线一直有效，
    * 立刻重入 —— 形成中断风暴，现象是整块板子失去响应而不是报错。
@@ -288,6 +329,84 @@ int rk3576_gpio_read(int bank, int pin)
   return (regval >> pin) & 1;
 }
 
+
+/****************************************************************************
+ * Name: rk3576_gpio_clk_enable
+ *
+ * Description:
+ *   打开某个 bank 的 pclk 与 **dbclk**。
+ *
+ * ★ 少开 dbclk 的后果：寄存器全对，但中断永远不来
+ *
+ *   GPIO 有两个时钟（厂商 dtsi 写得很清楚）：
+ *     clocks = <&cru PCLK_GPIO0>, <&cru DBCLK_GPIO0>;
+ *
+ *   pclk 管寄存器访问，dbclk 管**电平/边沿的采样**。U-Boot 把 pclk 留着
+ *   开，所以读写寄存器一切正常 —— 方向、中断类型、极性、使能位写进去
+ *   再读出来都对得上。但 dbclk 关着，检测逻辑根本没跑。
+ *
+ *   板上实测把这个失效模式摆得很清楚（k7diag tp，60 秒采样）：
+ *
+ *     起始: INT=1  INT_EN_H=0x00000020  RAWSTATUS=0x00000000
+ *     结果: 采样 12000 次，被拉低 1714 次，跳变 1889 次
+ *     结束: INT=0  RAWSTATUS=0x00000000  STATUS=0x00000000
+ *
+ *   引脚确实被按下去拉低了（1714 次），配置是电平触发+低有效+已使能，
+ *   而**中断原始状态位始终是 0**。写得对、读得到、就是不触发。
+ *
+ *   这种"寄存器层面全对、功能不工作"的组合极难从代码上看出来 —— 因为
+ *   代码确实没写错。只能靠把引脚电平和 RAWSTATUS 放在一起看：两者矛盾
+ *   时，问题一定在两者之间的那段逻辑，而它唯一的依赖就是 dbclk。
+ *
+ ****************************************************************************/
+
+static void rk3576_gpio_clk_enable(int bank)
+{
+  static bool done[RK3576_GPIO_NBANKS];
+
+  if (bank < 0 || bank >= RK3576_GPIO_NBANKS || done[bank])
+    {
+      return;
+    }
+
+  /* 门控位出处：kernel-6.1 drivers/clk/rockchip/clk-rk3576.c
+   *   GPIO0 在常开域，归 PMU CRU 管；GPIO1~4 在主 CRU。
+   */
+
+  switch (bank)
+    {
+      case 0:
+        rk3576_pmu_clk_gate(7, 6, true);    /* PCLK_GPIO0  */
+        rk3576_pmu_clk_gate(7, 7, true);    /* DBCLK_GPIO0 */
+        break;
+
+      case 1:
+        rk3576_clk_gate(17, 15, true);      /* PCLK_GPIO1  */
+        rk3576_clk_gate(18, 0,  true);      /* DBCLK_GPIO1 */
+        break;
+
+      case 2:
+        rk3576_clk_gate(18, 1, true);       /* PCLK_GPIO2  */
+        rk3576_clk_gate(18, 2, true);       /* DBCLK_GPIO2 */
+        break;
+
+      case 3:
+        rk3576_clk_gate(18, 3, true);       /* PCLK_GPIO3  */
+        rk3576_clk_gate(18, 4, true);       /* DBCLK_GPIO3 */
+        break;
+
+      case 4:
+        rk3576_clk_gate(18, 5, true);       /* PCLK_GPIO4  */
+        rk3576_clk_gate(18, 6, true);       /* DBCLK_GPIO4 */
+        break;
+
+      default:
+        return;
+    }
+
+  done[bank] = true;
+}
+
 int rk3576_gpio_irq_config(int bank, int pin, bool rising, bool level)
 {
   uintptr_t base;
@@ -297,6 +416,10 @@ int rk3576_gpio_irq_config(int bank, int pin, bool rising, bool level)
     {
       return -EINVAL;
     }
+
+  /* ★ 先开时钟。dbclk 不开，下面所有配置写进去也检测不到电平。 */
+
+  rk3576_gpio_clk_enable(bank);
 
   base = g_gpio_base[bank];
 

@@ -148,6 +148,7 @@ kickpi_k7_appinit.o: kickpi_k7_appinit.c \
  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/common/arm64_arch_timer.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/board.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/boardctl.h \
+ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/kthread.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/sdio.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wqueue.h \
  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/mutex.h \

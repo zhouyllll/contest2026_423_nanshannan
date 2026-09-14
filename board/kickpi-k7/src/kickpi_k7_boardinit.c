@@ -152,13 +152,35 @@ void board_late_initialize(void)
 
 int board_reset(int status)
 {
-  if (status != 0)
+  /* nsh> reboot      普通重启
+   * nsh> reboot 1    U-Boot 的 rockusb 下载模式
+   * nsh> reboot 2    maskrom（BootROM 下载模式）★ 烧写用这个
+   *
+   * ★ 为什么加 2 而不是继续用 1
+   *
+   *   1 进的是 U-Boot 自己的 rockusb gadget，复位没问题，但那个 gadget
+   *   在开发机上枚举不出来（本项目记过多次，这次又复现）。于是烧写只能
+   *   退回"复位 -> 抢 U-Boot 提示符 -> 敲 rbrom"，而抢提示符是个竞争
+   *   动作，失败了就得人去按板子。
+   *
+   *   2 写的是 BootROM 的下载魔数，SPL 读到就跳回 BootROM，用的是
+   *   BootROM 自己的 USB —— 整场调试里它每次都枚举成功。一条命令直达，
+   *   没有竞争。
+   */
+
+  switch (status)
     {
-      rk3576_reboot_loader();
-    }
-  else
-    {
-      rk3576_reboot_normal();
+      case 0:
+        rk3576_reboot_normal();
+        break;
+
+      case 1:
+        rk3576_reboot_loader();
+        break;
+
+      default:
+        rk3576_reboot_maskrom();
+        break;
     }
 
   return 0;

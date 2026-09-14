@@ -39,6 +39,7 @@
 #include <stdint.h>
 #include <sched.h>
 #include <nuttx/board.h>
+#include <nuttx/kthread.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/drivers/drivers.h>
@@ -74,6 +75,97 @@ int kickpi_ui_main(int argc, FAR char *argv[]);
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_RK3576_GMAC
+/****************************************************************************
+ * Name: gmac_bringup_thread
+ *
+ * Description:
+ *   GMAC 的整条上电序列，放到后台线程里跑。
+ *
+ * ★ 为什么要挪出启动路径
+ *
+ *   这一段里有一个 up_mdelay(2500)：给 1000Base-T 自协商留时间。实测它
+ *   **占了整个启动的 2.8 秒**，是单项最大开销。
+ *
+ *   而它等的东西并不会来 —— 同一份日志里写着
+ *     "GMAC0/1: 25M 焊盘采样 200 次 高=0 跳变=0 —— ★无跳变，时钟没到引脚"
+ *   参考时钟根本没出到 PHY，链路不可能建立，2.5 秒等的是一个永远不发生的
+ *   事件。等待时长和它所等的事件差着数量级，这在本项目已经是第三次了
+ *   （前两次是 I2C 超时和 GMAC 链路状态轮询）。
+ *
+ *   但"删掉这个等待"和"让网口能用"是两件事：时钟没出来是独立的硬件/配置
+ *   问题，还没修。所以这里不删逻辑，只是把它从**串行的启动路径**挪到后台
+ *   ——  网口该多久起来还是多久，nsh 不再陪着等。
+ *
+ ****************************************************************************/
+
+static int gmac_bringup_thread(int argc, FAR char *argv[])
+{
+  int ret;
+
+  UNUSED(argc);
+  UNUSED(argv);
+
+  rk3576_gmac_refclk25m(0);
+  rk3576_gmac_refclk25m(1);
+
+  rk3576_gmac_phy_reset(BOARD_GMAC1_RST_BANK, BOARD_GMAC1_RST_PIN, true);
+  rk3576_gmac_phy_reset(BOARD_GMAC0_RST_BANK, BOARD_GMAC0_RST_PIN, true);
+
+  /* PHY 自协商要时间（1000Base-T 通常 1~3 秒）。软复位等 RX 时钟，
+   * 而 RX 时钟要等链路 —— 这里给协商留出时间，否则必然超时。
+   */
+
+  up_mdelay(2500);
+
+  /* ★ 两个口都要配。
+   *
+   *   板上把两个网口用网线对接了，所以对端就是本板的另一个 MAC/PHY。
+   *   只配 GMAC0 的话，对端那半条链路没人管 —— 而 RGMII 的 RX 时钟由
+   *   对端 PHY 在链路建立后才输出，链路建不起来就一直没有时钟。
+   */
+
+  ret = rk3576_gmac_probe(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: GMAC0 探测失败: %d\n", ret);
+    }
+
+  ret = rk3576_gmac_probe(1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: GMAC1 探测失败: %d\n", ret);
+    }
+
+#ifdef CONFIG_RK3576_ETH
+  /* ★ 网络设备要在 rk3576_gmac_probe() **之后**注册。
+   *
+   *   probe 里做的是时钟、GRF、引脚复用、RGMII 延时线，以及 PHY 的
+   *   厂商初始化 —— 少了最后一项，PHY 的模拟前端不工作，DMA 软复位
+   *   不会完成，网络设备注册上去也是死的。
+   *
+   *   arm64 通用层默认在 OS 早期就调 arm64_netinitialize()，那时
+   *   板级初始化还没跑。所以开 CONFIG_NETDEV_LATEINIT 把它挪到这里。
+   */
+
+  ret = rk3576_eth_netinitialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 网络设备注册失败: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "网络: eth0 已注册（GMAC%d）\n",
+             CONFIG_RK3576_ETH_PORT);
+    }
+#endif
+
+  UNUSED(ret);
+  return 0;
+}
+
+#endif /* CONFIG_RK3576_GMAC */
 
 /****************************************************************************
  * Name: board_app_initialize
@@ -716,60 +808,33 @@ int board_app_initialize(uintptr_t arg)
    *   PHY 出复位那一刻就得有时钟，否则模拟前端不启动。
    */
 
-  rk3576_gmac_refclk25m(0);
-  rk3576_gmac_refclk25m(1);
-
-  rk3576_gmac_phy_reset(BOARD_GMAC1_RST_BANK, BOARD_GMAC1_RST_PIN, true);
-  rk3576_gmac_phy_reset(BOARD_GMAC0_RST_BANK, BOARD_GMAC0_RST_PIN, true);
-
-  /* PHY 自协商要时间（1000Base-T 通常 1~3 秒）。软复位等 RX 时钟，
-   * 而 RX 时钟要等链路 —— 这里给协商留出时间，否则必然超时。
+  /* GMAC 上电要 2.8 秒（见 gmac_bringup_thread 的说明），扔后台去跑，
+   * 不占启动路径。优先级压到 100，别和界面抢。
    */
 
-  up_mdelay(2500);
-
-  /* ★ 两个口都要配。
+  /* ★ 栈给 8192，别用 2048。
    *
-   *   板上把两个网口用网线对接了，所以对端就是本板的另一个 MAC/PHY。
-   *   只配 GMAC0 的话，对端那半条链路没人管 —— 而 RGMII 的 RX 时钟由
-   *   对端 PHY 在链路建立后才输出，链路建不起来就一直没有时钟。
+   *   我第一版写的 2048 —— 板上直接崩：CPU1 在 gmac_bringup_thread 的
+   *   最后一句（"网络: eth0 已注册"）之后取数异常
+   *   ESR=0x96000006（level 2 translation fault）。这个线程里全是带一堆
+   *   参数的 syslog，vsnprintf 的栈开销远不止 2KB。
+   *
+   *   栈溢出的坏处不止是"这个线程死了"：它踩的是相邻内存，后果会延迟
+   *   到别处才发作。今天几次"串口突然全哑、USB 也不枚举、只能按 RESET"
+   *   很可能都是它。**挑线程栈大小不是估一个够用的数，而是照系统默认来**
+   *   —— CONFIG_DEFAULT_TASK_STACKSIZE 就是 8192。
    */
 
-  ret = rk3576_gmac_probe(0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: GMAC0 探测失败: %d\n", ret);
-    }
+  {
+    int tid = kthread_create("gmac", 100, 8192, gmac_bringup_thread, NULL);
 
-  ret = rk3576_gmac_probe(1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: GMAC1 探测失败: %d\n", ret);
-    }
+    if (tid < 0)
+      {
+        syslog(LOG_ERR, "ERROR: GMAC 后台线程创建失败: %d\n", tid);
+      }
+  }
 #endif
 
-#ifdef CONFIG_RK3576_ETH
-  /* ★ 网络设备要在 rk3576_gmac_probe() **之后**注册。
-   *
-   *   probe 里做的是时钟、GRF、引脚复用、RGMII 延时线，以及 PHY 的
-   *   厂商初始化 —— 少了最后一项，PHY 的模拟前端不工作，DMA 软复位
-   *   不会完成，网络设备注册上去也是死的。
-   *
-   *   arm64 通用层默认在 OS 早期就调 arm64_netinitialize()，那时
-   *   板级初始化还没跑。所以开 CONFIG_NETDEV_LATEINIT 把它挪到这里。
-   */
-
-  ret = rk3576_eth_netinitialize(0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: 网络设备注册失败: %d\n", ret);
-    }
-  else
-    {
-      syslog(LOG_INFO, "网络: eth0 已注册（GMAC%d）\n",
-             CONFIG_RK3576_ETH_PORT);
-    }
-#endif
 
 #ifdef CONFIG_RK3576_WDT
   /* ★ 看门狗**必须最后注册**。

@@ -145,4 +145,9 @@ int rk3576_gpio_irq_enable(int bank, int pin, bool enable);
 }
 #endif
 
+/* 诊断用：读 bank 级 ISR 的进入次数与最近一次 INT_STATUS。 */
+
+uint32_t rk3576_gpio_irq_count(int bank, uint32_t *last_status);
+uint32_t rk3576_gpio_rawstatus(int bank);
+
 #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_GPIO_H */

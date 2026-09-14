@@ -936,6 +936,7 @@ int rk3576_gmac_probe(int port)
   syslog(LOG_INFO,
          "GMAC%d: 复位前 DMA_MODE=0x%08" PRIx32 " MAC_VERSION=0x%08" PRIx32
          "\n", port, gmac_getreg(port, RK3576_GMAC_DMA_MODE), version);
+#ifdef CONFIG_RK3576_GMAC_DIAG
 
   /* ★ 复位之前先把「时钟到底在不在跑」测出来。
    *
@@ -1025,6 +1026,7 @@ int rk3576_gmac_probe(int port)
                           port ? GMAC1_PIN_FUNC : GMAC0_PIN_FUNC);
       }
   }
+#endif /* CONFIG_RK3576_GMAC_DIAG */
 
   gmac_putreg(port, RK3576_GMAC_DMA_MODE, GMAC_DMA_MODE_SWR);
 
@@ -1054,6 +1056,7 @@ int rk3576_gmac_probe(int port)
              gmac_getreg(port, RK3576_GMAC_MAC_HW_FEATURE0),
              gmac_getreg(port, RK3576_GMAC_DMA_CH0_STATUS));
 
+#ifdef CONFIG_RK3576_GMAC_DIAG
       /* ★ 超时了也要先读一次 PHY ID 再返回。
        *
        *   MDC/MDIO 由 MAC 自己驱动，**不依赖 PHY 送来的 RX 时钟** ——
@@ -1281,6 +1284,7 @@ int rk3576_gmac_probe(int port)
           }
       }
 
+#endif /* CONFIG_RK3576_GMAC_DIAG */
       return -ETIMEDOUT;
     }
 

@@ -1,0 +1,21 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LVX_USE_DEMO_CONTEST2026_423_K7DIAG
+	tristate "KICKPI-K7 板级诊断（触摸中断脚 / 帧缓冲图案）"
+	default n
+	---help---
+		把"采样"和"判断"放到板子里做，只向串口输出一行结论。
+
+		★ 为什么不用 nsh 的 mw 直接读寄存器
+
+		  1.5M 波特率没有流控，而每条 nsh 命令还会附带一行
+		  `nxposix_spawn_exec: ERROR: exec failed: 2`，两者撞在一起 ——
+		  实测连读 14 次 EXT_PORT 只有 2 次完整回来。用丢字节的通道去
+		  读寄存器，读回来的数本身就不可信，而排查最怕的就是被不可信的
+		  观测带偏。
+
+		  这个命令在板上循环采样、自己做判断，串口上只出现结论。
+
