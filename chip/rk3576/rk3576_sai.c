@@ -259,9 +259,6 @@ static void sai_post_done(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
 static bool g_rx_logged     = false;
 static bool g_rx_datalogged = false;
-static bool g_rx_nohs_done  = false;
-static bool g_rx_cpuprobe   = false;
-static bool g_rx_pinprobe   = false;
 
 /****************************************************************************
  * Name: sai1_mclkout_to_io
@@ -837,20 +834,9 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       goto err_unlock;
     }
 
-  /* ★ 首个缓冲区用"不带握手"的方式搬一次，用来把两件事分开：
-   *
-   *     DMAC 能不能读到 0x2a610034（SAI 的 RXDR）？
-   *     外设的 DMA 请求线通不通？
-   *
-   *   两者失败的现象完全一样 —— 搬回来一片零。用 MEM_TO_MEM + 源地址
-   *   固定，微码里就是 LD/ST 而没有 WFP，不依赖任何请求线。
-   *     搬回真实数据 → 地址通，问题在握手；
-   *     还是零        → DMAC 根本读不到这个地址，握手层面查下去是白费。
-   */
-
   memset(&cfg, 0, sizeof(cfg));
 
-  cfg.direction = g_rx_nohs_done ? DMA_DEV_TO_MEM : DMA_MEM_TO_MEM;
+  cfg.direction = DMA_DEV_TO_MEM;
   cfg.src_width = 4;                  /* FIFO entry 32 位 */
   cfg.dst_width = 4;
   cfg.src_drq   = RK3576_DMA_REQ_SAI1_RX;
@@ -868,268 +854,6 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   /* 复位完成标记、清信号量计数，然后启动 DMA。
    * 临界区包住 reset：防止上一次残留计数和这次的完成中断错位。
    */
-
-  /* ★ 同一地址、同一时刻，CPU 读一次做对照。
-   *
-   *   现在的矛盾是：DMA 的读**弹出了 FIFO 条目**（RXFIFOLR 被排空），
-   *   说明访问确实到达了 SAI，但取回的值是 0。是"总线上读不到数据"还是
-   *   "FIFO 本来就是空的"，事后完全分不开 —— 必须在同一时刻用 CPU 读
-   *   同一个寄存器做对照：
-   *     CPU 读到非零、DMA 读到零 → 访问属性/总线视角问题
-   *     CPU 也读到零             → FIFO 本来就没数据，方向全错
-   */
-
-  /* ★ 先确认编解码器到底有没有在 SDI0 上驱动数据。
-   *
-   *   到这一步，引脚复用已回读确认、编解码器寄存器已在采集中读过、
-   *   RXCR 解码也对 —— 全都指向"配置没问题"，可采样就是零。剩下唯一
-   *   没验过的是**那根线上到底有没有信号**。
-   *
-   *   手法与当初查 GMAC 时钟一致：把引脚临时切回 GPIO 输入，采样若干次，
-   *   看高电平比例与跳变次数，然后把复用切回去。
-   *     有跳变 → 编解码器在发，问题在 SAI 的采样位置/格式
-   *     恒定   → 编解码器根本没输出，回头查它的主从模式与 ADC 输出使能
-   *
-   *   ★ 注意这会短暂打断接收，只做一次。
-   */
-
-  if (!g_rx_pinprobe)
-    {
-      int hi = 0;
-      int tr = 0;
-      int prev = -1;
-      int k;
-
-      g_rx_pinprobe = true;
-
-      rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_SDI0, 0);   /* 切回 GPIO */
-      rk3576_gpio_setdir(SAI1_PIN_BANK, SAI1_PIN_SDI0, false);
-
-      for (k = 0; k < 200; k++)
-        {
-          int v = rk3576_gpio_read(SAI1_PIN_BANK, SAI1_PIN_SDI0);
-
-          if (v > 0)
-            {
-              hi++;
-            }
-
-          if (prev >= 0 && v != prev)
-            {
-              tr++;
-            }
-
-          prev = v;
-          up_udelay(2);
-        }
-
-      rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_SDI0, SAI1_PIN_FUNC);
-
-      /* ★ 同样量一下 MCLK 与 SCLK 这两根**输出**引脚。
-       *
-       *   内部有时钟不等于引脚上有时钟：SAI 的 FIFO 按帧率在填，只证明
-       *   控制器内部的主时钟在跑；送到编解码器的 MCLK 走的是另一路门控、
-       *   另一根引脚，中间任一环节没通，编解码器就没有时钟。
-       *
-       *   三根一起量才能定位到底断在哪一级：
-       *     MCLK 有、SCLK 有、SDI0 无 → 时钟都到了，问题在编解码器内部
-       *     MCLK 无                   → 输出这一路没通（门控/选源/分频）
-       */
-
-      {
-        int mk_hi = 0, mk_tr = 0, mk_prev = -1;
-        int sk_hi = 0, sk_tr = 0, sk_prev = -1;
-        int q;
-
-        /* ★ 量输出脚**不能先切复用**。
-         *
-         *   MCLK/SCLK 是 SoC 往外送的。把复用切成 GPIO，SAI 的输出驱动
-         *   就从焊盘上断开了 —— 此时读到的必然是恒定电平，跟"时钟有没有
-         *   出来"毫无关系。据此得出的"MCLK 跳变=0，时钟没到引脚"是个
-         *   **自己造出来的结论**。
-         *
-         *   本项目 GMAC 那边早就写过正确做法：复用态下 GPIO 输入缓冲仍能
-         *   读到焊盘电平。所以保持功能复用不动，只把方向设成输入再采样。
-         *
-         *   （SDI0 是输入脚，由编解码器驱动，切不切复用都读得到，所以
-         *     上面那段不受影响。）
-         */
-
-        rk3576_gpio_setdir(SAI1_PIN_BANK, SAI1_PIN_MCLK, false);
-        rk3576_gpio_setdir(SAI1_PIN_BANK, SAI1_PIN_SCLK, false);
-
-        for (q = 0; q < 200; q++)
-          {
-            int mv = rk3576_gpio_read(SAI1_PIN_BANK, SAI1_PIN_MCLK);
-            int sv = rk3576_gpio_read(SAI1_PIN_BANK, SAI1_PIN_SCLK);
-
-            if (mv > 0)
-              {
-                mk_hi++;
-              }
-
-            if (sv > 0)
-              {
-                sk_hi++;
-              }
-
-            if (mk_prev >= 0 && mv != mk_prev)
-              {
-                mk_tr++;
-              }
-
-            if (sk_prev >= 0 && sv != sk_prev)
-              {
-                sk_tr++;
-              }
-
-            mk_prev = mv;
-            sk_prev = sv;
-          }
-
-        /* ★ 先证明这根脚的寄存器通路本身是通的，再谈"时钟没出来"。
-         *
-         *   到这一步，门控、选源、父时钟（SCLK 在跳即可证明）、引脚功能号
-         *   （<4 RK_PA2 1>，与原厂 pinctrl 逐字一致）全部核对过，MCLK 却
-         *   恒低。那就有两种可能，必须先分开：
-         *     a) 时钟路由的问题 —— 通路是好的，只是没信号
-         *     b) 我们对这个引脚的寄存器访问压根没生效 —— 回读一致只是因为
-         *        读写用的是同一个错地址，自己和自己对上了
-         *
-         *   把它切成 GPIO 输出自己推高再推低：电平跟得上就排除 (b)。
-         *   测完必须还原成功能复用，否则后面的现象都是自己造出来的。
-         */
-
-        {
-          int padhi;
-          int padlo;
-
-          rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_MCLK,
-                            RK3576_PINMUX_GPIO);
-          rk3576_gpio_setdir(SAI1_PIN_BANK, SAI1_PIN_MCLK, true);
-          rk3576_gpio_write(SAI1_PIN_BANK, SAI1_PIN_MCLK, true);
-          up_udelay(50);
-          padhi = rk3576_gpio_read(SAI1_PIN_BANK, SAI1_PIN_MCLK);
-          rk3576_gpio_write(SAI1_PIN_BANK, SAI1_PIN_MCLK, false);
-          up_udelay(50);
-          padlo = rk3576_gpio_read(SAI1_PIN_BANK, SAI1_PIN_MCLK);
-
-          rk3576_gpio_setdir(SAI1_PIN_BANK, SAI1_PIN_MCLK, false);
-          rk3576_pinmux_set(SAI1_PIN_BANK, SAI1_PIN_MCLK, SAI1_PIN_FUNC);
-
-          syslog(LOG_INFO,
-                 "SAI RX: MCLK 焊盘自检 推高读到=%d 推低读到=%d —— %s\n",
-                 padhi, padlo,
-                 (padhi == 1 && padlo == 0) ? "通路正常，恒低是时钟没来" :
-                                        "★寄存器通路不通，之前的读数全部作废");
-        }
-
-        syslog(LOG_INFO,
-               "SAI RX: MCLK(b%d-%d) 高=%d 跳变=%d | SCLK(-%d) 高=%d 跳变=%d\n",
-               SAI1_PIN_BANK, SAI1_PIN_MCLK, mk_hi, mk_tr,
-               SAI1_PIN_SCLK, sk_hi, sk_tr);
-      }
-
-      /* ★ 第三个独立证据源：SAI 自己的帧计数器。
-       *
-       *   前两个证据互相矛盾 —— FIFO 水位说"有数据在进来"，GPIO 采样说
-       *   "三根线全是恒低"。两者必有一个是假的：水位寄存器可能被我解错，
-       *   GPIO 输入通路也可能根本没使能。
-       *
-       *   RX_DATA_CNT 由硬件按收到的帧递增，既不依赖我对水位字段的解码，
-       *   也不依赖 GPIO。隔一段时间读两次：
-       *     递增 → SAI 真的在收，问题在数据内容
-       *     不变 → SAI 根本没在跑，"FIFO 在填"是假象
-       */
-
-      /* ★ 先确认这个寄存器块到底是不是活的。
-       *
-       *   RXFIFOLR 连着读出 0x00555555 / 0x00820820 / 0x00001000 这种
-       *   规则位图案 —— 那不是水位值。一个只读的 VERSION 寄存器能不能读出
-       *   合理常量，是判断"寄存器块真的在工作"最直接的证据；XFER 能回读
-       *   只说明写进去的值被锁存了，不代表控制器活着。
-       *
-       *   同时把门控、复位、电源域的**寄存器原值**读回来 —— 之前每一步都
-       *   只是"调用了设置函数"，从没验证过硬件真的接受了。
-       */
-
-      /* ★ 全量 dump，和原厂固件读到的那一份逐条对照。
-       *
-       *   原厂（录音进行时，/sys/kernel/debug/regmap/2a610000.sai）：
-       *     00 TXCR=00400fef  04 FSCR=0101f03f  08 RXCR=00400fef
-       *     24 DMACR=010f0010 28 INTCR=00020000 38 PATH_SEL=0000e4e4
-       *     64 TX_SHIFT=00000002
-       *
-       *   逐条比对比"再想一个假设"可靠得多 —— 这条链上我推导出来的配置
-       *   已经错过太多次，而这份是从能工作的固件上读回来的。
-       */
-
-      {
-        static const uint16_t offs[] =
-        {
-          0x00, 0x04, 0x08, 0x0c, 0x10, 0x14, 0x18, 0x1c,
-          0x20, 0x24, 0x28, 0x2c, 0x38, 0x64, 0x68
-        };
-        char line[256];
-        int  pos = 0;
-        int  ri;
-
-        for (ri = 0; ri < (int)(sizeof(offs) / sizeof(offs[0])); ri++)
-          {
-            pos += snprintf(&line[pos], sizeof(line) - pos,
-                            "%02x=%08lx ", offs[ri],
-                            (unsigned long)sai_getreg(offs[ri]));
-          }
-
-        syslog(LOG_INFO, "SAI 全量: %s\n", line);
-      }
-
-      syslog(LOG_INFO,
-             "SAI RX: VERSION=%08" PRIx32 " | CLKGATE8=%08" PRIx32
-             " CLKGATE9=%08" PRIx32 " SOFTRST8=%08" PRIx32 "\n",
-             sai_getreg(RK3576_SAI_VERSION),
-             getreg32(RK3576_CRU_ADDR + RK3576_CRU_CLKGATE_CON(8)),
-             getreg32(RK3576_CRU_ADDR + RK3576_CRU_CLKGATE_CON(9)),
-             getreg32(RK3576_CRU_ADDR + RK3576_CRU_SOFTRST_CON(8)));
-
-      {
-        uint32_t c1 = sai_getreg(RK3576_SAI_RX_DATA_CNT);
-        uint32_t f1 = sai_getreg(RK3576_SAI_RXFIFOLR);
-        uint32_t c2;
-        uint32_t f2;
-
-        up_mdelay(5);
-        c2 = sai_getreg(RK3576_SAI_RX_DATA_CNT);
-        f2 = sai_getreg(RK3576_SAI_RXFIFOLR);
-
-        syslog(LOG_INFO,
-               "SAI RX: 5ms 内 RX_DATA_CNT %08" PRIx32 " -> %08" PRIx32
-               " | RXFIFOLR %08" PRIx32 " -> %08" PRIx32
-               " | XFER=%08" PRIx32 " STATUS=%08" PRIx32 "\n",
-               c1, c2, f1, f2,
-               sai_getreg(RK3576_SAI_XFER),
-               sai_getreg(RK3576_SAI_STATUS));
-      }
-
-      syslog(LOG_INFO,
-             "SAI RX: SDI0(b%d-%d) 采样 200 次 高=%d 跳变=%d —— %s\n",
-             SAI1_PIN_BANK, SAI1_PIN_SDI0, hi, tr,
-             tr > 0 ? "有信号" : "恒定，编解码器没在发");
-    }
-
-  if (!g_rx_cpuprobe)
-    {
-      uint32_t before = sai_getreg(RK3576_SAI_RXFIFOLR);
-      uint32_t w0 = sai_getreg(RK3576_SAI_RXDR);
-      uint32_t w1 = sai_getreg(RK3576_SAI_RXDR);
-      uint32_t after = sai_getreg(RK3576_SAI_RXFIFOLR);
-
-      g_rx_cpuprobe = true;
-      syslog(LOG_INFO,
-             "SAI RX: CPU 直读 RXDR=%08" PRIx32 " %08" PRIx32
-             " 水位 %08" PRIx32 " -> %08" PRIx32 "\n",
-             w0, w1, before, after);
-    }
 
   /* ★ 启动 DMA 前先 clean 目的缓冲区。
    *
@@ -1225,14 +949,13 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       apb->curbyte = 0;
       /* 一次性：确认搬回来的到底是不是音频数据。 */
 
-      if (!g_rx_datalogged)
+      if (!g_rx_datalogged && priv->rx_result >= 16)
         {
           const uint32_t *w = (const uint32_t *)apb->samp;
 
           g_rx_datalogged = true;
-          g_rx_nohs_done  = true;
           syslog(LOG_INFO,
-                 "SAI RX DMA: 首缓冲(无握手) %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+                 "SAI RX DMA: 首缓冲 %08" PRIx32 " %08" PRIx32 " %08" PRIx32
                  " %08" PRIx32 " | RXFIFOLR=%08" PRIx32 " INTSR=%08" PRIx32
                  " 用时=%luus\n",
                  w[0], w[1], w[2], w[3],

@@ -91,6 +91,7 @@ int kickpi_spi_loopback(void);
 int kickpi_camera_stream(bool on);
 int kickpi_camera_receiver(bool on);
 int kickpi_camera_status(void);
+bool kickpi_camera_detected(void);
 
 /****************************************************************************
  * 去马赛克 + JPEG 编码（kickpi_k7_imgproc.c）

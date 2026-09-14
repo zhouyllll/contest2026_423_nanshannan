@@ -405,6 +405,7 @@ struct rk3576_eth_driver_s
  ****************************************************************************/
 
 static struct rk3576_eth_driver_s g_enet[CONFIG_RK3576_ETH_NETHIFS];
+static spinlock_t g_eth_irq_lock = SP_UNLOCKED;
 
 /* Descriptor allocations */
 
@@ -1309,19 +1310,21 @@ static int rk3576_eth_recvframe(struct rk3576_eth_driver_s *priv)
                * bytes of the CRC
                */
 
-              dev->d_len = ((rxdesc->des3 & EMAC_RDES3_PL_MASK)) - 4;
+              uint32_t pktlen = rxdesc->des3 & EMAC_RDES3_PL_MASK;
 
-              if (dev->d_len > ALIGNED_BUFSIZE)
+              if (pktlen < 4 || pktlen - 4 > ALIGNED_BUFSIZE)
                 {
-                  /* The Frame is to big */
+                  /* Drop invalid or oversized frames. */
 
-                  nerr("ERROR: Dropped, RX descriptor Too big: %d\n",
-                       dev->d_len);
+                  nerr("ERROR: Dropped invalid RX length: %" PRIu32 "\n",
+                       pktlen);
 
                   rk3576_eth_freesegment(priv, rxcurr, 1);
                 }
               else
                 {
+                  dev->d_len = pktlen - 4;
+
                   /* Get a buffer from the free list.  We don't even
                    * check if this is successful because we already
                    * assure the free list is not empty above.
@@ -1739,6 +1742,7 @@ static void rk3576_eth_interrupt_work(void *arg)
 {
   struct rk3576_eth_driver_s *priv = (struct rk3576_eth_driver_s *)arg;
   uint32_t dmasr;
+  irqstate_t flags;
 
   DEBUGASSERT(priv);
 
@@ -1748,7 +1752,10 @@ static void rk3576_eth_interrupt_work(void *arg)
 
   /* 用 ISR 抓下来的状态：寄存器已经在 ISR 里被清掉了 */
 
+  flags = spin_lock_irqsave(&g_eth_irq_lock);
   dmasr = priv->dmasr;
+  priv->dmasr = 0;
+  spin_unlock_irqrestore(&g_eth_irq_lock, flags);
 
   /* Mask only enabled interrupts.  This depends on the fact that the
    * interrupt related bits (0-16) correspond in these two registers.
@@ -1843,6 +1850,7 @@ static int rk3576_eth_enet_interrupt(int irq, void *context, void *arg)
 {
   register struct rk3576_eth_driver_s *priv = &g_enet[0];
   uint32_t dmasr;
+  irqstate_t flags;
 
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
 
@@ -1869,7 +1877,9 @@ static int rk3576_eth_enet_interrupt(int irq, void *context, void *arg)
        */
 
       putreg32(dmasr, RK3576_EMAC_DMA_CH0_STATUS);
-      priv->dmasr = dmasr;
+      flags = spin_lock_irqsave(&g_eth_irq_lock);
+      priv->dmasr |= dmasr;
+      spin_unlock_irqrestore(&g_eth_irq_lock, flags);
 
       /* Check if a packet transmission just completed. */
 
@@ -1965,6 +1975,7 @@ static void rk3576_eth_txtimeout_expiry(wdparm_t arg)
    */
 
   up_disable_irq(RK3576_IRQ_EMAC);
+  up_disable_irq(RK3576_IRQ_EMAC_CH0);
 
   /* Schedule to perform the TX timeout processing on the worker thread,
    * canceling any pending interrupt work.
@@ -2141,6 +2152,13 @@ static int rk3576_eth_ifdown(struct net_driver_s *dev)
   flags = enter_critical_section();
 
   up_disable_irq(RK3576_IRQ_EMAC);
+  up_disable_irq(RK3576_IRQ_EMAC_CH0);
+
+  {
+    irqstate_t lockflags = spin_lock_irqsave(&g_eth_irq_lock);
+    priv->dmasr = 0;
+    spin_unlock_irqrestore(&g_eth_irq_lock, lockflags);
+  }
 
   /* FIXME clear interrupts */
 
@@ -3573,6 +3591,7 @@ int rk3576_eth_netinitialize(int intf)
   if (irq_attach(RK3576_IRQ_EMAC_CH0, rk3576_eth_enet_interrupt, NULL))
     {
       nerr("ERROR: 挂 GMAC 通道中断失败\n");
+      irq_detach(RK3576_IRQ_EMAC);
       return -EAGAIN;
     }
 
@@ -3616,6 +3635,8 @@ int rk3576_eth_netinitialize(int intf)
   if (ret < 0)
     {
       nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+      irq_detach(RK3576_IRQ_EMAC_CH0);
+      irq_detach(RK3576_IRQ_EMAC);
       return ret;
     }
 #endif
@@ -3628,10 +3649,14 @@ int rk3576_eth_netinitialize(int intf)
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  netdev_register(&priv->dev, NET_LL_ETHERNET);
+  ret = netdev_register(&priv->dev, NET_LL_ETHERNET);
+  if (ret < 0)
+    {
+      irq_detach(RK3576_IRQ_EMAC_CH0);
+      irq_detach(RK3576_IRQ_EMAC);
+    }
 
-  UNUSED(ret);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

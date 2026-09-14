@@ -9,6 +9,7 @@
   <include name="openvela.xml"/>
 
   <project path="contest2026_423_nanshannan" name="contest2026_423_nanshannan">
+    <linkfile src=".agents/skills/driver-workflow" dest=".agents/skills/driver-workflow"/>
     <linkfile src="app/hello_app" dest="packages/demos/contest2026_423_hello_app"/>
     <linkfile src="app/spi_selftest" dest="packages/demos/contest2026_423_spi_selftest"/>
     <linkfile src="app/cam" dest="packages/demos/contest2026_423_cam"/>

@@ -109,7 +109,7 @@ static bool imx415_is_available(FAR struct imgsensor_s *sensor)
    * 上电时序。kickpi_camera_status() 返回探测结果。
    */
 
-  return kickpi_camera_status() >= 0;
+  return kickpi_camera_detected();
 }
 
 static int imx415_sensor_init(FAR struct imgsensor_s *sensor)
@@ -198,7 +198,13 @@ static int imx415_sensor_start_capture(FAR struct imgsensor_s *sensor,
       return ret;
     }
 
-  return kickpi_camera_stream(true);
+  ret = kickpi_camera_stream(true);
+  if (ret < 0)
+    {
+      kickpi_camera_receiver(false);
+    }
+
+  return ret;
 }
 
 static int imx415_sensor_stop_capture(FAR struct imgsensor_s *sensor,

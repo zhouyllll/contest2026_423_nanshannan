@@ -519,7 +519,13 @@ int kickpi_camera_receiver(bool on)
       return ret;
     }
 
-  return rk3576_csihost_start(KICKPI_CAM_CSI_HOST, IMX415_MODE_LANES);
+  ret = rk3576_csihost_start(KICKPI_CAM_CSI_HOST, IMX415_MODE_LANES);
+  if (ret < 0)
+    {
+      rk3576_csidphy_stop(KICKPI_CAM_DPHY_INDEX);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -529,6 +535,11 @@ int kickpi_camera_receiver(bool on)
 int kickpi_camera_status(void)
 {
   return rk3576_csihost_status(KICKPI_CAM_CSI_HOST);
+}
+
+bool kickpi_camera_detected(void)
+{
+  return g_cam_found != NULL && g_cam_i2c != NULL;
 }
 
 /****************************************************************************
@@ -629,31 +640,33 @@ int kickpi_camera_capture(void)
   size_t i;
   int ret;
 
-  if (g_cam_buf[0] == NULL)
+  if (g_cam_buf[0] == NULL || g_cam_buf[1] == NULL ||
+      g_cam_buf[2] == NULL)
     {
-      /* 两个都要分配：硬件在 FRM0/FRM1 之间乒乓，只给一个的话
-       * 第二帧会写到地址 0，把 DDR 起始处冲掉且不报错。
-       */
+      uint8_t *buf[3];
+      int j;
 
-      /* ★ 三块，不是两块。
-       *
-       *   两块时硬件写完 FRM0 立刻写 FRM1，写完 FRM1 又回头写 FRM0 ——
-       *   而渲染一帧比传感器出一帧慢，还没读完就被覆盖了，读出来是
-       *   半新半旧的撕裂画面。第三块作备用：每次帧结束就把刚完成的
-       *   那个槽换成备用块，正在被消费的那一块永远不是 DMA 的目标。
-       *   厂商内核 rkcif_assign_new_buffer_pingpong() 就是这么做的。
-       */
+      /* Publish the buffers only after all three allocations succeed. */
 
-      g_cam_buf[0] = kmm_memalign(CAM_BUF_ALIGN, CAM_FRAME_BYTES);
-      g_cam_buf[1] = kmm_memalign(CAM_BUF_ALIGN, CAM_FRAME_BYTES);
-      g_cam_buf[2] = kmm_memalign(CAM_BUF_ALIGN, CAM_FRAME_BYTES);
-
-      if (g_cam_buf[0] == NULL || g_cam_buf[1] == NULL ||
-          g_cam_buf[2] == NULL)
+      for (j = 0; j < 3; j++)
         {
-          syslog(LOG_ERR, "摄像头: 取图缓冲分配失败（每个 %d 字节）\n",
-                 CAM_FRAME_BYTES);
-          return -ENOMEM;
+          buf[j] = kmm_memalign(CAM_BUF_ALIGN, CAM_FRAME_BYTES);
+          if (buf[j] == NULL)
+            {
+              while (j > 0)
+                {
+                  kmm_free(buf[--j]);
+                }
+
+              syslog(LOG_ERR, "摄像头: 取图缓冲分配失败（每个 %d 字节）\n",
+                     CAM_FRAME_BYTES);
+              return -ENOMEM;
+            }
+        }
+
+      for (j = 0; j < 3; j++)
+        {
+          g_cam_buf[j] = buf[j];
         }
     }
 
