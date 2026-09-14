@@ -23,3 +23,31 @@ openvela 工程的其它仓里。按《新平台适配指南》「不得修改�
 **`CONFIG_ARCH_CHIP_CUSTOM` 必须原样写进 defconfig**，光靠
 `ARCH_CHIP_ARM64_CUSTOM` 去 `select` 它不行 —— `tools/Config.mk` 是 make
 在 kconfig 解析 select 之前读的。详见根目录 README。
+
+## ft5x06-scan-all-slots-for-touch-up.patch
+
+`drivers/input/ft5x06.c` —— 触摸只有按下、没有松开。
+
+解码器按 `TD_STATUS`（触点数）决定扫几个槽位。手指抬起那一帧控制器报
+`TD_STATUS = 0`，但**槽位 0 里仍留着一条带 UP 事件的记录** —— 整帧被当成
+"没数据"丢掉，上层永远收不到 `TOUCH_UP`。
+
+后果：LVGL 的 `process_single_touch()` 只有拿到 `TOUCH_UP` 才会把指针置成
+`RELEASED`；收不到就一直停在 `PRESSED`，没有 click，点什么都没反应。而
+**每一层都不报错** —— 中断在进、I2C 读得到、坐标也对。
+
+原厂 `focaltech_touch/focaltech_core.c` 的 `fts_read_parse_touchdata()`
+不是这么写的：
+
+```c
+for (i = 0; i < max_touch_num; i++) {        /* 上界是槽位数，不看 point_num */
+    pointid = buf[FTS_TOUCH_ID_POS + base] >> 4;
+    if (pointid >= FTS_MAX_ID) break;        /* 终止条件是"ID 无效" */
+    events[i].flag = buf[FTS_TOUCH_EVENT_POS + base] >> 6;
+}
+```
+
+本 patch 照此改写，并保留一条兜底：上一帧按下、这一帧完全没出现的触点
+补一个 `TOUCH_UP`（对应原厂的 `data->touchs ^ touchs` 那段）。
+
+上板验证：176 次落点全部按下/抬手成对，6 个色块全命中。
