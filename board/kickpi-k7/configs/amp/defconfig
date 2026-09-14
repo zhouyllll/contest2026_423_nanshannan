@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+CONFIG_AI_AGENT_CAMERA=y
 # CONFIG_AI_AGENT_MQTT is not set
 # CONFIG_AI_AGENT_WEIXIN is not set
 # CONFIG_DEBUG_INFO is not set
