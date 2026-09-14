@@ -29,6 +29,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <debug.h>
@@ -107,6 +108,20 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/* ★ 延迟输出缓冲。见 close(fd) 之后那段说明：bt 一旦开始写 /dev/ttyS1，
+ * 它自己的 printf 就到不了控制台，所以先攒着。
+ */
+
+static char g_btlog[1024];
+
+#define BTLOG(...) \
+  do \
+    { \
+      size_t l = strlen(g_btlog); \
+      snprintf(g_btlog + l, sizeof(g_btlog) - l, __VA_ARGS__); \
+    } \
+  while (0)
 
 /****************************************************************************
  * Name: bt_hw_reset
@@ -511,26 +526,69 @@ int kickpi_k7_bt_probe(void)
    */
 
   {
-    uint32_t lcr = getreg32(UART4_BASE + 0x0c);
-    uint32_t dll;
-    uint32_t dlm;
+    uint32_t lcr;
+    uint32_t dll = 0;
+    uint32_t dlm = 0;
+    int      busy;
+    int      guard;
 
-    putreg32(lcr | 0x80, UART4_BASE + 0x0c);       /* DLAB = 1 */
-    dll = getreg32(UART4_BASE + 0x00) & 0xff;
-    dlm = getreg32(UART4_BASE + 0x04) & 0xff;
-    putreg32(lcr, UART4_BASE + 0x0c);              /* 恢复 */
+    /* ★ 读分频器**不能背着驱动硬来**。
+     *
+     *   这段原来直接 putreg32(LCR|DLAB) 再读 0x00/0x04，而 UART4 此刻
+     *   正被 16550 驱动占着（就是我们刚写过字节的 /dev/ttyS1）。两个后果：
+     *
+     *     1) Synopsys DW UART 在 BUSY 期间写 LCR 会触发 busy-detect
+     *        （IIR=0x07），NuttX 的 16550 驱动不认这个中断号，会一直空转；
+     *     2) DLAB=1 时寄存器 0x00 既是 DLL 也是 THR —— 驱动的发送中断
+     *        只要在这个窗口里发一个字节，写进去的就不是数据而是**分频器**。
+     *
+     *   板上的现象是 `bt` 命令每次都停在上一条 printf 之后，再没有输出 ——
+     *   也就是这个"仪器"把它要测的东西弄挂了。
+     *
+     *   正确做法照 DW 的手册：先等 USR(0x7c) 的 BUSY 位清零再动 LCR；
+     *   一直 busy 就放弃这次测量，宁可没有读数，也不要一个把系统搞挂、
+     *   顺带还可能改坏分频器的读数。
+     */
 
-    {
-      uint32_t div = (dlm << 8) | dll;
-      printf("波特率: divisor=%u LCR=%02x -> 若源为 24MHz 则实际 %u bps"
-             "（期望 divisor=13 / 115200）\n",
-             (unsigned)div, (unsigned)lcr,
-             (unsigned)(div ? 24000000u / (16u * div) : 0));
-    }
+    for (guard = 0; guard < 1000; guard++)
+      {
+        if ((getreg32(UART4_BASE + 0x7c) & 0x01) == 0)
+          {
+            break;
+          }
+
+        up_udelay(10);
+      }
+
+    busy = (getreg32(UART4_BASE + 0x7c) & 0x01) != 0;
+    lcr  = getreg32(UART4_BASE + 0x0c);
+
+    if (!busy)
+      {
+        putreg32(lcr | 0x80, UART4_BASE + 0x0c);   /* DLAB = 1 */
+        dll = getreg32(UART4_BASE + 0x00) & 0xff;
+        dlm = getreg32(UART4_BASE + 0x04) & 0xff;
+        putreg32(lcr, UART4_BASE + 0x0c);          /* 恢复 */
+      }
+    else
+      {
+        BTLOG("波特率: UART4 一直 BUSY，跳过分频器回读"
+              "（不硬读，以免改坏 DLL/触发 busy-detect）\n");
+      }
+
+    if (!busy)
+      {
+        uint32_t div = (dlm << 8) | dll;
+
+        BTLOG("波特率: divisor=%u LCR=%02x -> 若源为 24MHz 则实际 %u bps"
+              "（期望 divisor=13 / 115200）\n",
+              (unsigned)div, (unsigned)lcr,
+              (unsigned)(div ? 24000000u / (16u * div) : 0));
+      }
   }
 
   n = write(fd, hci_reset, sizeof(hci_reset));
-  printf("已发 HCI Reset (%d 字节)，等应答…\n", n);
+  BTLOG("已发 HCI Reset (%d 字节)，等应答…\n", n);
 
   for (i = 0; i < 50 && total < (int)sizeof(rsp); i++)
     {
@@ -544,6 +602,24 @@ int kickpi_k7_bt_probe(void)
     }
 
   close(fd);
+
+  /* ★ UART4 关掉之后再把攒下来的诊断一次性打出来。
+   *
+   *   板上实测：只要 bt 这个进程开始往 /dev/ttyS1 写字节，它自己后续的
+   *   printf 就再也到不了控制台 —— 而 bt 返回之后 nsh 的输出立刻恢复
+   *   （在 `bt; echo 标记` 里标记能正常出现）。也就是说任务没挂，是**这
+   *   段时间里控制台输出被丢掉了**。
+   *
+   *   原因还没查清（UART0/UART4 是两个 16550 实例，基址 0x2ad40000 /
+   *   0x2ad70000、中断 108 / 112 都不同，已逐一核对过）。但排查 BT 不该
+   *   被这个挡住：先把结论攒进缓冲区，等 UART 关掉、控制台恢复之后再
+   *   一次性输出。
+   *
+   *   这条本身也是个待查项，别当成已解决。
+   */
+
+  fputs(g_btlog, stdout);
+  fflush(stdout);
 
   if (total == 0)
     {
