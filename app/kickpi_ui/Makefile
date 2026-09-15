@@ -4,6 +4,10 @@
 
 include $(APPDIR)/Make.defs
 
+CFLAGS += ${INCDIR_PREFIX}$(APPDIR)/external/libjpeg-turbo/libjpeg-turbo
+CFLAGS += ${INCDIR_PREFIX}$(APPDIR)/../packages/ai_agent/include
+CFLAGS += ${INCDIR_PREFIX}$(APPDIR)/netutils/cjson/cJSON
+
 PROGNAME  = kickpi_ui
 PRIORITY  = $(CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_PRIORITY)
 STACKSIZE = $(CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_STACKSIZE)

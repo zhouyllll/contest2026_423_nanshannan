@@ -39,7 +39,12 @@
 #include <dirent.h>
 #include <inttypes.h>
 #include <malloc.h>
+#include <errno.h>
+#include <pthread.h>
+#include <setjmp.h>
+#include <spawn.h>
 #include <stdio.h>
+#include <sys/wait.h>
 #include <nuttx/video/fb.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -52,6 +57,9 @@
 
 #include <lvgl/lvgl.h>
 #include <lvgl/src/drivers/nuttx/lv_nuttx_entry.h>
+#include <jpeglib.h>
+#include <cJSON.h>
+#include <velaclaw/client.h>
 
 #ifdef CONFIG_RK3576_RPTUN
 #  include <arch/chip/amp.h>
@@ -152,6 +160,37 @@ static unsigned   g_touch_count;
 
 static uint32_t   g_last_kicks;
 static time_t     g_t0;
+
+/* Camera snapshots are captured by the same V4L2 tool used to verify the
+ * agent camera path.  Only the UI thread touches LVGL objects.
+ */
+
+#define UI_CAMERA_FILE "/tmp/k7-ui-camera.jpg"
+static lv_obj_t     *g_camera_image;
+static lv_obj_t     *g_camera_status;
+static lv_obj_t     *g_camera_button;
+static lv_draw_buf_t *g_camera_frame;
+static pid_t         g_camera_pid = -1;
+static lv_obj_t     *g_agent_status;
+static velaclaw_client_t *g_agent_client;
+static pthread_mutex_t g_agent_lock = PTHREAD_MUTEX_INITIALIZER;
+static char          g_agent_reply[512];
+static bool          g_agent_reply_ready;
+static bool          g_agent_busy;
+static time_t        g_agent_started;
+static lv_obj_t     *g_guard_switch;
+static lv_obj_t     *g_guard_state;
+static bool          g_guard_enabled;
+static bool          g_guard_request;
+static time_t        g_guard_next;
+static int           g_guard_keys = -1;
+static int           g_guard_cup = -1;
+
+struct ui_jpeg_error_s
+{
+  struct jpeg_error_mgr pub;
+  jmp_buf jump;
+};
 
 /****************************************************************************
  * Private Functions
@@ -552,6 +591,427 @@ static void live_refresh(void)
 }
 
 /****************************************************************************
+ * CAMERA / DESK pages
+ ****************************************************************************/
+
+static void ui_jpeg_error(j_common_ptr info)
+{
+  struct ui_jpeg_error_s *err = (struct ui_jpeg_error_s *)info->err;
+  longjmp(err->jump, 1);
+}
+
+static lv_draw_buf_t *camera_decode(const char *path)
+{
+  struct jpeg_decompress_struct jpeg;
+  struct ui_jpeg_error_s error;
+  lv_draw_buf_t *frame = NULL;
+  FILE *file;
+  uint8_t *row = NULL;
+  bool created = false;
+  unsigned int x;
+
+  file = fopen(path, "rb");
+  if (file == NULL)
+    {
+      return NULL;
+    }
+
+  memset(&jpeg, 0, sizeof(jpeg));
+  jpeg.err = jpeg_std_error(&error.pub);
+  error.pub.error_exit = ui_jpeg_error;
+  if (setjmp(error.jump) != 0)
+    {
+      goto fail;
+    }
+
+  jpeg_create_decompress(&jpeg);
+  created = true;
+  jpeg_stdio_src(&jpeg, file);
+  jpeg_read_header(&jpeg, TRUE);
+  jpeg.scale_num = 1;
+  jpeg.scale_denom = 2;
+  jpeg.out_color_space = JCS_RGB;
+  jpeg_start_decompress(&jpeg);
+
+  if (jpeg.output_width == 0 || jpeg.output_height == 0 ||
+      jpeg.output_width > 1280 || jpeg.output_height > 720 ||
+      jpeg.output_components != 3)
+    {
+      goto fail;
+    }
+
+  frame = lv_draw_buf_create(jpeg.output_width, jpeg.output_height,
+                             LV_COLOR_FORMAT_ARGB8888, 0);
+  row = malloc(jpeg.output_width * 3);
+  if (frame == NULL || row == NULL)
+    {
+      goto fail;
+    }
+
+  while (jpeg.output_scanline < jpeg.output_height)
+    {
+      JSAMPROW scanline = row;
+      uint32_t *pixels = (uint32_t *)
+        lv_draw_buf_goto_xy(frame, 0, jpeg.output_scanline);
+
+      if (jpeg_read_scanlines(&jpeg, &scanline, 1) != 1)
+        {
+          goto fail;
+        }
+
+      for (x = 0; x < jpeg.output_width; x++)
+        {
+          pixels[x] = 0xff000000u |
+                      ((uint32_t)row[x * 3] << 16) |
+                      ((uint32_t)row[x * 3 + 1] << 8) |
+                      row[x * 3 + 2];
+        }
+    }
+
+  jpeg_finish_decompress(&jpeg);
+  jpeg_destroy_decompress(&jpeg);
+  free(row);
+  fclose(file);
+  return frame;
+
+fail:
+  if (created)
+    {
+      jpeg_destroy_decompress(&jpeg);
+    }
+
+  if (frame != NULL)
+    {
+      lv_draw_buf_destroy(frame);
+    }
+
+  free(row);
+  fclose(file);
+  return NULL;
+}
+
+static void camera_start(void)
+{
+  char *argv[] =
+    {
+      "v4l2cap", "1280", "720", UI_CAMERA_FILE, NULL
+    };
+  int ret;
+
+  if (g_camera_pid > 0)
+    {
+      return;
+    }
+
+  unlink(UI_CAMERA_FILE);
+  ret = posix_spawn(&g_camera_pid, "v4l2cap", NULL, NULL, argv, NULL);
+  if (ret != 0)
+    {
+      g_camera_pid = -1;
+      lv_label_set_text_fmt(g_camera_status,
+                            "Cannot start camera capture: %d", ret);
+      return;
+    }
+
+  lv_obj_add_state(g_camera_button, LV_STATE_DISABLED);
+  lv_label_set_text(g_camera_status, "Capturing desk image...");
+}
+
+static void camera_click_cb(lv_event_t *event)
+{
+  (void)event;
+  camera_start();
+}
+
+static void camera_poll(void)
+{
+  lv_draw_buf_t *next;
+  int status;
+  pid_t done;
+
+  if (g_camera_pid <= 0)
+    {
+      return;
+    }
+
+  done = waitpid(g_camera_pid, &status, WNOHANG);
+  if (done == 0)
+    {
+      return;
+    }
+
+  g_camera_pid = -1;
+  lv_obj_remove_state(g_camera_button, LV_STATE_DISABLED);
+  if (done < 0 || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
+    {
+      lv_label_set_text(g_camera_status, "Capture failed; check /dev/video0");
+      return;
+    }
+
+  next = camera_decode(UI_CAMERA_FILE);
+  if (next == NULL)
+    {
+      lv_label_set_text(g_camera_status, "JPEG decode failed");
+      return;
+    }
+
+  lv_image_set_src(g_camera_image, NULL);
+  if (g_camera_frame != NULL)
+    {
+      lv_draw_buf_destroy(g_camera_frame);
+    }
+
+  g_camera_frame = next;
+  lv_image_set_src(g_camera_image, g_camera_frame);
+  lv_label_set_text(g_camera_status,
+                    "Snapshot ready. Ask the assistant for live analysis.");
+}
+
+static void agent_reply_cb(int status, const char *reply, void *cookie)
+{
+  (void)cookie;
+  pthread_mutex_lock(&g_agent_lock);
+  if (status == 0 && reply != NULL)
+    {
+      snprintf(g_agent_reply, sizeof(g_agent_reply), "%s", reply);
+    }
+  else
+    {
+      snprintf(g_agent_reply, sizeof(g_agent_reply),
+               "Agent request failed: %d", status);
+    }
+
+  g_agent_reply_ready = true;
+  pthread_mutex_unlock(&g_agent_lock);
+}
+
+static void agent_ask(const char *question)
+{
+  velaclaw_ask_req_t request;
+  int ret;
+
+  if (g_agent_busy)
+    {
+      return;
+    }
+
+  if (g_agent_client == NULL)
+    {
+      g_agent_client = velaclaw_client_open("k7-desk-ui");
+      if (g_agent_client == NULL)
+        {
+          lv_label_set_text(g_agent_status,
+                            "Agent offline. Start ai_agent first.");
+          return;
+        }
+    }
+
+  request.text = question;
+  request.timeout_ms = 60000;
+  ret = velaclaw_ask(g_agent_client, &request, agent_reply_cb, NULL);
+  if (ret < 0)
+    {
+      lv_label_set_text_fmt(g_agent_status, "Agent request failed: %d",
+                            ret);
+      return;
+    }
+
+  g_agent_busy = true;
+  g_agent_started = time(NULL);
+  lv_label_set_text(g_agent_status, "Assistant is checking...");
+}
+
+static void agent_look_cb(lv_event_t *event)
+{
+  (void)event;
+  agent_ask("Use camera_capture to inspect the current desk image. "
+            "Describe only what is visible in this capture. "
+            "If capture or vision fails, say so plainly.");
+}
+
+static void agent_items_cb(lv_event_t *event)
+{
+  (void)event;
+  agent_ask("Use camera_capture to inspect the current desk image. "
+            "Are the keys and cup visible? Say unknown if an item is "
+            "obscured or the camera tool fails. Do not guess.");
+}
+
+static int guard_value(cJSON *root, const char *name)
+{
+  cJSON *item = cJSON_GetObjectItemCaseSensitive(root, name);
+  if (cJSON_IsBool(item))
+    {
+      return cJSON_IsTrue(item) ? 1 : 0;
+    }
+
+  return -1;
+}
+
+static bool guard_apply(const char *reply)
+{
+  const char *json = strchr(reply, '{');
+  cJSON *root;
+  int keys;
+  int cup;
+  bool alert = false;
+
+  if (json == NULL)
+    {
+      return false;
+    }
+
+  root = cJSON_Parse(json);
+  if (root == NULL)
+    {
+      return false;
+    }
+
+  keys = guard_value(root, "keys");
+  cup = guard_value(root, "cup");
+  if (keys >= 0)
+    {
+      alert |= g_guard_keys == 1 && keys == 0;
+      g_guard_keys = keys;
+    }
+
+  if (cup >= 0)
+    {
+      alert |= g_guard_cup == 1 && cup == 0;
+      g_guard_cup = cup;
+    }
+
+  cJSON_Delete(root);
+  lv_label_set_text_fmt(g_guard_state,
+                        alert ? "ALERT: a tracked item disappeared"
+                              : "Last check: keys=%s, cup=%s",
+                        g_guard_keys < 0 ? "unknown" :
+                          (g_guard_keys ? "visible" : "missing"),
+                        g_guard_cup < 0 ? "unknown" :
+                          (g_guard_cup ? "visible" : "missing"));
+  return true;
+}
+
+static void guard_switch_cb(lv_event_t *event)
+{
+  g_guard_enabled = lv_obj_has_state(lv_event_get_target(event),
+                                     LV_STATE_CHECKED);
+  g_guard_next = time(NULL);
+  if (!g_guard_enabled)
+    {
+      g_guard_keys = -1;
+      g_guard_cup = -1;
+      lv_label_set_text(g_guard_state, "Desk guard is off.");
+    }
+  else
+    {
+      lv_label_set_text(g_guard_state, "Desk guard enabled.");
+    }
+}
+
+static void agent_poll(void)
+{
+  char reply[sizeof(g_agent_reply)];
+  bool ready;
+
+  pthread_mutex_lock(&g_agent_lock);
+  ready = g_agent_reply_ready;
+  if (ready)
+    {
+      memcpy(reply, g_agent_reply, sizeof(reply));
+      g_agent_reply_ready = false;
+    }
+
+  pthread_mutex_unlock(&g_agent_lock);
+  if (ready)
+    {
+      reply[sizeof(reply) - 1] = '\0';
+      if (g_guard_request)
+        {
+          if (!guard_apply(reply))
+            {
+              lv_label_set_text(g_guard_state,
+                                "Check inconclusive; state unchanged.");
+            }
+
+          g_guard_request = false;
+          g_guard_next = time(NULL) + 60;
+        }
+      else
+        {
+          lv_label_set_text(g_agent_status, reply);
+        }
+
+      g_agent_busy = false;
+    }
+  else if (g_agent_busy && time(NULL) - g_agent_started >= 60)
+    {
+      lv_label_set_text(g_agent_status, "Agent response timed out.");
+      g_agent_busy = false;
+    }
+
+  if (g_guard_enabled && !g_agent_busy && time(NULL) >= g_guard_next)
+    {
+      g_guard_request = true;
+      agent_ask("Use camera_capture to inspect the desk. Return one JSON "
+                "object only: {\"keys\":true|false|null,"
+                "\"cup\":true|false|null}. Use null when obscured, "
+                "uncertain, or capture fails. Do not guess.");
+      if (!g_agent_busy)
+        {
+          g_guard_request = false;
+          g_guard_next = time(NULL) + 10;
+        }
+    }
+}
+
+static void camera_build(lv_obj_t *tab)
+{
+  lv_obj_t *card;
+  lv_obj_t *button;
+
+  lv_obj_set_flex_flow(tab, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_style_pad_row(tab, 8, 0);
+
+  card = card_create(tab, "desk camera");
+  g_camera_status = lv_label_create(card);
+  lv_label_set_text(g_camera_status, "Tap Open camera to take a snapshot.");
+  lv_label_set_long_mode(g_camera_status, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(g_camera_status, LV_PCT(100));
+
+  g_camera_button = lv_button_create(card);
+  lv_label_set_text(lv_label_create(g_camera_button), "Open camera");
+  lv_obj_add_event_cb(g_camera_button, camera_click_cb,
+                      LV_EVENT_CLICKED, NULL);
+
+  g_camera_image = lv_image_create(card);
+  lv_obj_set_width(g_camera_image, LV_PCT(100));
+
+  card = card_create(tab, "desktop assistant");
+  g_agent_status = lv_label_create(card);
+  lv_label_set_text(g_agent_status, "Start ai_agent, then ask about the desk.");
+  lv_label_set_long_mode(g_agent_status, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(g_agent_status, LV_PCT(100));
+
+  button = lv_button_create(card);
+  lv_label_set_text(lv_label_create(button), "What is on my desk?");
+  lv_obj_add_event_cb(button, agent_look_cb, LV_EVENT_CLICKED, NULL);
+
+  button = lv_button_create(card);
+  lv_label_set_text(lv_label_create(button), "Keys and cup?");
+  lv_obj_add_event_cb(button, agent_items_cb, LV_EVENT_CLICKED, NULL);
+
+  g_guard_switch = lv_switch_create(card);
+  lv_obj_add_event_cb(g_guard_switch, guard_switch_cb,
+                      LV_EVENT_VALUE_CHANGED, NULL);
+  lv_label_set_text(lv_label_create(card), "Desk guard (check every 60 s)");
+  g_guard_state = lv_label_create(card);
+  lv_label_set_text(g_guard_state, "Desk guard is off.");
+  lv_label_set_long_mode(g_guard_state, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(g_guard_state, LV_PCT(100));
+}
+
+/****************************************************************************
  * ABOUT 页
  ****************************************************************************/
 
@@ -631,6 +1091,8 @@ static void tick_cb(lv_timer_t *t)
 {
   (void)t;
 
+  camera_poll();
+  agent_poll();
   amp_refresh();
 
   /* LIVE 页不可见时不算、不画。曲线是"看得见才有意义"的东西，后台跑
@@ -662,6 +1124,7 @@ static void build_ui(void)
   dev_build(lv_tabview_add_tab(g_tabview, "DEV"));
   g_tab_live = lv_tabview_add_tab(g_tabview, "LIVE");
   live_build(g_tab_live);
+  camera_build(lv_tabview_add_tab(g_tabview, "DESK"));
   about_build(lv_tabview_add_tab(g_tabview, "ABOUT"));
 
   lv_timer_create(tick_cb, TICK_MS, NULL);
@@ -794,6 +1257,7 @@ int main(int argc, char *argv[])
 {
   lv_nuttx_dsc_t    dsc;
   lv_nuttx_result_t result;
+  lv_display_t     *disp_self;
 
   (void)argc;
   (void)argv;
@@ -833,8 +1297,8 @@ int main(int argc, char *argv[])
    *   一点屏幕就崩。第一版就是这么写的，板子直接起不来。
    */
 
-  result.disp = kickpi_disp_create("/dev/fb0");
-  if (result.disp == NULL)
+  disp_self = kickpi_disp_create("/dev/fb0");
+  if (disp_self == NULL)
     {
       printf("建立显示失败\n");
       return -1;
@@ -846,9 +1310,28 @@ int main(int argc, char *argv[])
 
   lv_nuttx_init(&dsc, &result);
 
+  /* ★ lv_nuttx_init() 会把 result 整个重置。
+   *
+   *   我们的显示是上面自己建的（PARTIAL 模式），而 dsc.fb_path 传的是
+   *   NULL，于是 lv_nuttx_init() 里那句 `if (dsc && dsc->fb_path)` 不成立，
+   *   它**不建显示**，同时把 result.disp 清成了 NULL —— 先前填进去的指针
+   *   被覆盖掉了。板上现象是"显示建好了，紧接着报打不开 (null)"，然后
+   *   程序退出、屏幕全黑。
+   *
+   *   所以自建的 disp 要用局部变量存住，等 lv_nuttx_init() 返回之后再填
+   *   回 result，并把输入设备绑上去。
+   */
+
+  result.disp = disp_self;
+
+  if (result.indev != NULL)
+    {
+      lv_indev_set_display(result.indev, result.disp);
+    }
+
   if (result.disp == NULL)
     {
-      printf("打不开 %s —— 显示未就绪\n", dsc.fb_path);
+      printf("显示未就绪\n");
       return EXIT_FAILURE;
     }
 
