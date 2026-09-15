@@ -25,3 +25,10 @@ SHA-256 为 `76c23608f76a4a12cdc7dcbbceadb7929154e19b7360db9eec643d780db391a4`�
 从 LBA 8192 写入时占 5177 扇区，最后 LBA 13368，距 DTB 起点
 LBA 14336 仍有 967 扇区。实际端口、文件日志和 xTS 结果均须
 在新镜像上板后验证。
+
+部署前可运行 `bash scripts/flash-xts-netsh-fit.sh --prepare` 检查 FIT
+大小、头部和分区边界。板子进入 RockUSB Loader 且设备转接到 WSL 后，
+脚本会先读取 LBA 8192 起的完整 6144 扇区到 `/tmp` 备份，检查原 FIT
+头部，再写入新 FIT 并逐字节回读；写入或回读失败时恢复备份并再次回读。
+脚本完成后保持 Loader 状态，重启和 `bootamp` 需单独进行。当前 WSL
+没有串口或 RockUSB 设备，新镜像尚未写入板子。
