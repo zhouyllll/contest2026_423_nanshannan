@@ -5,8 +5,8 @@
  *
  * 蓝牙命令。
  *
- *   bt probe   最小握手（HCI Reset），有界、失败立刻返回
- *   bt init    完整初始化，含 70KB 固件加载 —— 先 probe 通过再用
+ *   bt probe   Bounded transport and chip-ID probe
+ *   bt init    Firmware and HCI initialization after probe validation
  *
  * ★ 分成两条命令是有代价换来的：init 在模组不应答时会长时间重试，
  *   而它是前台任务，NSH 一直等着、控制台没有提示符、loader 发不进去，

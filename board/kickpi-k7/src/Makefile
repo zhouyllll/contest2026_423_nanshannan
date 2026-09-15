@@ -25,6 +25,10 @@ include $(TOPDIR)/Make.defs
 CSRCS = kickpi_k7_boardinit.c
 CSRCS += kickpi_k7_appinit.c
 
+ifeq ($(CONFIG_RK3576_SKW6621S),y)
+CSRCS += kickpi_k7_skw6621s.c
+endif
+
 ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += kickpi_k7_gpio.c
 

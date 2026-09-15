@@ -258,6 +258,18 @@ config RK3576_DWMMC
 		当前实现前置链路与自检：电源域 PD_SDGMAC、两路时钟、模块复位、
 		引脚复用，并用 VERID、软复位自清、CDETECT 三个独立读数确认状态。
 
+config RK3576_SKW6621S
+	bool "SKW6621S SDIO Bluetooth transport"
+	default n
+	depends on RK3576_DWMMC && MMCSD_SDIO && !BLUETOOTH_BCM4343X
+	---help---
+		KICKPI-K7 has an SKW6621S at SDIO 0x2a320000, not the
+		Broadcom UART controller named in the copied device tree.
+		The current implementation provides bounded SDIO and chip-ID
+		probe. Firmware boot and HCI transport remain under development;
+		keep this option disabled in release configurations until those
+		stages pass hardware validation.
+
 config RK3576_DWMMC_TRACE
 	bool "打印 SD 卡命令序列"
 	default n

@@ -1,0 +1,54 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+
+/****************************************************************************
+ * Manual KICKPI-K7 SKW6621S SDIO probe hooks.
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <errno.h>
+#include <syslog.h>
+
+#include <nuttx/sdio.h>
+
+#include "rk3576_dwmmc.h"
+#include "skw6621s/skw6621s_sdio.h"
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+int kickpi_k7_bt_probe(void)
+{
+  struct skw6621s_probe_s result;
+  FAR struct sdio_dev_s *sdio;
+  int ret;
+
+  ret = rk3576_dwmmc_probe(RK3576_DWMMC_SDIO_BASE);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "SKW6621S: RK3576 SDIO host probe failed: %d\n", ret);
+      return ret;
+    }
+
+  sdio = rk3576_dwmmc_initialize(RK3576_DWMMC_SDIO_BASE);
+  if (sdio == NULL)
+    {
+      return -ENODEV;
+    }
+
+  return skw6621s_sdio_probe(sdio, &result);
+}
+
+int kickpi_k7_bt_initialize(void)
+{
+  /* HCI must not register before firmware boot and RX framing exist. */
+
+  syslog(LOG_WARNING,
+         "SKW6621S: firmware/HCI initialization is not implemented yet\n");
+  return -ENOSYS;
+}

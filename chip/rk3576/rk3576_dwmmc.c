@@ -294,6 +294,7 @@ int rk3576_dwmmc_probe(uint32_t base)
   uint32_t hcon;
   uint32_t cdetect;
   uint32_t fifo_depth;
+  bool     sdio_ready = false;
   int      ret;
   int      i;
 
@@ -614,15 +615,14 @@ int rk3576_dwmmc_probe(uint32_t base)
 
     if (hw->is_sdio)
       {
-        /* ★ SDIO 枚举本来就是**反复**发 CMD5，不是发一次。
+        /* SDIO enumeration repeats CMD5 until the card reports ready.
          *
          *   第一次 arg=0 是询问，卡回它支持的 OCR 电压窗口；之后带着
          *   OCR 重发，直到卡把 bit31(C, 上电完成) 置起来。发一次就判定
          *   等于要求卡在第一条命令上就完成上电，多数卡做不到。
          *
-         *   另外 R4 响应**没有 CRC、命令索引字段是全 1**，DW MMC 因此
-         *   会置"响应错误"(RINTSTS bit1) —— 这是正常的，不能当失败，
-         *   Linux 的 dw_mmc 也是这么忽略的。判据要看 RESP0 的内容。
+         * R4 has no valid CRC or normal command-index field. Disable response
+         * CRC checking; an RE bit still means the response is invalid.
          */
 
         int try;
@@ -692,63 +692,41 @@ int rk3576_dwmmc_probe(uint32_t base)
                        " RESP0=0x%08" PRIx32 "\n", try, sts, resp);
               }
 
-            if (sts & DWMMC_INT_RTO)
+            if (sts & DWMMC_INT_CMD_ERROR)
               {
-                break;                 /* 真超时，卡不在或线不通 */
+                syslog(LOG_ERR,
+                       "DWMMC: CMD5 response invalid RINTSTS=0x%08" PRIx32
+                       " RESP0=0x%08" PRIx32 "\n", sts, resp);
+                break;
+              }
+
+            if ((sts & DWMMC_INT_CMD_DONE) == 0 ||
+                ((resp >> 28) & 0x7) == 0 ||
+                (resp & 0x00ffffff) == 0)
+              {
+                syslog(LOG_ERR,
+                       "DWMMC: CMD5 invalid R4 RINTSTS=0x%08" PRIx32
+                       " RESP0=0x%08" PRIx32 "\n", sts, resp);
+                break;
               }
 
             if (resp & 0x80000000)
               {
+                sdio_ready = true;
                 break;                 /* C 位置起，上电完成 */
               }
 
-            ocr = resp & 0x00ffffff;   /* 用卡报回的电压窗口重发 */
-            if (ocr == 0)
-              {
-                ocr = 0x00ff8000;      /* 卡没报，就给一个常规 3.2-3.4V 窗口 */
-              }
+            ocr = resp & 0x00ffffff;
 
             up_mdelay(10);
           }
 
-        /* ★ 再用 CMD52 (IO_RW_DIRECT) 读 CCCR 0x00（CCCR 版本）交叉验证。
-         *
-         *   CMD5 的 R4 响应没有 CRC、索引全 1，控制器只能校验起止位，
-         *   判据太弱 —— "响应错误 + RESP0=0" 分不清是卡答得不对还是
-         *   控制器没解析对。CMD52 的 R5 **带 CRC 和命令索引**，控制器
-         *   能真正校验：读回合理值就说明卡在线且命令通路完全正常，
-         *   问题只在 CMD5 的处理上。
-         *
-         *   arg 布局：[31]=R/W(0=读) [30:28]=功能号 [27]=RAW
-         *             [25:9]=寄存器地址 [7:0]=写数据
+        /* CCCR CMD52 access follows RCA assignment and card selection in
+         * sdio_probe(); it is not valid as a host-only pre-selection test.
          */
 
         dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);
-        dw_putreg(base, DWMMC_CMDARG, 0);           /* 读 func0 的 0x00 */
-        dw_putreg(base, DWMMC_CMD,
-                  DWMMC_CMD_START | holdbit |
-                  DWMMC_CMD_RESP_EXP | DWMMC_CMD_RESP_CRC |
-                  DWMMC_CMD_INDX(52));
-
-        for (us = 0; us < 200000; us++)
-          {
-            sts = dw_getreg(base, DWMMC_RINTSTS);
-            if (sts & (DWMMC_INT_CMD_DONE | DWMMC_INT_CMD_ERROR))
-              {
-                break;
-              }
-
-            up_udelay(1);
-          }
-
-        resp = dw_getreg(base, DWMMC_RESP0);
-        syslog(LOG_INFO,
-               "DWMMC: CMD52 读CCCR RINTSTS=0x%08" PRIx32
-               " RESP0=0x%08" PRIx32 " —— %s\n", sts, resp,
-               (sts & DWMMC_INT_RTO)  ? "超时：卡没应答" :
-               (sts & DWMMC_INT_RCRC) ? "CRC 错：采样时序有问题" :
-               (resp != 0)            ? "有有效响应，卡在线" :
-                                        "响应为 0");
+        return sdio_ready ? OK : -EIO;
       }
     else
       {
