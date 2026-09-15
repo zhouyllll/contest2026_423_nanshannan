@@ -31,6 +31,9 @@
 #include <debug.h>
 #include <errno.h>
 #include <syslog.h>
+#ifdef CONFIG_SYSLOG_FILE
+#  include <nuttx/syslog/syslog.h>
+#endif
 #include <inttypes.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/video/fb.h>
@@ -237,6 +240,12 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: 挂载 tmpfs 到 /tmp 失败: %d\n", ret);
     }
+#ifdef CONFIG_SYSLOG_FILE
+  else if (syslog_file_channel("/tmp/xts-syslog.log") == NULL)
+    {
+      syslog(LOG_ERR, "K7 xTS: failed to add /tmp syslog channel\n");
+    }
+#endif
 
   /* ★ /data 给 ai_agent 用。
    *
