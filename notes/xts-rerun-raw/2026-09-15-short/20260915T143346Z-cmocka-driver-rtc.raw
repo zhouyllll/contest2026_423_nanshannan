@@ -1,0 +1,5 @@
+
+nsh> [Kcmocka_driver_rtc
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh: cmocka_driver_rtc: command not found
+n

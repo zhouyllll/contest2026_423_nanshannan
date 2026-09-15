@@ -1,0 +1,5 @@
+
+nsh> [Kls /etc
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh: ls: stat failed: 2
+nsh> [K

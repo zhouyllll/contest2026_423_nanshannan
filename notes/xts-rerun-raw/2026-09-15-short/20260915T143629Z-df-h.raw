@@ -1,0 +1,8 @@
+
+nsh> [Kdf -h
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+  Filesystem      Size      Used  Available      512B      512B         0B /data
+  procfs            0B        0B         0B /proc
+  tmpfs           512B      512B       tests
+  tmpfs           512B      512B         0B /tmp
+nsh> [

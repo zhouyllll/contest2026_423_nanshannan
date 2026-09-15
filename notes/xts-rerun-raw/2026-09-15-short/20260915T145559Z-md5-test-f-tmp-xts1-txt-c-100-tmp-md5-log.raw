@@ -1,0 +1,62 @@
+
+nsh> [Kmd5_test -f /tmp/xts1.txt -c 100 > /tmp/md5.log
+[CPU1] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU1] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU1] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU1] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU1] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU1] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+[CPU0] file /tmp/xts1.txt md5 is f332259a470403eed260a56443cbcdb
+nsh> [K

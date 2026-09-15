@@ -1,0 +1,8 @@
+
+nsh> [Kramtest -w -s 1048576
+RAMTest: Marching ones: 4ade4660 1048576
+RAMTest: Marching zeroes: 4ade4660 1048576
+RAMTest: Pattern test: 4ade4660 1048576 55555555 aaaaaaaa
+RAMTest: Pattern test: 4ade4660 1048566666666 99999999
+RAMTest: Pattern test: 4ade4660 1048576 33333RAMTest: Address-in-address test: 4ade4660 1048576
+nsh> [K

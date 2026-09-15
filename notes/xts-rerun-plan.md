@@ -4,8 +4,12 @@
 `docs/refs/openvela_xts_test_cases.md`，已有证据与缺口见
 `notes/xts-strict-audit.md`。所有复测均记录：镜像 Git 提交、defconfig 与
 运行时 `.config`、设备/外设、起止时间、原命令、完整串口原始输出及结论。
-串口 `/dev/ttyUSB0` 当前未枚举；恢复 USB 转发并确认 `nsh>` 后才能上板。
-不要把本轮 12h 普通镜像空跑或 15h 中断的 24h 长测写作严格 PASS。
+CH340 串口已恢复，但高输出量命令仍有缺字；本轮原始记录与结论见
+`notes/xts-rerun-raw/2026-09-15-short/summary.md`。用户要求先暂停
+1.3.14 和 3.1.1 两个耗时项。不要把本轮 12h 普通镜像空跑或中断的
+24h 长测写作严格 PASS。下一版 AMP 双系统测试镜像已离线构建网络
+NSH（TCP 2323）及 `/tmp/xts-syslog.log`，以太网 `192.168.1.100`
+可达；上板验证前不要把网络日志当作现有证据。
 
 ## 先恢复与留证
 

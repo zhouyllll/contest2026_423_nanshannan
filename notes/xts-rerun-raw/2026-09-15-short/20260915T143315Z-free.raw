@@ -1,0 +1,6 @@
+
+nsh> [Kfree
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+      total       used       free    maxusedame
+   64552960    7801072   56751888    7821232   56744368    166      3 Umem
+nsh> [K

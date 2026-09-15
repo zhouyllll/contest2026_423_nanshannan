@@ -1,0 +1,5 @@
+
+nsh> [Kls -l /tmp/md5.log
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+ -rwxrwxrwx       0 /tmp/md5.log
+nsh> [K

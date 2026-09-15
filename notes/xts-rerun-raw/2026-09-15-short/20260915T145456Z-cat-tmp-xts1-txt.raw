@@ -1,0 +1,5 @@
+
+nsh> [Kcat /tmp/xts1.txt
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+xts-md5
+nsh>

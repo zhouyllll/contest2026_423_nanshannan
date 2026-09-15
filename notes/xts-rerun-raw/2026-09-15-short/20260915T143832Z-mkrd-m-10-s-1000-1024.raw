@@ -1,0 +1,4 @@
+
+nsh> [Kmkrd -m 10 -s 1000 1024
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> [K
