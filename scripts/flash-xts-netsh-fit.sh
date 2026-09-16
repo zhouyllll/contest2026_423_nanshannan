@@ -62,13 +62,16 @@ echo "Reading current AMP FIT region to $backup"
   echo "backup has wrong length; refusing write" >&2
   exit 1
 }
-python3 - "$backup" <<'PY'
+python3 - "$backup" "${K7_ALLOW_INITIAL_SECURITY:-0}" <<'PY'
 from pathlib import Path
 import sys
 header = Path(sys.argv[1]).read_bytes()[:4]
-if header != bytes.fromhex('d00dfeed'):
+if header == bytes.fromhex('d00dfeed'):
+    print('current FIT header verified')
+elif header == b'SSKR' and sys.argv[2] == '1':
+    print('original SSKR security header explicitly allowed')
+else:
     raise SystemExit('current FIT header is invalid; refusing write')
-print('current FIT header verified')
 PY
 sha256sum "$backup"
 
