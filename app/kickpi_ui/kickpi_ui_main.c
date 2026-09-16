@@ -1351,6 +1351,17 @@ int main(int argc, char *argv[])
 
   build_ui();
 
+#ifdef CONFIG_LV_USE_BUILTIN_MALLOC
+  {
+    lv_mem_monitor_t monitor;
+
+    lv_mem_monitor(&monitor);
+    printf("LVGL heap: used=%zu total=%zu peak=%zu\n",
+           monitor.total_size - monitor.free_size,
+           monitor.total_size, monitor.max_used);
+  }
+#endif
+
   /* openvela 的 LVGL 分支没有 lv_nuttx_run()，循环要自己写。
    * 和 apps/examples/lvgldemo 一样：lv_timer_handler() 返回距离下一个
    * 定时器还有多久，按它睡，最少 1ms。

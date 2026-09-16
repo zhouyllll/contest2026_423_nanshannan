@@ -110,7 +110,7 @@ diff -urN a/cmd/bootamp.c b/cmd/bootamp.c
 + */
 +
 +#define AMP_FIT_LBA		0x2000		/*  8192 */
-+#define AMP_FIT_CNT		0x1400		/*  5120 扇区 = 2.5MB 上限 */
++#define AMP_FIT_CNT		0x1800		/*  6144 扇区 = 3MB 上限 */
 +#define AMP_DTB_LBA		0x3800		/* 14336 */
 +#define AMP_DTB_CNT		0x220		/*   544 扇区 = 272KB 上限 */
 +#define AMP_KERNEL_LBA		0xC000		/* 49152 */
