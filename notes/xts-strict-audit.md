@@ -5,6 +5,15 @@
 2026-09-15 晚上已暂停 1.3.14/3.1.1 两个耗时项，转跑其他短项。
 本轮命令、原始串口和严格结论见
 [`xts-rerun-raw/2026-09-15-short/summary.md`](xts-rerun-raw/2026-09-15-short/summary.md)。
+
+2026-09-17 严格复测尝试：最终 FIT（LVGL 256 KiB 修复版）已通过 LBA
+8192 写入和回读校验，并在 U-Boot 以 1500000 波特率完整读取 5561 扇区。
+启动后板端没有 NSH 提示符，TCP 2323 连接被拒绝；`scripts/xts-short.py`
+执行 `getprime` 返回 `No NSH prompt`，115200 和 1500000 串口均无 NSH 输出。
+本次所有用例保持“未严格测试/启动阻塞”，不计入 PASS。原始记录见
+`/tmp/k7-xts-short/20260916T172032Z-getprime.raw`、
+`/tmp/k7-final-boot.raw`。
+
 以太网 `192.168.1.100` 可达，当前镜像尚无网络 NSH/可取回 CPU 日志的
 通道；较快串口输出仍缺字，主机 WSL 墙钟出现回跳。这些短项的功能
 结果不等于严格 PASS。
