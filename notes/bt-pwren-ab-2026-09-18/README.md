@@ -1,0 +1,1 @@
+PWREN comparison: read 0, set 1; CTYPE=0, CLKENA=1, DIV=0. CMD5 still RINTSTS=2 RESP0=0, host probe -5. Pin logs partially dropped: GPIO1_14/15/17 show mux=2 pull=1; do not infer CMD pull from missing line. FIT SHA256 e1aee139b564e3fef7172b18e382630c6040ca98a2426c5753d5d92a37353c6e. Build/readback passed. See reference-matrix.md for full SDK chain.

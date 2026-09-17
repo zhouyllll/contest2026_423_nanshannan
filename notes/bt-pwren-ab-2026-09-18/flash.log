@@ -1,0 +1,16 @@
+已打包 /tmp/k7-pwren-ab/fit/amp.itb（5473 扇区）
+FIT: /tmp/k7-pwren-ab/fit/amp.itb
+FIT bytes: 2802176; LBA 24576..30048 （区域上限 8192 扇区，余 2719）
+e1aee139b564e3fef7172b18e382630c6040ca98a2426c5753d5d92a37353c6e  /tmp/k7-pwren-ab/fit/amp.itb
+Downloading bootloader...
+[1A[2KDownloading bootloader succeeded.
+Reading current AMP FIT region to /tmp/k7-amp-fit/flash-20260917T175123Z/lba24576-8192-before.bin
+current FIT header verified
+a6fbe5286cc5911fe5bc30d6eef5287cc10e558e77d22e93b856a8273b16fa10  /tmp/k7-amp-fit/flash-20260917T175123Z/lba24576-8192-before.bin
+Writing new FIT
+Reading back new FIT
+e1aee139b564e3fef7172b18e382630c6040ca98a2426c5753d5d92a37353c6e  /tmp/k7-amp-fit/flash-20260917T175123Z/lba24576-new-readback.bin
+FIT write verified. Current region backup: /tmp/k7-amp-fit/flash-20260917T175123Z/lba24576-8192-before.bin
+Board remains in Loader mode; reset and bootamp only after review.
+Reset Device OK.
+已复位启动

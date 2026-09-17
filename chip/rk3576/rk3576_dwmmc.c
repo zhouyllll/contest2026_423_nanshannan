@@ -386,6 +386,23 @@ int rk3576_dwmmc_probe(uint32_t base)
       up_mdelay(20);
     }
 
+  /* Linux enables slot power even when no PWREN pin is muxed. */
+
+  if (hw->is_sdio)
+    {
+      uint32_t power = dw_getreg(base, DWMMC_PWREN);
+
+      dw_putreg(base, DWMMC_PWREN, power | 1u);
+      syslog(LOG_INFO, "SDIO PWREN %08" PRIx32 " -> %08" PRIx32 "\n",
+             power, dw_getreg(base, DWMMC_PWREN));
+
+      for (i = 12; i <= 17; i++)
+        {
+          syslog(LOG_INFO, "SDIO GPIO1_%d mux=%d pull=%d\n", i,
+                 rk3576_pinmux_get(1, i), rk3576_pinmux_getpull(1, i));
+        }
+    }
+
   /* 4b) WiFi 模组上电（仅 SDIO 实例）。
    *
    * ★ /sdio-pwrseq：reset-gpios = GPIO1_22，**低有效**，
@@ -558,6 +575,15 @@ int rk3576_dwmmc_probe(uint32_t base)
     dw_putreg(base, DWMMC_CLKENA, DWMMC_CLKENA_ENABLE);
     dw_update_clk(base);
     up_mdelay(2);
+
+    if (hw->is_sdio)
+      {
+        syslog(LOG_INFO, "SDIO PWREN=%08" PRIx32 " CTYPE=%08" PRIx32 "\n",
+               dw_getreg(base, DWMMC_PWREN), dw_getreg(base, DWMMC_CTYPE));
+        syslog(LOG_INFO, "SDIO CLKENA=%08" PRIx32 " DIV=%08" PRIx32
+               " SRC=%08" PRIx32 "\n", dw_getreg(base, DWMMC_CLKENA),
+               dw_getreg(base, DWMMC_CLKDIV), dw_getreg(base, DWMMC_CLKSRC));
+      }
 
     /* CMD0 GO_IDLE_STATE，无响应，带初始化序列 */
 
