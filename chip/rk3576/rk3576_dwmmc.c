@@ -396,16 +396,9 @@ int rk3576_dwmmc_probe(uint32_t base)
    *   和"引脚配错"完全一样。
    */
 
-  /* ★ 只把模组按在复位里，**释放要等时钟起来之后**。
-   *
-   *   Linux 的顺序是 mmc_power_up（先供电、先起总线时钟）-> 再执行
-   *   pwrseq 的 post_power_on（释放复位）-> 才发命令。也就是说模组是
-   *   **在有时钟的情况下**出复位的。
-   *
-   *   我们原来反了：无时钟时就释放复位，等 200ms 才开时钟。SDIO 卡在
-   *   复位释放的那一刻会按引脚状态锁存工作配置，没有时钟就可能锁进错的
-   *   状态 —— 之后它照样会拉命令线应答，但帧的形状不对，正是我们看到的
-   *   "RESP_ERR 置位、无超时、无 CRC 错、RESP0 全 0"。
+  /* Keep reset asserted during host setup. Linux mmc_power_up() calls
+   * pwrseq post_power_on (release plus delay) before enabling f_init.
+   * Follow that ordering; it is not yet a demonstrated CMD5 fix.
    */
 
   if (hw->is_sdio)
@@ -546,11 +539,9 @@ int rk3576_dwmmc_probe(uint32_t base)
     dw_update_clk(base);
     dw_putreg(base, DWMMC_CLKDIV, hw->is_sdio ? 0 : 30);
     dw_update_clk(base);
-    dw_putreg(base, DWMMC_CLKENA, DWMMC_CLKENA_ENABLE);
-    dw_update_clk(base);
-    up_mdelay(2);
-
-    /* 时钟已经在跑，现在才放模组出复位（见上面的说明） */
+    /* Release reset while the card clock is disabled, then wait for
+     * the module before enabling the initialization clock.
+     */
 
     if (hw->is_sdio)
       {
@@ -563,6 +554,10 @@ int rk3576_dwmmc_probe(uint32_t base)
                WIFI_RST_BANK, WIFI_RST_PIN, BT_RST_BANK, BT_RST_PIN,
                WIFI_PWRON_DELAY_MS);
       }
+
+    dw_putreg(base, DWMMC_CLKENA, DWMMC_CLKENA_ENABLE);
+    dw_update_clk(base);
+    up_mdelay(2);
 
     /* CMD0 GO_IDLE_STATE，无响应，带初始化序列 */
 
