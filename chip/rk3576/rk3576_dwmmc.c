@@ -400,6 +400,7 @@ int rk3576_dwmmc_probe(uint32_t base)
         {
           syslog(LOG_INFO, "SDIO GPIO1_%d mux=%d pull=%d\n", i,
                  rk3576_pinmux_get(1, i), rk3576_pinmux_getpull(1, i));
+          up_mdelay(10);
         }
     }
 
@@ -583,6 +584,36 @@ int rk3576_dwmmc_probe(uint32_t base)
         syslog(LOG_INFO, "SDIO CLKENA=%08" PRIx32 " DIV=%08" PRIx32
                " SRC=%08" PRIx32 "\n", dw_getreg(base, DWMMC_CLKENA),
                dw_getreg(base, DWMMC_CLKDIV), dw_getreg(base, DWMMC_CLKSRC));
+      }
+
+    /* RK3576 internal phase registers, as selected by the Rockchip
+     * host USRID check. Legacy enumeration uses drive=90, sample=0.
+     * TRM 39.6.6 requires init_state while changing phase. Bit 10 is
+     * reserved; mask only phase, delay and delay-select fields.
+     */
+
+    if (hw->is_sdio)
+      {
+        uint32_t usrid = dw_getreg(base, DWMMC_USRID);
+
+        up_mdelay(10);
+        syslog(LOG_INFO, "SDIO USRID=%08" PRIx32 "\n", usrid);
+        up_mdelay(10);
+        if (usrid == 0x20230001u)
+          {
+            syslog(LOG_INFO, "SDIO phase before drv=%08" PRIx32
+                   " sample=%08" PRIx32 "\n", dw_getreg(base, 0x130),
+                   dw_getreg(base, 0x134));
+            up_mdelay(10);
+            dw_putreg(base, 0x130, 0x00010001u);
+            dw_putreg(base, 0x130, 0x0bfe0002u);
+            dw_putreg(base, 0x134, 0x0bfe0000u);
+            dw_putreg(base, 0x130, 0x00010000u);
+            syslog(LOG_INFO, "SDIO phase after drv=%08" PRIx32
+                   " sample=%08" PRIx32 "\n", dw_getreg(base, 0x130),
+                   dw_getreg(base, 0x134));
+            up_mdelay(10);
+          }
       }
 
     /* CMD0 GO_IDLE_STATE，无响应，带初始化序列 */

@@ -1,0 +1,5 @@
+make: Entering directory '/home/dministrator/openvela-amlogic/src/nuttx'
+[1KCC:  misc/lib_utsname.c [1KCC:  chip/rk3576_dwmmc.c [1K[1K[1KIN: arch/arm64/src/libarch.a -> staging/libarch.a [1K[1KIN: libs/libc/libc.a -> staging/libc.a [1K[1KCPP:  /home/dministrator/openvela-amlogic/src/nuttx/../vendor/openvela/boards/contest2026_423_board/scripts/dramboot.ld-> /home/dministrator/openvela-amlogic/src/nuttx/../vendor/openvela/boards/contest2026_423_board/scripts/dramboot.ld.tmp [1KLD: nuttx
+Memory region         Used Size  Region Size  %age Used
+CP: nuttx.bin
+make: Leaving directory '/home/dministrator/openvela-amlogic/src/nuttx'
