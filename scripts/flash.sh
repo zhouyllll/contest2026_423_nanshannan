@@ -70,28 +70,41 @@ K7_FIT="$fit" bash "$ROOT/scripts/flash-xts-netsh-fit.sh" --prepare >/dev/null
 # 后面的 FIT 脚本会先 `db` 下载引导器再写。
 in_loader() { timeout 10 "$RKDEV" ld 2>/dev/null | grep -qE 'Loader|Maskrom'; }
 
+# 设备重新枚举要几秒，第一次 attach 常常落空（usbipd 显示 Shared 而不是
+# Attached）。一直重试到 rkdeveloptool 看得见为止。
 attach_usb() {
-  local busid="" i
-  for i in $(seq 1 15); do
-    busid=$("$USBIPD" list 2>/dev/null | tr -d '\r' | awk '/2207:/{print $1; exit}')
-    [[ -n "$busid" ]] && break
+  local busid i
+  for i in $(seq 1 20); do
+    busid=$("$USBIPD" list 2>/dev/null | tr -d '\r' | awk '/2207:/ && !/Attached/ {print $1; exit}')
+    if [[ -n "$busid" ]]; then
+      "$USBIPD" attach --wsl --busid "$busid" >/dev/null 2>&1 || true
+      sleep 2
+    fi
+    in_loader && return 0
     sleep 1
   done
-  [[ -n "$busid" ]] || return 1
-  "$USBIPD" attach --wsl --busid "$busid" >/dev/null 2>&1 || true
-  sleep 3
+  return 1
 }
 
-# 在 U-Boot 倒计时里打断并进 rockusb；$1 = 先发给 nsh 的命令（可空）
+# 发一条命令，然后立刻盯串口：一看到 U-Boot 就连发 Ctrl-C 打断，
+# 再发 `rockusb 0 mmc 0`。
+#   $1 = 先发给 nsh 的命令（可空）  $2 = 最多等几秒  $3 = 提示语（可空）
+#
+# ★ 发完命令必须马上开始盯。U-Boot 的倒计时只有 1 秒，而 `loader`
+#   在不同镜像上表现不一：有的落到 Maskrom（串口上不会出现 U-Boot，
+#   等满超时即可），有的只是普通重启 —— 旧版先 sleep 6 再去抓，
+#   U-Boot 早就过去了。
 serial_to_rockusb() {
-  python3 - "$SERIAL" "$BAUD" "$1" <<'PY'
+  python3 - "$SERIAL" "$BAUD" "$1" "$2" "${3:-}" <<'PY'
 import serial, sys, time
 s = serial.Serial(sys.argv[1], int(sys.argv[2]), timeout=0.05)
+s.reset_input_buffer()
 if sys.argv[3]:
     s.write(sys.argv[3].encode() + b'\r')
+if sys.argv[5]:
+    print(sys.argv[5], flush=True)
 buf = b''; seen = False; t0 = time.time()
-print('等 U-Boot（板子挂死的话现在按 RESET）…', flush=True)
-while time.time() - t0 < 120:
+while time.time() - t0 < float(sys.argv[4]):
     buf = (buf + s.read(4096))[-4000:]
     if not seen and (b'U-Boot' in buf or b'Hit key' in buf):
         seen = True
@@ -101,20 +114,18 @@ while time.time() - t0 < 120:
             time.sleep(0.5); s.read(4096)
             s.write(b'rockusb 0 mmc 0\r'); time.sleep(2)
             sys.exit(0)
-sys.exit('没等到 U-Boot')
+sys.exit(1)
 PY
 }
 
-if ! in_loader; then attach_usb || true; fi
 if ! in_loader; then
   [[ -w "$SERIAL" ]] || { echo "串口 $SERIAL 不可写"; exit 1; }
-  stty -F "$SERIAL" "$BAUD" raw -echo -echoe -echok -crtscts
-  printf 'loader\r' > "$SERIAL"
-  sleep 6
+  # loader 落到 Maskrom 时串口上等不到 U-Boot，20 秒后去 USB 上找
+  serial_to_rockusb loader 20 || true
   attach_usb || true
 fi
 if ! in_loader; then
-  serial_to_rockusb reboot
+  serial_to_rockusb reboot 120 "等 U-Boot（板子挂死的话现在按 RESET）…" || true
   attach_usb || true
 fi
 in_loader || { echo "板子未进入下载模式（usbipd 未共享时：管理员终端 usbipd bind --force --busid <id>）"; exit 1; }

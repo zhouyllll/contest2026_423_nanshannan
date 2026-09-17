@@ -235,7 +235,13 @@
                 GIC_AMP_IRQ_CFG_ROUTE(336, 0x80, AMP_AFF(0, 0))
 
                 /* CIF（SPI 318）—— 摄像头 */
-                GIC_AMP_IRQ_CFG_ROUTE(350, 0x80, AMP_AFF(0, 0))>;
+                GIC_AMP_IRQ_CFG_ROUTE(350, 0x80, AMP_AFF(0, 0))
+
+                /* UART4（SPI 80）—— 蓝牙 HCI，openvela 侧叫 UART1 */
+                GIC_AMP_IRQ_CFG_ROUTE(112, 0x80, AMP_AFF(0, 0))
+
+                /* 看门狗 wdt0（SPI 40）—— 预超时中断，WDIOC_CAPTURE 用 */
+                GIC_AMP_IRQ_CFG_ROUTE(72,  0x80, AMP_AFF(0, 0))>;
 
 		status = "okay";
 	};
@@ -346,6 +352,57 @@
 };
 
 &uart0 {
+	status = "disabled";
+};
+
+/* UART4 接蓝牙模组，归 openvela（CONFIG_16550_UART1_BASE=0x2ad70000）。
+ * 内核带 SERIAL_8250_DW=y，不关的话 Linux 会接管这个口。
+ */
+&uart4 {
+	status = "disabled";
+};
+
+/*
+ * ★ openvela 用的 I2C 总线，Linux 一条都不许碰。
+ *
+ *   内核带 CONFIG_I2C_RK3X=y，dtsi 里是 okay 的 I2C 控制器它全会接管
+ *   （复位、改时钟分频、挂 adapter），不管下面有没有它认识的设备。
+ *   2026-09-17 上板：同一份 openvela，单系统下 IMX415 正常出图，
+ *   双系统下三个摄像头接口 I2C 全部无应答 → /dev/video0 注册失败 →
+ *   界面点"打开相机"没反应。
+ *
+ *   划分见 amp/OWNERSHIP.md：
+ *     i2c1  pmic@23（A72 调压）          → Linux，保留
+ *     i2c2  hym8563 RTC、husb311         → openvela
+ *     i2c3  es8388 音频                   → openvela
+ *     i2c4 / i2c5 / i2c8  imx415         → openvela（摄像头整条链）
+ *     i2c7  空                            → 关掉，免得 Linux 占着
+ *
+ *   摄像头的 AVDD 开关（vcc_mipidcphy0 / vcc_mipidphy1 / vcc_mipidphy3）
+ *   在厂商 dtsi 里本来就是 always-on + boot-on，不需要再钉。
+ */
+
+&i2c2 {
+	status = "disabled";
+};
+
+&i2c3 {
+	status = "disabled";
+};
+
+&i2c4 {
+	status = "disabled";
+};
+
+&i2c5 {
+	status = "disabled";
+};
+
+&i2c7 {
+	status = "disabled";
+};
+
+&i2c8 {
 	status = "disabled";
 };
 
