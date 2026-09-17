@@ -1,0 +1,142 @@
+U-Boot 自动启动 bootamp，并把 AMP FIT 挪到 trust 分区（LBA 24576）
+
+应用：叠在 0005 / 0008 与 bsp/uboot/0003 之上，在 u-boot/ 下
+`patch -p1 < 本文件`。编出的 uboot.img 于 2026-09-17 上板验证：
+`AMP: FIT 需要 2559488 字节（4999 扇区），读取窗口 8192 扇区`，
+哈希 OK，Linux 与 openvela 起来，rpmsg 握手完成。
+
+★ 一、自动启动（09-14 就在板上用了，当时没归档进仓库，这里补上）
+
+  configs/rk3576-kickpi-k7.config：BOOTDELAY 3 -> 1，BOOTCOMMAND=bootamp。
+  include/configs/evb_rk3576.h：CONFIG_BOOTCOMMAND 必须在这里定义 ——
+  Rockchip 在这个头文件里 #undef 后重定义，放在 .config 里不生效。
+  同时去掉 bsp/uboot/0003 的"裸 nuttx.bin 从 boot 分区 LBA 0xC800 启动"：
+  AMP 布局下那里是 Linux 内核。
+
+★ 二、FIT 从 security（8192，上限 6144 扇区）挪到 trust（24576，上限 8192 扇区）
+
+  - openvela 继续变大，3MB 余量只剩约 560KB；
+  - security 是 OP-TEE 安全存储（RKSS）的分区，每次启动都有
+    `TEEC: Reset area[0]/[1]`，对应的就是 LBA 8192/9216；
+  - trust 在本板 FIT 版 uboot.img 下没有用途，U-Boot 不写它
+    （amp/FLASH.md 实测），上限顶到 misc 起点 32768。
+
+  主机侧布局以 amp/layout.sh 为准，两处必须同步改。
+
+★ 为什么要写进同一份补丁
+
+  2026-09-17 的故障排查里，"U-Boot 是不是这几天改过"答不上来：
+  源码目录不是 git 仓库，bootcmd 的改动只存在于板上和编译目录里。
+  补丁和 amp/layout.sh 一起提交，才能从仓库重建板上的状态。
+
+diff -urN a/cmd/bootamp.c b/cmd/bootamp.c
+--- a/cmd/bootamp.c	2026-09-17 10:41:27.150745522 +0800
++++ b/cmd/bootamp.c	2026-09-17 10:41:27.163240089 +0800
+@@ -41,18 +41,24 @@
+ #include <image.h>
+ #include <linux/libfdt.h>
+ 
+-/* eMMC 上的默认布局，和 amp/FLASH.md 那张表一一对应。
++/* eMMC 上的默认布局，和仓库 amp/layout.sh 一一对应（主机脚本以那边为准）。
+  *
+  * 扇区数取的是**上限**而不是精确值：多读几个扇区没有副作用，而写死精确
+  * 值意味着每次镜像变大都要同步改两处（这里和文档），漏一处就是"读进来
+  * 的 FIT 少了尾巴"这种很难看出来的故障。上限都留在各自分区内：
+- *   FIT   8192 + 6144 = 14336 = dtb 起点（正好顶满，不越界）
++ *   FIT  24576 + 8192 = 32768 = misc 起点（trust 分区整段，不越界）
+  *   dtb  14336 +  544 = 14880 < 16384（uboot 分区）
+  *   内核 49152 +14848 = 64000 < 65536（rkdeveloptool 写得到的上限）
++ *
++ * ★ FIT 原来在 security 分区（LBA 8192，上限 6144 扇区 = 3MB，顶到 dtb）。
++ *   挪到 trust 有两个原因：openvela 还会继续变大；security 是 OP-TEE
++ *   安全存储（RKSS）的分区，每次启动日志都有 `TEEC: Reset area[0]/[1]`，
++ *   碰的正是 8192/9216。trust 在本板的 FIT 版 uboot.img 下没有用途，
++ *   U-Boot 也不写它（amp/FLASH.md 实测）。
+  */
+ 
+-#define AMP_FIT_LBA		0x2000		/*  8192 */
+-#define AMP_FIT_CNT		0x1800		/*  6144 扇区 = 3MB 上限 */
++#define AMP_FIT_LBA		0x6000		/* 24576（trust 分区） */
++#define AMP_FIT_CNT		0x2000		/*  8192 扇区 = 4MB 上限 */
+ #define AMP_DTB_LBA		0x3800		/* 14336 */
+ #define AMP_DTB_CNT		0x220		/*   544 扇区 = 272KB 上限 */
+ #define AMP_KERNEL_LBA		0xC000		/* 49152 */
+@@ -115,7 +121,7 @@
+ 	if (need > window) {
+ 		printf("AMP: ★ FIT 超过读取窗口，读进来的镜像不完整，\n"
+ 		       "     后面的哈希校验必然失败。请缩小镜像或调大 AMP_FIT_CNT\n"
+-		       "     （上限 6144 扇区，再大就会压到 LBA 14336 的 dtb）。\n");
++		       "     （上限 8192 扇区，再大就会压到 LBA 32768 的 misc）。\n");
+ 		return -E2BIG;
+ 	}
+ 
+diff -urN a/configs/rk3576-kickpi-k7.config b/configs/rk3576-kickpi-k7.config
+--- a/configs/rk3576-kickpi-k7.config	2026-09-17 10:41:27.146580664 +0800
++++ b/configs/rk3576-kickpi-k7.config	2026-09-17 10:41:27.159075234 +0800
+@@ -51,7 +51,14 @@
+ #       regulators_enable_boot_on() 不再调压，各轨用上电默认值。
+ #       U-Boot 阶段本来就够用；真跑不动会在 VOP aclk 上暴露出来。
+ CONFIG_BASE_DEFCONFIG="rk3576-amp.config"
+-CONFIG_BOOTDELAY=3
++# ★ 3 -> 1：实测这段倒计时占整个启动 3.1 秒，是单项最大开销。
++#   留 1 秒而不是 0，是因为进 maskrom 的自动化链路要靠它：
++#   nsh> reboot -> 抢 => -> rbrom -> rkdeveloptool，没有这个窗口就得人去按板子。
++CONFIG_BOOTDELAY=1
++
++# 直接引导 AMP，别走 distro_bootcmd 那套 PXE/DHCP/USB 穷举。
++CONFIG_USE_BOOTCOMMAND=y
++CONFIG_BOOTCOMMAND="bootamp"
+ CONFIG_DEFAULT_DEVICE_TREE="rk3576-kickpi-k7"
+ # CONFIG_USING_KERNEL_DTB is not set
+ 
+diff -urN a/include/configs/evb_rk3576.h b/include/configs/evb_rk3576.h
+--- a/include/configs/evb_rk3576.h	2026-09-17 10:41:27.150745522 +0800
++++ b/include/configs/evb_rk3576.h	2026-09-17 10:41:27.159075234 +0800
+@@ -18,36 +18,22 @@
+ 
+ #define CONFIG_SYS_MMC_ENV_DEV		0
+ 
+-/*
+- * openvela/NuttX 直接启动：boot 分区里放**裸 nuttx.bin**，不再套 Android
+- * boot.img 的壳（header/ramdisk/dtb 三层在这里全是空的）。
++/* ★ bootcmd 直接指向 bootamp，不走 RKIMG_BOOTCOMMAND。
+  *
+- * boot 分区布局（GPT: boot @LBA 0xC800，64MB）：
+- *   +0x0000 (LBA 0xC800)  nuttx.bin   —— 标准 arm64 Linux Image
+- *                                        （头部 MZ…ARMd，text_offset 0x480000）
+- *   +0x2000 (LBA 0xE800)  board.dtb   —— 仅为满足 booti，NuttX 自己不读它
++ *   RKIMG_BOOTCOMMAND 是 boot_android -> boot_fit -> bootrkp ->
++ *   run distro_bootcmd 的链条。本板这三个都不适用（我们是 AMP FIT，
++ *   由 cmd/bootamp.c 自己从 eMMC 固定 LBA 读三段），于是每次都一路
++ *   失败落到 distro_bootcmd，去穷举 PXE/DHCP/USB —— 板上既没网也没
++ *   U 盘，纯属白等好几秒才掉到 => 提示符。
+  *
+- * ★ 为什么必须带 dtb
+- *   arm64 的 booti 会把 FDT 地址放进 x0 传给内核，第三个参数给 '-' 时
+- *   U-Boot 仍会去解析，实测直接 Data Abort 在 U-Boot 自己身上：
+- *     "Synchronous Abort" handler, esr 0x96000006, PC = 0x40226b28
+- *   NuttX 的地址全是硬编的、根本不读设备树 —— 但这一关得过。
++ *   实测：把倒计时按掉之后，这条穷举链是启动里剩下的最大一块。
+  *
+- * ★ fdt 加载地址不用 fdt_addr_r(0x48300000)
+- *   那个地址落在 Rockchip sysmem 的保留区里，booti 会报
+- *   "Sysmem Error: Found there is region overflow!"。虽然还能启动，
+- *   但换到 0x4a000000（空闲区）就没有这条告警。
+- *
+- * 内核读 0x2000 扇区（4MB）是按布局取的上限，不是按当前镜像大小 ——
+- * nuttx.bin 长大时不用改这里；booti 按 Image 头里的实际大小处理。
++ *   注意 CONFIG_BOOTCOMMAND 放在 .config 里是不生效的：Rockchip 在
++ *   本文件里 #undef 之后重新 #define，板级头文件后写后赢。改这里才管用。
+  */
++
+ #undef CONFIG_BOOTCOMMAND
+-#define CONFIG_BOOTCOMMAND			\
+-	"mmc dev 0;"				\
+-	"mmc read ${kernel_addr_r} 0xC800 0x2000;"	\
+-	"mmc read 0x4a000000 0xE800 0x400;"	\
+-	"booti ${kernel_addr_r} - 0x4a000000;"	\
+-	RKIMG_BOOTCOMMAND
++#define CONFIG_BOOTCOMMAND	"bootamp"
+ 
+ #endif /* CONFIG_SPL_BUILD */
+ #endif /* __CONFIGS_RK3576_EVB_H */

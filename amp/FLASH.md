@@ -50,12 +50,28 @@
 正因为上面这条，AMP 的四个部件都放在够得着的 LBA 上，而且**不使用**
 boot 分区的 Android 镜像格式（那样太占地方）：
 
-| LBA | 大小 | 内容 | 原分区 |
+| LBA | 上限 | 内容 | 原分区 |
 |---:|---:|---|---|
-| 8192 | 2.5MB | `amp.itb`（AMP FIT，里面是 openvela） | security |
 | 14336 | 272KB | `rk3576-kickpi-k7-amp.dtb`（只含 4 个 A72 核） | security |
 | 16384 | 3MB | `uboot-amp.img`（带 AMP + bootamp + 面板） | uboot |
-| 49152 | 7.6MB | `Image-amp`（裸 Linux Image） | vbmeta + boot 头部 |
+| **24576** | **4MB** | `amp.itb`（AMP FIT，里面是 openvela） | trust |
+| 49152 | 8MB（到 65536） | `Image-amp`（裸 Linux Image，7.2MB） | vbmeta + boot 头部 |
+
+主机侧的唯一来源是 `amp/layout.sh`，U-Boot 侧是 `cmd/bootamp.c` 的
+`AMP_*` 宏（`uboot/0009`），两处必须同步改。所有写盘脚本都先过
+`amp_check_write`，区间越界直接拒绝。
+
+★ 2026-09-17：FIT 从 security（8192，上限 6144 扇区）挪到 trust。
+原因一是 openvela 继续变大，3MB 只剩约 560KB；原因二是 security 是
+OP-TEE 安全存储（RKSS）的分区，每次启动都有 `TEEC: Reset area[0]/[1]`，
+对应的正是 8192/9216。
+
+★ 2026-09-17 事故：**别再往 LBA 51200 写任何东西。** 旧 `scripts/flash.sh`
+按单系统布局把 NuttX 写到 51200（boot 分区起点），而那里是 49152 起的
+AMP 内核的第 1MB 处。结果是双系统每次都卡死在 NSH 横幅附近，单系统却
+完全正常，连 09-13 验证过的 FIT 都一样挂 —— 回退代码没有用，坏的是
+eMMC 上 FIT 之外的东西。排查口诀：**双系统挂、单系统好，先把 dtb /
+内核 / U-Boot 从 eMMC 读回来和原件比对。**
 
 `Image` 之所以能压到 7.6MB（原来 43MB），见 `linux/amp-minimal.config`
 ——削掉的都是 AMP 下归 openvela 的外设，既省地方也是资源划分本身。
@@ -64,13 +80,13 @@ boot 分区的 Android 镜像格式（那样太占地方）：
 `amp.itb` 从 2.17MB 涨到 2.54MB（4961 扇区，8192..13153），正好压过去。
 **每次 openvela 变大都要重算这条边界** —— 这种越界不会报错，只会让 dtb
 读出来是 FIT 的尾巴，然后 Linux 在一个看不出所以然的地方停住。
-security 分区是 8192..16384，14336 之后还有 2048 扇区（1MB）余量。
+（这一段是 FIT 还在 security 时的记录；FIT 挪到 trust 之后 dtb 前面已经空出来了。）
 
 ## 烧
 
 ```bash
 RK=~/rkdeveloptool/rkdeveloptool
-$RK wl  8192 out/amp.itb
+$RK wl 24576 out/amp.itb        # 日常用 scripts/flash.sh，它带备份/回读/回滚
 $RK wl 14336 out/rk3576-kickpi-k7-amp.dtb
 $RK wl 16384 out/uboot-amp.img
 $RK wl 49152 out/Image-amp
@@ -105,7 +121,7 @@ UART 会静默丢字节。实测有一轮 `setenv amp_linux_cmd 'booti 0x4040000
 => mmc dev 0
 => mmc read 0x40400000 0xC000 0x39A5    # Linux Image ← LBA 49152
 => mmc read 0x4f000000 0x3800 0x212     # Linux DTB   ← LBA 14336
-=> mmc read 0x60000000 0x2000 0x1362    # amp.itb     ← LBA 8192
+=> mmc read 0x60000000 0x6000 0x2000    # amp.itb     ← LBA 24576
 => setenv amp_linux_cmd 'booti 0x40400000 - 0x4f000000'
 => bootamp 0x60000000
 ```

@@ -1,132 +1,129 @@
 #!/usr/bin/env bash
-# 一键烧写：把 nuttx.bin 打包并写进板子，全程无需碰板子。
-#
-# ★ 免 recovery 的原理
-#
-#   Rockchip 引导器支持软件触发下载模式：PMU0_GRF 里有一个跨复位保留的
-#   寄存器，写入下载模式魔数后复位，U-Boot 启动时读到就进 rockusb，
-#   不必按住 recovery 键。板端由 nsh 命令 loader 完成（见
-#   nuttx/arch/arm64/src/rk3576/rk3576_reboot.c）。
-#
-#     syscon@26024000 (rk3576-pmu0-grf) + 0x40  <- 0x5242C301
-#     CRU_GLB_SRST_FST (0x0C08)                 <- 0xfdb9
-#
-#   两个值都取自原厂 dtb 的 syscon-reboot-mode 节点与 TRM Part1。
-#
-#   WSL 下 USB 还要转发一次：板子重启会重新枚举，usbipd 的绑定跟着掉，
-#   所以每轮都要 attach 一次。usbipd.exe 可以在 WSL 里直接调用。
+# 一键烧写（AMP 布局）：把 nuttx.bin 打成 FIT，写进 trust 分区，复位启动。
 #
 # 用法：
-#   ./scripts/flash.sh              打包 + 烧写 + 复位启动
-#   ./scripts/flash.sh --no-build   跳过打包，直接烧现有镜像
-#   ./scripts/flash.sh --stay       烧完停在下载模式，不复位
-#   ./scripts/flash.sh --raw        裸镜像启动（需自编 U-Boot，见 bsp/uboot/）
-set -e
-
-# --raw：走自编 U-Boot 的裸镜像启动（路径 B），不套 Android boot.img 壳。
-#        需要板上已烧入带新 bootcmd 的 U-Boot（见 bsp/uboot/）。
-do_raw=0
+#   ./scripts/flash.sh                打包双系统 FIT（openvela + Linux）+ 烧写 + 复位
+#   ./scripts/flash.sh --solo         打包单系统 FIT（不带 Linux）
+#   ./scripts/flash.sh --fit X.itb    不打包，直接烧现成的 FIT
+#   ./scripts/flash.sh --stay         烧完停在下载模式，不复位
+#
+# ★ 只写 FIT 区（amp/layout.sh 的 AMP_FIT_LBA）。
+#
+#   旧版按单系统布局往 LBA 51200 写 boot.img / 裸 nuttx.bin。AMP 布局下
+#   那里是 Linux 内核（49152 起 7.2MB），2026-09-17 就是这样把内核写坏的：
+#   双系统每次都卡死在 NSH 横幅附近，单系统却一切正常。旧的 boot.img /
+#   --raw 路径因此删掉了；写盘一律经过 amp_check_write。
+#
+# ★ 进下载模式的两条路
+#
+#   1. 板子在 nsh> 下：发 `loader`（PMU0_GRF 写下载模式魔数后复位）。
+#   2. 不行就发 `reboot`，在 U-Boot 的 1 秒倒计时里连发 Ctrl-C，
+#      然后 `rockusb 0 mmc 0`。板子已经挂死时，按一下 RESET 也走这条。
+#
+#   前台如果是 ai_agent（提示符 vela>），loader 会被它吃掉；这里不替用户
+#   发 quit —— 试过，agent 退出时把控制台一起带走了，反而只能按 RESET。
+#
+#   WSL 下 USB 还要转发一次：进 rockusb 后设备重新枚举，每轮都要 attach。
+set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WS="$(cd "$ROOT/.." && pwd)"
+# shellcheck source=../amp/layout.sh
+source "$ROOT/amp/layout.sh"
 
-NUTTX_BIN="$WS/nuttx/nuttx.bin"
-ORIG_IMG="${ORIG_IMG:-$HOME/boot-orig.img}"
-BOOT_IMG="${BOOT_IMG:-$HOME/boot-nuttx.img}"
+NUTTX_BIN="${NUTTX_BIN:-$WS/nuttx/nuttx.bin}"
 RKDEV="${RKDEV:-$HOME/rkdeveloptool/rkdeveloptool}"
 USBIPD="${USBIPD:-/mnt/c/Program Files/usbipd-win/usbipd.exe}"
 SERIAL="${SERIAL:-/dev/ttyUSB0}"
-BAUD="${BAUD:-115200}"
-FLASH_LBA="${FLASH_LBA:-51200}"
+BAUD="${BAUD:-1500000}"
+MKIMAGE_PATH="${MKIMAGE_PATH:-$HOME/rk3576-amp/u-boot/tools:$HOME/rk3576-amp/u-boot/scripts/dtc}"
+OUT="${OUT:-/tmp/k7-amp-fit/build}"
 
-do_build=1
+its=amp.its
+fit=""
 do_reset=1
-for a in "$@"; do
-  case "$a" in
-    --no-build) do_build=0 ;;
-    --raw)      do_raw=1 ;;
-    --stay)     do_reset=0 ;;
-    *) echo "未知参数: $a"; exit 1 ;;
+while (( $# )); do
+  case "$1" in
+    --solo) its=amp-solo.its ;;
+    --fit)  fit="$2"; shift ;;
+    --stay) do_reset=0 ;;
+    *) echo "未知参数: $1"; exit 1 ;;
   esac
+  shift
 done
 
 # 1) 打包
-if [ "$do_raw" = 1 ]; then
-  echo "裸镜像模式：boot 分区 = nuttx.bin + board.dtb（无 Android 壳）"
-elif [ "$do_build" = 1 ]; then
-  [ -f "$NUTTX_BIN" ] || { echo "找不到 $NUTTX_BIN，先编译"; exit 1; }
-  python3 "$ROOT/scripts/repack-bootimg.py" "$ORIG_IMG" "$NUTTX_BIN" "$BOOT_IMG" >/dev/null
-  echo "已打包 $(stat -c%s "$BOOT_IMG") 字节"
+if [[ -z "$fit" ]]; then
+  [[ -f "$NUTTX_BIN" ]] || { echo "找不到 $NUTTX_BIN，先编译"; exit 1; }
+  mkdir -p "$OUT"
+  cp "$NUTTX_BIN" "$OUT/openvela-amp.bin"
+  cp "$ROOT/amp/fit/$its" "$OUT/"
+  (cd "$OUT" && PATH="$MKIMAGE_PATH:$PATH" \
+     mkimage -f "$its" -E -p 0xe00 "${its%.its}.itb" >/dev/null)
+  fit="$OUT/${its%.its}.itb"
+  echo "已打包 $fit（$(( $(stat -c%s "$fit") / 512 )) 扇区）"
 fi
+K7_FIT="$fit" bash "$ROOT/scripts/flash-xts-netsh-fit.sh" --prepare >/dev/null
 
-# 2) 让板子进下载模式
-in_loader() { timeout 10 "$RKDEV" ld 2>/dev/null | grep -q Loader; }
+# 2) 进下载模式
+# Loader 或 Maskrom 都算：`loader` 命令实测会落到 Maskrom，
+# 后面的 FIT 脚本会先 `db` 下载引导器再写。
+in_loader() { timeout 10 "$RKDEV" ld 2>/dev/null | grep -qE 'Loader|Maskrom'; }
 
 attach_usb() {
-  local busid
-  busid=$("$USBIPD" list 2>/dev/null | awk '/2207:350e/{print $1; exit}')
-  [ -n "$busid" ] || return 1
+  local busid="" i
+  for i in $(seq 1 15); do
+    busid=$("$USBIPD" list 2>/dev/null | tr -d '\r' | awk '/2207:/{print $1; exit}')
+    [[ -n "$busid" ]] && break
+    sleep 1
+  done
+  [[ -n "$busid" ]] || return 1
   "$USBIPD" attach --wsl --busid "$busid" >/dev/null 2>&1 || true
-  sleep 2
+  sleep 3
 }
 
+# 在 U-Boot 倒计时里打断并进 rockusb；$1 = 先发给 nsh 的命令（可空）
+serial_to_rockusb() {
+  python3 - "$SERIAL" "$BAUD" "$1" <<'PY'
+import serial, sys, time
+s = serial.Serial(sys.argv[1], int(sys.argv[2]), timeout=0.05)
+if sys.argv[3]:
+    s.write(sys.argv[3].encode() + b'\r')
+buf = b''; seen = False; t0 = time.time()
+print('等 U-Boot（板子挂死的话现在按 RESET）…', flush=True)
+while time.time() - t0 < 120:
+    buf = (buf + s.read(4096))[-4000:]
+    if not seen and (b'U-Boot' in buf or b'Hit key' in buf):
+        seen = True
+    if seen:
+        s.write(b'\x03')
+        if buf.rstrip().endswith(b'=>'):
+            time.sleep(0.5); s.read(4096)
+            s.write(b'rockusb 0 mmc 0\r'); time.sleep(2)
+            sys.exit(0)
+sys.exit('没等到 U-Boot')
+PY
+}
+
+if ! in_loader; then attach_usb || true; fi
 if ! in_loader; then
+  [[ -w "$SERIAL" ]] || { echo "串口 $SERIAL 不可写"; exit 1; }
+  stty -F "$SERIAL" "$BAUD" raw -echo -echoe -echok -crtscts
+  printf 'loader\r' > "$SERIAL"
+  sleep 6
   attach_usb || true
 fi
-
 if ! in_loader; then
-  # 板子还在跑 NuttX，用串口叫它自己重启进下载模式
-  if [ -w "$SERIAL" ]; then
-    echo "通过串口触发下载模式…"
-    stty -F "$SERIAL" "$BAUD" raw -echo -echoe -echok -crtscts
-    # ★ 前台如果跑着 ai_agent，它有自己的 vela> 提示符，会把 loader 当成
-    #   未知命令吃掉 —— 板子根本不会进下载模式，而失败要到 rkdeveloptool
-    #   找不到设备时才暴露，方向很容易查偏。
-    #
-    #   这里只**报告**不代劳：试过在这里替用户发 quit，结果 agent 退出时
-    #   把控制台一起带走了，板子既没进下载模式、串口也没了回显，反而从
-    #   "重发一次就好"变成"必须按 RESET"。自动化在不确定的前台状态上
-    #   动手，代价比它省下的那一步大。
-    printf 'loader\r' > "$SERIAL"
-    sleep 6
-    attach_usb || true
-  fi
+  serial_to_rockusb reboot
+  attach_usb || true
 fi
+in_loader || { echo "板子未进入下载模式（usbipd 未共享时：管理员终端 usbipd bind --force --busid <id>）"; exit 1; }
 
-if ! in_loader; then
-  echo "板子未进入下载模式。可能原因："
-  echo "  - 串口没在 nsh 提示符下（先确认 $SERIAL 能敲命令）"
-  echo "  - 前台跑着 ai_agent（提示符是 vela> 而不是 nsh>）：先在它里面敲 quit
-  - 板上跑着原厂 Android（提示符是 console:/ \$）：在它里面执行 reboot loader
-  - 板上固件还没有 loader 命令（首次需手动 recovery 烧一次）"
-  echo "  - usbipd 未共享设备：在 Windows 管理员终端执行"
-  echo "      usbipd bind --force --busid <busid>"
-  exit 1
-fi
-
-# 3) 烧写
-echo "烧写中…"
-if [ "$do_raw" = 1 ]; then
-  # 裸镜像：内核在分区起始，dtb 在分区内偏移 4MB（LBA +0x2000）
-  #
-  # ★ dtb 只是喂给 U-Boot 的 —— arm64 的 booti 第三个参数给 '-' 时它仍会
-  #   去解析 FDT，实测会在 U-Boot 自己身上 Data Abort。NuttX 不读设备树。
-  # ★ 用我们自己的 344 字节最小 FDT，不是原厂那份 264KB 的 board.dtb。
-  #
-  #   NuttX 根本不读设备树（arm64_head.S 里 x0 进 real_start 就被
-  #   switch_el 覆盖了），这份 FDT 纯粹是让 booti 不崩。既然只要"结构
-  #   合法"，就不该让启动链依赖一个从原厂固件里抠出来的二进制。
-  #   源码在 board/kickpi-k7/scripts/booti-stub.dts，已上板验证。
-  DTB="${DTB:-$ROOT/board/kickpi-k7/scripts/booti-stub.dtb}"
-  [ -f "$DTB" ] || { echo "找不到 $DTB（裸镜像模式需要一份 FDT 喂给 booti）"; exit 1; }
-  timeout 300 "$RKDEV" wl "$FLASH_LBA" "$NUTTX_BIN" 2>&1 | tail -1
-  timeout 300 "$RKDEV" wl $((FLASH_LBA + 0x2000)) "$DTB" 2>&1 | tail -1
-else
-  timeout 300 "$RKDEV" wl "$FLASH_LBA" "$BOOT_IMG" 2>&1 | tail -1
-fi
+# 3) 烧写（备份 + 写 + 回读 + 失败回滚）
+K7_FIT="$fit" bash "$ROOT/scripts/flash-xts-netsh-fit.sh"
 
 # 4) 启动
-if [ "$do_reset" = 1 ]; then
+if (( do_reset )); then
   timeout 20 "$RKDEV" rd 2>&1 | tail -1
   echo "已复位启动"
 else

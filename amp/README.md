@@ -106,7 +106,13 @@ cd amp/fit && mkimage -f amp.its -E -p 0xe00 amp.itb
 
 ## 怎么烧、怎么跑
 
+> ★ 下面这段是最早一版（boot.img 装 46MB Linux）的烧法，**已经作废**，
+> 按它写会把现在 LBA 49152 起的 AMP 内核覆盖掉（2026-09-17 真出过事）。
+> 现行布局和烧法见 [FLASH.md](FLASH.md) 与 `layout.sh`，日常只用
+> `scripts/flash.sh`。
+
 ```bash
+# 作废，勿用
 rkdeveloptool wl  16384 uboot-amp.img        # uboot 分区，4MB
 rkdeveloptool wl  51200 boot-linux-amp.img   # boot 分区 ← Linux
 rkdeveloptool wl 182272 amp.itb              # 借 recovery 分区放 ← openvela

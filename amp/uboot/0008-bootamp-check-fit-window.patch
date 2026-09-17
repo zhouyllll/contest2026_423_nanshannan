@@ -1,0 +1,130 @@
+bootamp：读完 FIT 先按头部核对实际长度，超出读取窗口时明确报错
+
+应用：叠在 0006 之上（0006 已把 AMP_FIT_CNT 改为 0x1800），
+在 u-boot/ 下 `patch -p1 < 本文件`。
+
+★ 起因
+
+  无参数 bootamp 读 FIT 用的是写死的扇区数。镜像一旦超过它，读进来的
+  是截断的 FIT，报错却是
+
+      Verifying Hash Integrity ... sha256 Bad hash
+      Bad Data Hash / AMP Error: Load loadables, ret=-13
+
+  看起来像"镜像写坏了"，其实写入和回读都正确，是引导器少读了尾巴。
+  本项目踩了两次：LVGL 静态绘制缓冲把镜像撑到 5665 扇区；加网络 NSH
+  后镜像 5177 / 5561 扇区。
+
+  第二次还叠了一层：0006 这份补丁里的上限改成了 0x1800，但 u-boot/
+  源码没同步、uboot.img 也没重编，板上跑的仍是 0x1400 —— 上限写在两处，
+  只改一处，就成了"以为修了其实没有"。
+
+★ 做法
+
+  mkimage -E -p 生成外置数据的 FIT：FDT 之后才是各镜像数据，每个镜像
+  节点有 data-position（绝对偏移）和 data-size（-E 不带 -p 时是
+  data-offset，相对 FDT 末尾按 4 字节对齐）。取最大结束位置即整个 FIT
+  需要的长度，与读取窗口比较；超出就打印所需扇区数并返回 -E2BIG，
+  不再进入哈希校验。每次启动都打印一行所需长度与窗口，便于提前发现。
+
+  上限 6144 扇区：8192 + 6144 = 14336，正好顶到 dtb 起点，再大就压到
+  dtb。
+
+--- a/cmd/bootamp.c	2026-09-17 03:15:34.285566585 +0800
++++ b/cmd/bootamp.c	2026-09-17 03:15:34.294366585 +0800
+@@ -38,13 +38,15 @@
+ #include <amp.h>
+ #include <command.h>
+ #include <environment.h>
++#include <image.h>
++#include <linux/libfdt.h>
+ 
+ /* eMMC 上的默认布局，和 amp/FLASH.md 那张表一一对应。
+  *
+  * 扇区数取的是**上限**而不是精确值：多读几个扇区没有副作用，而写死精确
+  * 值意味着每次镜像变大都要同步改两处（这里和文档），漏一处就是"读进来
+  * 的 FIT 少了尾巴"这种很难看出来的故障。上限都留在各自分区内：
+- *   FIT   8192 + 5120 = 13312 < 14336（dtb）
++ *   FIT   8192 + 6144 = 14336 = dtb 起点（正好顶满，不越界）
+  *   dtb  14336 +  544 = 14880 < 16384（uboot 分区）
+  *   内核 49152 +14848 = 64000 < 65536（rkdeveloptool 写得到的上限）
+  */
+@@ -60,6 +62,66 @@
+ #define AMP_DTB_ADDR		0x4f000000
+ #define AMP_KERNEL_ADDR		0x40400000
+ 
++/*
++ * ★ 读完 FIT 先核对它**实际需要多长**，超出读取窗口就明说。
++ *
++ *   这个窗口曾经是 5120 扇区，镜像涨到 5177 / 5561 扇区后，
++ *   无参数 bootamp 读进来的是截断的 FIT，报的却是
++ *
++ *       Verifying Hash Integrity ... sha256 Bad hash
++ *       Bad Data Hash / AMP Error: Load loadables, ret=-13
++ *
++ *   看起来像"镜像写坏了"，其实写入和回读都是对的，是引导器少读了尾巴。
++ *   这个坑踩了两次：一次是 LVGL 静态缓冲撑大镜像，一次是加网络 NSH。
++ *   而且仓库里的补丁改了上限、U-Boot 源码却没改，也没重编 ——
++ *   上限值被写在两个地方，只改一处就会出现"以为修了其实没有"。
++ *
++ *   mkimage -E -p 生成的是外置数据的 FIT：FDT 头之后才是各镜像的数据，
++ *   每个镜像节点里有 data-position（绝对偏移）和 data-size。取其中最大的
++ *   结束位置，就是整个 FIT 需要读进来的长度。
++ */
++static int amp_check_fit_window(void *fit, ulong window)
++{
++	ulong need;
++	int images, node;
++
++	if (fdt_check_header(fit)) {
++		printf("AMP: FIT 头无效（LBA 0x%x 处不是 FIT）\n", AMP_FIT_LBA);
++		return -EINVAL;
++	}
++
++	need = fdt_totalsize(fit);
++	images = fdt_path_offset(fit, FIT_IMAGES_PATH);
++	if (images >= 0) {
++		fdt_for_each_subnode(node, fit, images) {
++			int pos, size;
++
++			if (fit_image_get_data_size(fit, node, &size))
++				continue;
++			if (fit_image_get_data_position(fit, node, &pos) &&
++			    fit_image_get_data_offset(fit, node, &pos))
++				continue;
++			/* data-offset 是相对 FDT 末尾（按 4 字节对齐）的 */
++			if (!fdt_getprop(fit, node, FIT_DATA_POSITION_PROP, NULL))
++				pos += ALIGN(fdt_totalsize(fit), 4);
++			if ((ulong)pos + size > need)
++				need = (ulong)pos + size;
++		}
++	}
++
++	printf("AMP: FIT 需要 %lu 字节（%lu 扇区），读取窗口 %lu 扇区\n",
++	       need, (need + 511) / 512, window / 512);
++
++	if (need > window) {
++		printf("AMP: ★ FIT 超过读取窗口，读进来的镜像不完整，\n"
++		       "     后面的哈希校验必然失败。请缩小镜像或调大 AMP_FIT_CNT\n"
++		       "     （上限 6144 扇区，再大就会压到 LBA 14336 的 dtb）。\n");
++		return -E2BIG;
++	}
++
++	return 0;
++}
++
+ static int amp_load_from_mmc(void)
+ {
+ 	char cmd[128];
+@@ -87,6 +149,11 @@
+ 	if (ret)
+ 		return ret;
+ 
++	ret = amp_check_fit_window((void *)(ulong)AMP_FIT_ADDR,
++				   (ulong)AMP_FIT_CNT * 512);
++	if (ret)
++		return ret;
++
+ 	/* ★ devtype/devnum 必须有值，否则 booti 会在 strcmp(NULL) 上炸
+ 	 *
+ 	 *   common/bootm.c 的 bootm_disable_interrupts() 里是
