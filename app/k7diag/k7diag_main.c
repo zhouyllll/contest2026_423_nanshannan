@@ -41,6 +41,7 @@
 uint32_t rk3576_gpio_irq_count(int bank, uint32_t *last_status);
 void kickpi_touch_stat(uint32_t *samples, uint32_t *lows,
                        uint32_t *lowraw, uint32_t *edges);
+int rk3576_gmac_linkinfo(int port);
 extern uint32_t g_ft5x06_workers;
 extern uint32_t g_ft5x06_reads;
 extern uint32_t g_ft5x06_valids;
@@ -791,6 +792,34 @@ int main(int argc, char *argv[])
       return 0;
     }
 
+  if (argc >= 2 && strcmp(argv[1], "eth") == 0)
+    {
+      /* 两个网口各读一次 PHY。固件只把 GMAC1 注册成 eth0，
+       * 网线插错口时 ifup 只会报"自协商未完成"，这里一眼看出插在哪。
+       */
+
+      int port;
+
+      for (port = 0; port < 2; port++)
+        {
+          int v = rk3576_gmac_linkinfo(port);
+
+          if (v < 0)
+            {
+              printf("GMAC%d: 读 PHY 失败 %d\n", port, v);
+            }
+          else
+            {
+              printf("GMAC%d: 链路=%s 自协商=%s LP=0x%04x%s\n", port,
+                     (v & 1) ? "已建立" : "未建立",
+                     (v & 2) ? "完成" : "未完成", (unsigned)(v >> 2),
+                     port == 1 ? "  ← eth0" : "");
+            }
+        }
+
+      return 0;
+    }
+
   if (argc >= 2 && strcmp(argv[1], "rst") == 0)
     {
       return diag_rst();
@@ -820,6 +849,7 @@ int main(int argc, char *argv[])
   printf("  k7diag stat           读常驻采样的累计结果（不用对时）\n");
   printf("  k7diag tp [秒]        现场采样触摸中断脚\n");
   printf("  k7diag fb ramp|bars|grid   绕开 LVGL 写测试图案\n");
+  printf("  k7diag eth                 两个网口的 PHY 链路状态\n");
   printf("  k7diag rst                 读全局复位状态（只读不清）\n");
   printf("  k7diag vsync               量 VP1 的帧开始标志（清除/使能行为）\n");
   printf("  k7diag anim [秒]           绕开 LVGL 的双缓冲翻页动画（查撕裂/黑线）\n");

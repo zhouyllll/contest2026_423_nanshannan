@@ -3069,9 +3069,16 @@ static inline int rk3576_eth_initphy(struct rk3576_eth_driver_s *priv,
            * MCU whenever the link is ready.
            */
 
-          ninfo("%s: Autonegotiation failed [%d] (is cable plugged-in ?), "
-                "default to 10Mbs mode\n", \
-                BOARD_PHY_NAME, retries);
+          /* ★ 用 syslog 而不是 ninfo：没开网络调试时 ninfo 是空的，
+           *   ifup 失败在串口上只剩一句 "ifup eth0...Failed"，看不出
+           *   是没插网线、插错了口，还是 PHY 没应答。
+           */
+
+          syslog(LOG_WARNING, "ETH: 自协商 %d.%d 秒未完成（MSR=%04x），"
+                 "网线插在 GMAC%d 这个口上吗？\n",
+                 retries * LINK_WAITUS / 1000000,
+                 retries * LINK_WAITUS / 100000 % 10, phydata,
+                 CONFIG_RK3576_ETH_PORT);
 
           /* Stop auto negotiation */
 
@@ -3182,8 +3189,8 @@ static inline int rk3576_eth_initphy(struct rk3576_eth_driver_s *priv,
     }
   else
     {
-      nerr("ERROR: 速率未识别，自协商可能没完成: PHY STATUS=%04x\n",
-           phydata);
+      syslog(LOG_ERR, "ETH: 速率未识别，自协商可能没完成: PHY STATUS=%04x"
+             "（链路没起来，ifup 失败）\n", phydata);
       return -EIO;
     }
 

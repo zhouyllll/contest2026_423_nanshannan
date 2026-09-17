@@ -51,6 +51,7 @@
 #include <sys/mman.h>
 #include <stdlib.h>
 #include <string.h>
+#include <syslog.h>
 #include <time.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -60,6 +61,8 @@
 #include <jpeglib.h>
 #include <cJSON.h>
 #include <velaclaw/client.h>
+
+#include <arch/board/board.h>
 
 #ifdef CONFIG_RK3576_RPTUN
 #  include <arch/chip/amp.h>
@@ -594,6 +597,49 @@ static void live_refresh(void)
  * CAMERA / DESK pages
  ****************************************************************************/
 
+/****************************************************************************
+ * 大图缓冲从系统堆分配
+ *
+ * ★ lv_draw_buf_create() 走 LVGL 自己的内存池，本配置只有 256KB
+ *   （CONFIG_LV_MEM_SIZE_KILOBYTES）。一张 640x360 的 ARGB8888 就要
+ *   921KB，必然分配失败 —— 表现是点"打开相机"没有任何反应、拍照后
+ *   "JPEG decode failed"。系统堆还有几十 MB，图像数据放那边，
+ *   只把描述结构交给 LVGL。
+ ****************************************************************************/
+
+static lv_draw_buf_t *ui_draw_buf_create(uint32_t w, uint32_t h,
+                                         lv_color_format_t cf)
+{
+  lv_draw_buf_t *buf = calloc(1, sizeof(*buf));
+  uint32_t stride = lv_draw_buf_width_to_stride(w, cf);
+  size_t size = (size_t)stride * h;
+  uint8_t *data = memalign(LV_DRAW_BUF_ALIGN, size);
+
+  if (buf == NULL || data == NULL ||
+      lv_draw_buf_init(buf, w, h, cf, stride,
+                       data, size) != LV_RESULT_OK)
+    {
+      free(buf);
+      free(data);
+      syslog(LOG_ERR, "界面: 图像缓冲 %ux%u 分配失败\n",
+             (unsigned)w, (unsigned)h);
+      return NULL;
+    }
+
+  memset(data, 0, size);
+  return buf;
+}
+
+static void ui_draw_buf_destroy(lv_draw_buf_t *buf)
+{
+  if (buf != NULL)
+    {
+      lv_image_cache_drop(buf);
+      free(buf->data);
+      free(buf);
+    }
+}
+
 static void ui_jpeg_error(j_common_ptr info)
 {
   struct ui_jpeg_error_s *err = (struct ui_jpeg_error_s *)info->err;
@@ -640,8 +686,8 @@ static lv_draw_buf_t *camera_decode(const char *path)
       goto fail;
     }
 
-  frame = lv_draw_buf_create(jpeg.output_width, jpeg.output_height,
-                             LV_COLOR_FORMAT_ARGB8888, 0);
+  frame = ui_draw_buf_create(jpeg.output_width, jpeg.output_height,
+                             LV_COLOR_FORMAT_ARGB8888);
   row = malloc(jpeg.output_width * 3);
   if (frame == NULL || row == NULL)
     {
@@ -682,7 +728,7 @@ fail:
 
   if (frame != NULL)
     {
-      lv_draw_buf_destroy(frame);
+      ui_draw_buf_destroy(frame);
     }
 
   free(row);
@@ -717,10 +763,316 @@ static void camera_start(void)
   lv_label_set_text(g_camera_status, "Capturing desk image...");
 }
 
-static void camera_click_cb(lv_event_t *event)
+/****************************************************************************
+ * 相机页：全屏实时画面
+ *
+ * ★ 线程分工
+ *
+ *   取帧 + 缩放在后台线程里做（kickpi_camera_live_frame 会阻塞到下一帧，
+ *   约 33ms），写进 g_live_back；写完在锁里和 g_live_ready 交换指针。
+ *   LVGL 只在自己的线程里动对象：定时器发现有新帧，就把 g_live_ready
+ *   拷进图片用的 draw_buf 再 invalidate。这样 LVGL 渲染时读的那块内存
+ *   永远不会被后台线程改写。
+ *
+ * ★ 和拍照、agent 互斥
+ *
+ *   预览、v4l2cap、agent 的 camera_capture 用的是同一个 CIF。拍照和问
+ *   agent 之前都先关掉相机页（停流），板级那边也会对后来者返回 -EBUSY。
+ ****************************************************************************/
+
+#define LIVE_W        640
+#define LIVE_H        360
+#define LIVE_TIMER_MS 30
+
+static lv_obj_t      *g_live_page;
+static lv_obj_t      *g_live_img;
+static lv_obj_t      *g_live_info;
+static lv_draw_buf_t *g_live_buf;
+static lv_timer_t    *g_live_timer;
+static uint32_t      *g_live_back;
+static uint32_t      *g_live_ready;
+static bool           g_live_new;
+static volatile bool  g_live_run;
+static bool           g_live_thread_ok;
+static pthread_t      g_live_thread;
+static pthread_mutex_t g_live_lock = PTHREAD_MUTEX_INITIALIZER;
+static int            g_live_err;
+static unsigned       g_live_frames;
+static unsigned       g_live_shown;
+static time_t         g_live_t0;
+
+static void *live_thread(void *arg)
+{
+  (void)arg;
+
+  while (g_live_run)
+    {
+      int ret = kickpi_camera_live_frame(g_live_back, LIVE_W, LIVE_H, 500);
+
+      pthread_mutex_lock(&g_live_lock);
+      if (ret == OK)
+        {
+          uint32_t *t = g_live_ready;
+
+          g_live_ready = g_live_back;
+          g_live_back = t;
+          g_live_new = true;
+          g_live_frames++;
+        }
+      else
+        {
+          g_live_err = ret;
+        }
+
+      pthread_mutex_unlock(&g_live_lock);
+
+      if (ret != OK && ret != -ETIMEDOUT)
+        {
+          break;
+        }
+    }
+
+  return NULL;
+}
+
+static void live_timer_cb(lv_timer_t *t)
+{
+  bool fresh = false;
+  int err;
+
+  (void)t;
+
+  pthread_mutex_lock(&g_live_lock);
+  if (g_live_new)
+    {
+      memcpy(g_live_buf->data, g_live_ready,
+             (size_t)LIVE_W * LIVE_H * 4);
+      g_live_new = false;
+      fresh = true;
+    }
+
+  err = g_live_err;
+  g_live_err = 0;
+  pthread_mutex_unlock(&g_live_lock);
+
+  if (fresh)
+    {
+      g_live_shown++;
+      lv_image_cache_drop(g_live_buf);
+      lv_obj_invalidate(g_live_img);
+    }
+
+  if (err != 0 && err != -ETIMEDOUT)
+    {
+      lv_label_set_text_fmt(g_live_info, "Camera stopped: %d", err);
+    }
+  else if (fresh && (g_live_shown % 15) == 1)
+    {
+      time_t dt = time(NULL) - g_live_t0;
+      unsigned fps = dt > 0 ? (unsigned)(g_live_shown / dt) : 0;
+
+      lv_label_set_text_fmt(g_live_info, "Live  %u frames  %u fps",
+                            g_live_shown, fps);
+      if ((g_live_shown % 150) == 1 && dt > 0)
+        {
+          syslog(LOG_INFO, "界面: 相机页 采集 %u 帧 显示 %u 帧 / %ld 秒\n",
+                 g_live_frames, g_live_shown, (long)dt);
+        }
+    }
+}
+
+static void live_stop(void)
+{
+  if (g_live_timer != NULL)
+    {
+      lv_timer_delete(g_live_timer);
+      g_live_timer = NULL;
+    }
+
+  g_live_run = false;
+  if (g_live_thread_ok)
+    {
+      pthread_join(g_live_thread, NULL);
+      g_live_thread_ok = false;
+    }
+
+  kickpi_camera_live_stop();
+}
+
+static void live_page_close(void)
+{
+  if (g_live_page == NULL ||
+      lv_obj_has_flag(g_live_page, LV_OBJ_FLAG_HIDDEN))
+    {
+      return;
+    }
+
+  live_stop();
+  lv_obj_add_flag(g_live_page, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void live_close_cb(lv_event_t *event)
 {
   (void)event;
+  live_page_close();
+}
+
+static void live_snapshot_cb(lv_event_t *event)
+{
+  (void)event;
+
+  /* 先停流再拍：v4l2cap 走 /dev/video0，和预览抢同一个 CIF */
+
+  live_page_close();
   camera_start();
+}
+
+static bool live_page_create(void)
+{
+  lv_obj_t *bar;
+  lv_obj_t *btn;
+
+  /* XRGB：画面不透明，LVGL 直接拷贝，不做逐像素 alpha 混合 */
+
+  g_live_buf = ui_draw_buf_create(LIVE_W, LIVE_H, LV_COLOR_FORMAT_XRGB8888);
+  g_live_back = malloc((size_t)LIVE_W * LIVE_H * 4);
+  g_live_ready = malloc((size_t)LIVE_W * LIVE_H * 4);
+  if (g_live_buf == NULL || g_live_back == NULL || g_live_ready == NULL)
+    {
+      if (g_live_buf != NULL)
+        {
+          ui_draw_buf_destroy(g_live_buf);
+          g_live_buf = NULL;
+        }
+
+      free(g_live_back);
+      free(g_live_ready);
+      g_live_back = NULL;
+      g_live_ready = NULL;
+      return false;
+    }
+
+  g_live_page = lv_obj_create(lv_layer_top());
+  lv_obj_set_size(g_live_page, LV_PCT(100), LV_PCT(100));
+  lv_obj_set_style_bg_color(g_live_page, lv_color_black(), 0);
+  lv_obj_set_style_bg_opa(g_live_page, LV_OPA_COVER, 0);
+  lv_obj_set_style_border_width(g_live_page, 0, 0);
+  lv_obj_set_style_radius(g_live_page, 0, 0);
+  lv_obj_set_style_pad_all(g_live_page, 12, 0);
+  lv_obj_remove_flag(g_live_page, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_flex_flow(g_live_page, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_flex_align(g_live_page, LV_FLEX_ALIGN_CENTER,
+                        LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_row(g_live_page, 16, 0);
+
+  lv_obj_set_style_text_color(lv_label_create(g_live_page),
+                              lv_color_hex(UI_ACCENT), 0);
+  lv_label_set_text(lv_obj_get_child(g_live_page, 0), "Desk camera");
+
+  g_live_img = lv_image_create(g_live_page);
+  lv_image_set_src(g_live_img, g_live_buf);
+
+  g_live_info = lv_label_create(g_live_page);
+  lv_obj_set_style_text_color(g_live_info, lv_color_hex(UI_DIM), 0);
+  lv_label_set_text(g_live_info, "Starting camera...");
+
+  bar = lv_obj_create(g_live_page);
+  lv_obj_set_size(bar, LV_PCT(100), LV_SIZE_CONTENT);
+  lv_obj_set_style_bg_opa(bar, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_border_width(bar, 0, 0);
+  lv_obj_remove_flag(bar, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_flex_flow(bar, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(bar, LV_FLEX_ALIGN_SPACE_EVENLY,
+                        LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+
+  btn = lv_button_create(bar);
+  lv_obj_set_size(btn, 200, 72);
+  lv_label_set_text(lv_label_create(btn), "Snapshot");
+  lv_obj_center(lv_obj_get_child(btn, 0));
+  lv_obj_add_event_cb(btn, live_snapshot_cb, LV_EVENT_CLICKED, NULL);
+
+  btn = lv_button_create(bar);
+  lv_obj_set_size(btn, 200, 72);
+  lv_obj_set_style_bg_color(btn, lv_color_hex(UI_BAD), 0);
+  lv_label_set_text(lv_label_create(btn), "Close");
+  lv_obj_center(lv_obj_get_child(btn, 0));
+  lv_obj_add_event_cb(btn, live_close_cb, LV_EVENT_CLICKED, NULL);
+
+  return true;
+}
+
+static void live_page_open(void)
+{
+  int ret;
+
+  if (g_camera_pid > 0)
+    {
+      lv_label_set_text(g_camera_status, "Snapshot in progress, wait...");
+      return;
+    }
+
+  if (g_live_page == NULL && !live_page_create())
+    {
+      lv_label_set_text(g_camera_status, "Camera page: out of memory");
+      syslog(LOG_ERR, "界面: 相机页创建失败\n");
+      return;
+    }
+
+  lv_obj_remove_flag(g_live_page, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_move_foreground(g_live_page);
+
+  ret = kickpi_camera_live_start();
+  syslog(LOG_INFO, "界面: 相机页打开，预览启动 %d\n", ret);
+  if (ret < 0)
+    {
+      lv_label_set_text_fmt(g_live_info,
+                            ret == -EBUSY ? "Camera busy (%d), try again" :
+                            "Camera start failed: %d", ret);
+      return;
+    }
+
+  g_live_new = false;
+  g_live_err = 0;
+  g_live_frames = 0;
+  g_live_shown = 0;
+  g_live_t0 = time(NULL);
+  g_live_run = true;
+  if (pthread_create(&g_live_thread, NULL, live_thread, NULL) != 0)
+    {
+      g_live_run = false;
+      kickpi_camera_live_stop();
+      lv_label_set_text(g_live_info, "Cannot start preview thread");
+      return;
+    }
+
+  g_live_thread_ok = true;
+  pthread_setname_np(g_live_thread, "ui_camera");
+  lv_label_set_text(g_live_info, "Live");
+  g_live_timer = lv_timer_create(live_timer_cb, LIVE_TIMER_MS, NULL);
+}
+
+static void camera_click_cb(lv_event_t *event)
+{
+  lv_event_code_t code = lv_event_get_code(event);
+  lv_indev_t *indev = lv_indev_active();
+  lv_point_t pt = { 0, 0 };
+
+  if (indev != NULL)
+    {
+      lv_indev_get_point(indev, &pt);
+    }
+
+  syslog(LOG_INFO, "界面: Open camera 事件 %s (%d,%d)\n",
+         code == LV_EVENT_PRESSED ? "PRESSED" :
+         code == LV_EVENT_RELEASED ? "RELEASED" :
+         code == LV_EVENT_PRESS_LOST ? "PRESS_LOST" :
+         code == LV_EVENT_CLICKED ? "CLICKED" : "?",
+         (int)pt.x, (int)pt.y);
+
+  if (code == LV_EVENT_CLICKED)
+    {
+      live_page_open();
+    }
 }
 
 static void camera_poll(void)
@@ -758,7 +1110,7 @@ static void camera_poll(void)
   lv_image_set_src(g_camera_image, NULL);
   if (g_camera_frame != NULL)
     {
-      lv_draw_buf_destroy(g_camera_frame);
+      ui_draw_buf_destroy(g_camera_frame);
     }
 
   g_camera_frame = next;
@@ -794,6 +1146,10 @@ static void agent_ask(const char *question)
     {
       return;
     }
+
+  /* agent 的 camera_capture 走 /dev/video0，和预览抢 CIF */
+
+  live_page_close();
 
   if (g_agent_client == NULL)
     {
@@ -975,7 +1331,8 @@ static void camera_build(lv_obj_t *tab)
 
   card = card_create(tab, "desk camera");
   g_camera_status = lv_label_create(card);
-  lv_label_set_text(g_camera_status, "Tap Open camera to take a snapshot.");
+  lv_label_set_text(g_camera_status,
+                    "Open camera for live view; Snapshot saves a still.");
   lv_label_set_long_mode(g_camera_status, LV_LABEL_LONG_WRAP);
   lv_obj_set_width(g_camera_status, LV_PCT(100));
 
@@ -983,6 +1340,12 @@ static void camera_build(lv_obj_t *tab)
   lv_label_set_text(lv_label_create(g_camera_button), "Open camera");
   lv_obj_add_event_cb(g_camera_button, camera_click_cb,
                       LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(g_camera_button, camera_click_cb,
+                      LV_EVENT_PRESSED, NULL);
+  lv_obj_add_event_cb(g_camera_button, camera_click_cb,
+                      LV_EVENT_RELEASED, NULL);
+  lv_obj_add_event_cb(g_camera_button, camera_click_cb,
+                      LV_EVENT_PRESS_LOST, NULL);
 
   g_camera_image = lv_image_create(card);
   lv_obj_set_width(g_camera_image, LV_PCT(100));
@@ -1161,7 +1524,11 @@ static struct kickpi_fb_s g_kfb;
  *   引导器愿意读的长度。运行期的缓冲放堆上，镜像一个字节都不会涨。
  */
 
-#define KICKPI_DRAW_LINES 60
+/* 360 行：相机页 640x360 的画面一块画完。原来 60 行要分 6 块。
+ * 两块共 720x360x4x2 = 2MB，系统堆放得下。
+ */
+
+#define KICKPI_DRAW_LINES 360
 static uint32_t *g_draw1;
 static uint32_t *g_draw2;
 
@@ -1180,11 +1547,23 @@ static void kickpi_flush_cb(lv_display_t *disp, const lv_area_t *area,
              (size_t)w * 4);
     }
 
-  up.x = area->x1;
-  up.y = area->y1;
-  up.w = w;
-  up.h = lv_area_get_height(area);
-  ioctl(fb->fd, FBIO_UPDATE, (unsigned long)&up);
+  /* ★ 一帧只在最后一块时刷一次。
+   *
+   *   驱动的 updatearea 每次都把半个帧缓冲（3.6MB）整块刷回 DRAM
+   *   （见 rk3576_fb.c 的说明）。原来每块都调一次，一帧画面被分成
+   *   几块就刷几次 —— 640x360 的相机画面按 60 行分块，一帧刷 6 次，
+   *   帧率被它压着。PARTIAL 模式下帧缓冲只有一块、前几块写进去就在，
+   *   最后统一刷一次就够了。
+   */
+
+  if (lv_display_flush_is_last(disp))
+    {
+      up.x = 0;
+      up.y = 0;
+      up.w = fb->xres;
+      up.h = fb->yres;
+      ioctl(fb->fd, FBIO_UPDATE, (unsigned long)&up);
+    }
 
   lv_display_flush_ready(disp);
 }

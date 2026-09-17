@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include <arch/board/board.h>
 
@@ -68,6 +69,7 @@ int main(int argc, char *argv[])
       printf("      cam gain <0-240> [shr]  模拟增益，每级 0.3dB\n");
       printf("      cam show [0|1]   送屏，参数 0 关伽马用于对照\n");
       printf("      cam preview [n]  连续预览 n 帧（默认 300），敲键停止\n");
+      printf("      cam live [n]     测界面预览接口：取 n 帧 640x360 ARGB 并计时\n");
       printf("      cam vmax <行数>  改帧率，1143≈83fps 3165≈30fps\n");
       printf("      cam fbinfo|stat\n");
       return 1;
@@ -186,6 +188,47 @@ int main(int argc, char *argv[])
 
       ret = kickpi_imgproc_selftest(argc > 3 ? atoi(argv[3]) : 0,
                                     argc > 2 ? argv[2] : "/tmp/bayer.jpg");
+    }
+  else if (strcmp(argv[1], "live") == 0)
+    {
+      /* 不经过触摸屏，直接验证 kickpi_ui 相机页用的那三个接口 */
+
+      int n = argc > 2 ? atoi(argv[2]) : 30;
+      uint32_t *buf = malloc(640 * 360 * 4);
+      struct timespec t0;
+      struct timespec t1;
+      int i;
+
+      if (buf == NULL)
+        {
+          printf("缓冲分配失败\n");
+          return 1;
+        }
+
+      ret = kickpi_camera_live_start();
+      printf("live_start = %d\n", ret);
+      clock_gettime(CLOCK_MONOTONIC, &t0);
+      for (i = 0; ret == 0 && i < n; i++)
+        {
+          ret = kickpi_camera_live_frame(buf, 640, 360, 500);
+        }
+
+      clock_gettime(CLOCK_MONOTONIC, &t1);
+      kickpi_camera_live_stop();
+      if (ret == 0)
+        {
+          long ms = (t1.tv_sec - t0.tv_sec) * 1000 +
+                    (t1.tv_nsec - t0.tv_nsec) / 1000000;
+
+          printf("live: %d 帧 %ld ms，中心像素 %08x 左上 %08x\n",
+                 i, ms, (unsigned)buf[180 * 640 + 320], (unsigned)buf[0]);
+        }
+      else
+        {
+          printf("live: 第 %d 帧失败 %d\n", i, ret);
+        }
+
+      free(buf);
     }
   else if (strcmp(argv[1], "show") == 0)
     {

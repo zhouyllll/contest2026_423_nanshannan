@@ -565,6 +565,10 @@ bool kickpi_camera_detected(void)
 
 #define CAM_BUF_ALIGN    64
 
+/* 预览白平衡增益的定点基准：256 = 1.0 倍（与 imgproc 的 AWB_UNITY 相同） */
+
+#define AWB_Q8_UNITY     256
+
 static uint8_t *g_cam_buf[3];
 
 /* 直方图与百分位。直方图放静态区而不是栈上 —— 1KB 的局部数组对
@@ -2349,6 +2353,333 @@ int kickpi_camera_preview(int frames)
   }
 
   return ret;
+}
+
+/****************************************************************************
+ * 界面实时预览（kickpi_ui 的相机页用）
+ *
+ * ★ 为什么不走 V4L2
+ *
+ *   /dev/video0 只出 JPEG（imgsensor 的格式枚举里没有 Bayer，见
+ *   kickpi_k7_video.c），而 JPEG 是软件编码的，1932x1096 一帧要一两秒 ——
+ *   拿它做预览就是幻灯片，界面那边还得再解码一次。预览要的是"缩小的
+ *   RGB 直接给 LVGL"，所以复用 kickpi_camera_preview 那套连续取流，
+ *   只把"送 /dev/fb0"换成"写调用者给的 ARGB 缓冲"。直接写 fb0 会和
+ *   LVGL 抢同一块屏。
+ *
+ * ★ 和 V4L2 互斥
+ *
+ *   两条路用的是同一个 CIF host 和同一个传感器，同时开就是互相改对方的
+ *   DMA 地址。g_cam_live 与 g_cam_v4l2 各记一边，后来的一方返回 -EBUSY。
+ *   agent 拍照（camera_capture）前界面会先停预览。
+ ****************************************************************************/
+
+static bool g_cam_live;
+static bool g_cam_v4l2;
+static uint16_t g_live_black;
+static uint16_t g_live_white;
+static int g_live_gain[3] = { AWB_Q8_UNITY, AWB_Q8_UNITY, AWB_Q8_UNITY };
+
+void kickpi_camera_v4l2_busy(bool on)
+{
+  g_cam_v4l2 = on;
+}
+
+bool kickpi_camera_live_active(void)
+{
+  return g_cam_live;
+}
+
+int kickpi_camera_live_start(void)
+{
+  uint32_t stat;
+  int ret;
+
+  if (g_cam_live)
+    {
+      return OK;
+    }
+
+  if (g_cam_v4l2)
+    {
+      return -EBUSY;
+    }
+
+  if (!kickpi_camera_detected())
+    {
+      return -ENODEV;
+    }
+
+  ret = kickpi_camera_receiver(true);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = kickpi_camera_stream(true);
+  if (ret < 0)
+    {
+      kickpi_camera_receiver(false);
+      return ret;
+    }
+
+  /* 借单帧取图把三块缓冲分配好，并量一次动态范围作为拉伸的初值 */
+
+  /* 静默模式：不刷直方图日志，也跳过只为诊断服务的整帧清零 */
+
+  g_cam_live = true;
+  g_cam_quiet = true;
+  ret = kickpi_camera_capture();
+  if (ret < 0)
+    {
+      g_cam_quiet = false;
+      goto fail;
+    }
+
+  g_live_black = g_cam_p1;
+  g_live_white = g_cam_p99;
+
+  ret = rk3576_cif_start(KICKPI_CAM_CSI_HOST,
+                         (uintptr_t)g_cam_buf[0], (uintptr_t)g_cam_buf[1],
+                         IMX415_MODE_WIDTH, IMX415_MODE_HEIGHT);
+  if (ret < 0)
+    {
+      g_cam_quiet = false;
+      goto fail;
+    }
+
+  /* 连续流的第一帧是从半中间接上的，丢掉 */
+
+  ret = rk3576_cif_wait_frame(KICKPI_CAM_CSI_HOST, -1, 500, &stat);
+  if (ret < 0)
+    {
+      rk3576_cif_stop(KICKPI_CAM_CSI_HOST);
+      g_cam_quiet = false;
+      goto fail;
+    }
+
+  syslog(LOG_INFO, "摄像头: 界面预览开始\n");
+  return OK;
+
+fail:
+  g_cam_live = false;
+  kickpi_camera_stream(false);
+  kickpi_camera_receiver(false);
+  return ret;
+}
+
+void kickpi_camera_live_stop(void)
+{
+  if (!g_cam_live)
+    {
+      return;
+    }
+
+  rk3576_cif_stop(KICKPI_CAM_CSI_HOST);
+  kickpi_camera_stream(false);
+  kickpi_camera_receiver(false);
+  g_cam_quiet = false;
+  g_cam_live = false;
+  syslog(LOG_INFO, "摄像头: 界面预览停止\n");
+}
+
+/****************************************************************************
+ * Name: kickpi_camera_live_frame
+ *
+ * Description:
+ *   等下一帧，缩小成 w x h 的 ARGB8888 写进 argb（行跨距 = w）。
+ *
+ *   ★ 每个输出像素取对应位置的一个 2x2 Bayer 块：R、B 各一个、G 取两个
+ *     的平均。这是"块合并"而不是双线性去马赛克 —— 输出只有源的三分之一
+ *     宽，双线性算出来的细节反正会被缩掉，块合并快得多，颜色也不会错位。
+ *
+ *   ★ 拉伸和白平衡用的是**上一帧**量出来的值（这一帧边画边统计）。
+ *     预览里相邻两帧几乎一样，这样整帧只扫一遍。
+ *
+ *   ★ 渲染要快过一个帧周期：不换页的乒乓方案前提就是这个
+ *     （见 kickpi_camera_preview）。640x360 每帧约 23 万次块读取。
+ *
+ * Returned Value:
+ *   OK；-ETIMEDOUT 没等到帧；-EINVAL 预览没开。
+ *
+ ****************************************************************************/
+
+int kickpi_camera_live_frame(FAR uint32_t *argb, int w, int h,
+                             int timeout_ms)
+{
+  const int phase = CONFIG_KICKPI_K7_BAYER_PHASE;
+  uint32_t hist[64];
+  uint64_t sum[3] = { 0, 0, 0 };
+  uint32_t stat;
+  uint32_t n = 0;
+  uint32_t span;
+  const uint16_t *raw;
+  int black;
+  int dx;
+  int dy;
+  int slot;
+  int i;
+
+  if (!g_cam_live || argb == NULL || w <= 0 || h <= 0 ||
+      w > CAM_SXTAB_MAX)
+    {
+      return -EINVAL;
+    }
+
+  slot = rk3576_cif_wait_frame(KICKPI_CAM_CSI_HOST, -1, timeout_ms, &stat);
+  if (slot < 0)
+    {
+      return slot;
+    }
+
+  g_cam_ready = slot;
+  up_invalidate_dcache((uintptr_t)g_cam_buf[slot],
+                       (uintptr_t)g_cam_buf[slot] + CAM_FRAME_BYTES);
+  raw = (const uint16_t *)g_cam_buf[slot];
+
+  if (!g_cam_gamma_ready)
+    {
+      /* 和 show 里同一张表：sqrt(q * 255)，让暗部抬起来 */
+
+      int q;
+
+      for (q = 0; q < 256; q++)
+        {
+          uint32_t v = (uint32_t)q * 255u;
+          uint32_t r = 0;
+          uint32_t bit = 1u << 16;
+
+          while (bit > v)
+            {
+              bit >>= 2;
+            }
+
+          while (bit != 0)
+            {
+              if (v >= r + bit)
+                {
+                  v -= r + bit;
+                  r = (r >> 1) + bit;
+                }
+              else
+                {
+                  r >>= 1;
+                }
+
+              bit >>= 2;
+            }
+
+          g_cam_gamma[q] = (uint8_t)r;
+        }
+
+      g_cam_gamma_ready = true;
+    }
+
+  /* 源坐标对齐到偶数，保证每个 2x2 块里 R/G/G/B 各在固定位置 */
+
+  for (dx = 0; dx < w; dx++)
+    {
+      g_cam_sxtab[dx] = (uint16_t)((dx * (IMX415_MODE_WIDTH - 2) / w) & ~1);
+    }
+
+  /* 2x2 块里各颜色的偏移。phase 是 (0,0) 处的颜色：0=RGGB 1=GRBG
+   * 2=GBRG 3=BGGR，和 kickpi_k7_imgproc.c 的约定一致。
+   */
+
+  {
+    int rx = phase & 1;
+    int ry = (phase >> 1) & 1;
+    int offr = ry * CAM_ROW_PIX + rx;
+    int offb = (1 - ry) * CAM_ROW_PIX + (1 - rx);
+    int offg1 = ry * CAM_ROW_PIX + (1 - rx);
+    int offg2 = (1 - ry) * CAM_ROW_PIX + rx;
+
+    black = g_live_black;
+    span = g_live_white > g_live_black ?
+           (uint32_t)(g_live_white - g_live_black) : 1;
+    memset(hist, 0, sizeof(hist));
+
+    for (dy = 0; dy < h; dy++)
+      {
+        int sy = (dy * (IMX415_MODE_HEIGHT - 2) / h) & ~1;
+        const uint16_t *row = raw + (size_t)sy * CAM_ROW_PIX;
+        uint32_t *out = argb + (size_t)dy * w;
+
+        for (dx = 0; dx < w; dx++)
+          {
+            const uint16_t *b = row + g_cam_sxtab[dx];
+            int c[3];
+
+            c[0] = b[offr];
+            c[1] = (b[offg1] + b[offg2]) >> 1;
+            c[2] = b[offb];
+
+            /* 统计本帧：亮度直方图（G 通道）和各通道和，供下一帧用 */
+
+            if ((dx & 7) == 0 && (dy & 7) == 0)
+              {
+                hist[c[1] >> 10]++;
+                sum[0] += c[0];
+                sum[1] += c[1];
+                sum[2] += c[2];
+                n++;
+              }
+
+            for (i = 0; i < 3; i++)
+              {
+                int t = c[i] - black;
+
+                t = t <= 0 ? 0 : (int)(((uint32_t)t * 255u) / span);
+                t = (t * g_live_gain[i]) >> 8;
+                c[i] = g_cam_gamma[t > 255 ? 255 : t];
+              }
+
+            out[dx] = 0xff000000u | ((uint32_t)c[0] << 16) |
+                      ((uint32_t)c[1] << 8) | (uint32_t)c[2];
+          }
+      }
+  }
+
+  /* 更新下一帧用的拉伸范围（p1..p99）和灰世界白平衡 */
+
+  if (n > 0)
+    {
+      uint32_t acc = 0;
+      int lo = -1;
+      int hi = 63;
+
+      for (i = 0; i < 64; i++)
+        {
+          acc += hist[i];
+          if (lo < 0 && acc >= n / 100)
+            {
+              lo = i;
+            }
+
+          if (acc >= n - n / 100)
+            {
+              hi = i;
+              break;
+            }
+        }
+
+      g_live_black = (uint16_t)((lo < 0 ? 0 : lo) << 10);
+      g_live_white = (uint16_t)(((hi + 1) << 10) - 1);
+
+      if (sum[0] > 0 && sum[2] > 0)
+        {
+          for (i = 0; i < 3; i += 2)
+            {
+              uint64_t g = (sum[1] * AWB_Q8_UNITY) / sum[i];
+
+              g_live_gain[i] = g < AWB_Q8_UNITY / 2 ? AWB_Q8_UNITY / 2 :
+                               g > AWB_Q8_UNITY * 4 ? AWB_Q8_UNITY * 4 :
+                               (int)g;
+            }
+        }
+    }
+
+  return OK;
 }
 
 /****************************************************************************

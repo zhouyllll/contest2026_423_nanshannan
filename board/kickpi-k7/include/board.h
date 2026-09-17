@@ -444,6 +444,22 @@ int kickpi_camera_gain(int gain, int shr);
 int kickpi_camera_vmax(int vmax);
 
 /****************************************************************************
+ * Name: kickpi_camera_live_start / _frame / _stop
+ *
+ * Description:
+ *   界面用的实时预览：连续取流，每次把最新一帧缩小成 w x h 的 ARGB8888。
+ *   与 /dev/video0 互斥，另一边在用时 start 返回 -EBUSY。
+ *
+ ****************************************************************************/
+
+int  kickpi_camera_live_start(void);
+int  kickpi_camera_live_frame(FAR uint32_t *argb, int w, int h,
+                              int timeout_ms);
+void kickpi_camera_live_stop(void);
+bool kickpi_camera_live_active(void);
+void kickpi_camera_v4l2_busy(bool on);
+
+/****************************************************************************
  * Name: kickpi_camera_preview
  *
  * Description:

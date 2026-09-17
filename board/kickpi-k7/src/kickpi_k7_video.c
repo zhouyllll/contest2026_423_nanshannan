@@ -31,6 +31,8 @@
 #include <nuttx/video/v4l2_cap.h>
 #include <sys/videoio.h>
 
+#include <arch/board/board.h>
+
 #include "rk3576_video.h"
 #include "kickpi_k7.h"
 
@@ -192,6 +194,13 @@ static int imx415_sensor_start_capture(FAR struct imgsensor_s *sensor,
    * 反过来的话前几帧会打在还没就绪的接收端上。
    */
 
+  /* 界面的实时预览占着 CIF 时不能再开 —— 两边会互相改 DMA 地址 */
+
+  if (kickpi_camera_live_active())
+    {
+      return -EBUSY;
+    }
+
   ret = kickpi_camera_receiver(true);
   if (ret < 0)
     {
@@ -202,9 +211,11 @@ static int imx415_sensor_start_capture(FAR struct imgsensor_s *sensor,
   if (ret < 0)
     {
       kickpi_camera_receiver(false);
+      return ret;
     }
 
-  return ret;
+  kickpi_camera_v4l2_busy(true);
+  return OK;
 }
 
 static int imx415_sensor_stop_capture(FAR struct imgsensor_s *sensor,
@@ -212,6 +223,7 @@ static int imx415_sensor_stop_capture(FAR struct imgsensor_s *sensor,
 {
   kickpi_camera_stream(false);
   kickpi_camera_receiver(false);
+  kickpi_camera_v4l2_busy(false);
   return OK;
 }
 

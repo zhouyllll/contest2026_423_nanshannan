@@ -1341,4 +1341,38 @@ int rk3576_gmac_probe(int port)
   return OK;
 }
 
+
+/****************************************************************************
+ * Name: rk3576_gmac_linkinfo
+ *
+ * Description:
+ *   读一次 PHY 的链路状态并打印（k7diag eth 用）。
+ *
+ *   ★ BMSR 的链路位是"锁存低"的：掉过一次线就一直读到 0，直到被读一次。
+ *     所以连读两次，以第二次为准。
+ *
+ ****************************************************************************/
+
+int rk3576_gmac_linkinfo(int port)
+{
+  uint16_t bmsr = 0;
+  uint16_t lp = 0;
+  int ret;
+
+  if (port < 0 || port > 1)
+    {
+      return -EINVAL;
+    }
+
+  gmac_mdio_read(port, GMAC_PHY_ADDR, 1, &bmsr);
+  ret = gmac_mdio_read(port, GMAC_PHY_ADDR, 1, &bmsr);
+  gmac_mdio_read(port, GMAC_PHY_ADDR, 5, &lp);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return ((bmsr >> 2) & 1) | (((bmsr >> 5) & 1) << 1) | ((int)lp << 2);
+}
+
 #endif /* CONFIG_RK3576_GMAC */

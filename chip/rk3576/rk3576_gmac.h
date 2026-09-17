@@ -88,4 +88,8 @@ void rk3576_gmac_phy_reset(int bank, int pin, bool active_low);
 
 int rk3576_gmac_probe(int port);
 
+/* 链路状态：bit0 链路、bit1 自协商完成、bit2.. 对端能力；负数为错误 */
+
+int rk3576_gmac_linkinfo(int port);
+
 #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_GMAC_H */
