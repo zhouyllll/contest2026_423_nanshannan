@@ -510,15 +510,12 @@ int rk3576_dwmmc_probe(uint32_t base)
     uint32_t resp;
     int      us;
 
-    /* ★ SDIO 侧不走 HOLD 寄存器。
-     *
-     *   USE_HOLD_REG 决定命令/响应是否经过 HOLD 寄存器再采样。它影响的
-     *   正是采样时刻 —— 而我们的症状（RESP_ERR 置位、无超时、无 CRC 错、
-     *   RESP0 全 0）恰恰是"帧收到了但采错了位"的样子。SD 卡在 400kHz
-     *   下对此不敏感，SDIO 卡（SDR104）可能敏感。
+    /* Match the Rockchip host command path, which enables the HOLD
+     * register for SDIO as well as SD. Keep the probe consistent with
+     * rk3576_dwmmc_sendcmd(). Response errors remain fatal.
      */
 
-    uint32_t holdbit = hw->is_sdio ? 0 : DWMMC_CMD_USE_HOLD_REG;
+    uint32_t holdbit = DWMMC_CMD_USE_HOLD_REG;
 
     /* 先给足初始化时钟：400kHz 下 80 个时钟约 200us。 */
 
