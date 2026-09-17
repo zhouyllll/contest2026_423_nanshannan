@@ -41,6 +41,7 @@
 #include <malloc.h>
 #include <errno.h>
 #include <pthread.h>
+#include <sched.h>
 #include <setjmp.h>
 #include <spawn.h>
 #include <stdio.h>
@@ -780,6 +781,25 @@ static void camera_start(void)
  *   agent 之前都先关掉相机页（停流），板级那边也会对后来者返回 -EBUSY。
  ****************************************************************************/
 
+/* 帧率诊断：各段耗时累计（微秒），相机页开着时每 3 秒打一行 */
+
+static uint64_t g_st_grab_us;
+static uint32_t g_st_grab_n;
+static uint64_t g_st_loop_us;
+static uint32_t g_st_loop_n;
+static uint64_t g_st_flush_us;
+static uint32_t g_st_flush_n;
+static uint32_t g_st_frames_n;
+static uint64_t g_st_t0;
+
+static uint64_t now_us(void)
+{
+  struct timespec ts;
+
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+  return (uint64_t)ts.tv_sec * 1000000u + ts.tv_nsec / 1000;
+}
+
 #define LIVE_W        640
 #define LIVE_H        360
 #define LIVE_TIMER_MS 30
@@ -807,7 +827,11 @@ static void *live_thread(void *arg)
 
   while (g_live_run)
     {
+      uint64_t t0 = now_us();
       int ret = kickpi_camera_live_frame(g_live_back, LIVE_W, LIVE_H, 500);
+
+      g_st_grab_us += now_us() - t0;
+      g_st_grab_n++;
 
       pthread_mutex_lock(&g_live_lock);
       if (ret == OK)
@@ -855,8 +879,29 @@ static void live_timer_cb(lv_timer_t *t)
   g_live_err = 0;
   pthread_mutex_unlock(&g_live_lock);
 
+  if (g_st_t0 == 0)
+    {
+      g_st_t0 = now_us();
+    }
+  else if (now_us() - g_st_t0 >= 3000000)
+    {
+      syslog(LOG_INFO, "界面: 3 秒内 取帧 %u 次 均 %u ms | 循环 %u 次 均 %u ms"
+             " | 刷屏 %u 次 均 %u ms | 显示新帧 %u\n",
+             g_st_grab_n,
+             g_st_grab_n ? (unsigned)(g_st_grab_us / g_st_grab_n / 1000) : 0,
+             g_st_loop_n,
+             g_st_loop_n ? (unsigned)(g_st_loop_us / g_st_loop_n / 1000) : 0,
+             g_st_flush_n,
+             g_st_flush_n ? (unsigned)(g_st_flush_us / g_st_flush_n / 1000) : 0,
+             g_st_frames_n);
+      g_st_grab_us = g_st_loop_us = g_st_flush_us = 0;
+      g_st_grab_n = g_st_loop_n = g_st_flush_n = g_st_frames_n = 0;
+      g_st_t0 = now_us();
+    }
+
   if (fresh)
     {
+      g_st_frames_n++;
       g_live_shown++;
       lv_image_cache_drop(g_live_buf);
       lv_obj_invalidate(g_live_img);
@@ -1037,7 +1082,23 @@ static void live_page_open(void)
   g_live_shown = 0;
   g_live_t0 = time(NULL);
   g_live_run = true;
-  if (pthread_create(&g_live_thread, NULL, live_thread, NULL) != 0)
+  /* 取帧线程低于界面：画不画得出来由 LVGL 决定，取帧只管有就交 */
+
+  {
+    pthread_attr_t attr;
+    struct sched_param sp;
+
+    pthread_attr_init(&attr);
+    sp.sched_priority = sched_get_priority_min(SCHED_RR) +
+                        (CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_PRIORITY -
+                         sched_get_priority_min(SCHED_RR)) / 2;
+    pthread_attr_setschedparam(&attr, &sp);
+    pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+    ret = pthread_create(&g_live_thread, &attr, live_thread, NULL);
+    pthread_attr_destroy(&attr);
+  }
+
+  if (ret != 0)
     {
       g_live_run = false;
       kickpi_camera_live_stop();
@@ -1282,6 +1343,8 @@ static void agent_poll(void)
   if (ready)
     {
       reply[sizeof(reply) - 1] = '\0';
+      syslog(LOG_INFO, "界面: agent 回复（%ld 秒）: %s\n",
+             (long)(time(NULL) - g_agent_started), reply);
       if (g_guard_request)
         {
           if (!guard_apply(reply))
@@ -1550,6 +1613,21 @@ static void tick_cb(lv_timer_t *t)
 
   camera_poll();
   agent_poll();
+
+  /* 串口调试入口：echo 1 > /tmp/k7-open-camera 等同于点 Open camera */
+
+  if (unlink("/tmp/k7-open-camera") == 0)
+    {
+      live_page_open();
+    }
+
+  /* echo 1 > /tmp/k7-ask 等同于点 "What is on my desk?" */
+
+  if (unlink("/tmp/k7-ask") == 0)
+    {
+      syslog(LOG_INFO, "界面: 串口触发 agent 看桌面\n");
+      agent_look_cb(NULL);
+    }
   amp_refresh();
 
   /* LIVE 页不可见时不算、不画。曲线是"看得见才有意义"的东西，后台跑
@@ -1652,11 +1730,15 @@ static void kickpi_flush_cb(lv_display_t *disp, const lv_area_t *area,
 
   if (lv_display_flush_is_last(disp))
     {
+      uint64_t t0 = now_us();
+
       up.x = 0;
       up.y = 0;
       up.w = fb->xres;
       up.h = fb->yres;
       ioctl(fb->fd, FBIO_UPDATE, (unsigned long)&up);
+      g_st_flush_us += now_us() - t0;
+      g_st_flush_n++;
     }
 
   lv_display_flush_ready(disp);
@@ -1843,7 +1925,11 @@ int main(int argc, char *argv[])
 
   for (; ; )
     {
+      uint64_t t0 = now_us();
       uint32_t idle = lv_timer_handler();
+
+      g_st_loop_us += now_us() - t0;
+      g_st_loop_n++;
 
       usleep((idle ? idle : 1) * 1000);
     }

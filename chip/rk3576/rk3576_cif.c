@@ -56,6 +56,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/init.h>
+#include <nuttx/signal.h>
 #include <debug.h>
 #include <errno.h>
 #include <inttypes.h>
@@ -662,7 +664,22 @@ int rk3576_cif_wait_frame(int host, int want, int timeout_ms,
           return (stat & CIF_INT_FRAME1_END(0)) ? 1 : 0;
         }
 
-      up_mdelay(1);
+      /* ★ 任务上下文里要真睡，不能 up_mdelay 空转。
+       *
+       *   空转的等待线程从不让出 CPU。界面相机页的取帧线程和 LVGL 主循环
+       *   同优先级（RR），挤到同一个核上时 LVGL 要等满一个时间片
+       *   （CONFIG_RR_INTERVAL=200ms）才轮到 —— 实测取帧 30fps、界面只刷
+       *   5fps，主循环 3 秒只转 15 次。
+       */
+
+      if (OSINIT_OS_READY() && !up_interrupt_context())
+        {
+          nxsig_usleep(1000);
+        }
+      else
+        {
+          up_mdelay(1);
+        }
     }
 
   if (status != NULL)
