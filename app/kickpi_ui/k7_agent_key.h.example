@@ -1,0 +1,6 @@
+/* 复制为 k7_agent_key.h 并填入真实 Key。k7_agent_key.h 已被 .gitignore 忽略，
+ * 不要提交。没有这个文件时界面只启动 ai_agent，不配置 LLM 后端。
+ */
+
+#define K7_AGENT_LLM_PRESET "mimo"
+#define K7_AGENT_LLM_KEY    "在这里填 Key"

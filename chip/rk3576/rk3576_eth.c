@@ -1417,6 +1417,46 @@ static int rk3576_eth_recvframe(struct rk3576_eth_driver_s *priv)
 }
 
 /****************************************************************************
+ * Function: rk3576_eth_reply
+ *
+ * Description:
+ *   收包处理里产生的回复（ping 应答、ARP 应答）走这里发出。
+ *
+ *   ★ 必须先看发送环有没有空位。
+ *
+ *     txpoll 发送前后都检查 txhead 是否空闲，这条路径原来没有：发送环满
+ *     时直接覆盖一个还归 DMA 所有、或者还没回收的描述符，inflight 却照样
+ *     加一。之后 freeframe 按 inflight 去回收，走到空描述符停不下来。
+ *     没空位就丢掉这个回复 —— 对端会重发，比弄乱发送环好得多。
+ *
+ ****************************************************************************/
+
+static uint32_t g_eth_reply_drops;
+
+static void rk3576_eth_reply(struct rk3576_eth_driver_s *priv)
+{
+  struct eth_desc_s *txdesc = priv->txhead;
+
+  up_invalidate_dcache((uintptr_t)txdesc,
+                       (uintptr_t)txdesc + sizeof(struct eth_desc_s));
+
+  if ((txdesc->des3 & EMAC_TDES3_OWN_MASK) != 0 || txdesc->des0 != 0 ||
+      priv->inflight >= CONFIG_RK3576_ETH_NTXBUFFERS)
+    {
+      if ((g_eth_reply_drops++ % 64) == 0)
+        {
+          syslog(LOG_WARNING, "ETH: 发送环满，丢弃回复（累计 %" PRIu32
+                 "，inflight=%d）\n", g_eth_reply_drops, priv->inflight);
+        }
+
+      priv->dev.d_len = 0;
+      return;
+    }
+
+  rk3576_eth_transmit(priv);
+}
+
+/****************************************************************************
  * Function: rk3576_eth_receive
  *
  * Description:
@@ -1491,7 +1531,7 @@ static void rk3576_eth_receive(struct rk3576_eth_driver_s *priv)
             {
               /* And send the packet */
 
-              rk3576_eth_transmit(priv);
+              rk3576_eth_reply(priv);
             }
         }
       else
@@ -1514,7 +1554,7 @@ static void rk3576_eth_receive(struct rk3576_eth_driver_s *priv)
             {
               /* And send the packet */
 
-              rk3576_eth_transmit(priv);
+              rk3576_eth_reply(priv);
             }
         }
       else
@@ -1535,7 +1575,7 @@ static void rk3576_eth_receive(struct rk3576_eth_driver_s *priv)
 
           if (priv->dev.d_len > 0)
             {
-              rk3576_eth_transmit(priv);
+              rk3576_eth_reply(priv);
             }
         }
       else
@@ -1599,8 +1639,27 @@ static void rk3576_eth_freeframe(struct rk3576_eth_driver_s *priv)
       up_invalidate_dcache((uintptr_t)txdesc,
                            (uintptr_t)txdesc + sizeof(struct eth_desc_s));
 
+      /* ★ 最多走一圈，遇到空描述符立即停。
+       *
+       *   原来的循环只以"OWN 位为 0"为条件，唯一的出口是遇到 LD 且
+       *   inflight 归零。一旦 inflight 与环上真实的帧数对不上（见
+       *   rk3576_eth_receive 里直接发送的说明），剩下的空描述符 OWN=0、
+       *   LD=0，这里就在 net_lock 里无限打转 —— 板上表现是有人 ping
+       *   几下，整机（包括串口）卡死。
+       */
+
       for (i = 0; (txdesc->des3 & EMAC_TDES3_OWN_MASK) == 0; i++)
         {
+          if (i >= CONFIG_RK3576_ETH_NTXBUFFERS || txdesc->des0 == 0)
+            {
+              syslog(LOG_ERR, "ETH: 发送环计数失配 i=%d inflight=%d "
+                     "des0=%08" PRIx32 " des3=%08" PRIx32 "，复位计数\n",
+                     i, priv->inflight, txdesc->des0, txdesc->des3);
+              priv->txtail   = NULL;
+              priv->inflight = 0;
+              return;
+            }
+
           /* There should be a buffer assigned to all in-flight
            * TX descriptors.
            */
@@ -1855,6 +1914,22 @@ static int rk3576_eth_enet_interrupt(int irq, void *context, void *arg)
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
 
   dmasr = getreg32(RK3576_EMAC_DMA_CH0_STATUS);
+
+  /* ★ 进了中断却读到 DMA 状态为 0：这条电平线是别的源拉的（MAC 层
+   *   中断），本函数不会去清它，中断会立刻重入。数一下，风暴时说出来。
+   */
+
+  if (dmasr == 0)
+    {
+      static uint32_t zero_hits;
+
+      if ((++zero_hits % 100000) == 0)
+        {
+          syslog(LOG_ERR, "ETH: 中断 %d 状态为 0 已 %" PRIu32 " 次，"
+                 "MAC_INT=%08" PRIx32 "\n", irq, zero_hits,
+                 getreg32(RK3576_EMAC_BASE + 0xb0));
+        }
+    }
 
   if (dmasr != 0)
     {

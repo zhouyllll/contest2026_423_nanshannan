@@ -38,3 +38,6 @@ docs/vendor/
 *-key.txt
 secrets.*
 llm_config.json
+
+# ai_agent 的 LLM Key：只在本地（模板 app/kickpi_ui/k7_agent_key.h.example）
+app/kickpi_ui/k7_agent_key.h

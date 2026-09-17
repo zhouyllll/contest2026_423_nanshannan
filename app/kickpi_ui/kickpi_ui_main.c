@@ -1447,6 +1447,100 @@ static void about_build(lv_obj_t *tab)
 }
 
 /****************************************************************************
+ * ai_agent 开机自启动
+ *
+ * ★ 为什么由界面来拉起、而且 stdin 接 /dev/null
+ *
+ *   ai_agent 最后会起一个 CLI 线程，fgets(stdin) 读控制台。开机在后台
+ *   跑的话它和 nsh 抢同一个串口，敲的字谁先读到算谁的。把它的 stdin
+ *   接到 /dev/null，CLI 线程第一次读就拿到 EOF 退出，其余服务照常运行，
+ *   控制台仍归 nsh。界面和 agent 在同一个地址空间，走消息总线通信。
+ *
+ * ★ Key 不进仓库
+ *
+ *   /data 是 tmpfs，重启即失，所以每次开机由这里调 set_llm。Key 来自
+ *   本地的 k7_agent_key.h（.gitignore 已忽略，模板见
+ *   k7_agent_key.h.example）。没有这个文件就只启动 agent、不配后端，
+ *   界面上会显示 Agent 请求失败，而不是编进一个假 Key。
+ ****************************************************************************/
+
+#if __has_include("k7_agent_key.h")
+#  include "k7_agent_key.h"
+#endif
+
+extern bool message_bus_ready(void);
+extern void cmd_set_llm(int argc, char **argv);
+extern void cmd_set_vision_llm(int argc, char **argv);
+
+static void *agent_boot_thread(void *arg)
+{
+  posix_spawn_file_actions_t fa;
+  char *argv[] = { "ai_agent", NULL };
+  pid_t pid;
+  int ret;
+  int i;
+
+  (void)arg;
+
+  posix_spawn_file_actions_init(&fa);
+  posix_spawn_file_actions_addopen(&fa, 0, "/dev/null", O_RDONLY, 0);
+  ret = posix_spawn(&pid, "ai_agent", &fa, NULL, argv, NULL);
+  posix_spawn_file_actions_destroy(&fa);
+  if (ret != 0)
+    {
+      syslog(LOG_ERR, "界面: 启动 ai_agent 失败 %d\n", ret);
+      return NULL;
+    }
+
+  for (i = 0; i < 100 && !message_bus_ready(); i++)
+    {
+      usleep(100 * 1000);
+    }
+
+  if (!message_bus_ready())
+    {
+      syslog(LOG_ERR, "界面: ai_agent 10 秒内没有就绪\n");
+      return NULL;
+    }
+
+#ifdef K7_AGENT_LLM_KEY
+  {
+    char *llm[] = { "set_llm", K7_AGENT_LLM_PRESET, K7_AGENT_LLM_KEY, NULL };
+    char *vis[] = { "set_vision_llm", K7_AGENT_LLM_PRESET, K7_AGENT_LLM_KEY,
+                    NULL };
+
+    /* 等 router 初始化完（agent_main 的 P3 在消息总线之后） */
+
+    sleep(2);
+    cmd_set_llm(3, llm);
+    cmd_set_vision_llm(3, vis);
+    syslog(LOG_INFO, "界面: ai_agent 已启动，后端 %s 已配置\n",
+           K7_AGENT_LLM_PRESET);
+  }
+#else
+  syslog(LOG_WARNING, "界面: ai_agent 已启动，但没有 k7_agent_key.h，"
+         "未配置 LLM 后端\n");
+#endif
+
+  return NULL;
+}
+
+static void agent_autostart(void)
+{
+  pthread_attr_t attr;
+  pthread_t tid;
+
+  pthread_attr_init(&attr);
+  pthread_attr_setstacksize(&attr, 16384);
+  if (pthread_create(&tid, &attr, agent_boot_thread, NULL) == 0)
+    {
+      pthread_detach(tid);
+    }
+
+  pthread_attr_destroy(&attr);
+}
+
+/****************************************************************************
  * 定时刷新
  ****************************************************************************/
 
@@ -1729,6 +1823,7 @@ int main(int argc, char *argv[])
          result.indev != NULL ? "可用" : "不可用");
 
   build_ui();
+  agent_autostart();
 
 #ifdef CONFIG_LV_USE_BUILTIN_MALLOC
   {
