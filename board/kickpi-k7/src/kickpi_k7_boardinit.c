@@ -126,8 +126,31 @@ static void kickpi_k7_register_eh_frame(void)
 #endif
 
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
+/* ★ 启动时把复位状态原值打出来（**只读不清**）。
+ *
+ *   xTS 1.3.15 的 drivertest_watchdog_api 断言上一次复位原因是 RWDT，
+ *   实测我们报的是 CHIPPOR（cmocka: "1 != 2"，drivertest_watchdog.c:460）。
+ *   两种可能必须分开：
+ *     a) 寄存器在我们读到之前已经被 U-Boot/BL31 清掉了 -> 原值为 0
+ *     b) 我们的位掩码不对                              -> 原值非 0 但没命中
+ *
+ *   board_reset_cause() 是读完就清的（写 1 清），所以不能拿它来看；
+ *   这里在启动时单独读一次、不写回，留给后面的 boardctl 用。
+ */
+
+static void kickpi_dump_reset_status(void)
+{
+  uint32_t st = getreg32(RK3576_CRU_ADDR + 0x0c04);
+
+  syslog(LOG_INFO,
+         "复位状态: GLB_RST_ST=0x%08" PRIx32 "（bit5/6/11-15 任一置位=看门狗）\n",
+         st);
+}
+
 void board_late_initialize(void)
 {
+  kickpi_dump_reset_status();
+
 #ifdef CONFIG_HAVE_CXXINITIALIZE
   kickpi_k7_register_eh_frame();
 #endif

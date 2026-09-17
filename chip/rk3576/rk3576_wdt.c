@@ -31,6 +31,9 @@
 #include <errno.h>
 #include <syslog.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
+#include <nuttx/arch.h>
 #include <nuttx/timers/watchdog.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
@@ -66,6 +69,12 @@
 #define WDT_GATE_PCLK       7
 #define WDT_GATE_TCLK       8
 
+/* ★ 中断号：原厂 dtb 的 watchdog@2ace0000 interrupts = <0 0x28 4>
+ *   SPI 0x28 = 40，外设中断号 = SPI 号 + 32 = 72。
+ */
+
+#define RK3576_IRQ_WDT0     (40 + 32)
+
 #define WDT_TCLK_HZ         24000000u   /* tclk 接 xin24m */
 #define WDT_MAX_TOP         15
 
@@ -84,6 +93,10 @@ struct rk3576_wdt_s
 
   struct wdog_s               autofeed;
   bool                        autofeeding;
+
+  /* WDIOC_CAPTURE 注册的处理函数。非空时用"先中断后复位"模式。 */
+
+  xcpt_t                      handler;
 };
 
 /****************************************************************************
@@ -164,6 +177,82 @@ static void rk3576_wdt_autofeed_cb(wdparm_t arg)
                MSEC2TICK(priv->actual_ms ? priv->actual_ms / 4 : 250),
                rk3576_wdt_autofeed_cb, (wdparm_t)priv);
     }
+}
+
+/****************************************************************************
+ * Name: rk3576_wdt_interrupt
+ *
+ * Description:
+ *   看门狗第一次超时的中断。读 WDT_EOI 清中断，然后转给上层注册的处理函数。
+ *
+ *   DesignWare 的两段式：RMOD=1 时第一次超时只发中断，**在第二次超时之前
+ *   没人喂狗才真复位**。所以处理函数里既可以保存现场，也可以喂狗自救。
+ *
+ ****************************************************************************/
+
+static int rk3576_wdt_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  FAR struct rk3576_wdt_s *priv = (FAR struct rk3576_wdt_s *)arg;
+
+  /* 读 EOI 即清中断 —— 这个寄存器是读清的，值本身没有意义 */
+
+  (void)wdt_getreg(WDT_EOI);
+
+  if (priv != NULL && priv->handler != NULL)
+    {
+      return priv->handler(irq, context, arg);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rk3576_wdt_capture
+ *
+ * Description:
+ *   WDIOC_CAPTURE：注册"超时先回调、不直接复位"的处理函数。
+ *
+ *   对应 DW 的 WDT_CR.RMOD：
+ *     0 = 超时直接复位（默认）
+ *     1 = 第一次超时发中断，第二次才复位
+ *
+ *   xTS 1.3.15 的 drivertest_watchdog_api 会连续调两次 WDIOC_CAPTURE
+ *   （装上再摘掉），两次都要返回 OK，所以 handler 为空时要能干净地退回
+ *   直接复位模式。
+ *
+ ****************************************************************************/
+
+static xcpt_t rk3576_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
+                                 xcpt_t handler)
+{
+  FAR struct rk3576_wdt_s *priv = (FAR struct rk3576_wdt_s *)lower;
+  irqstate_t flags;
+  xcpt_t     old;
+  uint32_t   cr;
+
+  flags = enter_critical_section();
+
+  old           = priv->handler;
+  priv->handler = handler;
+  cr            = wdt_getreg(WDT_CR);
+
+  if (handler != NULL)
+    {
+      wdt_putreg(WDT_CR, cr | WDT_CR_RMOD);
+      up_enable_irq(RK3576_IRQ_WDT0);
+    }
+  else
+    {
+      up_disable_irq(RK3576_IRQ_WDT0);
+      wdt_putreg(WDT_CR, cr & ~WDT_CR_RMOD);
+    }
+
+  leave_critical_section(flags);
+
+  syslog(LOG_INFO, "WDT: capture %s，CR=0x%08" PRIx32 "\n",
+         handler != NULL ? "已装（先中断后复位）" : "已摘（直接复位）",
+         wdt_getreg(WDT_CR));
+  return old;
 }
 
 static int rk3576_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
@@ -340,6 +429,7 @@ static const struct watchdog_ops_s g_wdt_ops =
   .start      = rk3576_wdt_start,
   .stop       = rk3576_wdt_stop,
   .keepalive  = rk3576_wdt_keepalive,
+  .capture    = rk3576_wdt_capture,
   .getstatus  = rk3576_wdt_getstatus,
   .settimeout = rk3576_wdt_settimeout,
 };
@@ -362,6 +452,12 @@ int rk3576_wdt_initialize(FAR const char *devpath)
 
   priv->lower.ops = &g_wdt_ops;
   priv->started   = false;
+  priv->handler   = NULL;
+
+  /* 中断先挂上但不使能 —— WDIOC_CAPTURE 装处理函数时才打开 */
+
+  irq_attach(RK3576_IRQ_WDT0, rk3576_wdt_interrupt, priv);
+  up_disable_irq(RK3576_IRQ_WDT0);
 
   /* 自检：写一个档位再读回。读回一致说明 pclk 已开、基址与映射正确。
    * 注意这只验证 pclk，不验证 tclk —— tclk 是否在跑要看 CCVR 会不会变。

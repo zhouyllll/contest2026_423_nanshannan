@@ -690,6 +690,49 @@ static int diag_vsync(void)
   return 0;
 }
 
+
+/****************************************************************************
+ * Name: diag_rst
+ *
+ *   读 CRU 的全局复位状态（**只读不清**）。
+ *
+ *   xTS 1.3.15 的 drivertest_watchdog_api 断言上次复位原因是 RWDT，而我们
+ *   报的是 CHIPPOR（cmocka: "1 != 2"，drivertest_watchdog.c:460）。原因
+ *   只可能是两个：寄存器被上游清了（读到 0），或者位掩码不对（非 0 但没
+ *   命中）。启动时打印会被多核输出串掉，所以做成按需读 —— board_reset_cause()
+ *   只有 boardctl 才会调，开机后这个值一直还在。
+ ****************************************************************************/
+
+#define RK3576_CRU_ADDR_D   0x27200000
+#define CRU_GLB_RST_ST      0x0c04
+
+static int diag_rst(void)
+{
+  uint32_t st = *(volatile uint32_t *)
+                ((uintptr_t)RK3576_CRU_ADDR_D + CRU_GLB_RST_ST);
+  uint32_t wdt_bits = (1u << 5) | (1u << 6) | (0x1fu << 11);
+
+  printf("GLB_RST_ST = 0x%08" PRIx32 "\n", st);
+  printf("  看门狗位(bit5/6/11-15) 掩码 0x%08" PRIx32 " -> 命中 0x%08" PRIx32
+         " -> 判为 %s\n",
+         wdt_bits, st & wdt_bits,
+         (st & wdt_bits) ? "RWDT(2)" : "CHIPPOR(1)");
+  printf("  逐位: ");
+  {
+    int i;
+    for (i = 31; i >= 0; i--)
+      {
+        if (st & (1u << i))
+          {
+            printf("bit%d ", i);
+          }
+      }
+  }
+
+  printf("%s\n", st ? "" : "(全 0 —— 已被上游清掉)");
+  return 0;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -748,6 +791,11 @@ int main(int argc, char *argv[])
       return 0;
     }
 
+  if (argc >= 2 && strcmp(argv[1], "rst") == 0)
+    {
+      return diag_rst();
+    }
+
   if (argc >= 2 && strcmp(argv[1], "vsync") == 0)
     {
       return diag_vsync();
@@ -772,6 +820,7 @@ int main(int argc, char *argv[])
   printf("  k7diag stat           读常驻采样的累计结果（不用对时）\n");
   printf("  k7diag tp [秒]        现场采样触摸中断脚\n");
   printf("  k7diag fb ramp|bars|grid   绕开 LVGL 写测试图案\n");
+  printf("  k7diag rst                 读全局复位状态（只读不清）\n");
   printf("  k7diag vsync               量 VP1 的帧开始标志（清除/使能行为）\n");
   printf("  k7diag anim [秒]           绕开 LVGL 的双缓冲翻页动画（查撕裂/黑线）\n");
   printf("  k7diag touch [秒]          绕开 LVGL 的色块点击测试（查触摸链路）\n");
