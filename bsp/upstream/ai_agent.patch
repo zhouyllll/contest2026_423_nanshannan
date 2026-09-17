@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 1dfc116..58095aa 100644
+index 1dfc116..47ff72c 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -24,6 +24,12 @@ MODULE = $(CONFIG_EXAMPLES_AI_AGENT_VELA)
@@ -15,6 +15,18 @@ index 1dfc116..58095aa 100644
  CFLAGS += ${INCDIR_PREFIX}$(CURDIR)/include
  CFLAGS += ${INCDIR_PREFIX}$(CURDIR)/src
  CFLAGS += ${INCDIR_PREFIX}$(CURDIR)/tests
+@@ -69,6 +75,11 @@ CSRCS += src/tools/tool_fetch_url.c
+ CSRCS += src/tools/tool_feishu_doc.c
+ CSRCS += src/tools/tool_feishu_chat.c
+ CSRCS += src/tools/tool_vision.c
++# ★ CMakeLists.txt 里有这一段，Makefile 漏了：开 AI_AGENT_CAMERA 后
++#   tool_registry.c 引用 tool_camera_capture_execute，链接失败。
++ifeq ($(CONFIG_AI_AGENT_CAMERA),y)
++CSRCS += src/tools/tool_camera.c
++endif
+ CSRCS += src/tools/tool_shell.c
+ CSRCS += src/tools/tool_system.c
+ CSRCS += src/tools/tool_health.c
 diff --git a/src/channels/feishu_http.c b/src/channels/feishu_http.c
 index ee85abf..1c0cd39 100644
 --- a/src/channels/feishu_http.c
