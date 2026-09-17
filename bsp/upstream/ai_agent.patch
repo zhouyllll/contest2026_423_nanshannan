@@ -27,6 +27,26 @@ index 1dfc116..47ff72c 100644
  CSRCS += src/tools/tool_shell.c
  CSRCS += src/tools/tool_system.c
  CSRCS += src/tools/tool_health.c
+diff --git a/include/agent_config.h b/include/agent_config.h
+index 711bb6d..5c754c2 100644
+--- a/include/agent_config.h
++++ b/include/agent_config.h
+@@ -116,13 +116,13 @@
+  * a timeout and replies with a user-friendly error message.
+  * The socket-level SO_RCVTIMEO (AGENT_LLM_SOCKET_TIMEOUT_SEC)
+  * acts as the hard backstop that actually unblocks the read. */
+-#define AGENT_LLM_TIMEOUT_SEC 60
++#define AGENT_LLM_TIMEOUT_SEC 180  /* K7：mimo-v2.5 是推理模型，带图后的第二轮实测 99s */
+ 
+ /* Socket-level read timeout applied via SO_RCVTIMEO in vela_tls.
+  * Must be >= AGENT_LLM_TIMEOUT_SEC to allow the agent-level
+  * watchdog to fire first on normal slow responses.  Set higher
+  * to cover TLS handshake + full response read. */
+-#define AGENT_LLM_SOCKET_TIMEOUT_SEC 120
++#define AGENT_LLM_SOCKET_TIMEOUT_SEC 240
+ 
+ /* ── Timezone (POSIX TZ format) ────────────────────────────── */
+ #define AGENT_TIMEZONE "CST-8"
 diff --git a/src/channels/feishu_http.c b/src/channels/feishu_http.c
 index ee85abf..1c0cd39 100644
 --- a/src/channels/feishu_http.c

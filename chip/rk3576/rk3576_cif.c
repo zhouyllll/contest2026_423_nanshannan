@@ -566,9 +566,16 @@ uint32_t rk3576_cif_status(int host)
   stat = cif_getreg(off + CIF_MIPI_INTSTAT);
   cif_putreg(off + CIF_MIPI_INTSTAT, stat);
 
-  syslog(LOG_INFO, "CIF: host%d INTSTAT=0x%08" PRIx32 "%s\n",
-         host, stat,
-         (stat & CSI_ALL_ERROR_INTEN) ? "（含错误位）" : "");
+  /* ★ 只报错误位。这个函数在 V4L2 的帧结束中断里每帧调一次，
+   *   无条件打印就是每秒 30 行中断上下文的 syslog —— 板上实测把
+   *   agent 的拍照线程饿住了（串口被刷满，工具调用一直不返回）。
+   */
+
+  if ((stat & CSI_ALL_ERROR_INTEN) != 0)
+    {
+      syslog(LOG_WARNING, "CIF: host%d INTSTAT=0x%08" PRIx32 "（含错误位）\n",
+             host, stat);
+    }
 
   return stat;
 }

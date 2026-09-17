@@ -1,5 +1,5 @@
 diff --git a/src/core/agent_loop.c b/src/core/agent_loop.c
-index 3d9dec3..13a0da9 100644
+index 3d9dec3..cc86382 100644
 --- a/src/core/agent_loop.c
 +++ b/src/core/agent_loop.c
 @@ -43,6 +43,7 @@
@@ -64,7 +64,19 @@ index 3d9dec3..13a0da9 100644
      uint32_t ms = calc_elapsed_ms(&t0, &t1);
      bool timed_out = llm_call_timed_out(ms);
  
-@@ -990,9 +1026,9 @@ static char* handle_task_complete(const char* sys_prompt, cJSON* messages,
+@@ -897,7 +933,10 @@ static void send_working_status(const agent_msg_t* msg, int iteration)
+ #ifdef CONFIG_FEATURE_SYSTEM_VELACLAW
+         || strcmp(msg->channel, AGENT_CHAN_QUICKAPP) == 0
+ #endif
+-        || strcmp(msg->channel, AGENT_CHAN_WEIXIN) == 0) {
++        || strcmp(msg->channel, AGENT_CHAN_WEIXIN) == 0
++        /* velaclaw SDK（velaclaw_client_local.c）的异步回调只触发一次：
++         * 这条"处理中"会把它用掉，真正的回答随后到达时已经没人接了。 */
++        || strcmp(msg->channel, "local_client") == 0) {
+         return;
+     }
+ 
+@@ -990,9 +1029,9 @@ static char* handle_task_complete(const char* sys_prompt, cJSON* messages,
      llm_response_t final_resp;
      char* result = NULL;
      struct timeval t0, t1;
@@ -76,7 +88,7 @@ index 3d9dec3..13a0da9 100644
      uint32_t ms = calc_elapsed_ms(&t0, &t1);
      bool timed_out = llm_call_timed_out(ms);
  
-@@ -1065,9 +1101,9 @@ static char* run_react_loop(const char* sys_prompt, cJSON* messages,
+@@ -1065,9 +1104,9 @@ static char* run_react_loop(const char* sys_prompt, cJSON* messages,
  
          llm_response_t resp;
          struct timeval tv_start, tv_end;
@@ -88,7 +100,7 @@ index 3d9dec3..13a0da9 100644
          uint32_t latency_ms = calc_elapsed_ms(&tv_start, &tv_end);
  
          /* Router failover: on LLM call failure, try next backend */
-@@ -1083,10 +1119,10 @@ static char* run_react_loop(const char* sys_prompt, cJSON* messages,
+@@ -1083,10 +1122,10 @@ static char* run_react_loop(const char* sys_prompt, cJSON* messages,
                  router_idx = next_idx;
                  trace.backend_idx = next_idx;
                  llm_response_free(&resp);
@@ -101,7 +113,7 @@ index 3d9dec3..13a0da9 100644
                  latency_ms = calc_elapsed_ms(&tv_start, &tv_end);
              }
          }
-@@ -1183,10 +1219,10 @@ static char* run_react_loop(const char* sys_prompt, cJSON* messages,
+@@ -1183,10 +1222,10 @@ static char* run_react_loop(const char* sys_prompt, cJSON* messages,
                      router_idx = prem_idx;
                      trace.backend_idx = prem_idx;
  

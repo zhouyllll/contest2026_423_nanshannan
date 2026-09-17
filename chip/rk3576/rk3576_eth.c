@@ -1756,11 +1756,20 @@ static void rk3576_eth_freeframe(struct rk3576_eth_driver_s *priv)
 
 static void rk3576_eth_txdone(struct rk3576_eth_driver_s *priv)
 {
-  DEBUGASSERT(priv->txtail != NULL);
+  /* ★ 没有在途的帧是合法状态，不是断言条件。
+   *
+   *   TI 状态位在 ISR 里累积到 priv->dmasr，工作队列处理时可能上一轮已经
+   *   把帧回收完、txtail 置空了，这一轮又带着 TI 进来。原来这里是
+   *   DEBUGASSERT(txtail != NULL)，ai_agent 跑 HTTPS 时在 lpwork 里
+   *   触发（rk3576_eth.c:1759），整机 panic。
+   */
 
-  /* Scan the TX descriptor change, returning buffers to free list */
+  if (priv->txtail != NULL)
+    {
+      /* Scan the TX descriptor change, returning buffers to free list */
 
-  rk3576_eth_freeframe(priv);
+      rk3576_eth_freeframe(priv);
+    }
 
   /* If no further xmits are pending, then cancel the TX timeout */
 

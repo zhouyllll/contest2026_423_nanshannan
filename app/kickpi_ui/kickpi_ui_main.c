@@ -170,6 +170,7 @@ static time_t     g_t0;
  */
 
 #define UI_CAMERA_FILE "/tmp/k7-ui-camera.jpg"
+#define UI_AGENT_TIMEOUT_S 240
 static lv_obj_t     *g_camera_image;
 static lv_obj_t     *g_camera_status;
 static lv_obj_t     *g_camera_button;
@@ -1224,7 +1225,9 @@ static void agent_ask(const char *question)
     }
 
   request.text = question;
-  request.timeout_ms = 60000;
+  /* mimo-v2.5 是推理模型：拍照 + 看图 + 作答三轮，实测第二轮就要 99s */
+
+  request.timeout_ms = UI_AGENT_TIMEOUT_S * 1000;
   ret = velaclaw_ask(g_agent_client, &request, agent_reply_cb, NULL);
   if (ret < 0)
     {
@@ -1363,7 +1366,8 @@ static void agent_poll(void)
 
       g_agent_busy = false;
     }
-  else if (g_agent_busy && time(NULL) - g_agent_started >= 60)
+  else if (g_agent_busy &&
+           time(NULL) - g_agent_started >= UI_AGENT_TIMEOUT_S)
     {
       lv_label_set_text(g_agent_status, "Agent response timed out.");
       g_agent_busy = false;
@@ -1568,17 +1572,23 @@ static void *agent_boot_thread(void *arg)
 
 #ifdef K7_AGENT_LLM_KEY
   {
-    char *llm[] = { "set_llm", K7_AGENT_LLM_PRESET, K7_AGENT_LLM_KEY, NULL };
-    char *vis[] = { "set_vision_llm", K7_AGENT_LLM_PRESET, K7_AGENT_LLM_KEY,
-                    NULL };
+    /* Token Plan 的 Key 只认它自己的地址（token-plan-cn.xiaomimimo.com），
+     * 打到预设的 api.xiaomimimo.com 一律 401；模型也只有 mimo-v2.5 系列。
+     * 所以地址和模型都跟着 Key 放在本地头文件里。
+     */
+
+    char *llm[] = { "set_llm", K7_AGENT_LLM_URL, K7_AGENT_LLM_MODEL,
+                    K7_AGENT_LLM_KEY, NULL };
+    char *vis[] = { "set_vision_llm", K7_AGENT_LLM_HOST, K7_AGENT_VISION_MODEL,
+                    K7_AGENT_LLM_KEY, NULL };
 
     /* 等 router 初始化完（agent_main 的 P3 在消息总线之后） */
 
     sleep(2);
-    cmd_set_llm(3, llm);
-    cmd_set_vision_llm(3, vis);
-    syslog(LOG_INFO, "界面: ai_agent 已启动，后端 %s 已配置\n",
-           K7_AGENT_LLM_PRESET);
+    cmd_set_llm(4, llm);
+    cmd_set_vision_llm(4, vis);
+    syslog(LOG_INFO, "界面: ai_agent 已启动，后端 %s（%s）已配置\n",
+           K7_AGENT_LLM_HOST, K7_AGENT_LLM_MODEL);
   }
 #else
   syslog(LOG_WARNING, "界面: ai_agent 已启动，但没有 k7_agent_key.h，"

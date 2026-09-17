@@ -104,6 +104,19 @@ struct rk3576_video_s
   int                  stride_pix;  /* RAW 行跨距，以 uint16 计 */
   uint32_t             outlen;      /* 上层 buffer 的容量 */
   struct work_s        work;        /* 编码转到工作队列，不在 ISR 里做 */
+
+  /* ★ 按需编码：上层排队一个缓冲区（set_buf）才编一帧。
+   *
+   *   原来每个帧结束中断都排一次编码。30fps 进帧、一帧编码一两秒，
+   *   LPWORK（优先级 100）编完一帧立刻又有下一帧，永远不空 ——
+   *   ai_agent 的拍照线程（优先级 60）拿不到 CPU，DQBUF 之后的
+   *   STREAMOFF 永远执行不到，camera_capture 不返回。
+   *   v4l2cap 在 nsh（优先级 100）里跑能成功，正是因为能和它轮转。
+   */
+
+  bool                 want;        /* 上层在等一帧 */
+  bool                 cif_running; /* JPEG 模式下 CIF 当前在搬运 */
+  int                  skip;        /* (重)启动后要丢掉的帧数 */
   struct timeval       ts;
 };
 
@@ -113,6 +126,11 @@ struct rk3576_video_s
  *   板级知识），芯片层不该反向依赖板级。所以做成注册式：板级在初始化
  *   时把自己的转换函数交给这一层。
  */
+
+/* RAW 缓冲尾部的哨兵区，用来抓 DMA 越界写 */
+
+#define RAW_GUARD_BYTES   (256 * 1024)
+#define RAW_GUARD_BYTE    0xa5
 
 static rk3576_video_conv_t g_conv;
 static FAR void           *g_conv_arg;
@@ -195,10 +213,39 @@ static void rk3576_video_encode_work(FAR void *arg)
       return;
     }
 
+  rk3576_cif_stop(RK3576_VIDEO_HOST);
+  priv->cif_running = false;
+
   /* DMA 刚写完这块内存，CPU 侧的缓存里可能是旧数据 */
 
   up_invalidate_dcache((uintptr_t)priv->rawbuf,
                        (uintptr_t)priv->rawbuf + priv->rawbytes);
+
+  {
+    FAR const uint8_t *g = (FAR const uint8_t *)priv->rawbuf +
+                           priv->rawbytes;
+    size_t i;
+
+    up_invalidate_dcache((uintptr_t)g, (uintptr_t)g + RAW_GUARD_BYTES);
+    for (i = 0; i < RAW_GUARD_BYTES && g[i] == RAW_GUARD_BYTE; i++);
+    if (i < RAW_GUARD_BYTES)
+      {
+        size_t last = i;
+        size_t k;
+
+        for (k = i; k < RAW_GUARD_BYTES; k++)
+          {
+            if (g[k] != RAW_GUARD_BYTE)
+              {
+                last = k;
+              }
+          }
+
+        syslog(LOG_ERR, "CIF: ★ DMA 越界写 RAW 缓冲尾部：第 %zu..%zu 字节"
+               "（缓冲 %zu 字节，一行 %d 字节）\n",
+               i, last, priv->rawbytes, priv->stride_pix * 2);
+      }
+  }
 
   len = g_conv(priv->rawbuf, priv->stride_pix, g_capw, g_caph,
                priv->width, priv->height,
@@ -247,12 +294,28 @@ static int rk3576_video_interrupt(int irq, FAR void *context, FAR void *arg)
            *   转到工作队列，时间戳在这里取（那才是这一帧的时刻）。
            */
 
-          priv->ts = ts;
-          if (work_available(&priv->work))
+          /* 刚(重)启动时 DMA 是在一帧中间接上的，那一帧不完整，丢掉 */
+
+          if (priv->skip > 0)
             {
-              work_queue(LPWORK, &priv->work, rk3576_video_encode_work,
-                         priv, 0);
+              priv->skip--;
+              return OK;
             }
+
+          if (!priv->want || !work_available(&priv->work))
+            {
+              return OK;
+            }
+
+          /* 停中断、交给工作队列：编码期间 DMA 必须停，否则它会在
+           * 我们读 RAW 的同时写下一帧，编出来是撕裂的图。
+           */
+
+          priv->want = false;
+          priv->ts = ts;
+          up_disable_irq(RK3576_IRQ_CIF);
+          work_queue(LPWORK, &priv->work, rk3576_video_encode_work,
+                     priv, 0);
         }
       else
         {
@@ -347,6 +410,24 @@ static int rk3576_video_set_buf(FAR struct imgdata_s *data,
 
   if (priv->jpeg_mode)
     {
+      priv->want = true;
+
+      /* 上一帧编码时停掉了 DMA，这里为下一帧重新启动 */
+
+      if (priv->capturing && !priv->cif_running)
+        {
+          ret = rk3576_cif_start(RK3576_VIDEO_HOST, (uintptr_t)priv->rawbuf,
+                                 (uintptr_t)priv->rawbuf, g_capw, g_caph);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          priv->cif_running = true;
+          priv->skip = 1;
+          up_enable_irq(RK3576_IRQ_CIF);
+        }
+
       return OK;
     }
 
@@ -475,7 +556,9 @@ static int rk3576_video_start_capture(FAR struct imgdata_s *data,
 
       if (priv->rawbuf == NULL)
         {
-          priv->rawbuf = kmm_memalign(64, need);
+          /* 尾部多留一段并填哨兵，检查 DMA 有没有越界写 */
+
+          priv->rawbuf = kmm_memalign(64, need + RAW_GUARD_BYTES);
           if (priv->rawbuf == NULL)
             {
               nerr("ERROR: 分配 %zu 字节 RAW 缓冲失败\n", need);
@@ -483,6 +566,10 @@ static int rk3576_video_start_capture(FAR struct imgdata_s *data,
             }
 
           priv->rawbytes = need;
+          memset((FAR uint8_t *)priv->rawbuf + need, RAW_GUARD_BYTE,
+                 RAW_GUARD_BYTES);
+          up_clean_dcache((uintptr_t)priv->rawbuf + need,
+                          (uintptr_t)priv->rawbuf + need + RAW_GUARD_BYTES);
         }
 
       priv->stride_pix = (int)(line / 2);
@@ -519,6 +606,14 @@ static int rk3576_video_start_capture(FAR struct imgdata_s *data,
     }
 
   priv->capturing = true;
+  priv->cif_running = true;
+  priv->skip = priv->jpeg_mode ? 1 : 0;
+
+  /* V4L2 先 set_buf 再 start_capture，而 jpeg_mode 到这里才定下来 ——
+   * 第一个缓冲区在 set_buf 里没能置位 want，这里补上。
+   */
+
+  priv->want = priv->jpeg_mode && priv->buf != NULL;
   up_enable_irq(RK3576_IRQ_CIF);
 
   return OK;
@@ -533,8 +628,10 @@ static int rk3576_video_stop_capture(FAR struct imgdata_s *data)
   FAR struct rk3576_video_s *priv = (FAR struct rk3576_video_s *)data;
 
   up_disable_irq(RK3576_IRQ_CIF);
-  priv->capturing = false;
-  priv->callback  = NULL;
+  priv->capturing   = false;
+  priv->callback    = NULL;
+  priv->want        = false;
+  priv->cif_running = false;
 
   return rk3576_cif_stop(RK3576_VIDEO_HOST);
 }

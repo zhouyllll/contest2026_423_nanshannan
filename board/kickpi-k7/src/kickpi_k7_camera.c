@@ -565,6 +565,15 @@ bool kickpi_camera_detected(void)
 
 #define CAM_BUF_ALIGN    64
 
+/* ★ DMA 会越过一帧末尾多写约一行（实测每帧多 2920 字节，传感器实际
+ *   输出的行数比 CIF 配置的多）。按精确帧长分配时，这一行写进了相邻的
+ *   堆块 —— 板上表现是拍两次照之后 free / mallinfo 崩在堆遍历里，
+ *   坏掉的节点里是 0x0d0e 一类的 RAW 像素值。多留 4 行余量。
+ *   rk3576_video.c 的 RAW 缓冲同样处理，并在尾部放了哨兵检查。
+ */
+
+#define CAM_DMA_SLACK    (CAM_LINE_BYTES * 4)
+
 /* 预览白平衡增益的定点基准：256 = 1.0 倍（与 imgproc 的 AWB_UNITY 相同） */
 
 #define AWB_Q8_UNITY     256
@@ -654,7 +663,7 @@ int kickpi_camera_capture(void)
 
       for (j = 0; j < 3; j++)
         {
-          buf[j] = kmm_memalign(CAM_BUF_ALIGN, CAM_FRAME_BYTES);
+          buf[j] = kmm_memalign(CAM_BUF_ALIGN, CAM_FRAME_BYTES + CAM_DMA_SLACK);
           if (buf[j] == NULL)
             {
               while (j > 0)
