@@ -64,6 +64,7 @@
 #include <velaclaw/client.h>
 
 #include "k7_audio.h"
+#include "k7_tts.h"
 
 #include <arch/board/board.h>
 
@@ -1330,6 +1331,133 @@ static void assist_state(const char *text)
   lv_label_set_text(g_assist_state, text);
 }
 
+/* 语音播报：回答到了就念出来。合成 + 播放在工作线程里，要十几秒 */
+
+static struct
+{
+  pthread_mutex_t lock;
+  volatile bool   busy;
+  bool            done;
+  int             result;
+  char            text[2048];      /* 最近一条回答，"再读一遍"用 */
+} g_tts =
+{
+  .lock = PTHREAD_MUTEX_INITIALIZER,
+};
+
+static bool g_tts_enabled = true;
+
+static void *tts_worker(void *arg)
+{
+  int ret;
+
+  (void)arg;
+  ret = k7_tts_speak(g_tts.text);
+  syslog(LOG_INFO, "播报: 结束 ret=%d\n", ret);
+
+  pthread_mutex_lock(&g_tts.lock);
+  g_tts.result = ret;
+  g_tts.done = true;
+  g_tts.busy = false;
+  pthread_mutex_unlock(&g_tts.lock);
+  return NULL;
+}
+
+/* text 为 NULL 表示重读上一条 */
+
+static void tts_start(const char *text)
+{
+  pthread_attr_t attr;
+  pthread_t tid;
+
+  if (g_tts.busy || k7a_busy())
+    {
+      return;
+    }
+
+  if (text != NULL)
+    {
+      utf8_copy(g_tts.text, sizeof(g_tts.text), text);
+    }
+
+  if (g_tts.text[0] == '\0')
+    {
+      return;
+    }
+
+  g_tts.busy = true;
+  pthread_attr_init(&attr);
+
+  /* TLS 握手（mbedtls）加 cJSON，栈给足 */
+
+  pthread_attr_setstacksize(&attr, 32768);
+  if (pthread_create(&tid, &attr, tts_worker, NULL) == 0)
+    {
+      pthread_detach(tid);
+      assist_state("正在朗读…");
+    }
+  else
+    {
+      g_tts.busy = false;
+    }
+
+  pthread_attr_destroy(&attr);
+}
+
+static void tts_poll(void)
+{
+  bool done;
+  int result;
+
+  pthread_mutex_lock(&g_tts.lock);
+  done = g_tts.done;
+  result = g_tts.result;
+  g_tts.done = false;
+  pthread_mutex_unlock(&g_tts.lock);
+
+  if (done && !g_agent_busy)
+    {
+      if (result == 0)
+        {
+          assist_state("朗读完毕");
+        }
+      else
+        {
+          lv_label_set_text_fmt(g_assist_state, "朗读失败（%d）", result);
+        }
+    }
+
+  /* echo 文字 > /tmp/k7-say：直接朗读这段文字（调试 / 演示用） */
+
+  if (!g_tts.busy)
+    {
+      FILE *fp = fopen("/tmp/k7-say", "r");
+
+      if (fp != NULL)
+        {
+          char buf[512];
+          size_t n = fread(buf, 1, sizeof(buf) - 1, fp);
+
+          fclose(fp);
+          unlink("/tmp/k7-say");
+          buf[n] = '\0';
+          tts_start(buf);
+        }
+    }
+}
+
+static void tts_switch_cb(lv_event_t *event)
+{
+  g_tts_enabled = lv_obj_has_state(lv_event_get_target(event),
+                                   LV_STATE_CHECKED);
+}
+
+static void tts_again_cb(lv_event_t *event)
+{
+  (void)event;
+  tts_start(NULL);
+}
+
 static void agent_reply_cb(int status, const char *reply, void *cookie)
 {
   (void)cookie;
@@ -1558,6 +1686,10 @@ static void agent_poll(void)
           assist_bubble(false, reply);
           lv_label_set_text_fmt(g_assist_state, "已回答，用时 %ld 秒",
                                 (long)elapsed);
+          if (g_tts_enabled)
+            {
+              tts_start(reply);
+            }
         }
 
       lv_obj_add_flag(g_assist_spinner, LV_OBJ_FLAG_HIDDEN);
@@ -1617,6 +1749,7 @@ static void assist_build(lv_obj_t *tab)
   lv_obj_t *card;
   lv_obj_t *row;
   lv_obj_t *label;
+  lv_obj_t *button;
 
   lv_obj_set_flex_flow(tab, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_row(tab, 8, 0);
@@ -1692,6 +1825,24 @@ static void assist_build(lv_obj_t *tab)
   lv_obj_set_style_text_font(g_guard_state, &lv_font_k7_cjk_20, 0);
   lv_obj_set_style_text_color(g_guard_state, lv_color_hex(UI_DIM), 0);
   lv_label_set_text(g_guard_state, "桌面守护已关闭。");
+
+  /* 语音播报 */
+
+  row = lv_obj_create(card);
+  lv_obj_remove_style_all(row);
+  lv_obj_set_size(row, LV_PCT(100), LV_SIZE_CONTENT);
+  lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
+                        LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_column(row, 10, 0);
+
+  button = lv_switch_create(row);
+  lv_obj_add_state(button, LV_STATE_CHECKED);
+  lv_obj_add_event_cb(button, tts_switch_cb, LV_EVENT_VALUE_CHANGED, NULL);
+  label = lv_label_create(row);
+  lv_obj_set_style_text_font(label, &lv_font_k7_cjk_20, 0);
+  lv_label_set_text(label, "语音播报");
+  assist_button(row, "再读一遍", tts_again_cb);
 }
 
 static void camera_build(lv_obj_t *tab)
@@ -1755,6 +1906,7 @@ enum rec_state_e
   REC_IDLE = 0,
   REC_RECORDING,
   REC_PLAYING,
+  REC_BEEP,
 };
 
 struct rec_s
@@ -1847,12 +1999,25 @@ static void rec_write_wav(const int16_t *pcm, size_t frames)
     }
 }
 
-/* 录完：挑声道、算峰值和放大倍数、存 WAV */
+/* 录完：挑声道、算电平和放大倍数、存 WAV
+ *
+ * ★ 电平用 99.5 百分位，不用峰值。
+ *
+ *   实测录音里会有个别满幅（32767）的尖峰：丢掉 START 后第一块之后
+ *   仍然有。按峰值归一化的话，一个尖峰就把放大倍数压到 1 倍、把波形
+ *   图压成"一根柱子加一条平线"——用户看到的就是"包络动一下就不动了，
+ *   播放没反应"。百分位对零星尖峰不敏感。
+ */
 
 static void rec_analyse(void)
 {
+  static uint32_t hist[512];            /* |x| 按 64 分桶 */
   int64_t sum[2] = { 0, 0 };
+  uint32_t want;
+  uint32_t acc = 0;
+  size_t peak_at = 0;
   int peak = 0;
+  int p995 = 0;
   size_t i;
 
   for (i = 0; i < g_rec.frames; i++)
@@ -1866,20 +2031,34 @@ static void rec_analyse(void)
   g_rec.avg[1] = g_rec.frames ? (int)(sum[1] / (int64_t)g_rec.frames) : 0;
   g_rec.chan = g_rec.avg[1] > g_rec.avg[0] ? 1 : 0;
 
+  memset(hist, 0, sizeof(hist));
   for (i = 0; i < g_rec.frames; i++)
     {
       int16_t v = g_rec.st[2 * i + g_rec.chan];
       int a = v < 0 ? -v : v;
 
       g_rec.mono[i] = v;
+      hist[a >> 6]++;
       if (a > peak)
         {
           peak = a;
+          peak_at = i;
         }
     }
 
-  g_rec.peak = peak;
-  g_rec.gain = peak > 0 ? 29000 / peak : 16;
+  want = (uint32_t)(g_rec.frames - g_rec.frames / 200);
+  for (i = 0; i < 512; i++)
+    {
+      acc += hist[i];
+      if (acc >= want)
+        {
+          p995 = (int)((i + 1) << 6);
+          break;
+        }
+    }
+
+  g_rec.peak = p995 > 0 ? p995 : 1;
+  g_rec.gain = 20000 / g_rec.peak;
   if (g_rec.gain < 1)
     {
       g_rec.gain = 1;
@@ -1889,6 +2068,8 @@ static void rec_analyse(void)
       g_rec.gain = 16;
     }
 
+  syslog(LOG_INFO, "录音机: 最大尖峰 %d 在第 %zu 帧（%zu ms），99.5%% 电平 %d\n",
+         peak, peak_at, peak_at * 1000 / K7A_RATE, p995);
   rec_write_wav(g_rec.mono, g_rec.frames);
 }
 
@@ -1905,6 +2086,28 @@ static void *rec_worker(void *arg)
       if (g_rec.frames > 0)
         {
           rec_analyse();
+        }
+    }
+  else if (what == REC_BEEP)
+    {
+      int16_t *out = malloc(K7A_RATE * 2);
+      size_t i;
+
+      ret = -ENOMEM;
+      if (out != NULL)
+        {
+          /* 1kHz 方波的 48 点周期近似正弦：用查表太啰嗦，三角波足够听 */
+
+          for (i = 0; i < K7A_RATE; i++)
+            {
+              int ph = (int)(i % 48);
+              int tri = ph < 24 ? ph * 2 - 24 : 72 - ph * 2;
+
+              out[i] = (int16_t)(tri * 800);
+            }
+
+          ret = k7a_play_mono(out, K7A_RATE);
+          free(out);
         }
     }
   else
@@ -2019,8 +2222,9 @@ static void rec_draw_wave(void)
             }
         }
 
+      peak = g_rec.peak ? peak * 100 / g_rec.peak : 0;
       lv_chart_set_value_by_id(g_rec_chart, g_rec_series, i,
-                               g_rec.peak ? peak * 100 / g_rec.peak : 0);
+                               peak > 100 ? 100 : peak);
     }
 
   lv_chart_refresh(g_rec_chart);
@@ -2069,7 +2273,7 @@ static void rec_poll(void)
       rec_draw_wave();
       lv_label_set_text_fmt(g_rec_state,
                             "录好了 %d.%d 秒。用的是%s声道（平均 左 %d / "
-                            "右 %d），峰值 %d，放音放大 %d 倍。",
+                            "右 %d），电平 %d，放音放大 %d 倍。",
                             (int)(g_rec.frames / K7A_RATE),
                             (int)(g_rec.frames % K7A_RATE * 10 / K7A_RATE),
                             g_rec.chan ? "右" : "左",
@@ -2084,10 +2288,8 @@ static void rec_poll(void)
     {
       lv_label_set_text(g_rec_state, result == 0 ? "播放完毕。" :
                         "播放出错了。");
-      if (result != 0)
-        {
-          syslog(LOG_ERR, "录音机: 播放失败 %d\n", result);
-        }
+      syslog(LOG_INFO, "录音机: %s结束 ret=%d\n",
+             what == REC_BEEP ? "测试音" : "放音", result);
     }
 }
 
@@ -2343,6 +2545,7 @@ static void tick_cb(lv_timer_t *t)
 
   camera_poll();
   agent_poll();
+  tts_poll();
   rec_poll();
 
   /* 串口调试入口：echo 1 > /tmp/k7-open-camera 等同于点 Open camera */
@@ -2370,6 +2573,13 @@ static void tick_cb(lv_timer_t *t)
   if (unlink("/tmp/k7-play") == 0)
     {
       rec_start(REC_PLAYING);
+    }
+
+  /* echo 1 > /tmp/k7-beep：同一条放音路径放 1 秒 1kHz，单独验证喇叭 */
+
+  if (unlink("/tmp/k7-beep") == 0)
+    {
+      rec_start(REC_BEEP);
     }
 
   amp_refresh();

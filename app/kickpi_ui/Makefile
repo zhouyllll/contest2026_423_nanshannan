@@ -18,5 +18,6 @@ MAINSRC = kickpi_ui_main.c
 # 中文字库（scripts/gen-cjk-font.sh 生成，约 430KB）
 CSRCS += lv_font_k7_cjk_20.c
 CSRCS += k7_audio.c
+CSRCS += k7_tts.c
 
 include $(APPDIR)/Application.mk
