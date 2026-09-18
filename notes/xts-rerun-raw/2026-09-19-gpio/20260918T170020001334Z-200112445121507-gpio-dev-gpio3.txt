@@ -1,0 +1,6 @@
+
+NuttShell (NSH)
+nsh> [Kgpio /dev/gpio3
+Driver: /dev/gpio3
+  Input pin:     Value=1
+nsh> 

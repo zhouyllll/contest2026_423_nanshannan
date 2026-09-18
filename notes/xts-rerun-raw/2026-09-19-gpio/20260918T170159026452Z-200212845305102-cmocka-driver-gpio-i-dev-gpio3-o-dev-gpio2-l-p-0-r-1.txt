@@ -1,0 +1,7 @@
+
+NuttShell (NSH)
+nsh> [Kcmocka_driver_gpio -i /dev/gpio3 -o /dev/gpio2 -l -p 0 -r 1
+[write and read output]  writevalue is 0, outvalue is 1
+[Loop test]  outvalue is 0, invalue is 1
+[input and output test]  outvalue is 49, invalue is 49
+nsh> 

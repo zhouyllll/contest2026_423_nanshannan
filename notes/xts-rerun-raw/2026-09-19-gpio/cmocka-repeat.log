@@ -1,0 +1,6 @@
+[Kcmocka_driver_gpio -i /dev/gpio3 -o /dev/gpio2 -l -p 0 -r 1
+[write and read output]  writevalue is 0, outvalue is 1
+[Loop test]  outvalue is 0, invalue is 1
+[input and output test]  outvalue is 49, invalue is 49
+nsh> 
+{"command": "cmocka_driver_gpio -i /dev/gpio3 -o /dev/gpio2 -l -p 0 -r 1", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789750919.035153, "host_at_done": 1789750921.5537832, "elapsed_monotonic_s": 2.5186307260009926, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-136-current/20260918T170159026452Z-200212845305102-cmocka-driver-gpio-i-dev-gpio3-o-dev-gpio2-l-p-0-r-1.raw", "text": "/tmp/k7-xts-136-current/20260918T170159026452Z-200212845305102-cmocka-driver-gpio-i-dev-gpio3-o-dev-gpio2-l-p-0-r-1.txt", "prompt_returned": true}

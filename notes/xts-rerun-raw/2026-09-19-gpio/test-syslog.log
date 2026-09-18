@@ -1,0 +1,3 @@
+[Kdmesg
+
+{"command": "dmesg", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789750873.8185751, "host_at_done": 1789750888.919012, "elapsed_monotonic_s": 15.100437062006677, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-136-current/20260918T170113810310Z-200167148585100-dmesg.raw", "text": "/tmp/k7-xts-136-current/20260918T170113810310Z-200167148585100-dmesg.txt", "prompt_returned": false}

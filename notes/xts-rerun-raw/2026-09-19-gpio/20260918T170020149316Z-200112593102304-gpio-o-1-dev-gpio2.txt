@@ -1,0 +1,8 @@
+
+NuttShell (NSH)
+nsh> [Kgpio -o 1 /dev/gpio2
+Driver: /dev/gpio2
+  Output pin:    Value=1
+  Writing:       Value=1
+  Verify:        Value=1
+nsh> 
