@@ -1,0 +1,6 @@
+[Kdmesg -c
+[CPU0] [==========] tests: Running 3 test(s).
+[CPU0] [ RUN      ] drivertest_block_stress
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789732870.4471843, "host_at_done": 1789732877.5972388, "elapsed_monotonic_s": 7.150054522993742, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T120108773479Z-181802401896030-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T120108773479Z-181802401896030-dmesg-c.txt", "prompt_returned": true}

@@ -1,0 +1,509 @@
+2026-09-18T12:18:45.794789+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789733928.5216842, "host_at_done": 1789733934.8301523, "elapsed_monotonic_s": 6.308467799011851, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T121845846799Z-182906340355509-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T121845846799Z-182906340355509-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:19:23.510638+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789733964.9603605, "host_at_done": 1789733969.4373922, "elapsed_monotonic_s": 5.882240998005727, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T121923532992Z-182945391374555-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T121923532992Z-182945391374555-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:19:59.484105+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789733999.5325985, "host_at_done": 1789734005.4126344, "elapsed_monotonic_s": 5.880035761976615, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T121959503059Z-182982766624027-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T121959503059Z-182982766624027-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:20:35.418734+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734036.898474, "host_at_done": 1789734043.186375, "elapsed_monotonic_s": 6.287901078991126, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122035440862Z-183020093807477-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122035440862Z-183020093807477-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:21:11.168716+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734072.6000056, "host_at_done": 1789734077.5329778, "elapsed_monotonic_s": 6.301154696993763, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122111191184Z-183057877181754-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122111191184Z-183057877181754-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:21:47.539194+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734107.6320493, "host_at_done": 1789734113.510388, "elapsed_monotonic_s": 5.878337945003295, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122147557586Z-183095611767510-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122147557586Z-183095611767510-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:22:22.179747+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734143.6049259, "host_at_done": 1789734149.488446, "elapsed_monotonic_s": 5.883519972994691, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122222198166Z-183133125391805-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122222198166Z-183133125391805-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:22:58.116685+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734179.5849915, "host_at_done": 1789734185.887512, "elapsed_monotonic_s": 6.302520789991831, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122258137130Z-183170466945637-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122258137130Z-183170466945637-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:23:34.506213+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734215.9880948, "host_at_done": 1789734222.3008888, "elapsed_monotonic_s": 6.312793996999972, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122334525058Z-183208262440800-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122334525058Z-183208262440800-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:24:10.937246+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734252.4338253, "host_at_done": 1789734258.3316522, "elapsed_monotonic_s": 5.8978271250089165, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122410955971Z-183246110931455-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122410955971Z-183246110931455-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:24:48.350103+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734289.6201012, "host_at_done": 1789734294.7776062, "elapsed_monotonic_s": 5.157505133014638, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122448367632Z-183283522590031-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122448367632Z-183283522590031-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:25:23.941550+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734325.2725785, "host_at_done": 1789734331.0269299, "elapsed_monotonic_s": 5.754350984992925, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122523962360Z-183320003952954-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122523962360Z-183320003952954-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:26:00.239831+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734361.6394114, "host_at_done": 1789734367.3204668, "elapsed_monotonic_s": 5.681055035005556, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122600259475Z-183357118537145-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122600259475Z-183357118537145-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:26:36.355235+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734397.7621522, "host_at_done": 1789734402.9367385, "elapsed_monotonic_s": 5.799111069005448, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122636375504Z-183394249836744-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122636375504Z-183394249836744-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:27:12.985116+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734433.4097939, "host_at_done": 1789734439.0996594, "elapsed_monotonic_s": 5.689866043016082, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122713005163Z-183431504018466-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122713005163Z-183431504018466-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:27:47.988203+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734469.60758, "host_at_done": 1789734475.8565729, "elapsed_monotonic_s": 6.248993327986682, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122748007494Z-183468586479926-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122748007494Z-183468586479926-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:28:25.871572+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734507.3070319, "host_at_done": 1789734511.7448559, "elapsed_monotonic_s": 5.6311096099962015, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122825890783Z-183506469769603-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122825890783Z-183506469769603-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:29:01.763896+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734542.2953076, "host_at_done": 1789734548.0639875, "elapsed_monotonic_s": 5.768680053995922, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122901806836Z-183543579105622-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122901806836Z-183543579105622-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:29:38.092999+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734579.4569013, "host_at_done": 1789734585.2081585, "elapsed_monotonic_s": 5.751257210999029, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T122938112834Z-183580686329212-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T122938112834Z-183580686329212-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:30:14.035629+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734616.115471, "host_at_done": 1789734621.9201927, "elapsed_monotonic_s": 6.64777514198795, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123014054708Z-183617853799636-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123014054708Z-183617853799636-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:30:51.026824+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734652.4044929, "host_at_done": 1789734658.1840143, "elapsed_monotonic_s": 5.779521360003855, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123051045269Z-183656596542841-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123051045269Z-183656596542841-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:31:27.248338+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734688.6508596, "host_at_done": 1789734694.609288, "elapsed_monotonic_s": 5.9584285949822515, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123127267511Z-183693797994205-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123127267511Z-183693797994205-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:32:03.640114+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734724.9619558, "host_at_done": 1789734730.7452514, "elapsed_monotonic_s": 5.783296681998763, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123203659807Z-183731212123334-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123203659807Z-183731212123334-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:32:39.905080+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734761.2812498, "host_at_done": 1789734767.0082695, "elapsed_monotonic_s": 5.727019696991192, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123239923678Z-183768370839729-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123239923678Z-183768370839729-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:33:16.145256+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734797.615013, "host_at_done": 1789734803.4028435, "elapsed_monotonic_s": 5.787830794986803, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123316164281Z-183805485925749-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123316164281Z-183805485925749-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:33:52.511287+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734833.931497, "host_at_done": 1789734838.7760167, "elapsed_monotonic_s": 5.7654558130016085, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123352530425Z-183842784747786-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123352530425Z-183842784747786-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:34:28.815985+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734870.4325929, "host_at_done": 1789734875.3644025, "elapsed_monotonic_s": 6.081030050001573, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123428840737Z-183880016000154-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123428840737Z-183880016000154-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:35:04.548579+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734906.0153134, "host_at_done": 1789734911.7894332, "elapsed_monotonic_s": 5.774120224989019, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123504569317Z-183917766395132-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123504569317Z-183917766395132-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:35:40.788776+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734942.4906962, "host_at_done": 1789734948.5588455, "elapsed_monotonic_s": 6.068149442988215, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123540808192Z-183955010404348-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123540808192Z-183955010404348-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:36:17.602823+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789734979.0746658, "host_at_done": 1789734984.8537772, "elapsed_monotonic_s": 5.779111715004547, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123617621717Z-183992830939745-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123617621717Z-183992830939745-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:36:53.879937+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735015.3637307, "host_at_done": 1789735021.6199162, "elapsed_monotonic_s": 6.256185108999489, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123653898676Z-184030122533751-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123653898676Z-184030122533751-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:37:30.619051+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735051.9608068, "host_at_done": 1789735058.0455716, "elapsed_monotonic_s": 6.084764363011345, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123730639807Z-184067900631526-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123730639807Z-184067900631526-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:38:06.926669+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735088.6218767, "host_at_done": 1789735093.610667, "elapsed_monotonic_s": 6.0075272930262145, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123806946156Z-184105347249610-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123806946156Z-184105347249610-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:38:42.584211+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735124.1288502, "host_at_done": 1789735132.5382814, "elapsed_monotonic_s": 8.409431529988069, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123842604156Z-184143101156489-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123842604156Z-184143101156489-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:39:21.522833+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735162.901061, "host_at_done": 1789735168.6851118, "elapsed_monotonic_s": 5.784050933027174, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123921543575Z-184183114755048-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123921543575Z-184183114755048-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:39:57.699260+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735199.2400491, "host_at_done": 1789735205.1341772, "elapsed_monotonic_s": 5.894128355983412, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T123957717028Z-184220331912756-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T123957717028Z-184220331912756-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:40:33.697699+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735235.0797684, "host_at_done": 1789735240.8832572, "elapsed_monotonic_s": 5.803488417994231, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124033717449Z-184257825498482-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124033717449Z-184257825498482-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:41:09.945828+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735271.7214797, "host_at_done": 1789735278.2810955, "elapsed_monotonic_s": 6.5596156990213785, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124109966158Z-184295157497963-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124109966158Z-184295157497963-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:41:47.177435+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735308.6514308, "host_at_done": 1789735314.8446927, "elapsed_monotonic_s": 6.1932617429993115, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124147197195Z-184333516454336-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124147197195Z-184333516454336-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:42:23.790068+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735345.3931258, "host_at_done": 1789735351.2526798, "elapsed_monotonic_s": 5.859554356022272, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124223808191Z-184371187596038-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124223808191Z-184371187596038-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:43:00.218580+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735381.6912925, "host_at_done": 1789735386.3075542, "elapsed_monotonic_s": 5.698180804000003, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124300238279Z-184408712210784-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124300238279Z-184408712210784-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:43:35.249882+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735416.8418982, "host_at_done": 1789735422.650262, "elapsed_monotonic_s": 5.8083637219970115, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124335269203Z-184445899535287-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124335269203Z-184445899535287-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:44:12.710806+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735454.2232215, "host_at_done": 1789735460.8292727, "elapsed_monotonic_s": 6.6060513489937875, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124412731132Z-184483361463092-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124412731132Z-184483361463092-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:44:49.382267+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735490.9633234, "host_at_done": 1789735495.7617114, "elapsed_monotonic_s": 5.871567044989206, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124449400565Z-184521511865281-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124449400565Z-184521511865281-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:45:24.740979+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735526.2504873, "host_at_done": 1789735532.4434059, "elapsed_monotonic_s": 6.192918470012955, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124524760621Z-184559022423596-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124524760621Z-184559022423596-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:46:01.358175+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735563.3384218, "host_at_done": 1789735569.2153807, "elapsed_monotonic_s": 5.87695917399833, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124601378232Z-184596763171870-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124601378232Z-184596763171870-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:46:38.147452+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735600.5183237, "host_at_done": 1789735606.2797897, "elapsed_monotonic_s": 5.761465878982563, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124638167249Z-184634635561851-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124638167249Z-184634635561851-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:47:14.818376+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735636.3608139, "host_at_done": 1789735642.5764658, "elapsed_monotonic_s": 6.2156525700120255, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124714837627Z-184672809879349-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124714837627Z-184672809879349-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:47:51.580000+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735673.1861627, "host_at_done": 1789735679.0808475, "elapsed_monotonic_s": 5.894684875005623, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124751600128Z-184710608319484-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124751600128Z-184710608319484-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:48:27.865250+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735709.270538, "host_at_done": 1789735715.2956195, "elapsed_monotonic_s": 6.025081883009989, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124827884120Z-184748150001373-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124827884120Z-184748150001373-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:49:04.033009+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735745.3461149, "host_at_done": 1789735751.1683943, "elapsed_monotonic_s": 5.822279707004782, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124904052490Z-184785650614810-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124904052490Z-184785650614810-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:49:40.091630+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735781.6951787, "host_at_done": 1789735787.6027098, "elapsed_monotonic_s": 5.907530852011405, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T124940110917Z-184822795965063-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T124940110917Z-184822795965063-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:50:16.465441+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735817.8991623, "host_at_done": 1789735822.7678928, "elapsed_monotonic_s": 6.239980066020507, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125016485473Z-184860363368440-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125016485473Z-184860363368440-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:50:51.372748+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735853.2718253, "host_at_done": 1789735859.1156664, "elapsed_monotonic_s": 5.84384033997776, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125051391484Z-184898058171599-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125051391484Z-184898058171599-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:51:27.762873+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735889.2354574, "host_at_done": 1789735895.096877, "elapsed_monotonic_s": 5.861419395980192, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125127782692Z-184935853478317-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125127782692Z-184935853478317-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:52:03.874724+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735925.2186341, "host_at_done": 1789735931.096202, "elapsed_monotonic_s": 5.877568208990851, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125203894080Z-184973213328790-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125203894080Z-184973213328790-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:52:39.824443+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735961.1664526, "host_at_done": 1789735967.454657, "elapsed_monotonic_s": 6.28820456698304, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125239846337Z-185010456934356-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125239846337Z-185010456934356-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:53:16.193060+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789735997.6115973, "host_at_done": 1789736003.4622114, "elapsed_monotonic_s": 5.850614300987218, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125316212478Z-185048102111409-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125316212478Z-185048102111409-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:53:52.171144+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736033.5579085, "host_at_done": 1789736038.0650792, "elapsed_monotonic_s": 5.841325135988882, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125352190544Z-185085414413293-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125352190544Z-185085414413293-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:54:26.821559+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736068.1733794, "host_at_done": 1789736074.0286806, "elapsed_monotonic_s": 5.855301238014363, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125426840539Z-185122690003245-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125426840539Z-185122690003245-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:55:02.725181+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736104.1145353, "host_at_done": 1789736109.9714227, "elapsed_monotonic_s": 5.856887525005732, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125502746534Z-185159907956931-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125502746534Z-185159907956931-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:55:38.704085+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736140.0965772, "host_at_done": 1789736145.9833546, "elapsed_monotonic_s": 5.886777142994106, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125538723911Z-185197177415490-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125538723911Z-185197177415490-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:56:14.687949+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736176.1418068, "host_at_done": 1789736181.9813712, "elapsed_monotonic_s": 5.839564025984146, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125614707275Z-185234506336498-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125614707275Z-185234506336498-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:56:50.632006+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736212.0725632, "host_at_done": 1789736217.9442642, "elapsed_monotonic_s": 5.871700973977568, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125650651021Z-185271823396720-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125650651021Z-185271823396720-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:57:26.596215+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736248.071783, "host_at_done": 1789736252.5562732, "elapsed_monotonic_s": 5.8681084100098815, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125726617034Z-185309155827372-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125726617034Z-185309155827372-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:58:02.598650+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736282.6453552, "host_at_done": 1789736288.5134041, "elapsed_monotonic_s": 5.868048642005306, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125802619356Z-185346541766848-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125802619356Z-185346541766848-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:58:37.155751+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736318.618393, "host_at_done": 1789736324.927735, "elapsed_monotonic_s": 6.309342072985601, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125837175159Z-185383817485253-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125837175159Z-185383817485253-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:59:13.547224+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736356.261769, "host_at_done": 1789736362.1291223, "elapsed_monotonic_s": 5.867353545996593, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125913566628Z-185421622534441-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125913566628Z-185421622534441-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T12:59:50.833899+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736392.3669877, "host_at_done": 1789736398.3026426, "elapsed_monotonic_s": 5.935655334003968, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T125950853679Z-185460247580665-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T125950853679Z-185460247580665-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:00:26.797264+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736428.2014604, "host_at_done": 1789736434.0759168, "elapsed_monotonic_s": 5.874456279008882, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130026816313Z-185497742611299-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130026816313Z-185497742611299-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:01:02.783874+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736464.2423532, "host_at_done": 1789736468.7038255, "elapsed_monotonic_s": 5.879230846010614, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130102803507Z-185535071102544-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130102803507Z-185535071102544-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:01:38.745651+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736498.7928522, "host_at_done": 1789736505.073121, "elapsed_monotonic_s": 6.280268970003817, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130138767778Z-185572453133733-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130138767778Z-185572453133733-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:02:15.124158+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736536.5392914, "host_at_done": 1789736542.4054875, "elapsed_monotonic_s": 5.866196479997598, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130215146129Z-185610395795873-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130215146129Z-185610395795873-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:02:50.487553+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736571.9924505, "host_at_done": 1789736577.6349642, "elapsed_monotonic_s": 6.912457553000422, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130250506049Z-185647723428931-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130250506049Z-185647723428931-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:03:26.263534+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736607.7369776, "host_at_done": 1789736613.611459, "elapsed_monotonic_s": 5.874481859995285, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130326282838Z-185686183523596-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130326282838Z-185686183523596-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:04:03.642754+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736645.1038918, "host_at_done": 1789736650.9662323, "elapsed_monotonic_s": 5.8623401779914275, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130403665134Z-185723565822317-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130403665134Z-185723565822317-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:04:38.948900+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736680.7464793, "host_at_done": 1789736685.310778, "elapsed_monotonic_s": 5.871065895975335, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130438968382Z-185760900247215-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130438968382Z-185760900247215-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:05:13.949541+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736715.4226406, "host_at_done": 1789736721.2927682, "elapsed_monotonic_s": 5.870127511007013, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130513969522Z-185798623248836-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130513969522Z-185798623248836-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:05:49.816264+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736751.386045, "host_at_done": 1789736757.2650135, "elapsed_monotonic_s": 5.878968909994001, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130549836108Z-185835977963656-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130549836108Z-185835977963656-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:06:25.904400+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736787.382037, "host_at_done": 1789736793.2753708, "elapsed_monotonic_s": 5.893333840009291, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130625923594Z-185873443562654-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130625923594Z-185873443562654-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:07:01.260766+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736822.6905134, "host_at_done": 1789736828.9631727, "elapsed_monotonic_s": 6.272658928006422, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130701280608Z-185910852696974-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130701280608Z-185910852696974-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:07:37.548210+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736859.1110616, "host_at_done": 1789736865.0814166, "elapsed_monotonic_s": 5.970355533994734, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130737568908Z-185948579250093-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130737568908Z-185948579250093-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:08:13.494633+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736895.0674205, "host_at_done": 1789736900.9493878, "elapsed_monotonic_s": 5.88196701000561, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130813513934Z-185986140386398-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130813513934Z-185986140386398-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:08:49.631959+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736931.0808244, "host_at_done": 1789736936.96872, "elapsed_monotonic_s": 5.887895888998173, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130849651542Z-186023643506641-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130849651542Z-186023643506641-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:09:25.592956+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789736967.06921, "host_at_done": 1789736973.3790734, "elapsed_monotonic_s": 6.309863773989491, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T130925613279Z-186061026355589-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T130925613279Z-186061026355589-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:10:02.019777+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737003.5423226, "host_at_done": 1789737007.9299874, "elapsed_monotonic_s": 5.8921731839946005, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131002040165Z-186098871194344-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131002040165Z-186098871194344-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:10:37.967730+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737039.5501912, "host_at_done": 1789737045.3761802, "elapsed_monotonic_s": 5.825989228003891, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131037987309Z-186136322839382-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131037987309Z-186136322839382-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:11:13.458072+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737074.8863351, "host_at_done": 1789737080.7476368, "elapsed_monotonic_s": 5.861301483004354, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131113476951Z-186173740134324-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131113476951Z-186173740134324-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:11:49.245242+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737110.6535015, "host_at_done": 1789737115.7967334, "elapsed_monotonic_s": 6.507629942003405, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131149265137Z-186211065152050-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131149265137Z-186211065152050-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:12:24.375485+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737146.0728025, "host_at_done": 1789737152.37652, "elapsed_monotonic_s": 6.303717604983831, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131224395839Z-186249015147476-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131224395839Z-186249015147476-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:13:00.920620+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737182.4986815, "host_at_done": 1789737190.5572674, "elapsed_monotonic_s": 8.058585460996255, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131300960626Z-186287048554530-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131300960626Z-186287048554530-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:13:39.045837+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737220.5919392, "host_at_done": 1789737226.4799936, "elapsed_monotonic_s": 5.888054524984909, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131339064544Z-186326680217769-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131339064544Z-186326680217769-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:14:15.099320+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737256.6005516, "host_at_done": 1789737262.4931173, "elapsed_monotonic_s": 5.8925662910041865, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131415118260Z-186364156082514-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131415118260Z-186364156082514-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:14:51.018053+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737292.5487523, "host_at_done": 1789737297.4338307, "elapsed_monotonic_s": 6.311624541005585, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131451036404Z-186401560963560-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131451036404Z-186401560963560-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:15:27.484764+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737328.9862013, "host_at_done": 1789737333.4122853, "elapsed_monotonic_s": 5.8881971390219405, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131527502824Z-186439453928305-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131527502824Z-186439453928305-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:16:01.983434+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737363.5115337, "host_at_done": 1789737370.2390366, "elapsed_monotonic_s": 6.72750297098537, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131602003490Z-186476899053999-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131602003490Z-186476899053999-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:16:38.758342+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737400.738633, "host_at_done": 1789737406.8452787, "elapsed_monotonic_s": 6.106645776017103, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131638776360Z-186515193778235-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131638776360Z-186515193778235-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:17:15.416717+00:00
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737436.7250948, "host_at_done": 1789737443.0436933, "elapsed_monotonic_s": 6.318598414014559, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131715435167Z-186553317396195-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131715435167Z-186553317396195-dmesg-c.txt", "prompt_returned": true}
+2026-09-18T13:17:51.627938+00:00
+[Kdmesg -c
+[CPU0] [  ERROR   ] --- output_crc != input_crc
+[   LINE   ] --- drivertest_block.c:282: error: Failure!
+[CPU0] [  FAILED  ] drivertest_block_stress
+[CPU0] [ RUN      ] drivertest_block_single_write
+[CPU0] [       OK ] drivertest_block_single_write
+[CPU0] [ RUN      ] drivertest_block_cache_write
+[CPU0] [       OK ] drivertest_block_cache_write
+[CPU0] [==========] tests: 3 test(s) run.
+[CPU0] [  PASSED  ] 2 test(s).
+[CPU0] [  FAILED  ] tests: 1 test(s), listed below:
+[CPU0] [  FAILED  ] drivertest_block_stress
+[CPU0] 
+ 1 FAILED TEST(S)
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789737473.1581511, "host_at_done": 1789737473.892037, "elapsed_monotonic_s": 0.7338857770082541, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T131751646628Z-186590997785926-dmesg-c.raw", "text": "/tmp/k7-xts-135-run/20260918T131751646628Z-186590997785926-dmesg-c.txt", "prompt_returned": true}
+TEST_CAPTURE_ENDED; inspect result and last syslog before assigning PASS

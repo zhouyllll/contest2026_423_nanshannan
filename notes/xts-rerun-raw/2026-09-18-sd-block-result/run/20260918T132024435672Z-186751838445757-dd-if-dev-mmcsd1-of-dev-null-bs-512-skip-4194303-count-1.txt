@@ -1,0 +1,4 @@
+
+NuttShell (NSH)
+nsh> [Kdd if=/dev/mmcsd1 of=/dev/null bs=512 skip=4194303 count=1
+nsh> 

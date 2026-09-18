@@ -1,0 +1,3 @@
+[Kcmocka_driver_block -m /dev/mmcsd1
+nsh> 
+{"command": "cmocka_driver_block -m /dev/mmcsd1", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789732836.032229, "host_at_done": 1789737473.805414, "elapsed_monotonic_s": 4824.817320114002, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-135-run/20260918T120036023964Z-181768330990747-cmocka-driver-block-m-dev-mmcsd1.raw", "text": "/tmp/k7-xts-135-run/20260918T120036023964Z-181768330990747-cmocka-driver-block-m-dev-mmcsd1.txt", "prompt_returned": true}
