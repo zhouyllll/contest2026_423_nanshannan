@@ -1,0 +1,103 @@
+diff --git a/netutils/telnetd/telnetd_daemon.c b/netutils/telnetd/telnetd_daemon.c
+index 20d8ec0..107f2cb 100644
+--- a/netutils/telnetd/telnetd_daemon.c
++++ b/netutils/telnetd/telnetd_daemon.c
+@@ -202,15 +202,28 @@ int telnetd_daemon(FAR const struct telnetd_config_s *config)
+         {
+           /* Just continue if a signal was received */
+ 
+-          if (errno == EINTR)
+-            {
+-              continue;
+-            }
+-          else
++          /* Only a broken listening socket is fatal.  Everything else is
++           * about one connection: e.g. a client that connects and closes
++           * before we get here (a port scan, a liveness probe) makes
++           * accept() fail with ENOTCONN.  Stopping the daemon for that
++           * would take remote access down for everyone.
++           */
++
++          if (errno == EBADF || errno == EINVAL || errno == ENOTSOCK ||
++              errno == EOPNOTSUPP)
+             {
+               nerr("ERROR: accept failed: %d\n", errno);
+               goto errout_with_socket;
+             }
++
++          if (errno != EINTR)
++            {
++              nerr("ERROR: accept failed, dropping connection: %d\n",
++                   errno);
++              usleep(10 * 1000);
++            }
++
++          continue;
+         }
+ 
+ #ifdef CONFIG_NET_SOLINGER
+@@ -224,7 +237,8 @@ int telnetd_daemon(FAR const struct telnetd_config_s *config)
+                      &ling, sizeof(struct linger)) < 0)
+         {
+           nerr("ERROR: setsockopt failed: %d\n", errno);
+-          goto errout_with_acceptsd;
++          close(acceptsd);
++          continue;
+         }
+ #endif
+ 
+@@ -234,7 +248,8 @@ int telnetd_daemon(FAR const struct telnetd_config_s *config)
+       if (drvrfd < 0)
+         {
+           nerr("ERROR: open(/dev/telnet) failed: %d\n", errno);
+-          goto errout_with_acceptsd;
++          close(acceptsd);
++          continue;
+         }
+ 
+       /* Create a character device to "wrap" the accepted socket descriptor */
+@@ -247,9 +262,10 @@ int telnetd_daemon(FAR const struct telnetd_config_s *config)
+       if (ioctl(drvrfd, SIOCTELNET,
+                 (unsigned long)((uintptr_t)&session)) < 0)
+         {
+-          nerr("ERROR: open(/dev/telnet) failed: %d\n", errno);
++          nerr("ERROR: SIOCTELNET failed: %d\n", errno);
+           close(drvrfd);
+-          goto errout_with_acceptsd;
++          close(acceptsd);
++          continue;
+         }
+ 
+       close(drvrfd);
+@@ -260,8 +276,12 @@ int telnetd_daemon(FAR const struct telnetd_config_s *config)
+       drvrfd = open(session.ts_devpath, O_RDWR);
+       if (drvrfd < 0)
+         {
++          /* The telnet driver owns the socket now; if the peer is already
++           * gone the driver is torn down with it.  Keep listening.
++           */
++
+           nerr("ERROR: Failed to open %s: %d\n", session.ts_devpath, errno);
+-          goto errout_with_socket;
++          continue;
+         }
+ 
+       /* Use this driver as stdin, stdout, and stderror */
+@@ -317,16 +337,12 @@ int telnetd_daemon(FAR const struct telnetd_config_s *config)
+           if (ret > 0)
+             {
+               nerr("ERROR: Failed start the telnet session: %d\n", ret);
+-              errno = ret;
+-              goto errout_with_socket;
++              continue;
+             }
+         }
+ #endif
+     }
+ 
+-errout_with_acceptsd:
+-  close(acceptsd);
+-
+ errout_with_socket:
+   close(listensd);
+ errout:

@@ -34,7 +34,7 @@ openvela（NuttX）移植到 **KICKPI-K7（RK3576）**，大赛 BSP 作品，截
 | 14336 | Linux AMP DTB | `rk3576-kickpi-k7-amp.dtb`，上限 544 扇区 |
 | 16384 | U-Boot（自编，带 `bootamp`） | `bootcmd=bootamp`，`bootdelay=1` |
 | **24576** | **AMP FIT（openvela）** | trust 分区，上限 8192 扇区（09-17 从 8192 挪过来） |
-| 49152 | Linux `Image-amp`（7.2MB） | `~/rk3576-amp/out/Image-amp` sha dfb0842a |
+| 49152 | Linux `Image-amp-rootfs`（7.36MB，内嵌 initramfs） | `~/rk3576-amp/out/Image-amp-rootfs` sha 8f64e120；旧的无用户态版 `Image-amp` sha dfb0842a |
 | ≥65536 | rkdeveloptool **写不进去**（静默丢弃） | |
 
 U-Boot 改动在 `amp/uboot/0004..0009`，U-Boot 源码 `~/rk3576-amp/u-boot`（不是 git 仓库）。
@@ -68,6 +68,12 @@ cd ../contest2026_423_nanshannan && bash scripts/flash.sh          # 双系统�
 - 网络：ping、DNS、telnet NSH
 - **桌面助手端到端**：开机自启 `ai_agent` → 拍照 → mimo-v2.5 看图 → 作答，界面收到回答（实测 193s）
   - Token Plan：地址 `https://token-plan-cn.xiaomimimo.com/v1`，模型 **mimo-v2.5**（不支持 mimo-v2-flash/omni）
+
+- **Linux 用户态**（09-18）：initramfs + `k7d`，nsh 里 `ampctl exec <命令>` 在 A72 的 Linux 上执行并回显。
+  构建 `bash amp/linux/rootfs/build-rootfs.sh`，刷写 `flash.sh --stay` 后 `scripts/flash-kernel.sh ~/rk3576-amp/out/Image-amp-rootfs`。
+  详见 `amp/README.md`「Linux 用户态」。
+- **telnetd 不再被一次探测打死**：`bsp/upstream/telnetd-survive-bad-connection.patch`（apps 仓工作区已改）。
+  **别用 `bash /dev/tcp` 探 2323**，旧镜像上一次就会让 telnet 永久下线。
 
 ## 6. 上段会话修过的关键缺陷（别再踩）
 
@@ -115,6 +121,7 @@ cd ../contest2026_423_nanshannan && bash scripts/flash.sh          # 双系统�
 - CIF DMA 为什么多写一行未查（传感器实际行数 > 配置？）。现在靠余量挡着。
 - agent 一次回答约 3 分钟（模型端推理）。
 - 带诊断代码的镜像从 Maskrom 起来时，用户在 **115200** 看到过 nsh —— 原因未查。
+- telnet：连上立即 RST 且连发十几次时，个别 `Telnet_session` 卡住不退，占住 8 个预分配 TCP 连接之一（正常断开/间隔 0.5s 的 RST 不漏）。
 - xTS：1.3.15 看门狗 api 子项（GLB_RST_ST 被上游清零）未过；stash@{0} 的内容已提交（e84061b），stash 可删。
 - NuttX 仓库（`../nuttx`）有未提交修改：`arm64_gicv2.c`（SHARED_DIST 支持，**必需**）、ft5x06、es8388、bt_uart 等，归属待核对，别随手 checkout。
 

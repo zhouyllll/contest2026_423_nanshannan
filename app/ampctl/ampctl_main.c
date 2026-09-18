@@ -51,6 +51,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <semaphore.h>
+#include <pthread.h>
 
 #include <nuttx/rpmsg/rpmsg.h>
 
@@ -62,6 +63,22 @@
 
 #define AMPCTL_EPT_NAME   "amp-echo"
 #define AMPCTL_DEF_TMO_MS 3000
+
+/* exec 用的端点名。Linux 的 rpmsg_char 只认这一个名字（id_table），
+ * 认出来就生成 /dev/rpmsgN，k7d 在那头等着。
+ */
+
+#define AMPCTL_EXEC_EPT   "rpmsg-raw"
+
+/* k7d 自己 60s 杀超时的命令；这里多等一点，让它的 'E' 帧有机会回来。 */
+
+#define AMPCTL_EXEC_TMO_MS  70000
+
+/* 收包环。rptun 线程往里写、nsh 任务往外打印。串口 1.5M 约 150KB/s，
+ * Linux 那边吐得比这快，所以环满时回调会有界地等一会儿（见 exec_cb）。
+ */
+
+#define AMPCTL_RING_SIZE  16384
 
 /* 自检用的 group。必须是 rptun 没占用的 —— 见 rk3576_mailbox_selftest()
  * 的说明：在 rptun 的 group 上放假门铃会把它推进没有对端的非法状态。
@@ -81,6 +98,24 @@ struct ampctl_ctx_s
   char                  rxbuf[256];
   size_t                rxlen;
   const char           *cpuname;
+  const char           *eptname;
+  rpmsg_ept_cb          cb;
+};
+
+/* exec 的状态。base 必须是第一个成员：回调里的 priv 就是 base 的地址。 */
+
+struct ampctl_exec_s
+{
+  struct ampctl_ctx_s   base;
+  pthread_mutex_t       lock;
+  char                  ring[AMPCTL_RING_SIZE];
+  size_t                head;     /* 写位置（回调推进）              */
+  size_t                tail;     /* 读位置（打印推进）              */
+  size_t                dropped;  /* 等了也没腾出地方而丢掉的字节    */
+  bool                  hello;    /* 收到 'H'：知道对端地址了        */
+  bool                  done;     /* 收到 'E'                        */
+  int                   status;   /* 'E' 带回的退出码                */
+  char                  hellomsg[128];
 };
 
 /****************************************************************************
@@ -103,7 +138,9 @@ static void ampctl_usage(void)
          "  status            本端链路状态（不需要对端在线）\n"
          "  ping [-t ms] [文本]  发一帧并等回应，默认超时 %d ms\n"
          "  listen [-t ms]    只收不发，打印对端发来的帧\n"
-         "  selftest          自己给自己按门铃，验证接收路径（不需要对端）\n",
+         "  selftest          自己给自己按门铃，验证接收路径（不需要对端）\n"
+         "  exec <命令...>     让 A72 上的 Linux 执行 shell 命令，打印输出\n"
+         "                    例: ampctl exec cat /proc/cpuinfo\n",
          AMPCTL_DEF_TMO_MS);
 }
 
@@ -292,9 +329,9 @@ static void ampctl_device_created(struct rpmsg_device *rdev, void *priv)
       return;
     }
 
-  if (rpmsg_create_ept(&ctx->ept, rdev, AMPCTL_EPT_NAME,
+  if (rpmsg_create_ept(&ctx->ept, rdev, ctx->eptname,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                       ampctl_ept_cb, NULL) == 0)
+                       ctx->cb, NULL) == 0)
     {
       ctx->ept.priv = ctx;
       ctx->bound    = true;
@@ -321,12 +358,15 @@ static void ampctl_device_destroy(struct rpmsg_device *rdev, void *priv)
  *
  ****************************************************************************/
 
-static int ampctl_open(struct ampctl_ctx_s *ctx, int timeout_ms)
+static int ampctl_open(struct ampctl_ctx_s *ctx, int timeout_ms,
+                       const char *eptname, rpmsg_ept_cb cb)
 {
   int waited = 0;
 
   memset(ctx, 0, sizeof(*ctx));
   ctx->cpuname = CONFIG_RK3576_RPTUN_CPUNAME;
+  ctx->eptname = eptname;
+  ctx->cb      = cb;
   sem_init(&ctx->sem, 0, 0);
 
   rpmsg_register_callback(ctx, ampctl_device_created,
@@ -371,7 +411,7 @@ static int ampctl_ping(int timeout_ms, const char *text)
   struct ampctl_ctx_s ctx;
   int ret;
 
-  ret = ampctl_open(&ctx, timeout_ms);
+  ret = ampctl_open(&ctx, timeout_ms, AMPCTL_EPT_NAME, ampctl_ept_cb);
   if (ret < 0)
     {
       return ret;
@@ -408,7 +448,7 @@ static int ampctl_listen(int timeout_ms)
   struct ampctl_ctx_s ctx;
   int ret;
 
-  ret = ampctl_open(&ctx, timeout_ms);
+  ret = ampctl_open(&ctx, timeout_ms, AMPCTL_EPT_NAME, ampctl_ept_cb);
   if (ret < 0)
     {
       return ret;
@@ -432,6 +472,226 @@ static int ampctl_listen(int timeout_ms)
 }
 
 /****************************************************************************
+ * Name: ampctl_exec_cb
+ *
+ * Description:
+ *   跑在 rptun 线程里。帧格式见 amp/linux/rootfs/k7d.c 开头：首字节是
+ *   类型，'H' 握手、'O' 输出、'E' 结束。
+ *
+ *   'O' 进环；环满时**有界地**等打印那边腾地方（最多约 1s）。等是为了
+ *   不丢字 —— Linux 吐得比串口快；有界是因为 rptun 线程被卡住期间，这条
+ *   链路上别的端点也收不到东西。真等不到就丢，并记下丢了多少。
+ *
+ ****************************************************************************/
+
+static int ampctl_exec_cb(struct rpmsg_endpoint *ept, void *data, size_t len,
+                          uint32_t src, void *priv)
+{
+  struct ampctl_exec_s *ex = priv;
+  const char *p = data;
+  int waited = 0;
+  size_t i;
+
+  UNUSED(src);
+
+  if (len < 1)
+    {
+      return 0;
+    }
+
+  pthread_mutex_lock(&ex->lock);
+
+  switch (p[0])
+    {
+      case 'H':
+        len = len - 1 < sizeof(ex->hellomsg) - 1 ?
+              len - 1 : sizeof(ex->hellomsg) - 1;
+        memcpy(ex->hellomsg, p + 1, len);
+        ex->hellomsg[len] = '\0';
+        ex->hello = true;
+        break;
+
+      case 'O':
+        for (i = 1; i < len; i++)
+          {
+            while (ex->head - ex->tail >= AMPCTL_RING_SIZE && waited < 1000)
+              {
+                pthread_mutex_unlock(&ex->lock);
+                rpmsg_post(ept, &ex->base.sem);
+                usleep(10 * 1000);
+                waited += 10;
+                pthread_mutex_lock(&ex->lock);
+              }
+
+            if (ex->head - ex->tail >= AMPCTL_RING_SIZE)
+              {
+                ex->dropped += len - i;
+                break;
+              }
+
+            ex->ring[ex->head++ % AMPCTL_RING_SIZE] = p[i];
+          }
+        break;
+
+      case 'E':
+        {
+          char num[12];
+
+          len = len - 1 < sizeof(num) - 1 ? len - 1 : sizeof(num) - 1;
+          memcpy(num, p + 1, len);
+          num[len] = '\0';
+          ex->status = atoi(num);
+          ex->done   = true;
+        }
+        break;
+
+      default:
+        break;
+    }
+
+  pthread_mutex_unlock(&ex->lock);
+  rpmsg_post(ept, &ex->base.sem);
+  return 0;
+}
+
+/* 把环里现有的字节打印出来。返回 true 表示已经收到 'E'、而且环已经空了。 */
+
+static bool ampctl_exec_drain(struct ampctl_exec_s *ex)
+{
+  char buf[256];
+  bool done;
+  size_t n;
+
+  for (; ; )
+    {
+      pthread_mutex_lock(&ex->lock);
+      for (n = 0; n < sizeof(buf) && ex->tail != ex->head; n++)
+        {
+          buf[n] = ex->ring[ex->tail++ % AMPCTL_RING_SIZE];
+        }
+
+      done = ex->done && ex->tail == ex->head;
+      pthread_mutex_unlock(&ex->lock);
+
+      if (n == 0)
+        {
+          return done;
+        }
+
+      fwrite(buf, 1, n, stdout);
+    }
+}
+
+/****************************************************************************
+ * Name: ampctl_exec
+ *
+ * Description:
+ *   让 A72 簇上的 Linux 执行一条 shell 命令，把输出打出来。
+ *
+ *   三段，每段都有界：
+ *     1. 建 "rpmsg-raw" 端点，等 k7d 发来 'H'（它轮询 /dev/rpmsgN，
+ *        50ms 一次）。收到之前不能发 —— 还不知道对端地址。
+ *     2. 发 'X' + 命令。
+ *     3. 收 'O' 打印，直到 'E'。
+ *
+ *   返回 Linux 那边的退出码（>= 0），或链路错误（< 0）。
+ *
+ ****************************************************************************/
+
+static int ampctl_exec(int timeout_ms, const char *cmd)
+{
+  struct ampctl_exec_s *ex;
+  char frame[480];
+  clock_t deadline;
+  size_t len;
+  int ret;
+
+  len = strlen(cmd);
+  if (len == 0 || len > sizeof(frame) - 2)
+    {
+      printf("命令为空或超过 %zu 字节\n", sizeof(frame) - 2);
+      return -EINVAL;
+    }
+
+  /* 16KB 的环放栈上太大，放堆上 */
+
+  ex = calloc(1, sizeof(*ex));
+  if (ex == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  pthread_mutex_init(&ex->lock, NULL);
+
+  ret = ampctl_open(&ex->base, timeout_ms, AMPCTL_EXEC_EPT, ampctl_exec_cb);
+  if (ret < 0)
+    {
+      goto out_free;
+    }
+
+  deadline = clock() + MSEC2TICK(timeout_ms);
+  while (!ex->hello && clock() < deadline)
+    {
+      rpmsg_tickwait(&ex->base.ept, &ex->base.sem, MSEC2TICK(100));
+    }
+
+  if (!ex->hello)
+    {
+      printf("Linux 没有应答（等了 %d ms）。\n"
+             "  ampctl status 握手完成=否  → Linux 内核没起来\n"
+             "  握手完成=是                → 用户态 k7d 没在跑"
+             "（Image 里没带 initramfs？）\n", timeout_ms);
+      ret = -ETIMEDOUT;
+      goto out_close;
+    }
+
+  printf("[%s]\n", ex->hellomsg);
+
+  frame[0] = 'X';
+  memcpy(frame + 1, cmd, len);
+  ret = rpmsg_send(&ex->base.ept, frame, len + 1);
+  if (ret < 0)
+    {
+      printf("发送失败: %d\n", ret);
+      goto out_close;
+    }
+
+  deadline = clock() + MSEC2TICK(AMPCTL_EXEC_TMO_MS);
+  while (!ampctl_exec_drain(ex))
+    {
+      if (clock() >= deadline)
+        {
+          printf("\n等 Linux 结束超时（%d ms）\n", AMPCTL_EXEC_TMO_MS);
+          ret = -ETIMEDOUT;
+          goto out_close;
+        }
+
+      rpmsg_tickwait(&ex->base.ept, &ex->base.sem, MSEC2TICK(100));
+    }
+
+  fflush(stdout);
+  if (ex->dropped > 0)
+    {
+      printf("\n（输出太快，丢了 %zu 字节）\n", ex->dropped);
+    }
+
+  /* NSH 的 $? 只分成功/失败，具体的退出码只能在这里打出来 */
+
+  ret = ex->status;
+  if (ret != 0)
+    {
+      printf("[退出码 %d%s]\n", ret, ret == 124 ? "：Linux 侧 60s 超时被杀" : "");
+    }
+
+out_close:
+  ampctl_close(&ex->base);
+out_free:
+  pthread_mutex_destroy(&ex->lock);
+  free(ex);
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -439,12 +699,40 @@ int main(int argc, FAR char *argv[])
 {
   int timeout = AMPCTL_DEF_TMO_MS;
   const char *text = "hello from openvela";
+  int ret;
   int i;
 
   if (argc < 2)
     {
       ampctl_usage();
       return EXIT_FAILURE;
+    }
+
+  /* exec 后面的全部参数拼回一条命令行，交给 Linux 的 sh -c。
+   * 带管道、引号的写法要整体加引号：ampctl exec "ps | grep k7d"
+   */
+
+  if (strcmp(argv[1], "exec") == 0)
+    {
+      char cmd[478];
+      size_t off = 0;
+
+      cmd[0] = '\0';
+      for (i = 2; i < argc; i++)
+        {
+          int n = snprintf(cmd + off, sizeof(cmd) - off, "%s%s",
+                           i > 2 ? " " : "", argv[i]);
+          if (n < 0 || (size_t)n >= sizeof(cmd) - off)
+            {
+              printf("命令太长\n");
+              return EXIT_FAILURE;
+            }
+
+          off += n;
+        }
+
+      ret = ampctl_exec(timeout, cmd);
+      return ret < 0 ? EXIT_FAILURE : ret;
     }
 
   for (i = 2; i < argc; i++)

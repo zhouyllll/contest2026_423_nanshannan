@@ -55,7 +55,7 @@ boot 分区的 Android 镜像格式（那样太占地方）：
 | 14336 | 272KB | `rk3576-kickpi-k7-amp.dtb`（只含 4 个 A72 核） | security |
 | 16384 | 3MB | `uboot-amp.img`（带 AMP + bootamp + 面板） | uboot |
 | **24576** | **4MB** | `amp.itb`（AMP FIT，里面是 openvela） | trust |
-| 49152 | 8MB（到 65536） | `Image-amp`（裸 Linux Image，7.2MB） | vbmeta + boot 头部 |
+| 49152 | 8MB（到 65536） | `Image-amp-rootfs`（Linux Image + 内嵌 initramfs，7.36MB；bootamp 只读 7.25MB 窗口 = 14848 扇区） | vbmeta + boot 头部 |
 
 主机侧的唯一来源是 `amp/layout.sh`，U-Boot 侧是 `cmd/bootamp.c` 的
 `AMP_*` 宏（`uboot/0009`），两处必须同步改。所有写盘脚本都先过
@@ -89,7 +89,7 @@ RK=~/rkdeveloptool/rkdeveloptool
 $RK wl 24576 out/amp.itb        # 日常用 scripts/flash.sh，它带备份/回读/回滚
 $RK wl 14336 out/rk3576-kickpi-k7-amp.dtb
 $RK wl 16384 out/uboot-amp.img
-$RK wl 49152 out/Image-amp
+$RK wl 49152 out/Image-amp-rootfs   # 日常用 scripts/flash-kernel.sh（备份/回读/回滚）
 # 每一段都回读对比，见上
 ```
 

@@ -209,3 +209,32 @@ virtio_rpmsg_bus virtio0: rpmsg host is online
 
 烧写与启动步骤、以及踩过的坑，见 [FLASH.md](FLASH.md)；
 谁拥有哪个外设见 [OWNERSHIP.md](OWNERSHIP.md)。
+
+## Linux 用户态（2026-09-18 上板验证）
+
+Linux 侧不再是「只有内核、挂根失败就停」：Image 里内嵌 initramfs
+（静态 busybox + 守护进程 `k7d`），开机约 3.1s 进用户态。openvela 的 nsh 里：
+
+```
+nsh> ampctl exec uname -a
+[Linux 6.1.75 aarch64 on k7-linux, up 71s, 53 procs]
+Linux k7-linux 6.1.75 #15 SMP Fri Sep 18 21:42:37 +08 2026 aarch64
+nsh> ampctl exec "grep 'CPU part' /proc/cpuinfo"     # 4 × 0xd08 = Cortex-A72
+```
+
+链路：`ampctl exec` 建名为 `rpmsg-raw` 的端点 → Linux 名字服务建 channel →
+`rpmsg_char` 生成 `/dev/rpmsgN` → `k7d` 打开并先发 HELLO（openvela 这才知道
+对端地址）→ 执行 `sh -c`，输出逐帧回传，最后一帧带退出码。协议见
+`linux/rootfs/k7d.c` 开头。实测往返约 50ms，16KB 的 dmesg 全量不丢，连跑 20 次无失败。
+
+| 文件 | 作用 |
+|---|---|
+| `linux/amp-rootfs.config` | 内核增量：INITRD(XZ)、NET 核心（不要协议栈）、RPMSG_CHAR、`-Os` |
+| `linux/rootfs/busybox.applets` | busybox 白名单（allnoconfig 起，78 个 applet） |
+| `linux/rootfs/k7d.c` / `init` | 守护进程和 /init |
+| `linux/rootfs/build-rootfs.sh` | 一键构建，产物 `~/rk3576-amp/out/Image-amp-rootfs` |
+| `../scripts/flash-kernel.sh` | 写 LBA 49152（整区备份、回读、失败回滚） |
+
+**体积是唯一硬约束**：bootamp 固定读 14848 扇区（7.25MB）。当前 7.36MB 的
+Image 余 243KB。为什么不用 eMMC 上的根分区、不用 SD 卡：Linux 这边没有也
+不该有 MMC 驱动（eMMC 归 openvela），见 `linux/amp-rootfs.config` 开头。

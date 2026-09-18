@@ -1,0 +1,28 @@
+#!/bin/sh
+# A72 簇 Linux 的 /init（initramfs 里的第一个进程）。
+#
+# ★ 这一侧没有控制台：UART0 归 openvela。内核打开 /dev/console 会失败，
+#   init 起来时 0/1/2 三个 fd 是空的 —— 第一件事就是把它们接到 /dev/null，
+#   否则后面第一个 open() 拿到的就是 fd 0，子进程的 stdio 会接错地方。
+#
+# ★ 这个脚本不能退出。init 退出 = 内核 panic；bootargs 里 panic=0 让它
+#   停住而不是复位（复位走 PSCI SYSTEM_RESET，会把 openvela 一起复位）。
+#   所以最后是一个永远不返回的循环，k7d 挂了就重拉。
+
+exec </dev/null >/dev/null 2>&1
+
+mount -t proc     proc /proc
+mount -t sysfs    sys  /sys
+mount -t devtmpfs dev  /dev
+# 没开 SHMEM，tmpfs 在这个内核里就是 ramfs（不限大小，别往里写大文件）
+mount -t tmpfs    tmp  /tmp
+
+hostname k7-linux
+exec >/dev/kmsg 2>&1
+echo "k7 init: userspace up on $(nproc) cpus"
+
+while :; do
+	/sbin/k7d
+	echo "k7 init: k7d exited ($?), restarting"
+	sleep 1
+done
