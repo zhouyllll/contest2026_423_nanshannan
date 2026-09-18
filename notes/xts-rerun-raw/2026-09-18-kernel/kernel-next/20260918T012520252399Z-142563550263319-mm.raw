@@ -1,0 +1,1707 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kmm
+ÿü     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11155840
+       Total non-inuse space             = 52889216
+(0)Allocating 5040 bytes
+(0)Memory allocated at 0x4b190870
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52880368
+       Total allocated space             = 11160864
+       Total non-inuse space             = 52884192
+(1)Allocating 124352 bytes
+(1)Memory allocated at 0x4b191c10
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52756032
+       Total allocated space             = 11285200
+       Total non-inuse space             = 52759856
+(2)Allocating 5712 bytes
+(2)Memory allocated at 0x4b1b01c0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52750320
+       Total allocated space             = 11290912
+       Total non-inuse space             = 52754144
+(3)Allocating 96 bytes
+(3)Memory allocated at 0x4b06a440
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52750320
+       Total allocated space             = 11290992
+       Total non-inuse space             = 52754064
+(4)Allocating 2768 bytes
+(4)Memory allocated at 0x4b1b1810
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52747552
+       Total allocated space             = 11293760
+       Total non-inuse space             = 52751296
+(5)Allocating 32 bytes
+(5)Memory allocated at 0x4b069f00
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52747552
+       Total allocated space             = 11293808
+       Total non-inuse space             = 52751248
+(6)Allocating 624 bytes
+(6)Memory allocated at 0x4b06ac80
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52747552
+       Total allocated space             = 11294432
+       Total non-inuse space             = 52750624
+(7)Allocating 48 bytes
+(7)Memory allocated at 0x4b06aef0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52747552
+       Total allocated space             = 11294480
+       Total non-inuse space             = 52750576
+(8)Allocating 1552 bytes
+(8)Memory allocated at 0x4b063200
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52747552
+       Total allocated space             = 11296032
+       Total non-inuse space             = 52749024
+(9)Allocating 992 bytes
+(9)Memory allocated at 0x4b063810
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52747552
+       Total allocated space             = 11297008
+       Total non-inuse space             = 52748048
+(10)Allocating 69200 bytes
+(10)Memory allocated at 0x4b1b22e0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52678352
+       Total allocated space             = 11366208
+       Total non-inuse space             = 52678848
+(11)Allocating 928 bytes
+(11)Memory allocated at 0x4b1c3130
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52677440
+       Total allocated space             = 11367120
+       Total non-inuse space             = 52677936
+(12)Allocating 6768 bytes
+(12)Memory allocated at 0x4b1c34c0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52670672
+       Total allocated space             = 11373888
+       Total non-inuse space             = 52671168
+(13)Allocating 1664 bytes
+(13)Memory allocated at 0x4b1c4f30
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52669008
+       Total allocated space             = 11375552
+       Total non-inuse space             = 52669504
+(14)Allocating 1040 bytes
+(14)Memory allocated at 0x4b1c55b0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52667968
+       Total allocated space             = 11376592
+       Total non-inuse space             = 52668464
+(15)Allocating 32 bytes
+(15)Memory allocated at 0x4b06af20
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52667968
+       Total allocated space             = 11376624
+       Total non-inuse space             = 52668432
+(16)Allocating 224 bytes
+(16)Memory allocated at 0x4b06a490
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52667968
+       Total allocated space             = 11376832
+       Total non-inuse space             = 52668224
+(17)Allocating 496 bytes
+(17)Memory allocated at 0x4b1c59c0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52667472
+       Total allocated space             = 11377328
+       Total non-inuse space             = 52667728
+(18)Allocating 2032 bytes
+(18)Memory allocated at 0x4b1c5bb0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52665440
+       Total allocated space             = 11379360
+       Total non-inuse space             = 52665696
+(19)Allocating 2608 bytes
+(19)Memory allocated at 0x4b1c63a0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52662832
+       Total allocated space             = 11381968
+       Total non-inuse space             = 52663088
+(20)Allocating 240 bytes
+(20)Memory allocated at 0x4b1c6dd0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52662592
+       Total allocated space             = 11382208
+       Total non-inuse space             = 52662848
+(21)Allocating 992 bytes
+(21)Memory allocated at 0x4b1c6ec0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52661600
+       Total allocated space             = 11383200
+       Total non-inuse space             = 52661856
+(22)Allocating 96 bytes
+(22)Memory allocated at 0x4b063be0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52661600
+       Total allocated space             = 11383280
+       Total non-inuse space             = 52661776
+(23)Allocating 880 bytes
+(23)Memory allocated at 0x4b1c72a0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52660736
+       Total allocated space             = 11384144
+       Total non-inuse space             = 52660912
+(24)Allocating 10272 bytes
+(24)Memory allocated at 0x4b1c7600
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52650464
+       Total allocated space             = 11394416
+       Total non-inuse space             = 52650640
+(25)Allocating 32 bytes
+(25)Memory allocated at 0x4b06af40
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 2
+       Largest non-inuse chunk           = 52650464
+       Total allocated space             = 11394448
+       Total non-inuse space             = 52650608
+(26)Allocating 672 bytes
+(26)Memory allocated at 0x4b1c9e20
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 2
+       Largest non-inuse chunk           = 52649808
+       Total allocated space             = 11395104
+       Total non-inuse space             = 52649952
+(27)Allocating 9952 bytes
+(27)Memory allocated at 0x4b1ca0b0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 2
+       Largest non-inuse chunk           = 52639856
+       Total allocated space             = 11405056
+       Total non-inuse space             = 52640000
+(28)Allocating 4752 bytes
+(28)Memory allocated at 0x4b1cc790
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 2
+       Largest non-inuse chunk           = 52635104
+       Total allocated space             = 11409808
+       Total non-inuse space             = 52635248
+(29)Allocating 800 bytes
+(29)Memory allocated at 0x4b1cda20
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 2
+       Largest non-inuse chunk           = 52634320
+       Total allocated space             = 11410592
+       Total non-inuse space             = 52634464
+(30)Allocating 128 bytes
+(30)Memory allocated at 0x4b063c30
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 1
+       Largest non-inuse chunk           = 52634320
+       Total allocated space             = 11410736
+       Total non-inuse space             = 52634320
+(31)Allocating 81664 bytes
+(31)Memory allocated at 0x4b1cdd30
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 1
+       Largest non-inuse chunk           = 52552656
+       Total allocated space             = 11492400
+       Total non-inuse space             = 52552656
+(0)Re-allocating at 0x4b063810 from 962 to 963 bytes
+(0)Memory re-allocated at 0x4b063810
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 1
+       Largest non-inuse chunk           = 52552656
+       Total allocated space             = 11492400
+       Total non-inuse space             = 52552656
+(1)Re-allocating at 0x4b1c59c0 from 480 to 4346 bytes
+(1)Memory re-allocated at 0x4b1e1c30
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 2
+       Largest non-inuse chunk           = 52548288
+       Total allocated space             = 11496272
+       Total non-inuse space             = 52548784
+(2)Re-allocating at 0x4b063be0 from 68 to 592 bytes
+(2)Memory re-allocated at 0x4b1e2d40
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11496800
+       Total non-inuse space             = 52548256
+(3)Re-allocating at 0x4b1cdd30 from 81647 to 4734 bytes
+(3)Memory re-allocated at 0x4b1cdd30
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11419888
+       Total non-inuse space             = 52625168
+(4)Re-allocating at 0x4b1c6ec0 from 969 to 812 bytes
+(4)Memory re-allocated at 0x4b1c6ec0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11419728
+       Total non-inuse space             = 52625328
+(5)Re-allocating at 0x4b191c10 from 124321 to 6 bytes
+(5)Memory re-allocated at 0x4b191c10
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 6
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11295424
+       Total non-inuse space             = 52749632
+(6)Re-allocating at 0x4b06a490 from 194 to 30421 bytes
+(6)Memory re-allocated at 0x4b1cefc0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 7
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11325648
+       Total non-inuse space             = 52719408
+(7)Re-allocating at 0x4b1c7600 from 10254 to 511 bytes
+(7)Memory re-allocated at 0x4b1c7600
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 8
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11315904
+       Total non-inuse space             = 52729152
+(8)Re-allocating at 0x4b190870 from 5011 to 9172 bytes
+(8)Memory re-allocated at 0x4b1c7810
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 9
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11320064
+       Total non-inuse space             = 52724992
+(9)Re-allocating at 0x4b06ac80 from 601 to 42 bytes
+(9)Memory re-allocated at 0x4b06ac80
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 10
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11319504
+       Total non-inuse space             = 52725552
+(10)Re-allocating at 0x4b1c55b0 from 1024 to 18 bytes
+(10)Memory re-allocated at 0x4b1c55b0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 10
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11318496
+       Total non-inuse space             = 52726560
+(11)Re-allocating at 0x4b1cc790 from 4732 to 8663 bytes
+(11)Memory re-allocated at 0x4b1d66a0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 11
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11322416
+       Total non-inuse space             = 52722640
+(12)Re-allocating at 0x4b1c63a0 from 2590 to 1666 bytes
+(12)Memory re-allocated at 0x4b1c63a0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 12
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11321488
+       Total non-inuse space             = 52723568
+(13)Re-allocating at 0x4b1c72a0 from 852 to 5040 bytes
+(13)Memory re-allocated at 0x4b1d8880
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 12
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11325680
+       Total non-inuse space             = 52719376
+(14)Re-allocating at 0x4b063c30 from 111 to 11666 bytes
+(14)Memory re-allocated at 0x4b1d9c40
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 12
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11337216
+       Total non-inuse space             = 52707840
+(15)Re-allocating at 0x4b1c9e20 from 646 to 59139 bytes
+(15)Memory re-allocated at 0x4b191c30
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 12
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11395712
+       Total non-inuse space             = 52649344
+(16)Re-allocating at 0x4b06af20 from 3 to 1412 bytes
+(16)Memory re-allocated at 0x4b1c55d0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 13
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11397104
+       Total non-inuse space             = 52647952
+(17)Re-allocating at 0x4b06aef0 from 28 to 91255 bytes
+(17)Memory re-allocated at 0x4b1e2fa0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 12
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11488320
+       Total non-inuse space             = 52556736
+(18)Re-allocating at 0x4b1c4f30 from 1646 to 221 bytes
+(18)Memory re-allocated at 0x4b1c4f30
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 13
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11486896
+       Total non-inuse space             = 52558160
+(19)Re-allocating at 0x4b06a440 from 70 to 416 bytes
+(19)Memory re-allocated at 0x4b06acc0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 13
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11487248
+       Total non-inuse space             = 52557808
+(20)Re-allocating at 0x4b1c6dd0 from 222 to 9374 bytes
+(20)Memory re-allocated at 0x4b1dc9e0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 13
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11496400
+       Total non-inuse space             = 52548656
+(21)Re-allocating at 0x4b069f00 from 7 to 4 bytes
+(21)Memory re-allocated at 0x4b069f00
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 13
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11496400
+       Total non-inuse space             = 52548656
+(22)Re-allocating at 0x4b1b01c0 from 5692 to 123 bytes
+(22)Memory re-allocated at 0x4b1b01c0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 14
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11490832
+       Total non-inuse space             = 52554224
+(23)Re-allocating at 0x4b1b22e0 from 69179 to 7830 bytes
+(23)Memory re-allocated at 0x4b1b22e0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 15
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11429472
+       Total non-inuse space             = 52615584
+(24)Re-allocating at 0x4b1b1810 from 2746 to 1990 bytes
+(24)Memory re-allocated at 0x4b1b1810
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 16
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11428704
+       Total non-inuse space             = 52616352
+(25)Re-allocating at 0x4b1c3130 from 901 to 28 bytes
+(25)Memory re-allocated at 0x4b1c3130
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 17
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11427840
+       Total non-inuse space             = 52617216
+(26)Re-allocating at 0x4b1c5bb0 from 2011 to 229 bytes
+(26)Memory re-allocated at 0x4b1c5bb0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 18
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11426048
+       Total non-inuse space             = 52619008
+(27)Re-allocating at 0x4b1cda20 from 776 to 4088 bytes
+(27)Memory re-allocated at 0x4b1ccd30
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 18
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11429360
+       Total non-inuse space             = 52615696
+(28)Re-allocating at 0x4b06af40 from 12 to 3088 bytes
+(28)Memory re-allocated at 0x4b190870
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 18
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11432432
+       Total non-inuse space             = 52612624
+(29)Re-allocating at 0x4b063200 from 1536 to 168 bytes
+(29)Memory re-allocated at 0x4b063200
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 19
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11431056
+       Total non-inuse space             = 52614000
+(30)Re-allocating at 0x4b1c34c0 from 6750 to 11 bytes
+(30)Memory re-allocated at 0x4b1c34c0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 20
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11424320
+       Total non-inuse space             = 52620736
+(31)Re-allocating at 0x4b1ca0b0 from 9932 to 3723 bytes
+(31)Memory re-allocated at 0x4b1ca0b0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 20
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11418112
+       Total non-inuse space             = 52626944
+(0)Releasing memory at 0x4b1dc9e0 (size=9374 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 20
+       Largest non-inuse chunk           = 52456416
+       Total allocated space             = 11408720
+       Total non-inuse space             = 52636336
+(1)Releasing memory at 0x4b1e2fa0 (size=91255 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 20
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11317456
+       Total non-inuse space             = 52727600
+(2)Releasing memory at 0x4b1b01c0 (size=123 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 19
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11317312
+       Total non-inuse space             = 52727744
+(3)Releasing memory at 0x4b1c3130 (size=28 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 18
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11317264
+       Total non-inuse space             = 52727792
+(4)Releasing memory at 0x4b1b22e0 (size=7830 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 17
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11309424
+       Total non-inuse space             = 52735632
+(5)Releasing memory at 0x4b1cdd30 (size=4734 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 18
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11304672
+       Total non-inuse space             = 52740384
+(6)Releasing memory at 0x4b1c6ec0 (size=812 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 17
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11303840
+       Total non-inuse space             = 52741216
+(7)Releasing memory at 0x4b191c10 (size=6 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 17
+       Largest non-inuse chunk           = 52547680
+       Total allocated space             = 11303808
+       Total non-inuse space             = 52741248
+(8)Releasing memory at 0x4b1e2d40 (size=592 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 17
+       Largest non-inuse chunk           = 52548288
+       Total allocated space             = 11303200
+       Total non-inuse space             = 52741856
+(9)Releasing memory at 0x4b1c5bb0 (size=229 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 16
+       Largest non-inuse chunk           = 52548288
+       Total allocated space             = 11302960
+       Total non-inuse space             = 52742096
+(10)Releasing memory at 0x4b1c7600 (size=511 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 16
+       Largest non-inuse chunk           = 52548288
+       Total allocated space             = 11302432
+       Total non-inuse space             = 52742624
+(11)Releasing memory at 0x4b1c7810 (size=9172 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 15
+       Largest non-inuse chunk           = 52548288
+       Total allocated space             = 11293248
+       Total non-inuse space             = 52751808
+(12)Releasing memory at 0x4b1c4f30 (size=221 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 14
+       Largest non-inuse chunk           = 52548288
+       Total allocated space             = 11293008
+       Total non-inuse space             = 52752048
+(13)Releasing memory at 0x4b1c55d0 (size=1412 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 14
+       Largest non-inuse chunk           = 52548288
+       Total allocated space             = 11291584
+       Total non-inuse space             = 52753472
+(14)Releasing memory at 0x4b1cefc0 (size=30421 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 14
+       Largest non-inuse chunk           = 52548288
+       Total allocated space             = 11261152
+       Total non-inuse space             = 52783904
+(15)Releasing memory at 0x4b190870 (size=3088 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 14
+       Largest non-inuse chunk           = 52548288
+       Total allocated space             = 11258048
+       Total non-inuse space             = 52787008
+(16)Releasing memory at 0x4b069f00 (size=4 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 15
+       Largest non-inuse chunk           = 52548288
+       Total allocated space             = 11258000
+       Total non-inuse space             = 52787056
+(17)Releasing memory at 0x4b1c34c0 (size=11 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 14
+       Largest non-inuse chunk           = 52548288
+       Total allocated space             = 11257968
+       Total non-inuse space             = 52787088
+(18)Releasing memory at 0x4b1e1c30 (size=4346 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 13
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11253600
+       Total non-inuse space             = 52791456
+(19)Releasing memory at 0x4b063200 (size=168 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 13
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11253424
+       Total non-inuse space             = 52791632
+(20)Releasing memory at 0x4b1c55b0 (size=18 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 12
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11253392
+       Total non-inuse space             = 52791664
+(21)Releasing memory at 0x4b06acc0 (size=416 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 12
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11252960
+       Total non-inuse space             = 52792096
+(22)Releasing memory at 0x4b06ac80 (size=42 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 12
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11252896
+       Total non-inuse space             = 52792160
+(23)Releasing memory at 0x4b191c30 (size=59139 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 11
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11193744
+       Total non-inuse space             = 52851312
+(24)Releasing memory at 0x4b1b1810 (size=1990 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 10
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11191744
+       Total non-inuse space             = 52853312
+(25)Releasing memory at 0x4b1d8880 (size=5040 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 11
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11186688
+       Total non-inuse space             = 52858368
+(26)Releasing memory at 0x4b063810 (size=963 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 10
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11185712
+       Total non-inuse space             = 52859344
+(27)Releasing memory at 0x4b1c63a0 (size=1666 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 9
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11184032
+       Total non-inuse space             = 52861024
+(28)Releasing memory at 0x4b1d66a0 (size=8663 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 8
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11175360
+       Total non-inuse space             = 52869696
+(29)Releasing memory at 0x4b1ca0b0 (size=3723 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 7
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11171616
+       Total non-inuse space             = 52873440
+(30)Releasing memory at 0x4b1ccd30 (size=4088 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 6
+       Largest non-inuse chunk           = 52573728
+       Total allocated space             = 11167520
+       Total non-inuse space             = 52877536
+(31)Releasing memory at 0x4b1d9c40 (size=11666 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11155840
+       Total non-inuse space             = 52889216
+(0)Allocating 962 bytes aligned to 0x00000080
+(0)Memory allocated at 0x4b063200
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156816
+       Total non-inuse space             = 52888240
+(1)Allocating 480 bytes aligned to 0x00000800
+(1)Memory allocated at 0x4b191000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 6
+       Largest non-inuse chunk           = 52882960
+       Total allocated space             = 11157312
+       Total non-inuse space             = 52887744
+(2)Allocating 68 bytes aligned to 0x00020000
+(2)Memory allocated at 0x4b1a0000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 7
+       Largest non-inuse chunk           = 52821936
+       Total allocated space             = 11157392
+       Total non-inuse space             = 52887664
+(3)Allocating 81647 bytes aligned to 0x00002000
+(3)Memory allocated at 0x4b1a2000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 8
+       Largest non-inuse chunk           = 52732160
+       Total allocated space             = 11239056
+       Total non-inuse space             = 52806000
+(4)Allocating 969 bytes aligned to 0x00000020
+(4)Memory allocated at 0x4b063600
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 9
+       Largest non-inuse chunk           = 52732160
+       Total allocated space             = 11240048
+       Total non-inuse space             = 52805008
+(5)Allocating 124321 bytes aligned to 0x00008000
+(5)Memory allocated at 0x4b1b8000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 10
+       Largest non-inuse chunk           = 52599376
+       Total allocated space             = 11364384
+       Total non-inuse space             = 52680672
+(6)Allocating 194 bytes aligned to 0x00004000
+(6)Memory allocated at 0x4b194000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 11
+       Largest non-inuse chunk           = 52599376
+       Total allocated space             = 11364592
+       Total non-inuse space             = 52680464
+(7)Allocating 10254 bytes aligned to 0x00040000
+(7)Memory allocated at 0x4b200000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 12
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11374864
+       Total non-inuse space             = 52670192
+(8)Allocating 5011 bytes aligned to 0x00000200
+(8)Memory allocated at 0x4b1a0200
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 13
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11379888
+       Total non-inuse space             = 52665168
+(9)Allocating 601 bytes aligned to 0x00001000
+(9)Memory allocated at 0x4b192000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 14
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11380512
+       Total non-inuse space             = 52664544
+(10)Allocating 1024 bytes aligned to 0x00010000
+(10)Memory allocated at 0x4b1e0000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 15
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11381552
+       Total non-inuse space             = 52663504
+(11)Allocating 4732 bytes aligned to 0x00000008
+(11)Memory allocated at 0x4b192270
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 15
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11386304
+       Total non-inuse space             = 52658752
+(12)Allocating 2590 bytes aligned to 0x00000040
+(12)Memory allocated at 0x4b193500
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 15
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11388912
+       Total non-inuse space             = 52656144
+(13)Allocating 852 bytes aligned to 0x00000400
+(13)Memory allocated at 0x4b191400
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 16
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11389776
+       Total non-inuse space             = 52655280
+(14)Allocating 111 bytes aligned to 0x00000010
+(14)Memory allocated at 0x4b193f30
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 16
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11389904
+       Total non-inuse space             = 52655152
+(15)Allocating 646 bytes aligned to 0x00000004
+(15)Memory allocated at 0x4b0639e0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 16
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11390560
+       Total non-inuse space             = 52654496
+(0)Allocating 3 bytes aligned to 0x00000080
+(0)Memory allocated at 0x4b1a0080
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 17
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11390592
+       Total non-inuse space             = 52654464
+(1)Allocating 28 bytes aligned to 0x00000800
+(1)Memory allocated at 0x4b1b6000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 18
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11390640
+       Total non-inuse space             = 52654416
+(2)Allocating 1646 bytes aligned to 0x00020000
+(2)Memory allocated at 0x4b220000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 19
+       Largest non-inuse chunk           = 52296064
+       Total allocated space             = 11392304
+       Total non-inuse space             = 52652752
+(3)Allocating 70 bytes aligned to 0x00002000
+(3)Memory allocated at 0x4b1d8000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 20
+       Largest non-inuse chunk           = 52296064
+       Total allocated space             = 11392384
+       Total non-inuse space             = 52652672
+(4)Allocating 222 bytes aligned to 0x00000020
+(4)Memory allocated at 0x4b1a00a0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 20
+       Largest non-inuse chunk           = 52296064
+       Total allocated space             = 11392624
+       Total non-inuse space             = 52652432
+(5)Allocating 7 bytes aligned to 0x00008000
+(5)Memory allocated at 0x4b208000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 21
+       Largest non-inuse chunk           = 52296064
+       Total allocated space             = 11392656
+       Total non-inuse space             = 52652400
+(6)Allocating 5692 bytes aligned to 0x00004000
+(6)Memory allocated at 0x4b198000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 22
+       Largest non-inuse chunk           = 52296064
+       Total allocated space             = 11398368
+       Total non-inuse space             = 52646688
+(7)Allocating 69179 bytes aligned to 0x00040000
+(7)Memory allocated at 0x4b240000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 23
+       Largest non-inuse chunk           = 52097456
+       Total allocated space             = 11467568
+       Total non-inuse space             = 52577488
+(8)Allocating 2746 bytes aligned to 0x00000200
+(8)Memory allocated at 0x4b1d6600
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 24
+       Largest non-inuse chunk           = 52097456
+       Total allocated space             = 11470336
+       Total non-inuse space             = 52574720
+(9)Allocating 901 bytes aligned to 0x00001000
+(9)Memory allocated at 0x4b195000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 25
+       Largest non-inuse chunk           = 52097456
+       Total allocated space             = 11471248
+       Total non-inuse space             = 52573808
+(10)Allocating 2011 bytes aligned to 0x00010000
+(10)Memory allocated at 0x4b260000
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 26
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11473280
+       Total non-inuse space             = 52571776
+(11)Allocating 776 bytes aligned to 0x00000008
+(11)Memory allocated at 0x4b190870
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 26
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11474064
+       Total non-inuse space             = 52570992
+(12)Allocating 12 bytes aligned to 0x00000040
+(12)Memory allocated at 0x4b1b5f00
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 26
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11474096
+       Total non-inuse space             = 52570960
+(13)Allocating 1536 bytes aligned to 0x00000400
+(13)Memory allocated at 0x4b194400
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 27
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11475648
+       Total non-inuse space             = 52569408
+(14)Allocating 6750 bytes aligned to 0x00000010
+(14)Memory allocated at 0x4b1b6030
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 27
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11482416
+       Total non-inuse space             = 52562640
+(15)Allocating 9932 bytes aligned to 0x00000004
+(15)Memory allocated at 0x4b195390
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 27
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11492368
+       Total non-inuse space             = 52552688
+(0)Releasing memory at 0x4b1a0200 (size=5011 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 26
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11487344
+       Total non-inuse space             = 52557712
+(1)Releasing memory at 0x4b1b8000 (size=124321 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 25
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11363008
+       Total non-inuse space             = 52682048
+(2)Releasing memory at 0x4b198000 (size=5692 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 24
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11357296
+       Total non-inuse space             = 52687760
+(3)Releasing memory at 0x4b1d8000 (size=70 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 23
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11357216
+       Total non-inuse space             = 52687840
+(4)Releasing memory at 0x4b1d6600 (size=2746 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 22
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11354448
+       Total non-inuse space             = 52690608
+(5)Releasing memory at 0x4b208000 (size=7 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 21
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11354416
+       Total non-inuse space             = 52690640
+(6)Releasing memory at 0x4b192000 (size=601 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 21
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11353792
+       Total non-inuse space             = 52691264
+(7)Releasing memory at 0x4b1b6000 (size=28 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 21
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11353744
+       Total non-inuse space             = 52691312
+(8)Releasing memory at 0x4b194400 (size=1536 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 20
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11352192
+       Total non-inuse space             = 52692864
+(9)Releasing memory at 0x4b063200 (size=962 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 20
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11351216
+       Total non-inuse space             = 52693840
+(10)Releasing memory at 0x4b240000 (size=69179 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 19
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11282016
+       Total non-inuse space             = 52763040
+(11)Releasing memory at 0x4b195000 (size=901 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 19
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11281104
+       Total non-inuse space             = 52763952
+(12)Releasing memory at 0x4b1b6030 (size=6750 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 18
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11274336
+       Total non-inuse space             = 52770720
+(13)Releasing memory at 0x4b220000 (size=1646 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 17
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11272672
+       Total non-inuse space             = 52772384
+(14)Releasing memory at 0x4b1e0000 (size=1024 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 16
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11271632
+       Total non-inuse space             = 52773424
+(15)Releasing memory at 0x4b1a0080 (size=3 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 16
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11271600
+       Total non-inuse space             = 52773456
+(16)Releasing memory at 0x4b194000 (size=194 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 15
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11271392
+       Total non-inuse space             = 52773664
+(17)Releasing memory at 0x4b191000 (size=480 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 14
+       Largest non-inuse chunk           = 52033552
+       Total allocated space             = 11270896
+       Total non-inuse space             = 52774160
+(18)Releasing memory at 0x4b260000 (size=2011 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 13
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11268864
+       Total non-inuse space             = 52776192
+(19)Releasing memory at 0x4b193500 (size=2590 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 14
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11266256
+       Total non-inuse space             = 52778800
+(20)Releasing memory at 0x4b1a00a0 (size=222 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 13
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11266016
+       Total non-inuse space             = 52779040
+(21)Releasing memory at 0x4b063600 (size=969 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 13
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11265024
+       Total non-inuse space             = 52780032
+(22)Releasing memory at 0x4b1a0000 (size=68 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 12
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11264944
+       Total non-inuse space             = 52780112
+(23)Releasing memory at 0x4b191400 (size=852 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 11
+       Largest non-inuse chunk           = 52418528
+       Total allocated space             = 11264080
+       Total non-inuse space             = 52780976
+(24)Releasing memory at 0x4b200000 (size=10254 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 10
+       Largest non-inuse chunk           = 52732128
+       Total allocated space             = 11253808
+       Total non-inuse space             = 52791248
+(25)Releasing memory at 0x4b1b5f00 (size=12 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 10
+       Largest non-inuse chunk           = 52732160
+       Total allocated space             = 11253776
+       Total non-inuse space             = 52791280
+(26)Releasing memory at 0x4b0639e0 (size=646 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 9
+       Largest non-inuse chunk           = 52732160
+       Total allocated space             = 11253120
+       Total non-inuse space             = 52791936
+(27)Releasing memory at 0x4b195390 (size=9932 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 8
+       Largest non-inuse chunk           = 52732160
+       Total allocated space             = 11243168
+       Total non-inuse space             = 52801888
+(28)Releasing memory at 0x4b192270 (size=4732 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 7
+       Largest non-inuse chunk           = 52732160
+       Total allocated space             = 11238416
+       Total non-inuse space             = 52806640
+(29)Releasing memory at 0x4b190870 (size=776 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 7
+       Largest non-inuse chunk           = 52732160
+       Total allocated space             = 11237632
+       Total non-inuse space             = 52807424
+(30)Releasing memory at 0x4b193f30 (size=111 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 6
+       Largest non-inuse chunk           = 52732160
+       Total allocated space             = 11237504
+       Total non-inuse space             = 52807552
+(31)Releasing memory at 0x4b1a2000 (size=81647 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11155840
+       Total non-inuse space             = 52889216
+(0)Allocating 3 bytes aligned to 0x00000001
+(0)Memory allocated at 0x4b069f00
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11155888
+       Total non-inuse space             = 52889168
+(1)Allocating 20 bytes aligned to 0x00000002
+(1)Memory allocated at 0x4b06a440
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11155920
+       Total non-inuse space             = 52889136
+(2)Allocating 13 bytes aligned to 0x00000004
+(2)Memory allocated at 0x4b06a460
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11155952
+       Total non-inuse space             = 52889104
+(3)Allocating 24 bytes aligned to 0x00000008
+(3)Memory allocated at 0x4b06a480
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11155984
+       Total non-inuse space             = 52889072
+(4)Allocating 31 bytes aligned to 0x00000010
+(4)Memory allocated at 0x4b06a4a0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156032
+       Total non-inuse space             = 52889024
+(5)Allocating 12 bytes aligned to 0x00000020
+(5)Memory allocated at 0x4b06a500
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156064
+       Total non-inuse space             = 52888992
+(6)Allocating 28 bytes aligned to 0x00000040
+(6)Memory allocated at 0x4b06ac80
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156112
+       Total non-inuse space             = 52888944
+(7)Allocating 5 bytes aligned to 0x00000080
+(7)Memory allocated at 0x4b06ad00
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 6
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156144
+       Total non-inuse space             = 52888912
+(8)Allocating 21 bytes aligned to 0x00000001
+(8)Memory allocated at 0x4b06a4d0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156192
+       Total non-inuse space             = 52888864
+(9)Allocating 8 bytes aligned to 0x00000002
+(9)Memory allocated at 0x4b06a520
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156224
+       Total non-inuse space             = 52888832
+(10)Allocating 1 bytes aligned to 0x00000004
+(10)Memory allocated at 0x4b06a540
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156256
+       Total non-inuse space             = 52888800
+(11)Allocating 17 bytes aligned to 0x00000008
+(11)Memory allocated at 0x4b06acb0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156288
+       Total non-inuse space             = 52888768
+(12)Allocating 29 bytes aligned to 0x00000010
+(12)Memory allocated at 0x4b06acd0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156336
+       Total non-inuse space             = 52888720
+(13)Allocating 16 bytes aligned to 0x00000020
+(13)Memory allocated at 0x4b06ad20
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156368
+       Total non-inuse space             = 52888688
+(14)Allocating 6 bytes aligned to 0x00000040
+(14)Memory allocated at 0x4b06ad40
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156400
+       Total non-inuse space             = 52888656
+(15)Allocating 25 bytes aligned to 0x00000080
+(15)Memory allocated at 0x4b06ad80
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156448
+       Total non-inuse space             = 52888608
+(0)Allocating 11 bytes aligned to 0x00000001
+(0)Memory allocated at 0x4b06ad60
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156480
+       Total non-inuse space             = 52888576
+(1)Allocating 18 bytes aligned to 0x00000002
+(1)Memory allocated at 0x4b06adb0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156512
+       Total non-inuse space             = 52888544
+(2)Allocating 26 bytes aligned to 0x00000004
+(2)Memory allocated at 0x4b06add0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156560
+       Total non-inuse space             = 52888496
+(3)Allocating 32 bytes aligned to 0x00000008
+(3)Memory allocated at 0x4b06ae00
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156608
+       Total non-inuse space             = 52888448
+(4)Allocating 9 bytes aligned to 0x00000010
+(4)Memory allocated at 0x4b06ae30
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156640
+       Total non-inuse space             = 52888416
+(5)Allocating 30 bytes aligned to 0x00000020
+(5)Memory allocated at 0x4b06ae80
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156688
+       Total non-inuse space             = 52888368
+(6)Allocating 4 bytes aligned to 0x00000040
+(6)Memory allocated at 0x4b06af00
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156720
+       Total non-inuse space             = 52888336
+(7)Allocating 27 bytes aligned to 0x00000080
+(7)Memory allocated at 0x4b063200
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156768
+       Total non-inuse space             = 52888288
+(8)Allocating 10 bytes aligned to 0x00000001
+(8)Memory allocated at 0x4b06ae50
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156816
+       Total non-inuse space             = 52888240
+(9)Allocating 19 bytes aligned to 0x00000002
+(9)Memory allocated at 0x4b06af20
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156848
+       Total non-inuse space             = 52888208
+(10)Allocating 23 bytes aligned to 0x00000004
+(10)Memory allocated at 0x4b06af40
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156880
+       Total non-inuse space             = 52888176
+(11)Allocating 14 bytes aligned to 0x00000008
+(11)Memory allocated at 0x4b06aeb0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156912
+       Total non-inuse space             = 52888144
+(12)Allocating 2 bytes aligned to 0x00000010
+(12)Memory allocated at 0x4b06aed0
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 2
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156960
+       Total non-inuse space             = 52888096
+(13)Allocating 22 bytes aligned to 0x00000020
+(13)Memory allocated at 0x4b063260
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156992
+       Total non-inuse space             = 52888064
+(14)Allocating 15 bytes aligned to 0x00000040
+(14)Memory allocated at 0x4b063280
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 3
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11157024
+       Total non-inuse space             = 52888032
+(15)Allocating 7 bytes aligned to 0x00000080
+(15)Memory allocated at 0x4b063300
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 4
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11157056
+       Total non-inuse space             = 52888000
+(0)Releasing memory at 0x4b06a4d0 (size=21 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11157008
+       Total non-inuse space             = 52888048
+(1)Releasing memory at 0x4b06a500 (size=12 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156976
+       Total non-inuse space             = 52888080
+(2)Releasing memory at 0x4b06af00 (size=4 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 6
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156944
+       Total non-inuse space             = 52888112
+(3)Releasing memory at 0x4b06ae00 (size=32 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 7
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156896
+       Total non-inuse space             = 52888160
+(4)Releasing memory at 0x4b06ae50 (size=10 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 8
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156848
+       Total non-inuse space             = 52888208
+(5)Releasing memory at 0x4b06ae80 (size=30 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 8
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156800
+       Total non-inuse space             = 52888256
+(6)Releasing memory at 0x4b06a520 (size=8 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 8
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156768
+       Total non-inuse space             = 52888288
+(7)Releasing memory at 0x4b06adb0 (size=18 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 9
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156736
+       Total non-inuse space             = 52888320
+(8)Releasing memory at 0x4b063260 (size=22 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 9
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156704
+       Total non-inuse space             = 52888352
+(9)Releasing memory at 0x4b069f00 (size=3 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 10
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156656
+       Total non-inuse space             = 52888400
+(10)Releasing memory at 0x4b063200 (size=27 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 10
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156608
+       Total non-inuse space             = 52888448
+(11)Releasing memory at 0x4b06af20 (size=19 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 10
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156576
+       Total non-inuse space             = 52888480
+(12)Releasing memory at 0x4b063280 (size=15 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 9
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156544
+       Total non-inuse space             = 52888512
+(13)Releasing memory at 0x4b06add0 (size=26 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 8
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156496
+       Total non-inuse space             = 52888560
+(14)Releasing memory at 0x4b06a540 (size=1 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 8
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156464
+       Total non-inuse space             = 52888592
+(15)Releasing memory at 0x4b06ad60 (size=11 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 9
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156432
+       Total non-inuse space             = 52888624
+(16)Releasing memory at 0x4b06ac80 (size=28 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 10
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156384
+       Total non-inuse space             = 52888672
+(17)Releasing memory at 0x4b06a440 (size=20 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 11
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156352
+       Total non-inuse space             = 52888704
+(18)Releasing memory at 0x4b06af40 (size=23 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 11
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156320
+       Total non-inuse space             = 52888736
+(19)Releasing memory at 0x4b06acd0 (size=29 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 12
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156272
+       Total non-inuse space             = 52888784
+(20)Releasing memory at 0x4b06ae30 (size=9 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 11
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156240
+       Total non-inuse space             = 52888816
+(21)Releasing memory at 0x4b06a4a0 (size=31 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 11
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156192
+       Total non-inuse space             = 52888864
+(22)Releasing memory at 0x4b06a460 (size=13 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 11
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156160
+       Total non-inuse space             = 52888896
+(23)Releasing memory at 0x4b06ad20 (size=16 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 12
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156128
+       Total non-inuse space             = 52888928
+(24)Releasing memory at 0x4b06ad00 (size=5 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 11
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156096
+       Total non-inuse space             = 52888960
+(25)Releasing memory at 0x4b06aed0 (size=2 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 11
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156048
+       Total non-inuse space             = 52889008
+(26)Releasing memory at 0x4b06ad80 (size=25 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 10
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11156000
+       Total non-inuse space             = 52889056
+(27)Releasing memory at 0x4b063300 (size=7 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 9
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11155968
+       Total non-inuse space             = 52889088
+(28)Releasing memory at 0x4b06acb0 (size=17 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 8
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11155936
+       Total non-inuse space             = 52889120
+(29)Releasing memory at 0x4b06aeb0 (size=14 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 7
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11155904
+       Total non-inuse space             = 52889152
+(30)Releasing memory at 0x4b06ad40 (size=6 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 6
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11155872
+       Total non-inuse space             = 52889184
+(31)Releasing memory at 0x4b06a480 (size=24 bytes)
+     mallinfo:
+       Total space allocated from system = 64045056
+       Number of non-inuse chunks        = 5
+       Largest non-inuse chunk           = 52885392
+       Total allocated space             = 11155840
+       Total non-inuse space             = 52889216
+TEST COMPLETE
+nsh> 

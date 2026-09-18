@@ -1,0 +1,75 @@
+{
+  "1.1.2": {
+    "title": "1.1.2 系统调度测试",
+    "config_differences": [
+      {
+        "name": "CONFIG_PSEUDOFS_SOFTLINKS",
+        "expected": "y",
+        "actual": "not enabled"
+      }
+    ]
+  },
+  "1.1.3": {
+    "title": "1.1.3 系统调用测试",
+    "config_differences": [
+      {
+        "name": "CONFIG_IOB_NBUFFERS",
+        "expected": "128",
+        "actual": "24"
+      },
+      {
+        "name": "CONFIG_IOB_NCHAINS",
+        "expected": "4",
+        "actual": "24"
+      },
+      {
+        "name": "CONFIG_NET_LOCAL",
+        "expected": "y",
+        "actual": "not enabled"
+      },
+      {
+        "name": "CONFIG_PSEUDOFS_SOFTLINKS",
+        "expected": "y",
+        "actual": "not enabled"
+      }
+    ]
+  },
+  "1.1.4": {
+    "title": "1.1.4 Kernel-ostest测试",
+    "config_differences": []
+  },
+  "1.1.6": {
+    "title": "1.1.6 Kernel-mm内存测试",
+    "config_differences": []
+  },
+  "1.1.7": {
+    "title": "1.1.7 Kernel-scanftest扫描测试",
+    "config_differences": []
+  },
+  "1.1.8": {
+    "title": "1.1.8 Kernel-C测试",
+    "config_differences": []
+  },
+  "1.1.9": {
+    "title": "1.1.9 Kernel-Cxx测试",
+    "config_differences": []
+  },
+  "1.1.10": {
+    "title": "1.1.10 Kernel-popen测试",
+    "config_differences": [
+      {
+        "name": "CONFIG_DISABLE_POSIX_TIMERS",
+        "expected": "y",
+        "actual": "not enabled"
+      }
+    ]
+  },
+  "1.1.11": {
+    "title": "1.1.11 Kernel-pipe测试",
+    "config_differences": []
+  },
+  "1.1.13": {
+    "title": "1.1.13 Kernel-C++功能测试",
+    "config_differences": []
+  }
+}

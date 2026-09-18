@@ -1,0 +1,504 @@
+[Kuname -a
+NuttX  0.0.0 3b51eaa1-dirty Sep 18 2026 09:18:30 arm64 kickpi-k7
+nsh> 
+{"command": "uname -a", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694678.9043555, "host_at_done": 1789694678.9768827, "elapsed_monotonic_s": 0.07252693199552596, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T012438895306Z-142521095767859-uname-a.raw", "text": "/tmp/k7-xts-kernel-next/20260918T012438895306Z-142521095767859-uname-a.txt", "prompt_returned": true}
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694679.008802, "host_at_done": 1789694679.101123, "elapsed_monotonic_s": 0.09232119200169109, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T012439000763Z-142521201217525-dmesg-c.raw", "text": "/tmp/k7-xts-kernel-next/20260918T012439000763Z-142521201217525-dmesg-c.txt", "prompt_returned": true}
+[Khello
+Hello, World!!
+nsh> 
+{"command": "hello", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694679.133006, "host_at_done": 1789694679.1993911, "elapsed_monotonic_s": 0.06638552900403738, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T012439124906Z-142521325355950-hello.raw", "text": "/tmp/k7-xts-kernel-next/20260918T012439124906Z-142521325355950-hello.txt", "prompt_returned": true}
+[Khelloxx
+helloxx_main: Saying hello from the dynamically constructed instance
+CHelloWorld::HelloWorld: Hello, World!!
+helloxx_main: Saying hello from the instance constructed on the stack
+CHelloWorld::HelloWorld: Hello, World!!
+helloxx_main: Saying hello from the statically constructed instance
+CHelloWorld::HelloWorld: Hello, World!!
+nsh> 
+{"command": "helloxx", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694679.2302797, "host_at_done": 1789694679.3152485, "elapsed_monotonic_s": 0.08496874998672865, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T012439222653Z-142521423102130-helloxx.raw", "text": "/tmp/k7-xts-kernel-next/20260918T012439222653Z-142521423102130-helloxx.txt", "prompt_returned": true}
+[Kcxxtest
+Test std::vector =============================
+v1=1 2 3
+s1=Hello, World!
+Hello World Good Luck 
+Test std::map ===============================
+Test RTTI =============================
+extend
+Test Exception ===============================
+Catch Exception: runtime error
+nsh> 
+{"command": "cxxtest", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694679.346196, "host_at_done": 1789694679.4311695, "elapsed_monotonic_s": 0.08497345901560038, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T012439338242Z-142521538694058-cxxtest.raw", "text": "/tmp/k7-xts-kernel-next/20260918T012439338242Z-142521538694058-cxxtest.txt", "prompt_returned": true}
+[Kscanftest
+
+Testing sscanf()'s return-value,
+conversions, and assignments...
+Test #1 PASSED.
+Test #2 PASSED.
+Test #3 PASSED.
+Test #4 PASSED.
+Test #5 PASSED.
+Test #6 PASSED.
+Test #7 PASSED.
+Test #8 PASSED.
+Test #9 PASSED.
+Test #10 PASSED.
+Test #11 PASSED.
+Test #12 PASSED.
+Test #13 PASSED.
+Test #14 PASSED.
+Test #15 PASSED.
+Test #16 PASSED.
+Test #17 PASSED.
+Test #18 PASSED.
+Test #19 PASSED.
+Test #20 PASSED.
+Test #21 PASSED.
+Test #22 PASSED.
+Test #23 PASSED.
+Test #24 PASSED.
+Test #25 PASSED.
+Test #26 PASSED.
+Test #27 PASSED.
+Test #28 PASSED.
+Test #29 PASSED.
+Test #30 PASSED.
+Test #31 PASSED.
+Test #32 PASSED.
+Test #33 PASSED.
+Test #34 PASSED.
+Test #35 PASSED.
+Test #36 PASSED.
+Test #37 PASSED.
+Test #38 PASSED.
+Test #39 PASSED.
+Test #40 PASSED.
+Test #41 PASSED.
+Test #42 PASSED.
+Test #43 PASSED.
+Test #44 PASSED.
+Test #45 PASSED.
+Test #46 PASSED.
+Test #47 PASSED.
+Test #48 PASSED.
+Test #49 PASSED.
+Test #50 PASSED.
+Test #51 PASSED.
+Test #52 PASSED.
+Test #53 PASSED.
+Test #54 PASSED.
+Test #55 PASSED.
+Test #56 PASSED.
+Test #57 PASSED.
+Test #58 PASSED.
+Test #59 PASSED.
+Test #60 PASSED.
+Test #61 PASSED.
+Test #62 PASSED.
+Test #63 PASSED.
+Test #64 PASSED.
+Test #65 PASSED.
+Test #66 PASSED.
+Test #67 PASSED.
+Test #68 PASSED.
+Test #69 PASSED.
+
+Back to Back Test...
+Test PASSED.
+
+Testing fscanf()'s return-value,
+conversions, and assignments...
+Test #1 PASSED.
+Test #2 PASSED.
+Test #3 PASSED.
+Test #4 PASSED.
+Test #5 PASSED.
+Test #6 PASSED.
+Test #7 PASSED.
+Test #8 PASSED.
+Test #9 PASSED.
+Test #10 PASSED.
+Test #11 PASSED.
+Test #12 PASSED.
+Test #13 PASSED.
+Test #14 PASSED.
+Test #15 PASSED.
+Test #16 PASSED.
+Test #17 PASSED.
+Test #18 PASSED.
+Test #19 PASSED.
+Test #20 PASSED.
+Test #21 PASSED.
+Test #22 PASSED.
+Test #23 PASSED.
+Test #24 PASSED.
+Test #25 PASSED.
+Test #26 PASSED.
+Test #27 PASSED.
+Test #28 PASSED.
+Test #29 PASSED.
+Test #30 PASSED.
+Test #31 PASSED.
+Test #32 PASSED.
+Test #33 PASSED.
+Test #34 PASSED.
+Test #35 PASSED.
+Test #36 PASSED.
+Test #37 PASSED.
+Test #38 PASSED.
+Test #39 PASSED.
+Test #40 PASSED.
+Test #41 PASSED.
+Test #42 PASSED.
+Test #43 PASSED.
+Test #44 PASSED.
+Test #45 PASSED.
+Test #46 PASSED.
+Test #47 PASSED.
+Test #48 PASSED.
+Test #49 PASSED.
+Test #50 PASSED.
+Test #51 PASSED.
+Test #52 PASSED.
+Test #53 PASSED.
+Test #54 PASSED.
+Test #55 PASSED.
+Test #56 PASSED.
+Test #57 PASSED.
+Test #58 PASSED.
+Test #59 PASSED.
+Test #60 PASSED.
+Test #61 PASSED.
+Test #62 PASSED.
+Test #63 PASSED.
+Test #64 PASSED.
+Test #65 PASSED.
+Test #66 PASSED.
+Test #67 PASSED.
+Test #68 PASSED.
+Test #69 PASSED.
+
+Testing scanf()'s type-modifiers...
+Test #1 PASSED.
+Test #2 PASSED.
+Test #3 PASSED.
+Test #4 PASSED.
+Test #5 PASSED.
+Test #6 PASSED.
+Test #7 PASSED.
+Test #8 PASSED.
+Test #9 PASSED.
+Test #10 PASSED.
+Test #11 PASSED.
+Test #12 PASSED.
+Test #13 PASSED.
+Test #14 PASSED.
+Test #15 PASSED.
+Test #16 PASSED.
+Test #17 PASSED.
+Test #18 PASSED.
+Test #19 PASSED.
+Test #20 PASSED.
+Test #21 PASSED.
+Test #22 PASSED.
+Test #23 PASSED.
+Test #24 PASSED.
+Test #25 PASSED.
+Scanf tests done... OK: 164, FAILED: 0
+nsh> 
+{"command": "scanftest", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694679.462083, "host_at_done": 1789694679.8968306, "elapsed_monotonic_s": 0.43474777598748915, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T012439453879Z-142521654332565-scanftest.raw", "text": "/tmp/k7-xts-kernel-next/20260918T012439453879Z-142521654332565-scanftest.txt", "prompt_returned": true}
+[Kpopen
+Calling popen("help")
+help usage:  help [-v] [<cmd>]
+
+    .             dd            ifconfig      pidof         source        
+    [             df            ifdown        printf        test          
+    ?             dmesg         ifup          ps            time          
+    alias         echo          kill          put           true          
+    unalias       env           pkill         pwd           truncate      
+    arp           exec          ln            readlink      uname         
+    basename      exit          ls            reboot        umount        
+    break         expr          mkdir         resetcause    unset         
+    cat           false         mkfatfs       rm            uptime        
+    cd            fdinfo        mkfifo        rmdir         usleep        
+    cp            free          mkrd          rpmsg         watch         
+    cmp           get           mount         rptun         wget          
+    dirname       help          mv            set           xd            
+    date          hexdump       nslookup      sleep         wait          
+
+Builtin Apps:
+    abnormal_test_backtrace        getprime                       
+    ai_agent                       gpio                           
+    ampctl                         hdmi                           
+    bt                             hello                          
+    cam                            helloxx                        
+    cmocka                         i2c                            
+    cmocka_aescbc                  k7diag                         
+    cmocka_aesctr                  kickpi_ui                      
+    cmocka_aesxts                  loader                         
+    cmocka_crc32                   md5_test                       
+    cmocka_des3cbc                 mem_batch_opt_perf_test        
+    cmocka_driver_audio            mem_cycle_opt_perf_test        
+    cmocka_driver_block            memstress                      
+    cmocka_driver_framebuffer      mic                            
+    cmocka_driver_gpio             mm                             
+    cmocka_driver_i2c_read         nsh                            
+    cmocka_driver_i2c_write        nxlooper                       
+    cmocka_driver_i2cdev_master    nxplayer                       
+    cmocka_driver_oneshot          nxrecorder                     
+    cmocka_driver_simple           ostest                         
+    cmocka_driver_spidev_master    ping                           
+    cmocka_driver_touchpanel       pipe                           
+    cmocka_driver_uart             popen                          
+    cmocka_driver_watchdog         ramtest                        
+    cmocka_ecdsa                   rb                             
+    cmocka_hash                    sb                             
+    cmocka_hmac                    scanftest                      
+    cmocka_mm_test                 sh                             
+    cmocka_sched_test              spi_selftest                   
+    cmocka_syscall_test            telnetd                        
+    cxxtest                        v4l2cap                        
+    fstest                         
+End of data
+Calling pclose()
+The shell has already exited (and exit status is not available)
+nsh> 
+{"command": "popen", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694679.9308786, "host_at_done": 1789694680.1296463, "elapsed_monotonic_s": 0.19876760701299645, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T012439922981Z-142522123432484-popen.raw", "text": "/tmp/k7-xts-kernel-next/20260918T012439922981Z-142522123432484-popen.txt", "prompt_returned": true}
+[Kcmocka_sched_test
+nsh> 
+{"command": "cmocka_sched_test", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694680.1636891, "host_at_done": 1789694681.0601292, "elapsed_monotonic_s": 0.8964406719896942, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T012440154794Z-142522355248572-cmocka-sched-test.raw", "text": "/tmp/k7-xts-kernel-next/20260918T012440154794Z-142522355248572-cmocka-sched-test.txt", "prompt_returned": true}
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+[CPU0] [==========] nuttx_sched_test_suites: Running 16 test(s).
+[CPU0] [ RUN      ] test_nuttx_sched_pthread01
+[CPU0] [       OK ] test_nuttx_sched_pthread01
+[CPU0] [ RUN      ] test_nuttx_sched_pthread02
+[CPU0] [       OK ] test_nuttx_sched_pthread02
+[CPU0] [ RUN      ] test_nuttx_sched_pthread03
+[CPU0] [       OK ] test_nuttx_sched_pthread03
+[CPU0] [ RUN      ] test_nuttx_sched_pthread04
+[CPU0] [       OK ] test_nuttx_sched_pthread04
+[CPU0] [ RUN      ] test_nuttx_sched_pthread05
+[CPU0] [       OK ] test_nuttx_sched_pthread05
+[CPU0] [ RUN      ] test_nuttx_sched_pthread06
+[CPU0] [       OK ] test_nuttx_sched_pthread06
+[CPU0] [ RUN      ] test_nuttx_sched_pthread07
+[CPU0] [       OK ] test_nuttx_sched_pthread07
+[CPU0] [ RUN      ] test_nuttx_sched_pthread08
+[CPU0] [       OK ] test_nuttx_sched_pthread08
+[CPU0] [ RUN      ] test_nuttx_sched_pthread09
+[CPU0] [       OK ] test_nuttx_sched_pthread09
+[CPU0] [ RUN      ] test_nuttx_sched_task01
+[CPU0] [       OK ] test_nuttx_sched_task01
+[CPU0] [ RUN      ] test_nuttx_sched_task02
+[CPU0] [       OK ] test_nuttx_sched_task02
+[CPU0] [ RUN      ] test_nuttx_sched_task03
+[CPU0] [       OK ] test_nuttx_sched_task03
+[CPU0] [ RUN      ] test_nuttx_sched_task04
+[CPU0] [test_nuttx_sched_task04]:scheduling policy is RR!
+[CPU0] [       OK ] test_nuttx_sched_task04
+[CPU0] [ RUN      ] test_nuttx_sched_task05
+[CPU0] [       OK ] test_nuttx_sched_task05
+[CPU0] [ RUN      ] test_nuttx_sched_task06
+[CPU0] [       OK ] test_nuttx_sched_task06
+[CPU0] [ RUN      ] test_nuttx_sched_task07
+[CPU0] [       OK ] test_nuttx_sched_task07
+[CPU0] [==========] nuttx_sched_test_suites: 16 test(s) run.
+[CPU0] [  PASSED  ] 16 test(s).
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694681.0940442, "host_at_done": 1789694681.2484016, "elapsed_monotonic_s": 0.15435752700432204, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T012441086009Z-142523286460220-dmesg-c.raw", "text": "/tmp/k7-xts-kernel-next/20260918T012441086009Z-142523286460220-dmesg-c.txt", "prompt_returned": true}
+[Kcmocka_syscall_test
+nsh> 
+{"command": "cmocka_syscall_test", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694681.2813613, "host_at_done": 1789694694.9176679, "elapsed_monotonic_s": 13.636307020991808, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T012441273716Z-142523474167120-cmocka-syscall-test.raw", "text": "/tmp/k7-xts-kernel-next/20260918T012441273716Z-142523474167120-cmocka-syscall-test.txt", "prompt_returned": true}
+[Kdmesg -c
+[CPU0] [==========] nuttx_syscall_test_suites: Running 82 test(s).
+[CPU0] [ RUN      ] test_nuttx_syscall_chdir01
+[CPU0] [       OK ] test_nuttx_syscall_chdir01
+[CPU0] [ RUN      ] test_nuttx_syscall_chdir02
+[CPU0] [       OK ] test_nuttx_syscall_chdir02
+[CPU0] [ RUN      ] test_nuttx_syscall_getitimer01
+[CPU0] [       OK ] test_nuttx_syscall_getitimer01
+[CPU0] [ RUN      ] test_nuttx_syscall_clockgettime01
+[CPU0] [       OK ] test_nuttx_syscall_clockgettime01
+[CPU0] [ RUN      ] test_nuttx_syscall_clocknanosleep01
+[CPU0] [       OK ] test_nuttx_syscall_clocknanosleep01
+[CPU0] [ RUN      ] test_nuttx_syscall_clocksettime01
+[CPU0] [       OK ] test_nuttx_syscall_clocksettime01
+[CPU0] [ RUN      ] test_nuttx_syscall_close01
+[CPU0] [       OK ] test_nuttx_syscall_close01
+[CPU0] [ RUN      ] test_nuttx_syscall_close02
+[CPU0] [       OK ] test_nuttx_syscall_close02
+[CPU0] [ RUN      ] test_nuttx_syscall_close03
+[CPU0] [       OK ] test_nuttx_syscall_close03
+[CPU0] [ RUN      ] test_nuttx_syscall_creat01
+[CPU0] [       OK ] test_nuttx_syscall_creat01
+[CPU0] [ RUN      ] test_nuttx_syscall_creat02
+[CPU0] [       OK ] test_nuttx_syscall_creat02
+[CPU0] [ RUN      ] test_nuttx_syscall_fcntl02
+[CPU0] [       OK ] test_nuttx_syscall_fcntl02
+[CPU0] [ RUN      ] test_nuttx_syscall_fcntl03
+[CPU0] [       OK ] test_nuttx_syscall_fcntl03
+[CPU0] [ RUN      ] test_nuttx_syscall_fcntl04
+[CPU0] [       OK ] test_nuttx_syscall_fcntl04
+[CPU0] [ RUN      ] test_nuttx_syscall_fcntl06
+[CPU0] [       OK ] test_nuttx_syscall_fcntl06
+[CPU0] [ RUN      ] test_nuttx_syscall_fstatfs01
+[CPU0] [       OK ] test_nuttx_syscall_fstatfs01
+[CPU0] [ RUN      ] test_nuttx_syscall_fsync01
+[CPU0] [       OK ] test_nuttx_syscall_fsync01
+[CPU0] [ RUN      ] test_nuttx_syscall_fsync02
+[CPU0] [       OK ] test_nuttx_syscall_fsync02
+[CPU0] [ RUN      ] test_nuttx_syscall_fsync03
+[CPU0] [       OK ] test_nuttx_syscall_fsync03
+[CPU0] [ RUN      ] test_nuttx_syscall_getpeername01
+[CPU0] [       OK ] test_nuttx_syscall_getpeername01
+[CPU0] [ RUN      ] test_nuttx_syscall_getsockopt01
+[CPU0] [       OK ] test_nuttx_syscall_getsockopt01
+[CPU0] [ RUN      ] test_nuttx_syscall_setsockopt01
+[CPU0] [       OK ] test_nuttx_syscall_setsockopt01
+[CPU0] [ RUN      ] test_nuttx_syscall_listen01
+[CPU0] listen(-400, 0) failed
+[CPU0] bad file descriptor successful
+[CPU0] listen(3, 0) failed
+[CPU0] not a socket successful
+[CPU0] listen(4, 0) failed
+[CPU0] UDP listen successful
+[CPU0] [       OK ] test_nuttx_syscall_listen01
+[CPU0] [ RUN      ] test_nuttx_syscall_ftruncate01
+[CPU0] [       OK ] test_nuttx_syscall_ftruncate01
+[CPU0] [ RUN      ] test_nuttx_syscall_getcwd01
+[CPU0] [       OK ] test_nuttx_syscall_getcwd01
+[CPU0] [ RUN      ] test_nuttx_syscall_getcwd02
+[CPU0] [       OK ] test_nuttx_syscall_getcwd02
+[CPU0] [ RUN      ] test_nuttx_syscall_getpid01
+[CPU0] [       OK ] test_nuttx_syscall_getpid01
+[CPU0] [ RUN      ] test_nuttx_syscall_getppid01
+[CPU0] [       OK ] test_nuttx_syscall_getppid01
+[CPU0] [ RUN      ] test_nuttx_syscall_gethostname01
+[CPU0] [       OK ] test_nuttx_syscall_gethostname01
+[CPU0] [ RUN      ] test_nuttx_syscall_gettimeofday01
+[CPU0] [       OK ] test_nuttx_syscall_gettimeofday01
+[CPU0] [ RUN      ] test_nuttx_syscall_lseek01
+[CPU0] [       OK ] test_nuttx_syscall_lseek01
+[CPU0] [ RUN      ] test_nuttx_syscall_lseek07
+[CPU0] [       OK ] test_nuttx_syscall_lseek07
+[CPU0] [ RUN      ] test_nuttx_syscall_lstat01
+[CPU0] [       OK ] test_nuttx_syscall_lstat01
+[CPU0] [ RUN      ] test_nuttx_syscall_dup01
+[CPU0] [       OK ] test_nuttx_syscall_dup01
+[CPU0] [ RUN      ] test_nuttx_syscall_dup02
+[CPU0] [       OK ] test_nuttx_syscall_dup02
+[CPU0] [ RUN      ] test_nuttx_syscall_dup03
+[CPU0] [       OK ] test_nuttx_syscall_dup03
+[CPU0] [ RUN      ] test_nuttx_syscall_dup04
+[CPU0] [       OK ] test_nuttx_syscall_dup04
+[CPU0] [ RUN      ] test_nuttx_syscall_dup05
+[CPU0] [       OK ] test_nuttx_syscall_dup05
+[CPU0] [ RUN      ] test_nuttx_syscall_dup201
+[CPU0] [       OK ] test_nuttx_syscall_dup201
+[CPU0] [ RUN      ] test_nuttx_syscall_dup202
+[CPU0] [       OK ] test_nuttx_syscall_dup202
+[CPU0] [ RUN      ] test_nuttx_syscall_fpathconf01
+[CPU0] [       OK ] test_nuttx_syscall_fpathconf01
+[CPU0] [ RUN      ] test_nuttx_syscall_getegid01
+[CPU0] [       OK ] test_nuttx_syscall_getegid01
+[CPU0] [ RUN      ] test_nuttx_syscall_getegid02
+[CPU0] [       OK ] test_nuttx_syscall_getegid02
+[CPU0] [ RUN      ] test_nuttx_syscall_geteuid01
+[CPU0] [       OK ] test_nuttx_syscall_geteuid01
+[CPU0] [ RUN      ] test_nuttx_syscall_getgid01
+[CPU0] [       OK ] test_nuttx_syscall_getgid01
+[CPU0] [ RUN      ] test_nuttx_syscall_getgid02
+[CPU0] [       OK ] test_nuttx_syscall_getgid02
+[CPU0] [ RUN      ] test_nuttx_syscall_getuid01
+[CPU0] [       OK ] test_nuttx_syscall_getuid01
+[CPU0] [ RUN      ] test_nuttx_syscall_pathconf01
+[CPU0] [       OK ] test_nuttx_syscall_pathconf01
+[CPU0] [ RUN      ] test_nuttx_syscall_pipe01
+[CPU0] [       OK ] test_nuttx_syscall_pipe01
+[CPU0] [ RUN      ] test_nuttx_syscall_pipe02
+[CPU0] [       OK ] test_nuttx_syscall_pipe02
+[CPU0] [ RUN      ] test_nuttx_syscall_pread01
+[CPU0] [       OK ] test_nuttx_syscall_pread01
+[CPU0] [ RUN      ] test_nuttx_syscall_pwrite01
+[CPU0] [       OK ] test_nuttx_syscall_pwrite01
+[CPU0] [ RUN      ] test_nuttx_syscall_pwrite02
+[CPU0] [       OK ] test_nuttx_syscall_pwrite02
+[CPU0] [ RUN      ] test_nuttx_syscall_rmdir01
+[CPU0] [       OK ] test_nuttx_syscall_rmdir01
+[CPU0] [ RUN      ] test_nuttx_syscall_rmdir02
+[CPU0] [       OK ] test_nuttx_syscall_rmdir02
+[CPU0] [ RUN      ] test_nuttx_syscall_truncate01
+[CPU0] [       OK ] test_nuttx_syscall_truncate01
+[CPU0] [ RUN      ] test_nuttx_syscall_unlink01
+[CPU0] [       OK ] test_nuttx_syscall_unlink01
+[CPU0] [ RUN      ] test_nuttx_syscall_nansleep01
+[CPU0] [       OK ] test_nuttx_syscall_nansleep01
+[CPU0] [ RUN      ] test_nuttx_syscall_nansleep02
+[CPU0] [       OK ] test_nuttx_syscall_nansleep02
+[CPU0] [ RUN      ] test_nuttx_syscall_time01
+[CPU0] [       OK ] test_nuttx_syscall_time01
+[CPU0] [ RUN      ] test_nuttx_syscall_time02
+[CPU0] [       OK ] test_nuttx_syscall_time02
+[CPU0] [ RUN      ] test_nuttx_syscall_timercreate01
+[CPU0] [       OK ] test_nuttx_syscall_timercreate01
+[CPU0] [ RUN      ] test_nuttx_syscall_timerdelete01
+[CPU0] [       OK ] test_nuttx_syscall_timerdelete01
+[CPU0] [ RUN      ] test_nuttx_syscall_timergettime01
+[CPU0] [       OK ] test_nuttx_syscall_timergettime01
+[CPU0] [ RUN      ] test_nuttx_syscall_mkdir01
+[CPU0] [       OK ] test_nuttx_syscall_mkdir01
+[CPU0] [ RUN      ] test_nuttx_syscall_mkdir02
+[CPU0] [       OK ] test_nuttx_syscall_mkdir02
+[CPU0] [ RUN      ] test_nuttx_syscall_mkdir03
+[CPU0] [       OK ] test_nuttx_syscall_mkdir03
+[CPU0] [ RUN      ] test_nuttx_syscall_sched01
+[CPU0] [       OK ] test_nuttx_syscall_sched01
+[CPU0] [ RUN      ] test_nuttx_syscall_sched02
+[CPU0] [       OK ] test_nuttx_syscall_sched02
+[CPU0] [ RUN      ] test_nuttx_syscall_sched03
+[CPU0] [       OK ] test_nuttx_syscall_sched03
+[CPU0] [ RUN      ] test_nuttx_syscall_sched04
+[CPU0] [       OK ] test_nuttx_syscall_sched04
+[CPU0] [ RUN      ] test_nuttx_syscall_write01
+[CPU0] [       OK ] test_nuttx_syscall_write01
+[CPU0] [ RUN      ] test_nuttx_syscall_write02
+[CPU0] [       OK ] test_nuttx_syscall_write02
+[CPU0] [ RUN      ] test_nuttx_syscall_write03
+[CPU0] [       OK ] test_nuttx_syscall_write03
+[CPU0] [ RUN      ] test_nuttx_syscall_read01
+[CPU0] [       OK ] test_nuttx_syscall_read01
+[CPU0] [ RUN      ] test_nuttx_syscall_read02
+[CPU0] [       OK ] test_nuttx_syscall_read02
+[CPU0] [ RUN      ] test_nuttx_syscall_read03
+[CPU0] [       OK ] test_nuttx_syscall_read03
+[CPU0] [ RUN      ] test_nuttx_syscall_read04
+[CPU0] [       OK ] test_nuttx_syscall_read04
+[CPU0] [ RUN      ] test_nuttx_syscall_symlink01
+[CPU0] [       OK ] test_nuttx_syscall_symlink01
+[CPU0] [ RUN      ] test_nuttx_syscall_symlink02
+[CPU0] [       OK ] test_nuttx_syscall_symlink02
+[CPU0] [ RUN      ] test_nuttx_syscall_sockettest01
+[CPU0] NO.1 do socket() test, ret=-1  erron=22 experrno=97
+[CPU0] NO.2 do socket() test, ret=-1  erron=93 experrno=97
+[CPU0] NO.3 do socket() test, ret=-1  erron=93 experrno=97
+[CPU0] NO.4 do socket() test, ret=-1  erron=93 experrno=97
+[CPU0] NO.6 do socket() test, ret=-1  erron=93 experrno=97
+[CPU0] [       OK ] test_nuttx_syscall_sockettest01
+[CPU0] [ RUN      ] test_nuttx_syscall_sockettest02
+[CPU0] [       OK ] test_nuttx_syscall_sockettest02
+[CPU0] [==========] nuttx_syscall_test_suites: 82 test(s) run.
+[CPU0] [  PASSED  ] 82 test(s).
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694694.9484515, "host_at_done": 1789694695.4237652, "elapsed_monotonic_s": 0.475313823990291, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T012454940787Z-142537141237034-dmesg-c.raw", "text": "/tmp/k7-xts-kernel-next/20260918T012454940787Z-142537141237034-dmesg-c.txt", "prompt_returned": true}
+[Kfree
+      total       used       free    maxused    maxfree  nused  nfree name
+   64045056   11144976   52900080   13259808   52893600    379      8 Umem
+nsh> 
+{"command": "free", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694695.456756, "host_at_done": 1789694695.5221248, "elapsed_monotonic_s": 0.06536883799708448, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T012455448663Z-142537649114943-free.raw", "text": "/tmp/k7-xts-kernel-next/20260918T012455448663Z-142537649114943-free.txt", "prompt_returned": true}

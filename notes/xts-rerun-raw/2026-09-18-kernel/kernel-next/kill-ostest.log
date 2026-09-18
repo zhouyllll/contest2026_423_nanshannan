@@ -1,0 +1,3 @@
+[Kkill -9 279
+nsh> 
+{"command": "kill -9 279", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789717543.8420074, "host_at_done": 1789717543.917502, "elapsed_monotonic_s": 0.07549494100385346, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T074543833684Z-166009733649010-kill-9-279.raw", "text": "/tmp/k7-xts-kernel-next/20260918T074543833684Z-166009733649010-kill-9-279.txt", "prompt_returned": true}

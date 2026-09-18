@@ -1,0 +1,6 @@
+{
+  "commit": "3990c93",
+  "network": "192.168.1.50:2323",
+  "ostest_status": "stuck at two-thread spinlock",
+  "fit": "/tmp/k7-xts-ramlog/fit/amp.itb"
+}

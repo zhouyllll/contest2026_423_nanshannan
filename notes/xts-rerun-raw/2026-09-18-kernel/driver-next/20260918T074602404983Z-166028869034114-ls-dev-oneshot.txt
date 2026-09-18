@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> [Kls /dev/oneshot
+ /dev/oneshot
+nsh> 

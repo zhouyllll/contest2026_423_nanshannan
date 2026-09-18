@@ -1,0 +1,6 @@
+
+NuttShell (NSH)
+nsh> [Kls /var
+/var:
+ pipe
+nsh> 

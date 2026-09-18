@@ -1,0 +1,3 @@
+[Kpkill ostest
+nsh> 
+{"command": "pkill ostest", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789717529.2953844, "host_at_done": 1789717529.3719726, "elapsed_monotonic_s": 0.0765882619889453, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-kernel-next/20260918T074528261544Z-165994161518936-pkill-ostest.raw", "text": "/tmp/k7-xts-kernel-next/20260918T074528261544Z-165994161518936-pkill-ostest.txt", "prompt_returned": true}
