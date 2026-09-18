@@ -678,9 +678,14 @@ static ssize_t pl330_build_program(struct rk3576_pl330_chan_s *ch,
 
       if (istx)
         {
-          off += emit_wfp(&buf[off], PL330_COND_SINGLE, peri);
-          off += emit_ld(&buf[off], PL330_COND_SINGLE);
-          off += emit_stp(&buf[off], PL330_COND_SINGLE, peri);
+          /* 发送同样用 BURST（原厂 _bursts() 两个方向用同一个条件）。
+           * 原来的 SINGLE 下 WFP 不等请求，放音是"按总线速度往 FIFO 里
+           * 灌"；改 BURST 后 1 秒测试音照常放完，放音按请求线节拍走。
+           */
+
+          off += emit_wfp(&buf[off], PL330_COND_BURST, peri);
+          off += emit_ld(&buf[off], PL330_COND_BURST);
+          off += emit_stp(&buf[off], PL330_COND_BURST, peri);
         }
       else
         {
@@ -696,8 +701,6 @@ static ssize_t pl330_build_program(struct rk3576_pl330_chan_s *ch,
            *   带 arm,pl330-periph-burst 时强制 BURST；WFP、load、store
            *   三条用同一个条件。
            *
-           *   发送方向这次不动：放音在现有写法下已验证出声，不在同一次
-           *   改动里动两条状态不同的路径。
            */
 
           off += emit_wfp(&buf[off], PL330_COND_BURST, peri);

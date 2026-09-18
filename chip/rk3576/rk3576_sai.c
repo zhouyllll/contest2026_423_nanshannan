@@ -578,7 +578,16 @@ static void sai_configure(struct rk3576_sai_dev_s *priv, bool rx)
   /* 数据相对帧同步右移 2 拍 —— I2S 的那一拍延迟 */
 
   sai_putreg(RK3576_SAI_TX_SHIFT, SAI_XSHIFT_RIGHT(2));
-  sai_putreg(RK3576_SAI_RX_SHIFT, SAI_XSHIFT_RIGHT(2));
+  /* ★ 接收比发送多延一拍：RIGHT(4)，不是 RIGHT(2)。
+   *
+   *   与原厂 I2S 分支一样用 RIGHT(2) 时，录到的样本全部是真值右移一位
+   *   （最高位恒为 0）：小的负数 0xFFC0 读成 0x7FE0，小的正数读成 0x00xx，
+   *   平均幅度恰好是满量程的一半（实测 16480）。把样本左移一位就还原成
+   *   平滑、过零连续的真实波形 —— 也就是 SAI 早采了一个位，把 32 位槽里
+   *   MSB 前的填充 0 当成了最高位。发送方向同样的设置放音正常，只改接收。
+   */
+
+  sai_putreg(RK3576_SAI_RX_SHIFT, SAI_XSHIFT_RIGHT(4));
 
   /* 帧宽 = 每帧总位数；脉冲宽取一半，即标准 I2S 的 50% 占空 */
 
@@ -712,6 +721,7 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   struct dma_config_s cfg;
   size_t nwords;
   size_t nbytes;
+  bool start_xfer = false;
   irqstate_t flags;
   int ret;
   clock_t t_start;
@@ -742,38 +752,28 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
        *   读回 0 表示对应状态机**不空闲**，即正在跑。
        */
 
-      sai_putreg(RK3576_SAI_XFER, SAI_XFER_CLK_EN | SAI_XFER_FSS_EN);
-      sai_putreg(RK3576_SAI_XFER,
-                 SAI_XFER_CLK_EN | SAI_XFER_FSS_EN | SAI_XFER_RXS_EN |
-                 SAI_XFER_RX_CNT_EN | SAI_XFER_TX_CNT_EN);
-      priv->rx_running = true;
+      /* ★ XFER 的 RXS 推迟到 DMA 程序启动之后再开（见下面 start 之后）。
+       *
+       *   原先在这里就开始收，DMA 要等后面取通道、配置、打日志之后才起。
+       *   32 深的 FIFO 在 48k 立体声下 0.33ms 就灌满溢出 —— 实测 5ms 内
+       *   RX_DATA_CNT 按 96k 字/秒正常增长、各 lane 水位到 32，而 DMA 停在
+       *   WFP 上一直等不来请求。原厂 Linux 的顺序是先 DMA 后 xfer。
+       */
+
+      start_xfer = true;
     }
 
-  /* FIFO 满（缓冲间隙攒满）：停 RXS、只清 RXC 通道，再重开。
-   * 不清的话满 FIFO 会挡住后续的水位请求边沿。
+  /* ★ 这里原来有一段"FIFO 满就停 RXS、清 RXC、再重开"，判据是
+   *   RXFIFOLR & (1 << 23)。按 TRM（RK3576 TRM Part1 SAI_RXFIFOLR）
+   *   这个寄存器只有四个 6 位水位字段 rfl3..rfl0（23:18/17:12/11:6/5:0），
+   *   **没有"满"标志**：bit23 是 rfl3 的最高位。于是 lane3 的水位一到
+   *   32 就被当成"满"，整个接收逻辑被清掉、FIFO 里的数据丢光 —— 日志里
+   *   大量 XFER=0000000b（这段代码写的值）就是它在反复执行。
+   *
+   *   真正的溢出标志是 SAI_INTSR.rxoi(bit17)。这里不再清 RXC，只在
+   *   诊断里观测它。
    */
 
-  if (sai_getreg(RK3576_SAI_RXFIFOLR) & SAI_RXFIFOLR_FULL)
-    {
-      int us;
-
-      sai_putreg(RK3576_SAI_XFER, SAI_XFER_CLK_EN | SAI_XFER_FSS_EN);
-      sai_putreg(RK3576_SAI_CLR, SAI_CLR_RXC);
-
-      for (us = 0; us < 10000; us++)
-        {
-          if ((sai_getreg(RK3576_SAI_CLR) & SAI_CLR_RXC) == 0)
-            {
-              break;
-            }
-
-          up_udelay(1);
-        }
-
-      sai_rx_dma_enable(true);
-      sai_putreg(RK3576_SAI_XFER,
-                 SAI_XFER_CLK_EN | SAI_XFER_FSS_EN | SAI_XFER_RXS_EN);
-    }
 
   /* DMA 设备：appinit 里已 rk3576_pl330_initialize(0)，这里只取句柄。
    * 接收侧不再忙等 —— PL330 用 DMAWFP 等 SAI1 的 DMA 请求线，
@@ -880,6 +880,12 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
    *   地址会自动来。
    */
 
+  /* 清接收溢出（INTCR.rxoic，bit18）：缓冲之间的空档里 FIFO 可能已经
+   * 溢出过一次。
+   */
+
+  sai_putreg(RK3576_SAI_INTCR, sai_getreg(RK3576_SAI_INTCR) | (1 << 18));
+
   ret = priv->rxchan->ops->start(priv->rxchan, sai_rx_dma_cb, priv,
                                  (uintptr_t)apb->samp,
                                  SAI1_BASE + RK3576_SAI_RXDR, nbytes);
@@ -889,16 +895,47 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       goto err_chan;
     }
 
-  /* ★ 等 DMA 完成，超时贴着"这批数据本来需要多久"。
-   *   es8388 按 buffer 时间 x2 传下来的 timeout 就是这个量级；若为 0
-   *   （异常），给 20ms 保底。等待期间本线程让出 CPU —— 不再忙等，
-   *   也就不会再饿死控制台。
+  if (start_xfer)
+    {
+      /* ★ 打开帧计数器。
+       *
+       *   RX_DATA_CNT 只有在 XFER 的 RX_CNT_EN(bit5) 使能后才计数。
+       *   我之前把"计数器恒 0"当成"SAI 没在收帧"的判据 —— 而计数器根本
+       *   没开。**用一个没使能的观测手段下结论，比没有观测更糟**。
+       */
+
+      sai_putreg(RK3576_SAI_XFER, SAI_XFER_CLK_EN | SAI_XFER_FSS_EN);
+      sai_putreg(RK3576_SAI_XFER,
+                 SAI_XFER_CLK_EN | SAI_XFER_FSS_EN | SAI_XFER_RXS_EN |
+                 SAI_XFER_RX_CNT_EN | SAI_XFER_TX_CNT_EN);
+      priv->rx_running = true;
+    }
+
+  /* ★ 等 DMA 完成，超时按"这批数据本来需要多久"自己算。
+   *
+   *   es8388 的超时是按 apb->nbytes - apb->curbyte 算的 —— 那是**放音**
+   *   的剩余字节。录音递进来的是空缓冲区（nbytes = 0），算出来就是 0，
+   *   原来这里再兜底成 20ms。而 8192 字节在 48k 立体声 16 位下要 21.3ms
+   *   （2048 个字 / 96k 字每秒）：每个缓冲区都在快收完时被判超时、DMA
+   *   被杀掉。PL330 改成 BURST、DMA 先于 RXS 启动之后，FIFO 水位停在
+   *   13~15（刚好在 RDL=16 下面反复被搬走）而仍然"超时"，就是它。
+   *
+   *   按容量和实际采样参数算传输时间，取两倍再加 20ms 余量，且不小于
+   *   上层给的值。
    */
 
-  if (timeout == 0)
-    {
-      timeout = MSEC2TICK(20);
-    }
+  {
+    uint32_t bytes_per_s = priv->rxsamplerate * priv->rxchannels *
+                           (uint32_t)((priv->rxdatawidth + 7) / 8);
+    uint32_t need_ms = bytes_per_s ?
+                       (uint32_t)(nbytes * 1000 / bytes_per_s) : 100;
+    clock_t  need = MSEC2TICK(need_ms * 2 + 20);
+
+    if (timeout < need)
+      {
+        timeout = need;
+      }
+  }
 
   ret = nxsem_tickwait(&priv->rx_sem, timeout);
   if (ret < 0)
@@ -919,6 +956,28 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
              getreg32(RK3576_DMAC0_BASE + PL330_CPC(0)),
              getreg32(RK3576_DMAC0_BASE + PL330_SA(0)),
              getreg32(RK3576_DMAC0_BASE + PL330_DA(0)));
+
+      /* 一次性：请求线相关的安全配置。CR4 每一位是一个外设的 PNS
+       * （1 = 非安全）；通道是非安全线程时，外设若是安全的，WFP 等不来。
+       */
+
+      {
+        static bool once;
+
+        if (!once)
+          {
+            once = true;
+            syslog(LOG_ERR, "SAI RX DMA: dmac0 CR0=%08" PRIx32 " CR4=%08"
+                   PRIx32 " FSRD=%08" PRIx32 " FSRC=%08" PRIx32 " FTR0=%08"
+                   PRIx32 " CS0=%08" PRIx32 "\n",
+                   getreg32(RK3576_DMAC0_BASE + PL330_CR0),
+                   getreg32(RK3576_DMAC0_BASE + PL330_CR4),
+                   getreg32(RK3576_DMAC0_BASE + 0x30),
+                   getreg32(RK3576_DMAC0_BASE + PL330_FSC),
+                   getreg32(RK3576_DMAC0_BASE + 0x40),
+                   getreg32(RK3576_DMAC0_BASE + PL330_CS(0)));
+          }
+      }
 
       /* 超时：DMA 没等来数据（外设没在跑 / 请求线没到）。如实返回。 */
 
