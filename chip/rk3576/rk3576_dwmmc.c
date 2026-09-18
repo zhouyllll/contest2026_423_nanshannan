@@ -616,6 +616,77 @@ int rk3576_dwmmc_probe(uint32_t base)
           }
       }
 
+    /* Match the vendor MMC rescan's pre-enumeration CCCR reset.
+     * A failed read uses the reset bit alone. A reset response failure
+     * is logged but does not replace the subsequent CMD5 acceptance gate.
+     */
+
+    if (hw->is_sdio)
+      {
+        uint32_t abort_value = 8;
+        int step;
+
+        for (step = 0; step < 2; step++)
+          {
+            uint32_t arg = (6u << 9);
+            uint32_t command = DWMMC_CMD_START | holdbit |
+                               DWMMC_CMD_RESP_EXP | DWMMC_CMD_RESP_CRC |
+                               DWMMC_CMD_STOP | DWMMC_CMD_INDX(52);
+
+            if (step == 0)
+              {
+                command |= DWMMC_CMD_INIT;
+              }
+            else
+              {
+                arg |= 0x80000000u | abort_value;
+              }
+
+            dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);
+            dw_putreg(base, DWMMC_CMDARG, arg);
+            dw_putreg(base, DWMMC_CMD, command);
+            for (us = 0; us < 200000; us++)
+              {
+                if ((dw_getreg(base, DWMMC_CMD) & DWMMC_CMD_START) == 0)
+                  {
+                    break;
+                  }
+
+                up_udelay(1);
+              }
+
+            if (us == 200000)
+              {
+                syslog(LOG_ERR, "SDIO CMD52 START timeout\n");
+                return -ETIMEDOUT;
+              }
+
+            for (us = 0; us < 200000; us++)
+              {
+                sts = dw_getreg(base, DWMMC_RINTSTS);
+                if (sts & (DWMMC_INT_CMD_DONE | DWMMC_INT_CMD_ERROR))
+                  {
+                    break;
+                  }
+
+                up_udelay(1);
+              }
+
+            resp = dw_getreg(base, DWMMC_RESP0);
+            syslog(LOG_INFO, "SDIO CMD52 %s sts=%08" PRIx32
+                   " resp=%08" PRIx32 "\n", step ? "reset" : "read",
+                   sts, resp);
+            if (step == 0 && (sts & DWMMC_INT_CMD_DONE) != 0 &&
+                (sts & DWMMC_INT_CMD_ERROR) == 0 &&
+                (resp & ((1u << 11) | (1u << 9) | (1u << 8))) == 0)
+              {
+                abort_value = (resp & 0xffu) | 8u;
+              }
+
+            up_mdelay(10);
+          }
+      }
+
     /* CMD0 GO_IDLE_STATE，无响应，带初始化序列 */
 
     dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);
@@ -770,8 +841,8 @@ int rk3576_dwmmc_probe(uint32_t base)
             up_mdelay(10);
           }
 
-        /* CCCR CMD52 access follows RCA assignment and card selection in
-         * sdio_probe(); it is not valid as a host-only pre-selection test.
+        /* Normal CCCR access follows RCA assignment and selection in
+         * sdio_probe(). The reset operation above is the exception.
          */
 
         dw_putreg(base, DWMMC_RINTSTS, DWMMC_INT_ALL);
