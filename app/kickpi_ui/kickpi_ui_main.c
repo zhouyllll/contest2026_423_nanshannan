@@ -63,6 +63,8 @@
 #include <cJSON.h>
 #include <velaclaw/client.h>
 
+#include "k7_audio.h"
+
 #include <arch/board/board.h>
 
 #ifdef CONFIG_RK3576_RPTUN
@@ -1722,6 +1724,444 @@ static void camera_build(lv_obj_t *tab)
 }
 
 /****************************************************************************
+ * VOICE 页：录音机
+ *
+ * 录 5 秒 → 看波形和电平 → 放出来听。展示用，同时也是麦克风链路的
+ * 自检：`mic` 命令给的是数字，这里给的是"录进去的就是我刚说的话"。
+ *
+ * ★ 录音和放音都在工作线程里做
+ *
+ *   音频 ioctl 会阻塞（每个缓冲区约 43ms，整段 5 秒），放在 LVGL 线程里
+ *   界面就冻住了。工作线程只写 g_rec 里的几个数，界面在 tick 里读。
+ *
+ * ★ 录的是哪个声道
+ *
+ *   ES8388 按立体声采，但板上麦克风接的是 LINE2 的一路，另一路可能只有
+ *   底噪。两路都存下来，录完按平均幅度挑大的那一路当作单声道。
+ *
+ * ★ 放音自动放大
+ *
+ *   麦克风电平偏低（`mic` 实测底噪平均 117/32767），原样放几乎听不见。
+ *   按峰值归一化到约 -1dB，最多放大 16 倍，倍数显示在界面上。
+ ****************************************************************************/
+
+#define REC_SECONDS    5
+#define REC_FRAMES     (REC_SECONDS * K7A_RATE)
+#define REC_WAVE_PTS   100
+#define REC_WAV_FILE   "/tmp/k7-rec.wav"
+
+enum rec_state_e
+{
+  REC_IDLE = 0,
+  REC_RECORDING,
+  REC_PLAYING,
+};
+
+struct rec_s
+{
+  pthread_mutex_t lock;
+  volatile int    state;
+  int16_t        *st;          /* 交错立体声，REC_FRAMES 帧 */
+  int16_t        *mono;        /* 挑出来的那一路 */
+  size_t          frames;      /* 已录帧数 */
+  int             level;       /* 最近一块的电平 0..100，录音时刷新 */
+  int             peak;        /* 所选声道的峰值 */
+  int             avg[2];      /* 两个声道的平均幅度 */
+  int             chan;        /* 选中的声道 0 = 左 1 = 右 */
+  int             gain;        /* 放音放大倍数 */
+  int             result;      /* 最近一次操作的返回值 */
+  bool            done;        /* 一次操作刚结束，界面还没处理 */
+  int             done_what;   /* 刚结束的是 REC_RECORDING 还是 REC_PLAYING */
+};
+
+static struct rec_s g_rec =
+{
+  .lock = PTHREAD_MUTEX_INITIALIZER,
+};
+
+static lv_obj_t          *g_rec_state;
+static lv_obj_t          *g_rec_bar;
+static lv_obj_t          *g_rec_chart;
+static lv_chart_series_t *g_rec_series;
+static lv_obj_t          *g_rec_btn_rec;
+static lv_obj_t          *g_rec_btn_play;
+static int                g_rec_shown_sec = -1;
+
+static bool rec_capture_cb(const int16_t *st, size_t frames, void *priv)
+{
+  int peak = 0;
+  size_t n;
+  size_t i;
+
+  (void)priv;
+  n = REC_FRAMES - g_rec.frames;
+  if (frames < n)
+    {
+      n = frames;
+    }
+
+  memcpy(g_rec.st + 2 * g_rec.frames, st, n * 4);
+  for (i = 0; i < n * 2; i++)
+    {
+      int v = st[i] < 0 ? -st[i] : st[i];
+      if (v > peak)
+        {
+          peak = v;
+        }
+    }
+
+  g_rec.frames += n;
+  g_rec.level = peak * 100 / 32768;
+  return g_rec.frames < REC_FRAMES;
+}
+
+static void rec_write_wav(const int16_t *pcm, size_t frames)
+{
+  uint32_t data = frames * 2;
+  uint8_t  hdr[44];
+  FILE    *fp;
+
+  memcpy(hdr, "RIFF", 4);
+  hdr[4]  = (data + 36) & 0xff;         hdr[5]  = ((data + 36) >> 8) & 0xff;
+  hdr[6]  = ((data + 36) >> 16) & 0xff; hdr[7]  = ((data + 36) >> 24) & 0xff;
+  memcpy(hdr + 8, "WAVEfmt ", 8);
+  hdr[16] = 16; hdr[17] = 0; hdr[18] = 0; hdr[19] = 0;   /* fmt 块长度 */
+  hdr[20] = 1;  hdr[21] = 0;                             /* PCM */
+  hdr[22] = 1;  hdr[23] = 0;                             /* 单声道 */
+  hdr[24] = K7A_RATE & 0xff; hdr[25] = (K7A_RATE >> 8) & 0xff;
+  hdr[26] = 0;  hdr[27] = 0;
+  hdr[28] = (K7A_RATE * 2) & 0xff; hdr[29] = ((K7A_RATE * 2) >> 8) & 0xff;
+  hdr[30] = ((K7A_RATE * 2) >> 16) & 0xff; hdr[31] = 0;
+  hdr[32] = 2;  hdr[33] = 0;                             /* 块对齐 */
+  hdr[34] = 16; hdr[35] = 0;                             /* 位深 */
+  memcpy(hdr + 36, "data", 4);
+  hdr[40] = data & 0xff;         hdr[41] = (data >> 8) & 0xff;
+  hdr[42] = (data >> 16) & 0xff; hdr[43] = (data >> 24) & 0xff;
+
+  fp = fopen(REC_WAV_FILE, "wb");
+  if (fp != NULL)
+    {
+      fwrite(hdr, 1, sizeof(hdr), fp);
+      fwrite(pcm, 2, frames, fp);
+      fclose(fp);
+    }
+}
+
+/* 录完：挑声道、算峰值和放大倍数、存 WAV */
+
+static void rec_analyse(void)
+{
+  int64_t sum[2] = { 0, 0 };
+  int peak = 0;
+  size_t i;
+
+  for (i = 0; i < g_rec.frames; i++)
+    {
+      sum[0] += g_rec.st[2 * i] < 0 ? -g_rec.st[2 * i] : g_rec.st[2 * i];
+      sum[1] += g_rec.st[2 * i + 1] < 0 ? -g_rec.st[2 * i + 1]
+                                        : g_rec.st[2 * i + 1];
+    }
+
+  g_rec.avg[0] = g_rec.frames ? (int)(sum[0] / (int64_t)g_rec.frames) : 0;
+  g_rec.avg[1] = g_rec.frames ? (int)(sum[1] / (int64_t)g_rec.frames) : 0;
+  g_rec.chan = g_rec.avg[1] > g_rec.avg[0] ? 1 : 0;
+
+  for (i = 0; i < g_rec.frames; i++)
+    {
+      int16_t v = g_rec.st[2 * i + g_rec.chan];
+      int a = v < 0 ? -v : v;
+
+      g_rec.mono[i] = v;
+      if (a > peak)
+        {
+          peak = a;
+        }
+    }
+
+  g_rec.peak = peak;
+  g_rec.gain = peak > 0 ? 29000 / peak : 16;
+  if (g_rec.gain < 1)
+    {
+      g_rec.gain = 1;
+    }
+  else if (g_rec.gain > 16)
+    {
+      g_rec.gain = 16;
+    }
+
+  rec_write_wav(g_rec.mono, g_rec.frames);
+}
+
+static void *rec_worker(void *arg)
+{
+  int what = (int)(intptr_t)arg;
+  int ret;
+
+  if (what == REC_RECORDING)
+    {
+      g_rec.frames = 0;
+      g_rec.level = 0;
+      ret = k7a_capture(rec_capture_cb, NULL, (REC_SECONDS + 3) * 1000);
+      if (g_rec.frames > 0)
+        {
+          rec_analyse();
+        }
+    }
+  else
+    {
+      int16_t *out = malloc(g_rec.frames * 2);
+      size_t i;
+
+      if (out == NULL)
+        {
+          ret = -ENOMEM;
+        }
+      else
+        {
+          for (i = 0; i < g_rec.frames; i++)
+            {
+              int32_t v = (int32_t)g_rec.mono[i] * g_rec.gain;
+
+              out[i] = v > 32767 ? 32767 : (v < -32768 ? -32768 : v);
+            }
+
+          ret = k7a_play_mono(out, g_rec.frames);
+          free(out);
+        }
+    }
+
+  pthread_mutex_lock(&g_rec.lock);
+  g_rec.result = ret;
+  g_rec.done_what = what;
+  g_rec.done = true;
+  g_rec.state = REC_IDLE;
+  pthread_mutex_unlock(&g_rec.lock);
+  return NULL;
+}
+
+static void rec_start(int what)
+{
+  pthread_attr_t attr;
+  pthread_t tid;
+
+  if (g_rec.state != REC_IDLE)
+    {
+      return;
+    }
+
+  if (k7a_busy())
+    {
+      lv_label_set_text(g_rec_state, "音频设备正被占用（语音唤醒在听？）");
+      return;
+    }
+
+  if (g_rec.st == NULL)
+    {
+      g_rec.st = malloc(REC_FRAMES * 4);
+      g_rec.mono = malloc(REC_FRAMES * 2);
+      if (g_rec.st == NULL || g_rec.mono == NULL)
+        {
+          lv_label_set_text(g_rec_state, "内存不够，录不了。");
+          return;
+        }
+    }
+
+  if (what == REC_PLAYING && g_rec.frames == 0)
+    {
+      lv_label_set_text(g_rec_state, "还没录过，先点“录音”。");
+      return;
+    }
+
+  g_rec.state = what;
+  g_rec_shown_sec = -1;
+  pthread_attr_init(&attr);
+  pthread_attr_setstacksize(&attr, 8192);
+  if (pthread_create(&tid, &attr, rec_worker, (void *)(intptr_t)what) != 0)
+    {
+      g_rec.state = REC_IDLE;
+      lv_label_set_text(g_rec_state, "起不了工作线程。");
+    }
+  else
+    {
+      pthread_detach(tid);
+      lv_label_set_text(g_rec_state, what == REC_RECORDING ?
+                        "录音中…对着麦克风说话" : "播放中…");
+    }
+
+  pthread_attr_destroy(&attr);
+}
+
+static void rec_click_cb(lv_event_t *e)
+{
+  rec_start((int)(intptr_t)lv_event_get_user_data(e));
+}
+
+/* 录完后画包络：每个点是一段里的峰值，按本次峰值缩放到 0..100 */
+
+static void rec_draw_wave(void)
+{
+  size_t seg = g_rec.frames / REC_WAVE_PTS;
+  int i;
+
+  for (i = 0; i < REC_WAVE_PTS; i++)
+    {
+      int peak = 0;
+      size_t j;
+
+      for (j = 0; j < seg; j++)
+        {
+          int16_t v = g_rec.mono[i * seg + j];
+          int a = v < 0 ? -v : v;
+
+          if (a > peak)
+            {
+              peak = a;
+            }
+        }
+
+      lv_chart_set_value_by_id(g_rec_chart, g_rec_series, i,
+                               g_rec.peak ? peak * 100 / g_rec.peak : 0);
+    }
+
+  lv_chart_refresh(g_rec_chart);
+}
+
+static void rec_poll(void)
+{
+  bool done;
+  int what;
+  int result;
+
+  pthread_mutex_lock(&g_rec.lock);
+  done = g_rec.done;
+  what = g_rec.done_what;
+  result = g_rec.result;
+  g_rec.done = false;
+  pthread_mutex_unlock(&g_rec.lock);
+
+  if (g_rec.state == REC_RECORDING)
+    {
+      int sec = (int)(g_rec.frames / K7A_RATE);
+
+      lv_bar_set_value(g_rec_bar, g_rec.level, LV_ANIM_OFF);
+      if (sec != g_rec_shown_sec)
+        {
+          g_rec_shown_sec = sec;
+          lv_label_set_text_fmt(g_rec_state, "录音中… %d / %d 秒",
+                                sec, REC_SECONDS);
+        }
+    }
+
+  if (!done)
+    {
+      return;
+    }
+
+  lv_bar_set_value(g_rec_bar, 0, LV_ANIM_OFF);
+  if (what == REC_RECORDING)
+    {
+      if (g_rec.frames == 0)
+        {
+          lv_label_set_text_fmt(g_rec_state, "录音失败（%d）", result);
+          return;
+        }
+
+      rec_draw_wave();
+      lv_label_set_text_fmt(g_rec_state,
+                            "录好了 %d.%d 秒。用的是%s声道（平均 左 %d / "
+                            "右 %d），峰值 %d，放音放大 %d 倍。",
+                            (int)(g_rec.frames / K7A_RATE),
+                            (int)(g_rec.frames % K7A_RATE * 10 / K7A_RATE),
+                            g_rec.chan ? "右" : "左",
+                            g_rec.avg[0], g_rec.avg[1], g_rec.peak,
+                            g_rec.gain);
+      syslog(LOG_INFO, "录音机: %zu 帧 声道=%d 平均 L=%d R=%d 峰值=%d "
+             "增益=%d ret=%d，已存 %s\n", g_rec.frames, g_rec.chan,
+             g_rec.avg[0], g_rec.avg[1], g_rec.peak, g_rec.gain, result,
+             REC_WAV_FILE);
+    }
+  else
+    {
+      lv_label_set_text(g_rec_state, result == 0 ? "播放完毕。" :
+                        "播放出错了。");
+      if (result != 0)
+        {
+          syslog(LOG_ERR, "录音机: 播放失败 %d\n", result);
+        }
+    }
+}
+
+static lv_obj_t *voice_button(lv_obj_t *parent, const char *text,
+                              lv_event_cb_t cb, int arg)
+{
+  lv_obj_t *button = lv_button_create(parent);
+  lv_obj_t *label = lv_label_create(button);
+
+  lv_obj_set_style_text_font(label, &lv_font_k7_cjk_20, 0);
+  lv_label_set_text(label, text);
+  lv_obj_set_style_pad_ver(button, 16, 0);
+  lv_obj_set_style_pad_hor(button, 28, 0);
+  lv_obj_add_event_cb(button, cb, LV_EVENT_CLICKED, (void *)(intptr_t)arg);
+  return button;
+}
+
+static void voice_build(lv_obj_t *tab)
+{
+  lv_obj_t *card;
+  lv_obj_t *row;
+  lv_obj_t *label;
+
+  lv_obj_set_flex_flow(tab, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_style_pad_row(tab, 8, 0);
+
+  card = card_create(tab, NULL);
+  label = lv_label_create(card);
+  lv_obj_set_style_text_font(label, &lv_font_k7_cjk_20, 0);
+  lv_obj_set_style_text_color(label, lv_color_hex(UI_ACCENT), 0);
+  lv_label_set_text(label, "录音机（ES8388 麦克风 → 扬声器）");
+
+  row = lv_obj_create(card);
+  lv_obj_remove_style_all(row);
+  lv_obj_set_size(row, LV_PCT(100), LV_SIZE_CONTENT);
+  lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_style_pad_column(row, 16, 0);
+  g_rec_btn_rec = voice_button(row, "录音 5 秒", rec_click_cb, REC_RECORDING);
+  g_rec_btn_play = voice_button(row, "播放", rec_click_cb, REC_PLAYING);
+
+  label = lv_label_create(card);
+  lv_obj_set_style_text_font(label, &lv_font_k7_cjk_20, 0);
+  lv_obj_set_style_text_color(label, lv_color_hex(UI_DIM), 0);
+  lv_label_set_text(label, "实时电平");
+
+  g_rec_bar = lv_bar_create(card);
+  lv_obj_set_size(g_rec_bar, LV_PCT(100), 18);
+  lv_bar_set_range(g_rec_bar, 0, 100);
+
+  label = lv_label_create(card);
+  lv_obj_set_style_text_font(label, &lv_font_k7_cjk_20, 0);
+  lv_obj_set_style_text_color(label, lv_color_hex(UI_DIM), 0);
+  lv_label_set_text(label, "波形（包络）");
+
+  g_rec_chart = lv_chart_create(card);
+  lv_obj_set_size(g_rec_chart, LV_PCT(100), 200);
+  lv_chart_set_type(g_rec_chart, LV_CHART_TYPE_BAR);
+  lv_chart_set_point_count(g_rec_chart, REC_WAVE_PTS);
+  lv_chart_set_range(g_rec_chart, LV_CHART_AXIS_PRIMARY_Y, 0, 100);
+  lv_chart_set_div_line_count(g_rec_chart, 0, 0);
+  lv_obj_set_style_pad_column(g_rec_chart, 1, 0);
+  lv_obj_set_style_bg_color(g_rec_chart, lv_color_hex(UI_BG), 0);
+  lv_obj_set_style_border_width(g_rec_chart, 0, 0);
+  g_rec_series = lv_chart_add_series(g_rec_chart, lv_color_hex(UI_ACCENT),
+                                     LV_CHART_AXIS_PRIMARY_Y);
+
+  g_rec_state = lv_label_create(card);
+  lv_obj_set_width(g_rec_state, LV_PCT(100));
+  lv_label_set_long_mode(g_rec_state, LV_LABEL_LONG_WRAP);
+  lv_obj_set_style_text_font(g_rec_state, &lv_font_k7_cjk_20, 0);
+  lv_label_set_text(g_rec_state, "点“录音 5 秒”，然后对着麦克风说话。");
+}
+
+/****************************************************************************
  * ABOUT 页
  ****************************************************************************/
 
@@ -1903,6 +2343,7 @@ static void tick_cb(lv_timer_t *t)
 
   camera_poll();
   agent_poll();
+  rec_poll();
 
   /* 串口调试入口：echo 1 > /tmp/k7-open-camera 等同于点 Open camera */
 
@@ -1918,6 +2359,19 @@ static void tick_cb(lv_timer_t *t)
       syslog(LOG_INFO, "界面: 串口触发 agent 看桌面\n");
       agent_look_cb(NULL);
     }
+
+  /* echo 1 > /tmp/k7-rec / k7-play 等同于点录音机的两个按钮 */
+
+  if (unlink("/tmp/k7-rec") == 0)
+    {
+      rec_start(REC_RECORDING);
+    }
+
+  if (unlink("/tmp/k7-play") == 0)
+    {
+      rec_start(REC_PLAYING);
+    }
+
   amp_refresh();
 
   /* LIVE 页不可见时不算、不画。曲线是"看得见才有意义"的东西，后台跑
@@ -1956,6 +2410,7 @@ static void build_ui(void)
    */
 
   assist_build(lv_tabview_add_tab(g_tabview, "AGENT"));
+  voice_build(lv_tabview_add_tab(g_tabview, "VOICE"));
   about_build(lv_tabview_add_tab(g_tabview, "ABOUT"));
 
   lv_timer_create(tick_cb, TICK_MS, NULL);
