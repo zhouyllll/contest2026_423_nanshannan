@@ -1,0 +1,8 @@
+ M board/kickpi-k7/configs/amp-dual/defconfig
+ M board/kickpi-k7/src/Make.dep
+ M logs/zhouyllll/manifest.json
+?? chip/rk3576/skw6621s/design.md
+?? chip/rk3576/skw6621s/requirements.md
+?? chip/rk3576/skw6621s/tasks.md
+?? "docs/2026 \351\246\226\345\261\212 openvela AI \347\241\254\344\273\266\345\274\200\345\217\221\350\200\205\345\244\247\350\265\233 - \344\275\234\345\223\201\346\217\220\344\272\244\346\250\241\346\235\277.docx:Zone.Identifier"
+?? notes/xts-rerun-raw/2026-09-18-short/

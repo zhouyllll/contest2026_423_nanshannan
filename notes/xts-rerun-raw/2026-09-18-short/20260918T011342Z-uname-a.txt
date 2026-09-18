@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> [Kuname -a
+NuttX  0.0.0 3b51eaa1-dirty Sep 18 2026 09:07:12 arm64 kickpi-k7
+nsh> 

@@ -1,0 +1,208 @@
+diff --git a/board/kickpi-k7/configs/amp-dual/defconfig b/board/kickpi-k7/configs/amp-dual/defconfig
+index 1cce8e2..51d6647 100644
+--- a/board/kickpi-k7/configs/amp-dual/defconfig
++++ b/board/kickpi-k7/configs/amp-dual/defconfig
+@@ -56,8 +56,6 @@ CONFIG_AUDIO_ES8388=y
+ CONFIG_ES8388_INPUT_CHANNEL_LINE2=y
+ CONFIG_ES8388_INPUT_CHANNEL=1
+ CONFIG_AUDIO_NUM_BUFFERS=4
+-CONFIG_BLUETOOTH_BCM4343X=y
+-CONFIG_BLUETOOTH_BCM4343X_SPEED=1500000
+ CONFIG_BLUETOOTH_UART=y
+ CONFIG_BLUETOOTH_UART_SHIM=y
+ CONFIG_BOARDCTL_RESET=y
+@@ -285,3 +283,12 @@ CONFIG_LVX_USE_DEMO_CONTEST2026_423_K7DIAG=y
+ CONFIG_NETDB_DNSSERVER_IPv4ADDR=0xc0a80101
+ CONFIG_NETINIT_DRIPADDR=0xc0a80101
+ CONFIG_NETINIT_IPADDR=0xc0a80132
++
++# ★ 蓝牙：K7 实际焊的是 SKW6621S（SDIO 0x2a320000），不是 dtsi 里抄来的
++#   Broadcom UART 模组（原厂 Android 的 SDIO ID 日志已核实）。
++#   RK3576_SKW6621S 与 BLUETOOTH_BCM4343X 互斥。Linux 侧内核没有 MMC 驱动，
++#   不会碰 SDIO 控制器；dwmmc 是轮询驱动，不用加 amp-irqs。
++CONFIG_MMCSD_SDIO=y
++CONFIG_RK3576_DWMMC=y
++CONFIG_RK3576_SKW6621S=y
++CONFIG_SDIO_BLOCKSETUP=y
+diff --git a/board/kickpi-k7/src/Make.dep b/board/kickpi-k7/src/Make.dep
+index 0d9d342..c212896 100644
+--- a/board/kickpi-k7/src/Make.dep
++++ b/board/kickpi-k7/src/Make.dep
+@@ -186,36 +186,32 @@ kickpi_k7_appinit.o: kickpi_k7_appinit.c \
+  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_rptun.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/chip/amp.h \
+  kickpi_k7.h
+-kickpi_k7_gpio.o: kickpi_k7_gpio.c \
++kickpi_k7_skw6621s.o: kickpi_k7_skw6621s.c \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/config.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/debug.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/errno.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/compiler.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/streams.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/stdio.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/sys/types.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/syslog.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/stdint.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/types.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/inttypes.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/limits.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/limits.h \
+  /home/dministrator/openvela-amlogic/src/prebuilts/gcc/linux-x86_64/aarch64-none-elf/lib/gcc/aarch64-none-elf/13.4.0/include/stdarg.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/time.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/fs.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/ioctl.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/stdbool.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/serial/tioctl.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/uio.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/sys/uio.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/dirent.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/mm/map.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/queue.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/ratelimit.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/sys/types.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/spinlock_type.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/atomic.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/pthread.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/mutex_type.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/semaphore_type.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/errno.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/semaphore.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/mm/gran.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/spawn.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/spawn.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/time.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/queue.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/unistd.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/tls.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/sched.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/assert.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/sched.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/strings.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/string.h \
+@@ -230,17 +226,6 @@ kickpi_k7_gpio.o: kickpi_k7_gpio.c \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/macro.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/barriers.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/chip/irq.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/spinlock_type.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/atomic.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/lib/lib.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/stdlib.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/syslog.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/ratelimit.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/pthread.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/unistd.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/tls.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/sched.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/assert.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/clock.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/timex.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/time.h \
+@@ -249,19 +234,34 @@ kickpi_k7_gpio.o: kickpi_k7_gpio.c \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/inttypes.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wdog.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/list_type.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/ioexpander/gpio.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/signal.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/fs.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/ioctl.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/serial/tioctl.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/fs/uio.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/sys/uio.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/dirent.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/mm/map.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/mm/gran.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/spawn.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/spawn.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/sdio.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wqueue.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/arch/board/board.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_gpio.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_pinmux.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/hardware/rk3576_gpio.h \
+- kickpi_k7.h
+-kickpi_k7_bt.o: kickpi_k7_bt.c \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/mutex.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/execinfo.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/stdio.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/lib/lib.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/stdlib.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/semaphore.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/init.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_dwmmc.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/skw6621s/skw6621s_sdio.h
++kickpi_k7_gpio.o: kickpi_k7_gpio.c \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/config.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/debug.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/compiler.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/streams.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/stdio.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/types.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/compiler.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/stdint.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/types.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/arch/inttypes.h \
+@@ -303,9 +303,6 @@ kickpi_k7_bt.o: kickpi_k7_bt.c \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/atomic.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/lib/lib.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/stdlib.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/fcntl.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/debug.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/streams.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/syslog.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/ratelimit.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/pthread.h \
+@@ -321,30 +318,14 @@ kickpi_k7_bt.o: kickpi_k7_bt.c \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/inttypes.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wdog.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/list_type.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/termios.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/arch.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/cache.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/common/arm64_internal.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/syscall.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/sys/syscall.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/common/arm64_arch.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/nuttx.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/sys/param.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/bits.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wireless/bluetooth/bt_uart.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wireless/bluetooth/bt_uart_shim.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_cru.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/ioexpander/gpio.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/signal.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/wqueue.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/arch/board/board.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_gpio.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_pinmux.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/hardware/rk3576_gpio.h \
+  kickpi_k7.h
+-kickpi_k7_bt_firmware.o: kickpi_k7_bt_firmware.c \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/config.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/stdint.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/compiler.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/arch/types.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/arch/inttypes.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/limits.h \
+- /home/dministrator/openvela-amlogic/src/nuttx/include/arch/limits.h
+ kickpi_k7_i2c.o: kickpi_k7_i2c.c \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/config.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/debug.h \
+@@ -940,5 +921,6 @@ kickpi_k7_video.o: kickpi_k7_video.c \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/nuttx/video/imgdata.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/videoio.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/include/sys/video_controls.h \
++ /home/dministrator/openvela-amlogic/src/nuttx/include/arch/board/board.h \
+  /home/dministrator/openvela-amlogic/src/nuttx/arch/arm64/src/chip/rk3576_video.h \
+  kickpi_k7.h
+diff --git a/logs/zhouyllll/manifest.json b/logs/zhouyllll/manifest.json
+index 1faab21..d46996d 100644
+--- a/logs/zhouyllll/manifest.json
++++ b/logs/zhouyllll/manifest.json
+@@ -29,5 +29,5 @@
+       "model": "<synthetic>"
+     }
+   ],
+-  "updated_at": "2026-09-14T15:11:10.823338+00:00"
++  "updated_at": "2026-09-16T19:07:45.426820+00:00"
+ }
+\ No newline at end of file

@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kecho xts-md5 > /etc/1.txt
+ÿünsh: echo: open failed: 2
+nsh> 

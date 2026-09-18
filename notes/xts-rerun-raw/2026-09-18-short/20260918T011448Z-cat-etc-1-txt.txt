@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> [Kcat /etc/1.txt
+nsh: cat: open failed: 2
+nsh> 

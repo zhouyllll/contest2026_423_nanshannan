@@ -1,0 +1,4 @@
+
+NuttShell (NSH)
+nsh> [Kmkdir /etc
+nsh> 

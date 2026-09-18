@@ -1,0 +1,8 @@
+{
+  "bsp_head": "b946208b4c58cd4929521e3f234ceac8aff11822",
+  "fit_path": "/tmp/k7-line-diag/fit/amp.itb",
+  "fit_sha256": "289303c33841b5b9c72578a810962f31e80a50a37ae07b1b0fa4450b2f31d55f",
+  "network": "192.168.1.50:2323",
+  "serial": "/dev/ttyUSB0 1500000",
+  "timing_limitation": "Host wall clock stepped backwards. Monotonic durations only; no boot/drift PASS."
+}
