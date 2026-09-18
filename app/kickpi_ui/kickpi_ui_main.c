@@ -176,10 +176,12 @@ static lv_obj_t     *g_camera_status;
 static lv_obj_t     *g_camera_button;
 static lv_draw_buf_t *g_camera_frame;
 static pid_t         g_camera_pid = -1;
-static lv_obj_t     *g_agent_status;
+static lv_obj_t     *g_assist_list;
+static lv_obj_t     *g_assist_state;
+static lv_obj_t     *g_assist_spinner;
 static velaclaw_client_t *g_agent_client;
 static pthread_mutex_t g_agent_lock = PTHREAD_MUTEX_INITIALIZER;
-static char          g_agent_reply[512];
+static char          g_agent_reply[2048];
 static bool          g_agent_reply_ready;
 static bool          g_agent_busy;
 static time_t        g_agent_started;
@@ -1178,7 +1180,152 @@ static void camera_poll(void)
   g_camera_frame = next;
   lv_image_set_src(g_camera_image, g_camera_frame);
   lv_label_set_text(g_camera_status,
-                    "Snapshot ready. Ask the assistant for live analysis.");
+                    "Snapshot ready. Ask the assistant on the AGENT tab.");
+}
+
+/****************************************************************************
+ * AGENT 页：桌面助手
+ *
+ * ★ 为什么单独一页
+ *
+ *   原来助手是 DESK 页相机卡片下面的一个 label：回答写进去了，但
+ *     1. 界面只有 Montserrat 14，模型用中文回答时整段是空白；
+ *     2. 回答缓冲 512 字节，实测一次回答 882 字节，中文 UTF-8 还可能
+ *        被从一个字的中间截断；
+ *     3. 它在全宽相机画面的下面，拍过照之后要往下滚才看得到。
+ *   用户看到的就是"点了没反应、也没有输出"。
+ *
+ *   这一页：问答气泡（中文字库 lv_font_k7_cjk_20）、进行中显示已等秒数、
+ *   回答完整保留（2KB，截断只落在字符边界上）。
+ *
+ * ★ 为什么要显示秒数
+ *
+ *   一次看桌面是三轮：LLM 决定调相机（约 6s）→ 拍照 + 视觉模型描述 →
+ *   LLM 组织回答（mimo-v2.5 推理模型，实测 85s）。串口实测总共 196s。
+ *   三分钟里界面一动不动，谁都会以为卡了。
+ ****************************************************************************/
+
+LV_FONT_DECLARE(lv_font_k7_cjk_20);
+
+#define ASSIST_MAX_BUBBLES 12
+#define ASSIST_BOT_BG      0x223041
+#define ASSIST_USER_BG     0x1f5f8b
+
+/* UTF-8 安全的拷贝：截断时退到字符边界，不留半个汉字 */
+
+static void utf8_copy(char *dst, size_t size, const char *src)
+{
+  size_t len = strlen(src);
+
+  if (len >= size)
+    {
+      len = size - 1;
+      while (len > 0 && ((unsigned char)src[len] & 0xc0) == 0x80)
+        {
+          len--;
+        }
+    }
+
+  memcpy(dst, src, len);
+  dst[len] = '\0';
+}
+
+/* 模型爱写 Markdown（**加粗**、# 标题、- 列表），label 不渲染它们，
+ * 原样显示全是星号井号。就地去掉这几种标记。
+ */
+
+static void strip_markdown(char *s)
+{
+  char *r = s;
+  char *w = s;
+  bool line_start = true;
+
+  while (*r != '\0')
+    {
+      if (r[0] == '*' && r[1] == '*')
+        {
+          r += 2;
+          continue;
+        }
+
+      if (line_start && (*r == '#' || *r == '>'))
+        {
+          while (*r == '#' || *r == '>' || *r == ' ')
+            {
+              r++;
+            }
+
+          continue;
+        }
+
+      if (line_start && (*r == '-' || *r == '*') && r[1] == ' ')
+        {
+          *w++ = '-';                   /* 列表符统一成 '-' */
+          *w++ = ' ';
+          r += 2;
+          line_start = false;
+          continue;
+        }
+
+      line_start = *r == '\n';
+      *w++ = *r++;
+    }
+
+  *w = '\0';
+}
+
+static void assist_bubble(bool user, const char *text)
+{
+  lv_obj_t *row;
+  lv_obj_t *bubble;
+  lv_obj_t *label;
+
+  /* 只留最近几条，老的删掉，免得 LVGL 堆越用越少 */
+
+  while (lv_obj_get_child_count(g_assist_list) >= ASSIST_MAX_BUBBLES)
+    {
+      lv_obj_delete(lv_obj_get_child(g_assist_list, 0));
+    }
+
+  /* flex 列里没法让单个子项靠右，所以每条套一个整行宽的 row，
+   * 在 row 里按主轴 START / END 对齐。
+   */
+
+  row = lv_obj_create(g_assist_list);
+  lv_obj_remove_style_all(row);
+  lv_obj_set_size(row, LV_PCT(100), LV_SIZE_CONTENT);
+  lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(row, user ? LV_FLEX_ALIGN_END : LV_FLEX_ALIGN_START,
+                        LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+  lv_obj_remove_flag(row, LV_OBJ_FLAG_SCROLLABLE);
+
+  bubble = lv_obj_create(row);
+  lv_obj_remove_style_all(bubble);
+  lv_obj_set_width(bubble, LV_PCT(user ? 70 : 92));
+  lv_obj_set_height(bubble, LV_SIZE_CONTENT);
+  lv_obj_set_style_bg_opa(bubble, LV_OPA_COVER, 0);
+  lv_obj_set_style_bg_color(bubble,
+                            lv_color_hex(user ? ASSIST_USER_BG
+                                              : ASSIST_BOT_BG), 0);
+  lv_obj_set_style_radius(bubble, 12, 0);
+  lv_obj_set_style_pad_all(bubble, 12, 0);
+  lv_obj_remove_flag(bubble, LV_OBJ_FLAG_SCROLLABLE);
+
+  label = lv_label_create(bubble);
+  lv_obj_set_width(label, LV_PCT(100));
+  lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
+  lv_obj_set_style_text_font(label, &lv_font_k7_cjk_20, 0);
+  lv_obj_set_style_text_color(label, lv_color_white(), 0);
+  lv_obj_set_style_text_line_space(label, 4, 0);
+  lv_label_set_text(label, text);
+
+  lv_obj_update_layout(g_assist_list);
+  lv_obj_scroll_to_view(row, LV_ANIM_ON);
+}
+
+static void assist_state(const char *text)
+{
+  lv_label_set_text(g_assist_state, text);
 }
 
 static void agent_reply_cb(int status, const char *reply, void *cookie)
@@ -1187,25 +1334,28 @@ static void agent_reply_cb(int status, const char *reply, void *cookie)
   pthread_mutex_lock(&g_agent_lock);
   if (status == 0 && reply != NULL)
     {
-      snprintf(g_agent_reply, sizeof(g_agent_reply), "%s", reply);
+      utf8_copy(g_agent_reply, sizeof(g_agent_reply), reply);
     }
   else
     {
       snprintf(g_agent_reply, sizeof(g_agent_reply),
-               "Agent request failed: %d", status);
+               "请求失败（%d）。检查网络和 ai_agent 是否在运行。", status);
     }
 
   g_agent_reply_ready = true;
   pthread_mutex_unlock(&g_agent_lock);
 }
 
-static void agent_ask(const char *question)
+/* question 发给模型，shown 显示在气泡里（NULL 表示不显示，桌面守护用） */
+
+static void agent_ask(const char *question, const char *shown)
 {
   velaclaw_ask_req_t request;
   int ret;
 
   if (g_agent_busy)
     {
+      assist_state("上一个问题还在处理，稍等。");
       return;
     }
 
@@ -1218,8 +1368,7 @@ static void agent_ask(const char *question)
       g_agent_client = velaclaw_client_open("k7-desk-ui");
       if (g_agent_client == NULL)
         {
-          lv_label_set_text(g_agent_status,
-                            "Agent offline. Start ai_agent first.");
+          assist_state("助手离线：ai_agent 没在运行。");
           return;
         }
     }
@@ -1231,30 +1380,58 @@ static void agent_ask(const char *question)
   ret = velaclaw_ask(g_agent_client, &request, agent_reply_cb, NULL);
   if (ret < 0)
     {
-      lv_label_set_text_fmt(g_agent_status, "Agent request failed: %d",
-                            ret);
+      lv_label_set_text_fmt(g_assist_state, "请求没发出去（%d）。", ret);
       return;
+    }
+
+  if (shown != NULL)
+    {
+      assist_bubble(true, shown);
     }
 
   g_agent_busy = true;
   g_agent_started = time(NULL);
-  lv_label_set_text(g_agent_status, "Assistant is checking...");
+  lv_obj_remove_flag(g_assist_spinner, LV_OBJ_FLAG_HIDDEN);
+  assist_state("思考中…");
 }
+
+/* 回答要求：中文、短、不要 Markdown。字库只有 GB2312 一级常用字，
+ * 生僻字会显示成方块，短句能少碰到。
+ */
+
+#define ASSIST_STYLE "请用简体中文回答，不超过 120 字，不要用 Markdown 格式。"
+
+/* camera_capture 的 resolution 缺省是 320x180，模型也会自己选低的
+ * （实测一次只拍了 8.9KB 的图），看小物件基本靠猜。明确要 high。
+ */
+
+#define ASSIST_CAM "Call camera_capture with resolution \"high\". "
 
 static void agent_look_cb(lv_event_t *event)
 {
   (void)event;
-  agent_ask("Use camera_capture to inspect the current desk image. "
-            "Describe only what is visible in this capture. "
-            "If capture or vision fails, say so plainly.");
+  agent_ask(ASSIST_CAM "Use camera_capture to inspect the current desk image and "
+            "describe the main objects. " ASSIST_STYLE,
+            "桌上有什么？");
 }
 
 static void agent_items_cb(lv_event_t *event)
 {
   (void)event;
-  agent_ask("Use camera_capture to inspect the current desk image. "
+  agent_ask(ASSIST_CAM "Use camera_capture to inspect the current desk image. "
             "Are the keys and cup visible? Say unknown if an item is "
-            "obscured or the camera tool fails. Do not guess.");
+            "obscured or the camera tool fails. Do not guess. "
+            ASSIST_STYLE,
+            "钥匙和杯子在吗？");
+}
+
+static void agent_tidy_cb(lv_event_t *event)
+{
+  (void)event;
+  agent_ask(ASSIST_CAM "Use camera_capture to inspect the current desk image. "
+            "Is the desk tidy? Give at most three concrete suggestions. "
+            ASSIST_STYLE,
+            "桌面乱不乱？怎么收拾？");
 }
 
 static int guard_value(cJSON *root, const char *name)
@@ -1266,6 +1443,11 @@ static int guard_value(cJSON *root, const char *name)
     }
 
   return -1;
+}
+
+static const char *guard_word(int v)
+{
+  return v < 0 ? "不确定" : (v ? "在" : "不见了");
 }
 
 static bool guard_apply(const char *reply)
@@ -1302,13 +1484,17 @@ static bool guard_apply(const char *reply)
     }
 
   cJSON_Delete(root);
-  lv_label_set_text_fmt(g_guard_state,
-                        alert ? "ALERT: a tracked item disappeared"
-                              : "Last check: keys=%s, cup=%s",
-                        g_guard_keys < 0 ? "unknown" :
-                          (g_guard_keys ? "visible" : "missing"),
-                        g_guard_cup < 0 ? "unknown" :
-                          (g_guard_cup ? "visible" : "missing"));
+  lv_label_set_text_fmt(g_guard_state, "%s钥匙：%s，杯子：%s",
+                        alert ? "注意：有东西不见了！" : "上次检查 ",
+                        guard_word(g_guard_keys), guard_word(g_guard_cup));
+  lv_obj_set_style_text_color(g_guard_state,
+                              lv_color_hex(alert ? UI_BAD : UI_DIM), 0);
+  if (alert)
+    {
+      assist_bubble(false, "桌面守护：刚才还在的东西现在看不到了，"
+                           "请看一下桌面。");
+    }
+
   return true;
 }
 
@@ -1321,17 +1507,19 @@ static void guard_switch_cb(lv_event_t *event)
     {
       g_guard_keys = -1;
       g_guard_cup = -1;
-      lv_label_set_text(g_guard_state, "Desk guard is off.");
+      lv_label_set_text(g_guard_state, "桌面守护已关闭。");
     }
   else
     {
-      lv_label_set_text(g_guard_state, "Desk guard enabled.");
+      lv_label_set_text(g_guard_state, "桌面守护已开启，马上检查一次。");
     }
 }
 
 static void agent_poll(void)
 {
-  char reply[sizeof(g_agent_reply)];
+  static char reply[sizeof(g_agent_reply)];
+  static time_t shown_elapsed = -1;
+  time_t elapsed;
   bool ready;
 
   pthread_mutex_lock(&g_agent_lock);
@@ -1343,43 +1531,64 @@ static void agent_poll(void)
     }
 
   pthread_mutex_unlock(&g_agent_lock);
+
+  elapsed = time(NULL) - g_agent_started;
   if (ready)
     {
       reply[sizeof(reply) - 1] = '\0';
-      syslog(LOG_INFO, "界面: agent 回复（%ld 秒）: %s\n",
-             (long)(time(NULL) - g_agent_started), reply);
+      syslog(LOG_INFO, "界面: agent 回复（%ld 秒，%zu 字节）: %s\n",
+             (long)elapsed, strlen(reply), reply);
       if (g_guard_request)
         {
           if (!guard_apply(reply))
             {
               lv_label_set_text(g_guard_state,
-                                "Check inconclusive; state unchanged.");
+                                "这次没看清，状态保持不变。");
             }
 
           g_guard_request = false;
           g_guard_next = time(NULL) + 60;
+          assist_state("空闲");
         }
       else
         {
-          lv_label_set_text(g_agent_status, reply);
+          strip_markdown(reply);
+          assist_bubble(false, reply);
+          lv_label_set_text_fmt(g_assist_state, "已回答，用时 %ld 秒",
+                                (long)elapsed);
         }
 
+      lv_obj_add_flag(g_assist_spinner, LV_OBJ_FLAG_HIDDEN);
       g_agent_busy = false;
+      shown_elapsed = -1;
     }
-  else if (g_agent_busy &&
-           time(NULL) - g_agent_started >= UI_AGENT_TIMEOUT_S)
+  else if (g_agent_busy && elapsed >= UI_AGENT_TIMEOUT_S)
     {
-      lv_label_set_text(g_agent_status, "Agent response timed out.");
+      assist_bubble(false, "这次等了 4 分钟还没有回答，已放弃。"
+                           "可以再问一次。");
+      assist_state("超时");
+      lv_obj_add_flag(g_assist_spinner, LV_OBJ_FLAG_HIDDEN);
       g_agent_busy = false;
+      shown_elapsed = -1;
+    }
+  else if (g_agent_busy && elapsed != shown_elapsed)
+    {
+      /* 每秒刷一次，不是每个 tick —— 文本没变就不重绘 */
+
+      shown_elapsed = elapsed;
+      lv_label_set_text_fmt(g_assist_state,
+                            "%s %ld 秒（拍照→看图→作答，通常 2~3 分钟）",
+                            g_guard_request ? "桌面守护检查中" : "思考中",
+                            (long)elapsed);
     }
 
   if (g_guard_enabled && !g_agent_busy && time(NULL) >= g_guard_next)
     {
       g_guard_request = true;
-      agent_ask("Use camera_capture to inspect the desk. Return one JSON "
+      agent_ask(ASSIST_CAM "Use camera_capture to inspect the desk. Return one JSON "
                 "object only: {\"keys\":true|false|null,"
                 "\"cup\":true|false|null}. Use null when obscured, "
-                "uncertain, or capture fails. Do not guess.");
+                "uncertain, or capture fails. Do not guess.", NULL);
       if (!g_agent_busy)
         {
           g_guard_request = false;
@@ -1388,10 +1597,104 @@ static void agent_poll(void)
     }
 }
 
+static lv_obj_t *assist_button(lv_obj_t *parent, const char *text,
+                               lv_event_cb_t cb)
+{
+  lv_obj_t *button = lv_button_create(parent);
+  lv_obj_t *label = lv_label_create(button);
+
+  lv_obj_set_style_text_font(label, &lv_font_k7_cjk_20, 0);
+  lv_label_set_text(label, text);
+  lv_obj_set_style_pad_ver(button, 14, 0);
+  lv_obj_add_event_cb(button, cb, LV_EVENT_CLICKED, NULL);
+  return button;
+}
+
+static void assist_build(lv_obj_t *tab)
+{
+  lv_obj_t *card;
+  lv_obj_t *row;
+  lv_obj_t *label;
+
+  lv_obj_set_flex_flow(tab, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_style_pad_row(tab, 8, 0);
+  lv_obj_remove_flag(tab, LV_OBJ_FLAG_SCROLLABLE);
+
+  /* 状态行：转圈 + 文字 */
+
+  row = lv_obj_create(tab);
+  lv_obj_remove_style_all(row);
+  lv_obj_set_size(row, LV_PCT(100), LV_SIZE_CONTENT);
+  lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
+                        LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_column(row, 10, 0);
+
+  g_assist_spinner = lv_spinner_create(row);
+  lv_obj_set_size(g_assist_spinner, 28, 28);
+  lv_obj_add_flag(g_assist_spinner, LV_OBJ_FLAG_HIDDEN);
+
+  g_assist_state = lv_label_create(row);
+  lv_obj_set_flex_grow(g_assist_state, 1);
+  lv_label_set_long_mode(g_assist_state, LV_LABEL_LONG_WRAP);
+  lv_obj_set_style_text_font(g_assist_state, &lv_font_k7_cjk_20, 0);
+  lv_obj_set_style_text_color(g_assist_state, lv_color_hex(UI_ACCENT), 0);
+  lv_label_set_text(g_assist_state, "空闲");
+
+  /* 对话区：占满剩余高度，自己滚动 */
+
+  g_assist_list = lv_obj_create(tab);
+  lv_obj_set_width(g_assist_list, LV_PCT(100));
+  lv_obj_set_flex_grow(g_assist_list, 1);
+  lv_obj_set_style_bg_color(g_assist_list, lv_color_hex(UI_CARD), 0);
+  lv_obj_set_style_border_width(g_assist_list, 0, 0);
+  lv_obj_set_style_radius(g_assist_list, 8, 0);
+  lv_obj_set_style_pad_all(g_assist_list, 10, 0);
+  lv_obj_set_style_pad_row(g_assist_list, 10, 0);
+  lv_obj_set_flex_flow(g_assist_list, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_scroll_dir(g_assist_list, LV_DIR_VER);
+
+  assist_bubble(false, "你好，我是桌面助手。点下面的按钮，我会用摄像头"
+                       "看一眼桌面再回答。每次大约需要 2~3 分钟。");
+
+  /* 提问按钮 */
+
+  card = card_create(tab, NULL);
+  lv_obj_set_flex_flow(card, LV_FLEX_FLOW_ROW_WRAP);
+  lv_obj_set_style_pad_column(card, 10, 0);
+  lv_obj_set_style_pad_row(card, 10, 0);
+  assist_button(card, "桌上有什么？", agent_look_cb);
+  assist_button(card, "钥匙和杯子在吗？", agent_items_cb);
+  assist_button(card, "桌面乱不乱？", agent_tidy_cb);
+
+  /* 桌面守护 */
+
+  row = lv_obj_create(card);
+  lv_obj_remove_style_all(row);
+  lv_obj_set_size(row, LV_PCT(100), LV_SIZE_CONTENT);
+  lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
+                        LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_column(row, 10, 0);
+
+  g_guard_switch = lv_switch_create(row);
+  lv_obj_add_event_cb(g_guard_switch, guard_switch_cb,
+                      LV_EVENT_VALUE_CHANGED, NULL);
+  label = lv_label_create(row);
+  lv_obj_set_style_text_font(label, &lv_font_k7_cjk_20, 0);
+  lv_label_set_text(label, "桌面守护（每 60 秒看一次钥匙和杯子）");
+
+  g_guard_state = lv_label_create(card);
+  lv_obj_set_width(g_guard_state, LV_PCT(100));
+  lv_label_set_long_mode(g_guard_state, LV_LABEL_LONG_WRAP);
+  lv_obj_set_style_text_font(g_guard_state, &lv_font_k7_cjk_20, 0);
+  lv_obj_set_style_text_color(g_guard_state, lv_color_hex(UI_DIM), 0);
+  lv_label_set_text(g_guard_state, "桌面守护已关闭。");
+}
+
 static void camera_build(lv_obj_t *tab)
 {
   lv_obj_t *card;
-  lv_obj_t *button;
 
   lv_obj_set_flex_flow(tab, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_row(tab, 8, 0);
@@ -1416,29 +1719,6 @@ static void camera_build(lv_obj_t *tab)
 
   g_camera_image = lv_image_create(card);
   lv_obj_set_width(g_camera_image, LV_PCT(100));
-
-  card = card_create(tab, "desktop assistant");
-  g_agent_status = lv_label_create(card);
-  lv_label_set_text(g_agent_status, "Start ai_agent, then ask about the desk.");
-  lv_label_set_long_mode(g_agent_status, LV_LABEL_LONG_WRAP);
-  lv_obj_set_width(g_agent_status, LV_PCT(100));
-
-  button = lv_button_create(card);
-  lv_label_set_text(lv_label_create(button), "What is on my desk?");
-  lv_obj_add_event_cb(button, agent_look_cb, LV_EVENT_CLICKED, NULL);
-
-  button = lv_button_create(card);
-  lv_label_set_text(lv_label_create(button), "Keys and cup?");
-  lv_obj_add_event_cb(button, agent_items_cb, LV_EVENT_CLICKED, NULL);
-
-  g_guard_switch = lv_switch_create(card);
-  lv_obj_add_event_cb(g_guard_switch, guard_switch_cb,
-                      LV_EVENT_VALUE_CHANGED, NULL);
-  lv_label_set_text(lv_label_create(card), "Desk guard (check every 60 s)");
-  g_guard_state = lv_label_create(card);
-  lv_label_set_text(g_guard_state, "Desk guard is off.");
-  lv_label_set_long_mode(g_guard_state, LV_LABEL_LONG_WRAP);
-  lv_obj_set_width(g_guard_state, LV_PCT(100));
 }
 
 /****************************************************************************
@@ -1670,6 +1950,12 @@ static void build_ui(void)
   g_tab_live = lv_tabview_add_tab(g_tabview, "LIVE");
   live_build(g_tab_live);
   camera_build(lv_tabview_add_tab(g_tabview, "DESK"));
+
+  /* 助手页放在 DESK 后面：tick_cb 里 LIVE 页是按下标 2 判断的，
+   * 插在前面会把它挤走。
+   */
+
+  assist_build(lv_tabview_add_tab(g_tabview, "AGENT"));
   about_build(lv_tabview_add_tab(g_tabview, "ABOUT"));
 
   lv_timer_create(tick_cb, TICK_MS, NULL);

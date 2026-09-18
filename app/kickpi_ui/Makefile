@@ -15,4 +15,7 @@ MODULE    = $(CONFIG_LVX_USE_DEMO_CONTEST2026_423_KICKPI_UI)
 
 MAINSRC = kickpi_ui_main.c
 
+# 中文字库（scripts/gen-cjk-font.sh 生成，约 430KB）
+CSRCS += lv_font_k7_cjk_20.c
+
 include $(APPDIR)/Application.mk
