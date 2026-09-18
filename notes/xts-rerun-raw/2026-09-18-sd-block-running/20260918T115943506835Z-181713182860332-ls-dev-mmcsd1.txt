@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> [Kls /dev/mmcsd1
+ /dev/mmcsd1
+nsh> 

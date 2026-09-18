@@ -1,0 +1,7 @@
+
+NuttShell (NSH)
+nsh> [Kdmesg -c
+[CPU0] [==========] tests: Running 3 test(s).
+[CPU0] [ RUN      ] drivertest_block_stress
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
