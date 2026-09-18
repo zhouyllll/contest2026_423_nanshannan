@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> [Kcat /etc/1.txt
+xts-md5
+nsh> 

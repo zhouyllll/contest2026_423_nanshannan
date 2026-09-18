@@ -1,0 +1,8 @@
+{
+  "complete_md5_lines": 100,
+  "unique_values": [
+    "f332259a470403eed260a56443cbcdb0"
+  ],
+  "host_expected": "f332259a470403eed260a56443cbcdb0",
+  "result": "PASS"
+}

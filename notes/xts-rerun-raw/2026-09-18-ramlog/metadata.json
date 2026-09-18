@@ -1,0 +1,10 @@
+{
+  "base_bsp_commit": "1615e49",
+  "overlay": "board/kickpi-k7/configs/xts-logging.config",
+  "fit_sha256": "e605fd0354bc1c1053ef5e319ea661c1d927615c9bd59345550f57393b8ff9dc",
+  "fit_path": "/tmp/k7-xts-ramlog/fit/amp.itb",
+  "write_lba": 24576,
+  "backup": "/tmp/k7-amp-fit/flash-20260918T012035Z/lba24576-8192-before.bin",
+  "network": "192.168.1.50:2323",
+  "syslog_buffer_bytes": 262144
+}

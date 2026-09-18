@@ -1,0 +1,24 @@
+
+NuttShell (NSH)
+nsh> [Kdmesg -c
+[CPU0] [==========] nuttx_mm_test_suites: Running 8 test(s).
+[CPU0] [ RUN      ] test_nuttx_mm01
+[CPU0] [       OK ] test_nuttx_mm01
+[CPU0] [ RUN      ] test_nuttx_mm02
+[CPU0] [       OK ] test_nuttx_mm02
+[CPU0] [ RUN      ] test_nuttx_mm03
+[CPU0] [       OK ] test_nuttx_mm03
+[CPU0] [ RUN      ] test_nuttx_mm04
+[CPU0] [       OK ] test_nuttx_mm04
+[CPU0] [ RUN      ] test_nuttx_mm05
+[CPU0] [       OK ] test_nuttx_mm05
+[CPU0] [ RUN      ] test_nuttx_mm06
+[CPU0] [       OK ] test_nuttx_mm06
+[CPU0] [ RUN      ] test_nuttx_mm07
+[CPU0] [       OK ] test_nuttx_mm07
+[CPU0] [ RUN      ] test_nuttx_mm08
+[CPU0] [       OK ] test_nuttx_mm08
+[CPU0] [==========] nuttx_mm_test_suites: 8 test(s) run.
+[CPU0] [  PASSED  ] 8 test(s).
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 

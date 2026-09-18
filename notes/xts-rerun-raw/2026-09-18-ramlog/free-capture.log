@@ -1,0 +1,5 @@
+[Kfree
+      total       used       free    maxused    maxfree  nused  nfree name
+   64045056   11142480   52902576   11227808   52893600    371      5 Umem
+nsh> 
+{"command": "free", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694507.9873416, "host_at_done": 1789694508.0507472, "elapsed_monotonic_s": 0.06340604199795052, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-ramlog/run/20260918T012147979327Z-142343567382642-free.raw", "text": "/tmp/k7-xts-ramlog/run/20260918T012147979327Z-142343567382642-free.txt", "prompt_returned": true}

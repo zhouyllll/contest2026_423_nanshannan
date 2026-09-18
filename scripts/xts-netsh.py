@@ -9,7 +9,7 @@ import socket
 import sys
 import time
 
-HOST = os.environ.get('K7_NETSH_HOST', '192.168.1.100')
+HOST = os.environ.get('K7_NETSH_HOST', '192.168.1.50')
 PORT = int(os.environ.get('K7_NETSH_PORT', '2323'))
 OUT = os.environ.get('K7_NETSH_OUT', '/tmp/k7-xts-netsh')
 PROMPT = re.compile(rb'nsh>\s*(?:\x1b\[[0-9;]*[A-Za-z])?\s*$')
@@ -87,7 +87,7 @@ def main():
     command = sys.argv[1]
     timeout = float(sys.argv[2]) if len(sys.argv) > 2 else 30.0
     os.makedirs(OUT, exist_ok=True)
-    stamp = dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+    stamp = dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '-' + str(time.monotonic_ns())
     tag = re.sub(r'[^A-Za-z0-9]+', '-', command).strip('-')[:60]
     rawpath = os.path.join(OUT, f'{stamp}-{tag}.raw')
     textpath = os.path.join(OUT, f'{stamp}-{tag}.txt')
@@ -107,6 +107,7 @@ def main():
     record = {'command': command, 'host': HOST, 'port': PORT,
               'host_at_enter': start_wall, 'host_at_done': time.time(),
               'elapsed_monotonic_s': time.monotonic() - start_mono,
+              'host_clock_moved_back': time.time() < start_wall,
               'raw': rawpath, 'text': textpath,
               'prompt_returned': bool(PROMPT.search(output[-400:]))}
     with open(os.path.join(OUT, 'events.jsonl'), 'a', encoding='utf-8') as events:

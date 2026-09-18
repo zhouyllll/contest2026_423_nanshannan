@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> [Kls /dev/ram10
+ /dev/ram10
+nsh> 

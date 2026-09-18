@@ -1,0 +1,36 @@
+[Kdmesg -c
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694522.6700802, "host_at_done": 1789694522.74369, "elapsed_monotonic_s": 0.07360991300083697, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-ramlog/run/20260918T012202661824Z-142359341634079-dmesg-c.raw", "text": "/tmp/k7-xts-ramlog/run/20260918T012202661824Z-142359341634079-dmesg-c.txt", "prompt_returned": true}
+[Kcmocka_mm_test
+nsh> 
+{"command": "cmocka_mm_test", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694522.7777305, "host_at_done": 1789694522.9310832, "elapsed_monotonic_s": 0.15335325899650343, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-ramlog/run/20260918T012202769671Z-142359449482274-cmocka-mm-test.raw", "text": "/tmp/k7-xts-ramlog/run/20260918T012202769671Z-142359449482274-cmocka-mm-test.txt", "prompt_returned": true}
+[Kdmesg -c
+[CPU0] [==========] nuttx_mm_test_suites: Running 8 test(s).
+[CPU0] [ RUN      ] test_nuttx_mm01
+[CPU0] [       OK ] test_nuttx_mm01
+[CPU0] [ RUN      ] test_nuttx_mm02
+[CPU0] [       OK ] test_nuttx_mm02
+[CPU0] [ RUN      ] test_nuttx_mm03
+[CPU0] [       OK ] test_nuttx_mm03
+[CPU0] [ RUN      ] test_nuttx_mm04
+[CPU0] [       OK ] test_nuttx_mm04
+[CPU0] [ RUN      ] test_nuttx_mm05
+[CPU0] [       OK ] test_nuttx_mm05
+[CPU0] [ RUN      ] test_nuttx_mm06
+[CPU0] [       OK ] test_nuttx_mm06
+[CPU0] [ RUN      ] test_nuttx_mm07
+[CPU0] [       OK ] test_nuttx_mm07
+[CPU0] [ RUN      ] test_nuttx_mm08
+[CPU0] [       OK ] test_nuttx_mm08
+[CPU0] [==========] nuttx_mm_test_suites: 8 test(s) run.
+[CPU0] [  PASSED  ] 8 test(s).
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
+{"command": "dmesg -c", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694522.9629233, "host_at_done": 1789694523.0788906, "elapsed_monotonic_s": 0.11596748698502779, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-ramlog/run/20260918T012202954528Z-142359634338078-dmesg-c.raw", "text": "/tmp/k7-xts-ramlog/run/20260918T012202954528Z-142359634338078-dmesg-c.txt", "prompt_returned": true}
+[Kfree
+      total       used       free    maxused    maxfree  nused  nfree name
+   64045056   11142480   52902576   13259808   52893600    371      5 Umem
+nsh> 
+{"command": "free", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789694523.1098523, "host_at_done": 1789694523.175182, "elapsed_monotonic_s": 0.0653296819946263, "host_clock_moved_back": false, "raw": "/tmp/k7-xts-ramlog/run/20260918T012203102124Z-142359781939779-free.raw", "text": "/tmp/k7-xts-ramlog/run/20260918T012203102124Z-142359781939779-free.txt", "prompt_returned": true}

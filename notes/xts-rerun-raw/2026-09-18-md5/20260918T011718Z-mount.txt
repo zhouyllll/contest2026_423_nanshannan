@@ -1,0 +1,8 @@
+
+NuttShell (NSH)
+nsh> [Kmount
+  /data type tmpfs
+  /proc type procfs
+  /tests type tmpfs
+  /tmp type tmpfs
+nsh> 

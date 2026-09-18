@@ -1,0 +1,13 @@
+make: Entering directory '/home/dministrator/openvela-amlogic/src/nuttx'
+CP: arch/dummy/Kconfig to /home/dministrator/openvela-amlogic/src/nuttx/../contest2026_423_nanshannan/chip/rk3576/Kconfig
+CP: boards/dummy/Kconfig to /home/dministrator/openvela-amlogic/src/nuttx/../vendor/openvela/boards/contest2026_423_board/Kconfig
+LN: platform/board to /home/dministrator/openvela-amlogic/src/apps/platform/dummy
+LN: include/arch to arch/arm64/include
+LN: include/arch/board to /home/dministrator/openvela-amlogic/src/nuttx/../vendor/openvela/boards/contest2026_423_board/include
+LN: drivers/platform to /home/dministrator/openvela-amlogic/src/nuttx/drivers/dummy
+LN: include/arch/chip to /home/dministrator/openvela-amlogic/src/nuttx/../contest2026_423_nanshannan/chip/rk3576/include
+LN: arch/arm64/src/chip to /home/dministrator/openvela-amlogic/src/nuttx/../contest2026_423_nanshannan/chip/rk3576
+LN: arch/arm64/src/board to /home/dministrator/openvela-amlogic/src/nuttx/../vendor/openvela/boards/contest2026_423_board/src
+Loaded configuration '.config'
+Configuration saved to '.config'
+make: Leaving directory '/home/dministrator/openvela-amlogic/src/nuttx'

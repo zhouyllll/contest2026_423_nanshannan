@@ -1,0 +1,108 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kdmesg -c
+ÿü[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] file /etc/1.txt md5 is f332259a470403eed260a56443cbcdb0
+[CPU0] nxposix_spawn_exec: ERROR: exec failed: 2
+nsh> 
