@@ -676,17 +676,33 @@ static ssize_t pl330_build_program(struct rk3576_pl330_chan_s *ch,
        *   所以这里用 BURST 条件，与 DMALDP/DMASTP 保持一致。
        */
 
-      off += emit_wfp(&buf[off], PL330_COND_SINGLE, peri);
-
       if (istx)
         {
+          off += emit_wfp(&buf[off], PL330_COND_SINGLE, peri);
           off += emit_ld(&buf[off], PL330_COND_SINGLE);
           off += emit_stp(&buf[off], PL330_COND_SINGLE, peri);
         }
       else
         {
-          off += emit_ldp(&buf[off], PL330_COND_SINGLE, peri);
-          off += emit_st(&buf[off], PL330_COND_SINGLE);
+          /* ★ 接收必须用 BURST 条件（WFPB / LDPB / STB）。
+           *
+           *   原先三条都是 SINGLE（与上面注释说的相反）：实测 8192 字节
+           *   一个缓冲区 1ms 就"收完"（48k 立体声本该 43ms），数据是大段
+           *   0 夹着 0x7f0x、左右声道逐字相同 —— WFPS 没在等请求线，DMA
+           *   按总线速度读空 FIFO。录音机"波形动一下就不动、放出来没声"
+           *   就是它。
+           *
+           *   原厂 Linux pl330.c 的 _bursts()：突发长度 > 1 用 BURST，dtsi
+           *   带 arm,pl330-periph-burst 时强制 BURST；WFP、load、store
+           *   三条用同一个条件。
+           *
+           *   发送方向这次不动：放音在现有写法下已验证出声，不在同一次
+           *   改动里动两条状态不同的路径。
+           */
+
+          off += emit_wfp(&buf[off], PL330_COND_BURST, peri);
+          off += emit_ldp(&buf[off], PL330_COND_BURST, peri);
+          off += emit_st(&buf[off], PL330_COND_BURST);
         }
     }
 
