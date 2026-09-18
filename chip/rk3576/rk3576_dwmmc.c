@@ -616,6 +616,29 @@ int rk3576_dwmmc_probe(uint32_t base)
           }
       }
 
+    /* Observe idle pads without changing their mux or pull settings. */
+
+    if (hw->is_sdio)
+      {
+        unsigned int cmd_high = 0;
+        unsigned int data_high = 0;
+        int sample;
+
+        for (sample = 0; sample < 64; sample++)
+          {
+            cmd_high += rk3576_gpio_read(hw->cmd_bank, hw->cmd_pin) > 0;
+            data_high += rk3576_gpio_read(hw->bus_bank, hw->bus_first) > 0;
+            up_udelay(10);
+          }
+
+        syslog(LOG_INFO, "SDIO idle CMD high=%u/64 D0 high=%u/64\n",
+               cmd_high, data_high);
+        up_mdelay(10);
+        syslog(LOG_INFO, "SDIO idle STATUS=%08" PRIx32 " UHS=%08" PRIx32
+               "\n", dw_getreg(base, DWMMC_STATUS), dw_getreg(base, 0x74));
+        up_mdelay(10);
+      }
+
     /* Match the vendor MMC rescan's pre-enumeration CCCR reset.
      * A failed read uses the reset bit alone. A reset response failure
      * is logged but does not replace the subsequent CMD5 acceptance gate.
@@ -814,6 +837,16 @@ int rk3576_dwmmc_probe(uint32_t base)
 
             if (sts & DWMMC_INT_CMD_ERROR)
               {
+                up_mdelay(1);
+                syslog(LOG_INFO, "SDIO failed CMD=%08" PRIx32
+                       " STATUS=%08" PRIx32 "\n",
+                       dw_getreg(base, DWMMC_CMD), dw_getreg(base, DWMMC_STATUS));
+                up_mdelay(10);
+                syslog(LOG_INFO, "SDIO settled STS=%08" PRIx32
+                       " RESP=%08" PRIx32 " PAD=%d\n",
+                       dw_getreg(base, DWMMC_RINTSTS), dw_getreg(base, DWMMC_RESP0),
+                       rk3576_gpio_read(hw->cmd_bank, hw->cmd_pin));
+                up_mdelay(10);
                 syslog(LOG_ERR,
                        "DWMMC: CMD5 response invalid RINTSTS=0x%08" PRIx32
                        " RESP0=0x%08" PRIx32 "\n", sts, resp);
