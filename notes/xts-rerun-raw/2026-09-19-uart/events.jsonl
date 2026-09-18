@@ -1,0 +1,3 @@
+{"command": "cmocka_driver_uart -d /dev/ttyS0 -n 0", "elapsed_monotonic_s": 1.2015186130010989, "prompt_returned": true, "expected_send_seen": false, "burst_payload_seen": null}
+{"command": "cmocka_driver_uart -d /dev/ttyS0 -n 1", "elapsed_monotonic_s": 4.700256156997057, "prompt_returned": true, "expected_send_seen": null, "burst_payload_seen": null}
+{"command": "cmocka_driver_uart -d /dev/ttyS0 -n 2", "elapsed_monotonic_s": 6.373204749019351, "prompt_returned": true, "expected_send_seen": null, "burst_payload_seen": true}
