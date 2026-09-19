@@ -1,5 +1,9 @@
 # xTS 必测项严格口径复测清单（2026-09-15）
 
+## 2026-09-19 更新
+
+按原文步骤补齐 1.2.1（仅剩 SPL 一行，见表）、1.3.3、2.1.4。启动优化后 2.1.3 冷启动需重测。
+
 ## 2026-09-18 更新
 
 已通过完整复测补齐 1.1.5、1.1.12、1.3.4；1.1.1 另复测 8/8。
@@ -45,10 +49,10 @@ PANIC、ASSERT、watchdog 或 reboot 字样。该观察只是现有镜像的 12h
 |---|---|---|
 | 1.1.5 getprime | 旧表标通过，未写实际耗时输出 | 保存原命令输出；缺失则重跑 `getprime`。 |
 | 1.1.12 MD5 | `md5_test -c 100` 收到 99 行同值 | 核查是否只是串口漏行；保留完整 100 次结果或重跑并保存日志。 |
-| 1.2.1 Reboot 启动异常 | 10/10，`loader normal` | 原文要求从 NSH 执行 `reboot`；按原步骤重跑并保存每次启动日志。 |
+| 1.2.1 Reboot 启动异常 | **2026-09-19 按原文 NSH `reboot` ×10**：openvela 与 U-Boot 0 条异常，仅剩厂商 SPL 探 SD 槽 `spl: mmc init failed with error: -123`（10/10） | SPL 这一行需重编 SPL + 重写 idblock 才能去掉，未做；报告中说明。记录：[reboot-logo](xts-rerun-raw/2026-09-19-reboot-logo/README.md) |
 | 1.2.2 Cold boot 启动异常 | 下载模式 `rkdeveloptool rd` 5/5 | 原文要求设备 reset 按键；按硬件可用方式做 5 次并注明与真正断电启动的区别。 |
 | 1.2.4 Flash 占用 | `nuttx.bin` 大小约 1.20 MB | 原文要求设备端 `df -h` 及硬件 Flash 使用情况；补设备输出、分区/镜像说明。 |
-| 1.3.3 RAM 读写性能 | `ramtest -w -s 1048576` 各阶段无报错 | 补原文要求的测试前 `free` 最大空闲块和完整输出。 |
+| 1.3.3 RAM 读写性能 | **2026-09-19 PASS**：`free` maxfree 53,415,488 → `ramtest -w/-h/-b -s 53349952` 各 6 阶段无错，串口 0 字节 | −64 KB 的原因（ramtest 自身栈/TCB 同堆）见 [ramtest-final](xts-rerun-raw/2026-09-19-ramtest-final/README.md) |
 | 1.3.4 RAM 随机读写 | `mkrd -m 10 -s 512 2048`，block 3/3 | 原文要求 `mkrd -m 10 -s 1000 1024` 后在对应 RAM 设备运行 `cmocka_driver_block -m <设备>`；核对实际设备并按原步骤留证。 |
 | 1.3.5 Flash 功能 | SD 卡 FAT32 上 `fstest` 20/20 | 原文要求 Flash 设备上的 `cmocka_driver_block -m <设备>`；先确认测试会否破坏数据，再选可安全测试的介质。现结果只作替代功能验证。 |
 | 1.3.7 I²C/SPI | RTC/触摸 I²C 正常，SPI 时钟自检 | MPU6050 可作为 I²C 功能复测的实际外设；记录器件、接线、地址、读数及 `cmocka_driver_i2c_spi` 是否可在该器件上运行。原版脚本指定 BMI160，MPU6050 的功能结果作为替代证据，正式等效性需社区确认。另一块开发板并非这条用例的前提。 |
@@ -57,7 +61,7 @@ PANIC、ASSERT、watchdog 或 reboot 字样。该观察只是现有镜像的 12h
 | 1.3.15 Watchdog | 触发复位与恢复，四个 cmocka 子项未跑完 | 原文要求依次 `-r 0/1/2/3`、前三项 assert/栈及复位原因、末项 PASS；先解决测试和驱动行为，再逐项留证。 |
 | 1.3.16 RNG | 两批不同，`/dev/random` 可读 | 原文要求 `nist_sts 400000` 及 `finalAnalysisReport.txt`，各 P 值 >0.0001；现结果不能替代统计测试。 |
 | 2.1.3 Cold Boot 时间 | 5 次下载模式复位，平均 4795 ms | 原文要求上下电 10 次、平均 ≤4000 ms；现数值超过门槛且测试方式不同。实测上电 10 次并保留时间戳；若仍超过 4 秒，记失败并优化启动。 |
-| 2.1.4 Reboot 时间 | `loader normal` 10 次，平均 4744 ms | 原文要求 NSH `reboot` 10 次、平均 ≤6000 ms；按原入口复测并留日志。 |
+| 2.1.4 Reboot 时间 | **2026-09-19 PASS**：NSH `reboot` ×10，`NuttShell (NSH)` 平均 **2.76 s**（2.74–2.77），10/10 | 记录：[reboot-logo](xts-rerun-raw/2026-09-19-reboot-logo/README.md)。当日优化：U-Boot 倒计时 0.2s、触摸/TF/摄像头后台初始化（4.47→2.68s，加 logo 2.76s） |
 | 3.1.1 12h 待机 | 本轮普通镜像 12h 空跑已记录，无崩溃/重启关键字 | 当前镜像无 `CONFIG_MM_KASAN` 和 `show_info`，不能按原文判 PASS。长测结束后编译/烧录 KASAN + show_info 镜像，再静置 12h 留全程日志。 |
 
 复测顺序：先归档本轮 12h/24h 日志与漂移结论；再做无需重刷的短项；之后在适当镜像上跑 BMI160、RNG、RTC、Watchdog 等配置相关项；最后用 KASAN 镜像重跑 3.1.1。每条记录应有镜像 Git 提交、配置、命令、原始串口输出、时间和结论。不得把替代测试直接标成原版 PASS。
