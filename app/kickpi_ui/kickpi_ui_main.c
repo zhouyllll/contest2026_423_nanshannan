@@ -1938,6 +1938,28 @@ static lv_chart_series_t *g_rec_series;
 static lv_obj_t          *g_rec_btn_rec;
 static lv_obj_t          *g_rec_btn_play;
 static int                g_rec_shown_sec = -1;
+static lv_obj_t          *g_vol_slider;
+static lv_obj_t          *g_vol_label;
+
+static void vol_show(int percent)
+{
+  lv_label_set_text_fmt(g_vol_label, "喇叭音量 %d%%", percent);
+}
+
+static void vol_slider_cb(lv_event_t *e)
+{
+  int v = (int)lv_slider_get_value(lv_event_get_target(e));
+
+  vol_show(v);
+
+  /* 拖动过程中只改显示，松手再下发 —— 每一格都写一次 codec 寄存器没必要 */
+
+  if (lv_event_get_code(e) == LV_EVENT_RELEASED)
+    {
+      k7a_set_volume(v);
+      syslog(LOG_INFO, "音量: %d%%\n", v);
+    }
+}
 
 static bool rec_capture_cb(const int16_t *st, size_t frames, void *priv)
 {
@@ -2350,6 +2372,24 @@ static void voice_build(lv_obj_t *tab)
   lv_obj_set_flex_flow(tab, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_row(tab, 8, 0);
 
+  /* 喇叭音量：对耳机、喇叭、朗读、录音回放统一生效 */
+
+  card = card_create(tab, NULL);
+  g_vol_label = lv_label_create(card);
+  lv_obj_set_style_text_font(g_vol_label, &lv_font_k7_cjk_20, 0);
+  lv_obj_set_style_text_color(g_vol_label, lv_color_hex(UI_ACCENT), 0);
+  vol_show(k7a_get_volume());
+
+  g_vol_slider = lv_slider_create(card);
+  lv_obj_set_width(g_vol_slider, LV_PCT(94));
+  lv_obj_set_height(g_vol_slider, 20);
+  lv_obj_set_style_margin_ver(g_vol_slider, 14, 0);
+  lv_slider_set_range(g_vol_slider, 0, 100);
+  lv_slider_set_value(g_vol_slider, k7a_get_volume(), LV_ANIM_OFF);
+  lv_obj_add_event_cb(g_vol_slider, vol_slider_cb, LV_EVENT_VALUE_CHANGED,
+                      NULL);
+  lv_obj_add_event_cb(g_vol_slider, vol_slider_cb, LV_EVENT_RELEASED, NULL);
+
   card = card_create(tab, NULL);
   label = lv_label_create(card);
   lv_obj_set_style_text_font(label, &lv_font_k7_cjk_20, 0);
@@ -2608,6 +2648,28 @@ static void tick_cb(lv_timer_t *t)
     {
       rec_start(REC_PLAYING);
     }
+
+  /* echo 数值 > /tmp/k7-vol：设音量（0~100），等同于拖滑块 */
+
+  {
+    FILE *fp = fopen("/tmp/k7-vol", "r");
+
+    if (fp != NULL)
+      {
+        int v = -1;
+
+        if (fscanf(fp, "%d", &v) == 1)
+          {
+            k7a_set_volume(v);
+            lv_slider_set_value(g_vol_slider, k7a_get_volume(), LV_ANIM_OFF);
+            vol_show(k7a_get_volume());
+            syslog(LOG_INFO, "音量: %d%%（调试入口）\n", k7a_get_volume());
+          }
+
+        fclose(fp);
+        unlink("/tmp/k7-vol");
+      }
+  }
 
   /* echo 1 > /tmp/k7-beep：同一条放音路径放 1 秒 1kHz，单独验证喇叭 */
 

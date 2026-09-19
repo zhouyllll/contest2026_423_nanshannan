@@ -33,6 +33,13 @@ int k7a_capture(k7a_capture_cb_t cb, void *priv, int max_ms);
 
 int k7a_play_mono(const int16_t *mono, size_t frames);
 
+/* 放音音量 0~100（%），对耳机和喇叭同时生效。放音进行中调用会立即生效，
+ * 否则在下一次放音开始时生效。
+ */
+
+void k7a_set_volume(int percent);
+int k7a_get_volume(void);
+
 /* 采集与放音共用一个设备，同一时刻只能有一个在用。忙时返回 true。 */
 
 bool k7a_busy(void);

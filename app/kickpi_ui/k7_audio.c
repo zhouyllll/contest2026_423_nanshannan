@@ -51,6 +51,8 @@ struct k7a_dev_s
 
 static pthread_mutex_t g_k7a_lock = PTHREAD_MUTEX_INITIALIZER;
 static volatile bool   g_k7a_busy;
+static int             g_k7a_volume = 70;    /* % */
+static int             g_k7a_playfd = -1;    /* 正在放音的设备，调音量用 */
 
 static uint32_t k7a_now_ms(void)
 {
@@ -242,6 +244,51 @@ static void k7a_release(void)
   pthread_mutex_lock(&g_k7a_lock);
   g_k7a_busy = false;
   pthread_mutex_unlock(&g_k7a_lock);
+}
+
+/* ES8388 的 AUDIO_FU_VOLUME 取 0~1000，驱动内部按 20log10(v/1000) 换成
+ * DAC 数字衰减（DACCONTROL4/5，每级 0.5dB）：50% ≈ -6dB，10% = -20dB。
+ */
+
+static void k7a_apply_volume(int fd, int percent)
+{
+  struct audio_caps_desc_s caps;
+
+  memset(&caps, 0, sizeof(caps));
+  caps.caps.ac_len            = sizeof(struct audio_caps_s);
+  caps.caps.ac_type           = AUDIO_TYPE_FEATURE;
+  caps.caps.ac_format.hw      = AUDIO_FU_VOLUME;
+  caps.caps.ac_controls.hw[0] = (uint16_t)(percent * 10);
+  if (ioctl(fd, AUDIOIOC_CONFIGURE, (unsigned long)&caps) < 0)
+    {
+      syslog(LOG_WARNING, "k7a: 设音量失败 %d\n", errno);
+    }
+}
+
+void k7a_set_volume(int percent)
+{
+  if (percent < 0)
+    {
+      percent = 0;
+    }
+  else if (percent > 100)
+    {
+      percent = 100;
+    }
+
+  pthread_mutex_lock(&g_k7a_lock);
+  g_k7a_volume = percent;
+  if (g_k7a_playfd >= 0)
+    {
+      k7a_apply_volume(g_k7a_playfd, percent);
+    }
+
+  pthread_mutex_unlock(&g_k7a_lock);
+}
+
+int k7a_get_volume(void)
+{
+  return g_k7a_volume;
 }
 
 bool k7a_busy(void)
@@ -450,6 +497,11 @@ int k7a_play_mono(const int16_t *mono, size_t frames)
       return ret;
     }
 
+  pthread_mutex_lock(&g_k7a_lock);
+  k7a_apply_volume(d.fd, g_k7a_volume);
+  g_k7a_playfd = d.fd;
+  pthread_mutex_unlock(&g_k7a_lock);
+
   for (i = 0; i < d.nbuf && pos < frames; i++)
     {
       k7a_fill(d.bufs[i], d.bufbytes, mono, frames, &pos);
@@ -489,6 +541,9 @@ int k7a_play_mono(const int16_t *mono, size_t frames)
     }
 
 out:
+  pthread_mutex_lock(&g_k7a_lock);
+  g_k7a_playfd = -1;
+  pthread_mutex_unlock(&g_k7a_lock);
   k7a_close(&d);
   k7a_release();
   return ret;
