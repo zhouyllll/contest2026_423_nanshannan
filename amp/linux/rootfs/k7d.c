@@ -29,6 +29,26 @@
  *
  *   一帧最多 496 字节（virtio_rpmsg 缓冲 512 减去 16 字节头），这里留余量
  *   取 480。
+ *
+ * ★ 音频模式：语音唤醒的端点检测（VAD）在这里做
+ *
+ *   openvela 握手后的第一帧如果是 'A'，这条通道就进入音频模式：
+ *
+ *   openvela → Linux
+ *     'A'               进入音频模式（16kHz、单声道、16 位）
+ *     'P' <样本>        PCM，小端 int16，通常 160 个样本（10ms）
+ *   Linux → openvela
+ *     'L' <十进制>      最近 100ms 的峰值 0~32767，给界面画电平
+ *     'S' <起点>        开始说话（样本序号，从 'A' 之后第一个样本记 0）
+ *     'V' <起点> <终点> 一句话说完，[起点, 终点) 这段送去识别
+ *
+ *   openvela 那边保留最近十几秒的环形缓冲，按样本序号取段 —— 语音不回传，
+ *   rpmsg 上只走 PCM 一个方向。
+ *
+ * ★ 多条通道并发
+ *
+ *   唤醒的音频通道常驻，ampctl exec 随时还会再开一条。每发现一个新的
+ *   /dev/rpmsgN 就 fork 一个子进程服务它，互不阻塞。
  */
 
 #include <dirent.h>
@@ -49,6 +69,18 @@
 #define FRAME_MAX     480
 #define EXEC_TMO_S    60
 #define POLL_DEV_MS   50
+#define MAX_CHILD     8
+
+/* VAD 参数（16kHz，每帧 10ms = 160 个样本） */
+
+#define VAD_RATE        16000
+#define VAD_FRAME       160
+#define VAD_START_N     3       /* 连续 3 帧有声算开口            */
+#define VAD_END_N       50      /* 连续 500ms 无声算说完          */
+#define VAD_PREROLL     20      /* 起点往前补 200ms，免得吃掉首字 */
+#define VAD_MIN_N       30      /* 短于 300ms 的不送（咳嗽、敲桌） */
+#define VAD_MAX_N       800     /* 最长 8s 强制切断               */
+#define VAD_ABS_MIN     300     /* 有声的绝对下限（RMS）          */
 
 static void klog(const char *fmt, ...)
 {
@@ -107,30 +139,6 @@ static int send_text(int fd, char type, const char *fmt, ...)
 		n = sizeof(buf) - 1;
 
 	return send_frame(fd, type, buf, n);
-}
-
-/* 找一个 /dev/rpmsgN（不是 rpmsg_ctrlN）。没有就返回 -1。 */
-static int find_rpmsg_dev(char *path, size_t size)
-{
-	struct dirent *de;
-	DIR *d;
-	int found = -1;
-
-	d = opendir("/dev");
-	if (!d)
-		return -1;
-
-	while ((de = readdir(d)) != NULL) {
-		if (strncmp(de->d_name, "rpmsg", 5) == 0 &&
-		    de->d_name[5] >= '0' && de->d_name[5] <= '9') {
-			snprintf(path, size, "/dev/%s", de->d_name);
-			found = 0;
-			break;
-		}
-	}
-
-	closedir(d);
-	return found;
 }
 
 /*
@@ -220,6 +228,143 @@ static int run_command(int fd, const char *cmd)
 	return send_text(fd, 'E', "%d", 128 + WTERMSIG(status));
 }
 
+/* 端点检测。ES8388 开了 ALC 和噪声门，安静时样本基本是 0~50，说话时
+ * RMS 上千，靠"比底噪高 4 倍且过绝对下限"分开就够用。底噪跟踪：比
+ * 当前估计低就快速跟下去，高就极慢地往上爬（说话时不会被带高）。
+ */
+
+struct vad_s
+{
+  unsigned long pos;       /* 已处理的样本数（下一帧的起点序号） */
+  unsigned long seg_start;
+  int           floor;     /* 底噪 RMS 估计 */
+  int           run;       /* 连续有声 / 无声帧数 */
+  int           in_speech;
+  int           speech_n;  /* 本段已持续的帧数 */
+  int           peak;      /* 这 100ms 里的峰值 */
+  int           nframe;
+  int16_t       buf[VAD_FRAME];
+  int           fill;
+};
+
+static int isqrt(unsigned long v)
+{
+  unsigned long r = 0;
+  unsigned long b = 1ul << 30;
+
+  while (b > v)
+    b >>= 2;
+  while (b) {
+    if (v >= r + b) {
+      v -= r + b;
+      r = (r >> 1) + b;
+    } else {
+      r >>= 1;
+    }
+    b >>= 2;
+  }
+
+  return (int)r;
+}
+
+static void vad_frame(int fd, struct vad_s *v)
+{
+  unsigned long acc = 0;
+  int voiced;
+  int rms;
+  int i;
+
+  for (i = 0; i < VAD_FRAME; i++) {
+    int x = v->buf[i];
+    int a = x < 0 ? -x : x;
+
+    acc += (unsigned long)(x * x);
+    if (a > v->peak)
+      v->peak = a;
+  }
+
+  rms = isqrt(acc / VAD_FRAME);
+
+  if (v->floor == 0 || rms < v->floor)
+    v->floor = v->floor == 0 ? rms + 1 : (v->floor * 7 + rms) / 8 + 1;
+  else if (!v->in_speech)
+    v->floor += (rms - v->floor) / 256;
+
+  voiced = rms > VAD_ABS_MIN && rms > v->floor * 4;
+
+  if (!v->in_speech) {
+    v->run = voiced ? v->run + 1 : 0;
+    if (v->run >= VAD_START_N) {
+      unsigned long back = (VAD_START_N + VAD_PREROLL) * VAD_FRAME;
+
+      v->in_speech = 1;
+      v->speech_n = v->run;
+      v->run = 0;
+      v->seg_start = v->pos > back ? v->pos - back : 0;
+      send_text(fd, 'S', "%lu", v->seg_start);
+    }
+  } else {
+    v->speech_n++;
+    v->run = voiced ? 0 : v->run + 1;
+    if (v->run >= VAD_END_N || v->speech_n >= VAD_MAX_N) {
+      unsigned long end = v->pos + VAD_FRAME;
+
+      if (v->speech_n - v->run >= VAD_MIN_N)
+        send_text(fd, 'V', "%lu %lu", v->seg_start, end);
+      else
+        klog("vad: 丢掉 %d0ms 的短声\n", v->speech_n - v->run);
+
+      v->in_speech = 0;
+      v->run = 0;
+    }
+  }
+
+  v->pos += VAD_FRAME;
+  if (++v->nframe >= 10) {
+    send_text(fd, 'L', "%d", v->peak);
+    v->peak = 0;
+    v->nframe = 0;
+  }
+}
+
+static void serve_audio(int fd)
+{
+  struct vad_s v;
+  char frame[FRAME_MAX + 1];
+
+  memset(&v, 0, sizeof(v));
+  klog("audio: VAD 开始\n");
+
+  for (;;) {
+    ssize_t n = read(fd, frame, FRAME_MAX);
+    int ns;
+    int i;
+
+    if (n < 0 && errno == EINTR)
+      continue;
+    if (n <= 0)
+      break;
+    if (frame[0] != 'P')
+      continue;
+
+    /* 样本从 frame+1 开始，未对齐：逐个拷 */
+
+    ns = (int)(n - 1) / 2;
+    for (i = 0; i < ns; i++) {
+      int16_t x;
+
+      memcpy(&x, frame + 1 + 2 * i, 2);
+      v.buf[v.fill++] = x;
+      if (v.fill == VAD_FRAME) {
+        vad_frame(fd, &v);
+        v.fill = 0;
+      }
+    }
+  }
+
+  klog("audio: VAD 结束，共 %lu 样本\n", v.pos);
+}
+
 static void serve(const char *path)
 {
 	char frame[FRAME_MAX + 1];
@@ -251,6 +396,10 @@ static void serve(const char *path)
 			break;         /* EPIPE：openvela 撤掉了端点 */
 
 		frame[n] = '\0';
+		if (frame[0] == 'A') {
+			serve_audio(fd);
+			break;
+		}
 		if (frame[0] == 'X') {
 			if (run_command(fd, frame + 1) < 0)
 				break;
@@ -264,17 +413,82 @@ out:
 	close(fd);
 }
 
+/* 正在被子进程服务的设备 */
+
+static struct
+{
+  char  name[256];
+  pid_t pid;
+} g_child[MAX_CHILD];
+
+static int child_busy(const char *name)
+{
+  int i;
+
+  for (i = 0; i < MAX_CHILD; i++)
+    if (g_child[i].pid > 0 && strcmp(g_child[i].name, name) == 0)
+      return 1;
+
+  return 0;
+}
+
+static void reap(void)
+{
+  pid_t pid;
+  int i;
+
+  while ((pid = waitpid(-1, NULL, WNOHANG)) > 0)
+    for (i = 0; i < MAX_CHILD; i++)
+      if (g_child[i].pid == pid)
+        g_child[i].pid = 0;
+}
+
 int main(void)
 {
-	char path[300];
+  struct dirent *de;
+  DIR *d;
 
-	signal(SIGPIPE, SIG_IGN);
-	klog("started, waiting for /dev/rpmsgN\n");
+  signal(SIGPIPE, SIG_IGN);
+  klog("started, waiting for /dev/rpmsgN\n");
 
-	for (;;) {
-		if (find_rpmsg_dev(path, sizeof(path)) == 0)
-			serve(path);
+  for (;;) {
+    reap();
 
-		usleep(POLL_DEV_MS * 1000);
-	}
+    d = opendir("/dev");
+    if (d != NULL) {
+      while ((de = readdir(d)) != NULL) {
+        char path[300];
+        pid_t pid;
+        int i;
+
+        if (strncmp(de->d_name, "rpmsg", 5) != 0 ||
+            de->d_name[5] < '0' || de->d_name[5] > '9' ||
+            child_busy(de->d_name))
+          continue;
+
+        for (i = 0; i < MAX_CHILD && g_child[i].pid > 0; i++)
+          ;
+        if (i == MAX_CHILD)
+          break;
+
+        snprintf(path, sizeof(path), "/dev/%s", de->d_name);
+        pid = fork();
+        if (pid == 0) {
+          closedir(d);
+          serve(path);
+          _exit(0);
+        }
+
+        if (pid > 0) {
+          snprintf(g_child[i].name, sizeof(g_child[i].name), "%s",
+                   de->d_name);
+          g_child[i].pid = pid;
+        }
+      }
+
+      closedir(d);
+    }
+
+    usleep(POLL_DEV_MS * 1000);
+  }
 }
