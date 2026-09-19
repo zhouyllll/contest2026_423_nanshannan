@@ -1,0 +1,28 @@
+diff --git a/sched/task/task_posixspawn.c b/sched/task/task_posixspawn.c
+index adcdf137..a02ff7a7 100644
+--- a/sched/task/task_posixspawn.c
++++ b/sched/task/task_posixspawn.c
+@@ -110,7 +110,22 @@ static int nxposix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
+   if (pid < 0)
+     {
+       ret = -pid;
+-      serr("ERROR: exec failed: %d\n", ret);
++
++      /* ENOENT is an ordinary lookup miss: NSH tries every command as a
++       * program file first (nsh_fileapp) and falls back to its own
++       * commands, so logging it as an error prints one ERROR line per
++       * shell command.  The caller still gets the error code.
++       */
++
++      if (ret == ENOENT)
++        {
++          sinfo("exec: %s not found\n", path);
++        }
++      else
++        {
++          serr("ERROR: exec failed: %d\n", ret);
++        }
++
+       return ret;
+     }
+ 

@@ -17,6 +17,7 @@ openvela 工程的其它仓里。按《新平台适配指南》「不得修改�
 | `agent-mimo-no-thinking.patch` | `packages/ai_agent` | 对小米 MiMo（地址含 xiaomimimo）的文本与视觉请求加 `"thinking": {"type": "disabled"}`。mimo-v2.5 默认开深度思考：主机实测纯文本 8.6s → 2.1s、看一张图 20s → 4.3s；板上一次"拍照 → 看图 → 作答"三轮 196s → 23s。可用 `AGENT_LLM_DISABLE_THINKING=0` 关闭此行为。 |
 | `telnetd-survive-bad-connection.patch` | `apps` | **一次端口探测就让 telnet 永久下线**：客户端连上立刻断开（端口扫描、`bash /dev/tcp` 探活），`accept()` 返回 `-ENOTCONN`，`netutils/telnetd/telnetd_daemon.c` 把 EINTR 以外的任何 accept 错误都当致命，关监听 socket 并退出守护进程 —— 此后 2323 一律 Connection refused，只能串口重启 telnetd 或复位。改为只有监听 socket 本身坏了（EBADF/EINVAL/ENOTSOCK/EOPNOTSUPP）才退出，单个连接建会话失败只丢这个连接。上板：修复前 1 次裸连接即挂；修复后 10 次 FIN + 10 次 RST 断开后正常会话仍可用。已知残留：连上后**立即** RST、连发十几次时，个别 `Telnet_session` 会卡在信号量上不退出，占住 8 个预分配 TCP 连接之一。 |
 | `tftpc-null-blockno.patch` | `apps` | **空指针解引用**：`netutils/tftpc/tftpc_put.c` 等 WRQ 首个 ACK 时传 `blockno = NULL`（那个块号必然为 0，调用方不关心），但 `tftp_rcvack()` 无条件写 `*blockno = rblockno`。**任何一次握手成功的 TFTP put 都会 panic**。单独成补丁而不并进 `apps.patch`，因为这是个可独立提 PR 的真实缺陷，跟那边的格式符清理不是一回事。 |
+| `posixspawn-enoent-not-error.patch` | `nuttx` | **每条 NSH 命令都带一行 `nxposix_spawn_exec: ERROR: exec failed: 2`**：开了 `LIBC_EXECFUNCS` + `NSH_BUILTIN_APPS` 时，NSH 对每条命令先用 `nsh_fileapp()`（`posix_spawnp`）当程序文件试，`free`/`echo` 这类 NSH 自带命令必然 ENOENT，然后才回退。找不到是正常的查找结果，调用方有返回码；ENOENT 降为 `sinfo`，其它错误照旧 `serr`。影响 xTS 各项"日志无异常"的判读。`LIBC_EXECFUNCS` 不能关：`posix_spawn` 本身只在它打开时编译，界面拍照（v4l2cap）和启动 ai_agent 都靠它。 |
 
 ## 另外两个必须记住的配置坑
 
