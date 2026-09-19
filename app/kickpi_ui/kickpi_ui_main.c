@@ -1893,7 +1893,7 @@ static void camera_build(lv_obj_t *tab)
  * ★ 放音自动放大
  *
  *   麦克风电平偏低（`mic` 实测底噪平均 117/32767），原样放几乎听不见。
- *   按峰值归一化到约 -1dB，最多放大 16 倍，倍数显示在界面上。
+ *   按电平归一化，最多放大 4 倍（录音已有 ALC），倍数显示在界面上。
  ****************************************************************************/
 
 #define REC_SECONDS    5
@@ -2063,13 +2063,47 @@ static void rec_analyse(void)
     {
       g_rec.gain = 1;
     }
-  else if (g_rec.gain > 16)
+  else if (g_rec.gain > 4)
     {
-      g_rec.gain = 16;
+      /* ALC 已经把录音电平拉到目标值，这里只做小幅补偿。上限原来是
+       * 16 倍，底噪被一起放大，回放噪声很大。
+       */
+
+      g_rec.gain = 4;
     }
 
   syslog(LOG_INFO, "录音机: 最大尖峰 %d 在第 %zu 帧（%zu ms），99.5%% 电平 %d\n",
          peak, peak_at, peak_at * 1000 / K7A_RATE, p995);
+
+  /* 诊断：每 100ms 一个峰值，看噪声是均匀的底噪还是周期性的突发 */
+
+  {
+    char line[400];
+    int off = 0;
+    size_t seg = K7A_RATE / 10;
+    size_t k;
+
+    for (k = 0; k + seg <= g_rec.frames && off < (int)sizeof(line) - 8;
+         k += seg)
+      {
+        int pk = 0;
+        size_t j;
+
+        for (j = 0; j < seg; j++)
+          {
+            int a = g_rec.mono[k + j] < 0 ? -g_rec.mono[k + j]
+                                          : g_rec.mono[k + j];
+            if (a > pk)
+              {
+                pk = a;
+              }
+          }
+
+        off += snprintf(line + off, sizeof(line) - off, " %d", pk);
+      }
+
+    syslog(LOG_INFO, "录音机包络(每100ms峰值):%s\n", line);
+  }
   rec_write_wav(g_rec.mono, g_rec.frames);
 }
 

@@ -24,6 +24,7 @@
 #define __ARCH_ARM64_SRC_RK3576_RK3576_SAI_H
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 struct i2s_dev_s;
@@ -59,5 +60,20 @@ int rk3576_sai_probe(void);
  ****************************************************************************/
 
 struct i2s_dev_s *rk3576_sai_initialize(int port);
+
+/****************************************************************************
+ * Name: rk3576_sai_set_txhook
+ *
+ * Description:
+ *   注册"发送开始 / 结束"回调：一条放音流开始发送前调 hook(true)，
+ *   最后一个缓冲排空、TX 停下后调 hook(false)。板级用它开关喇叭功放 ——
+ *   功放常开的话不放音时也有明显底噪。hook 在音频工作线程里调，
+ *   里面只做 GPIO 这类不阻塞的事。
+ *
+ ****************************************************************************/
+
+typedef void (*rk3576_sai_txhook_t)(bool on);
+
+void rk3576_sai_set_txhook(rk3576_sai_txhook_t hook);
 
 #endif /* __ARCH_ARM64_SRC_RK3576_RK3576_SAI_H */

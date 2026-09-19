@@ -90,6 +90,13 @@
  * Private Data
  ****************************************************************************/
 
+/* SAI 发送开始 / 结束时开关喇叭功放 */
+
+static void kickpi_k7_speaker(bool on)
+{
+  rk3576_gpio_write(AUDIO_SPK_EN_BANK, AUDIO_SPK_EN_PIN, on);
+}
+
 static const struct es8388_lower_s g_es8388_lower =
 {
   .frequency = AUDIO_I2C_FREQ,
@@ -138,19 +145,23 @@ int kickpi_k7_audio_initialize(void)
       return -ENODEV;
     }
 
-  /* ★ 打开喇叭功放。
+  /* ★ 喇叭功放。
    *
    *   ES8388 在放音时 OUT1（耳机）和 OUT2（喇叭）都会打开
    *   （CONFIG_ES8388_OUTPUT_CHANNEL_ALL），但 OUT2 后面还有一颗功放，
    *   它的使能脚 GPIO2_B1 之前没人拉高 —— 表现是"只有耳机有声音，接上
-   *   喇叭不响"。一直打开：放音之外 codec 输出静音，功放只放大底噪。
-   *   AMP 下 Linux 没开声卡子系统，不会动这个脚。
+   *   喇叭不响"。
+   *
+   *   常开的话不放音时也有明显底噪（用户反馈），所以平时关着，由 SAI
+   *   在一条放音流开始 / 结束时回调开关。AMP 下 Linux 没开声卡子系统，
+   *   不会动这个脚。
    */
 
   rk3576_pinmux_set(AUDIO_SPK_EN_BANK, AUDIO_SPK_EN_PIN, 0);
   rk3576_gpio_setdir(AUDIO_SPK_EN_BANK, AUDIO_SPK_EN_PIN, true);
-  rk3576_gpio_write(AUDIO_SPK_EN_BANK, AUDIO_SPK_EN_PIN, true);
-  syslog(LOG_INFO, "音频: 喇叭功放使能 GPIO2_B1 = 1\n");
+  rk3576_gpio_write(AUDIO_SPK_EN_BANK, AUDIO_SPK_EN_PIN, false);
+  rk3576_sai_set_txhook(kickpi_k7_speaker);
+  syslog(LOG_INFO, "音频: 喇叭功放 GPIO2_B1 随放音开关\n");
 
   /* 套一层 PCM 解码，使 /dev/audio/pcm0 能直接吃 WAV */
 

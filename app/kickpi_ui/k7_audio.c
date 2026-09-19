@@ -27,6 +27,7 @@
 #include <sys/ioctl.h>
 
 #include <nuttx/audio/audio.h>
+#include <nuttx/i2c/i2c_master.h>
 
 #include "k7_audio.h"
 
@@ -42,6 +43,11 @@ struct k7a_dev_s
   int                 bufbytes;
   struct ap_buffer_s *bufs[K7A_MAXBUF];
 };
+
+/* ES8388 在 I2C3:0x10（板级 kickpi_k7_audio.c 已实测） */
+
+#define K7A_CODEC_BUS   "/dev/i2c3"
+#define K7A_CODEC_ADDR  0x10
 
 static pthread_mutex_t g_k7a_lock = PTHREAD_MUTEX_INITIALIZER;
 static volatile bool   g_k7a_busy;
@@ -243,11 +249,77 @@ bool k7a_busy(void)
   return g_k7a_busy;
 }
 
+static void k7a_codec_write(int fd, uint8_t reg, uint8_t val)
+{
+  struct i2c_msg_s msg;
+  struct i2c_transfer_s xfer;
+  uint8_t buf[2];
+
+  buf[0] = reg;
+  buf[1] = val;
+  msg.frequency = 100000;
+  msg.addr      = K7A_CODEC_ADDR;
+  msg.flags     = 0;
+  msg.buffer    = buf;
+  msg.length    = 2;
+  xfer.msgv     = &msg;
+  xfer.msgc     = 1;
+  if (ioctl(fd, I2CIOC_TRANSFER, (unsigned long)&xfer) < 0)
+    {
+      syslog(LOG_WARNING, "k7a: 写 ES8388 %02x 失败 %d\n", reg, errno);
+    }
+}
+
+/* ★ 录音增益照原厂：ALC 自动增益 + 噪声门。
+ *
+ *   上游 es8388 驱动录音时：麦克风 PGA +24dB（0x09=0x88，最大），ALC 关
+ *   （0x12=0x38），噪声门关（0x16=0x00）。安静环境底噪平均约 130/32767，
+ *   录音机再放大 8~16 倍，用户听到的就是"录音回放噪声很大"。
+ *
+ *   原厂 Android 录音进行时读回（见 app/mic/mic_main.c 的对照表）：
+ *     12:ea 13:c0 14:05 15:06 16:53
+ *   ALC 双声道、按目标电平自动调 PGA；噪声门阈值约 -61.5dBFS，低于它
+ *   把 ADC 输出静音。原厂 0x09=0x00 是交给 ALC 管的起始值。
+ *
+ *   输入通道（0x0A = LIN2/RIN2）不动：板上麦克风座接的是 LIN2，已实测。
+ *   必须在 START 之后写：es8388_start() 会重写 ADC 相关寄存器。
+ */
+
+static void k7a_codec_tune_capture(void)
+{
+  static const uint8_t regs[][2] =
+  {
+    { 0x09, 0x00 },
+    { 0x12, 0xea },
+    { 0x13, 0xc0 },
+    { 0x14, 0x05 },
+    { 0x15, 0x06 },
+    { 0x16, 0x53 },
+  };
+
+  int fd = open(K7A_CODEC_BUS, O_RDWR | O_CLOEXEC);
+  size_t i;
+
+  if (fd < 0)
+    {
+      syslog(LOG_WARNING, "k7a: 打不开 %s，录音增益保持驱动默认\n",
+             K7A_CODEC_BUS);
+      return;
+    }
+
+  for (i = 0; i < sizeof(regs) / sizeof(regs[0]); i++)
+    {
+      k7a_codec_write(fd, regs[i][0], regs[i][1]);
+    }
+
+  close(fd);
+}
+
 int k7a_capture(k7a_capture_cb_t cb, void *priv, int max_ms)
 {
   struct k7a_dev_s d;
   uint32_t deadline;
-  bool first = true;
+  size_t skipped = 0;
   int ret;
   int i;
 
@@ -278,6 +350,8 @@ int k7a_capture(k7a_capture_cb_t cb, void *priv, int max_ms)
       goto out;
     }
 
+  k7a_codec_tune_capture();
+
   deadline = k7a_now_ms() + (uint32_t)max_ms;
   ret = 0;
   while ((int32_t)(deadline - k7a_now_ms()) > 0)
@@ -292,14 +366,24 @@ int k7a_capture(k7a_capture_cb_t cb, void *priv, int max_ms)
           break;
         }
 
-      /* ★ START 之后第一块是满幅的爆音（`mic 1` 实测第 1 块 peak=32767，
-       *   之后都是 100~370 的底噪），不交给调用方 —— 否则录音机的
-       *   峰值归一化会被它顶到 1 倍，唤醒的端点检测也会被它触发。
+      /* ★ 开头 500ms 不交给调用方。
+       *
+       *   START 之后第一块是满幅爆音（`mic 1` 实测 peak=32767）；写完 ALC
+       *   寄存器后 ALC 起步还有一段增益收敛的冲击：丢 150ms 时实测每 100ms
+       *   峰值 9934 → 3184 → 1216 → 509 → 229，约 400ms 才落到安静时的
+       *   25~65。交出去的话录音机开头"砰"一声、归一化也被它
+       *   带偏，唤醒的端点检测也会被它触发。
        */
 
-      more = first ? true :
-             cb((const int16_t *)apb->samp, apb->nbytes / 4, priv);
-      first = false;
+      if (skipped < K7A_RATE * 500 / 1000)
+        {
+          skipped += apb->nbytes / 4;
+          more = true;
+        }
+      else
+        {
+          more = cb((const int16_t *)apb->samp, apb->nbytes / 4, priv);
+        }
 
       apb->nbytes = 0;
       apb->curbyte = 0;

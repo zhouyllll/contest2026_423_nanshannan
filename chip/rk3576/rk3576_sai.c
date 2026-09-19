@@ -258,6 +258,7 @@ static void sai_post_done(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 }
 
 static bool g_rx_logged     = false;
+static rk3576_sai_txhook_t g_txhook;
 static bool g_rx_datalogged = false;
 
 /****************************************************************************
@@ -1116,6 +1117,11 @@ static int rk3576_sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       sai_putreg(RK3576_SAI_XFER,
                  SAI_XFER_CLK_EN | SAI_XFER_FSS_EN | SAI_XFER_TXS_EN);
       priv->tx_running = true;
+
+      if (g_txhook != NULL)
+        {
+          g_txhook(true);
+        }
     }
 
   samples = (const uint32_t *)(apb->samp + apb->curbyte);
@@ -1163,6 +1169,11 @@ static int rk3576_sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
       sai_putreg(RK3576_SAI_XFER, 0);
       priv->tx_running = false;
+
+      if (g_txhook != NULL)
+        {
+          g_txhook(false);
+        }
     }
 
   nxmutex_unlock(&priv->lock);
@@ -1197,6 +1208,11 @@ static const struct i2s_ops_s g_sai_ops =
  *   调用前须先 rk3576_sai_probe() 成功。
  *
  ****************************************************************************/
+
+void rk3576_sai_set_txhook(rk3576_sai_txhook_t hook)
+{
+  g_txhook = hook;
+}
 
 struct i2s_dev_s *rk3576_sai_initialize(int port)
 {
