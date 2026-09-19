@@ -26,7 +26,34 @@ for src in (ui / name for name in SHOWN):
             if ord(ch) >= 0x80 and ord(ch) not in have:
                 missing.setdefault(ch, set()).add(f"{src.name}: {lit[:40]}")
 
+# LV_SYMBOL_* 是 FontAwesome 图标（私有区码位），只在 LVGL 自带的
+# Montserrat 里有。设了中文字库的标签上用它会显示成方框（DEV 页的 ✓
+# 就这样坏过）—— 宏展开后才是字符，上面的字面量扫描看不到。
+# 按变量名对：设过中文字库的标签变量，不能再 set_text 成 LV_SYMBOL_*。
+def base(expr):
+    return re.sub(r"\[.*?\]", "", expr).strip()
+
+# 全局变量（g_ 开头）整个文件对；局部变量只在同一个函数里对 —— 不同
+# 函数里同名的 lbl 各是各的。
+FONT_RE = r"lv_obj_set_style_text_font\(\s*([^,]+),\s*&lv_font_k7_cjk_20"
+SYM_RE = r"lv_label_set_text(?:_fmt)?\(\s*([^,]+),([^;]*LV_SYMBOL_[^;]*);"
+
+for name in SHOWN:
+    code = re.sub(r"/\*.*?\*/", "", (ui / name).read_text(encoding="utf-8"),
+                  flags=re.S)
+    funcs = re.split(r"\n(?=[a-z][^\n;]*\([^\n;]*\)\s*\n\{)", code)
+    glob = {base(v) for v in re.findall(FONT_RE, code)
+            if base(v).startswith("g_")}
+    for fn in funcs:
+        local = {base(v) for v in re.findall(FONT_RE, fn)}
+        for var, line in re.findall(SYM_RE, fn):
+            v = base(var)
+            if v in glob or (not v.startswith("g_") and v in local):
+                missing.setdefault("LV_SYMBOL_*", set()).add(
+                    f"{name}: {v} ←{line.strip()[:40]}")
+
 for ch, where in sorted(missing.items()):
-    print(f"缺 U+{ord(ch):04X} {ch}  <- " + " | ".join(sorted(where)))
+    tag = ch if len(ch) > 1 else f"U+{ord(ch):04X} {ch}"
+    print(f"缺 {tag}  <- " + " | ".join(sorted(where)))
 print(f"字库 {len(have)} 个字形，界面缺字 {len(missing)} 个")
 sys.exit(1 if missing else 0)

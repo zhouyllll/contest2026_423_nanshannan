@@ -463,7 +463,11 @@ static void dev_refresh(void)
 
       if (ok)
         {
-          lv_label_set_text(g_dev_marks[i], LV_SYMBOL_OK);
+          /* 这一列用的是中文字库，没有 LVGL 的 FontAwesome 图标
+           * （LV_SYMBOL_OK 显示成方框），用字库里有的 ✓ ✗
+           */
+
+          lv_label_set_text(g_dev_marks[i], "✓");
           color = UI_OK;
           ok_n++;
         }
@@ -475,7 +479,7 @@ static void dev_refresh(void)
         }
       else
         {
-          lv_label_set_text(g_dev_marks[i], LV_SYMBOL_CLOSE);
+          lv_label_set_text(g_dev_marks[i], "✗");
           color = UI_BAD;
           bad_n++;
         }
