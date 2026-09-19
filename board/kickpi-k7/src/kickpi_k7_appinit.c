@@ -168,6 +168,154 @@ static int gmac_bringup_thread(int argc, FAR char *argv[])
 #endif /* CONFIG_RK3576_GMAC */
 
 /****************************************************************************
+ * Name: devinit_thread
+ *
+ * Description:
+ *   触摸、TF 卡、摄像头、V4L2 的初始化，做完再拉起界面。后台线程里跑。
+ *
+ * ★ 为什么挪出启动路径（2026-09-19，xTS 2.1.4 启动时间）
+ *
+ *   board_app_initialize() 跑在 nsh 任务里，它不返回 nsh 就不出提示符。
+ *   串口时间戳实测这几项串行要 0.85 秒：触摸 0.22（FT8756 上电等待）、
+ *   TF 卡 0.35（400kHz 识别）、摄像头 + V4L2 0.28（三路 MCLK、I2C 探测）。
+ *   nsh 本身一样都不用。
+ *
+ *   顺序照旧：界面要 /dev/input0，所以仍然最后启动（见下面界面那段的
+ *   说明）。界面出现的时刻不变，只是 nsh 不再陪着等。
+ *
+ *   与主线程、GMAC 线程并发是安全的：各用各的 I2C 总线和控制器；CRU/GRF
+ *   是高 16 位掩码写，不做读改写。栈 8192 的理由见 gmac_bringup_thread。
+ *
+ ****************************************************************************/
+
+static int devinit_thread(int argc, FAR char *argv[])
+{
+  int ret;
+
+  UNUSED(argc);
+  UNUSED(argv);
+
+#ifdef CONFIG_INPUT_FT5X06
+  ret = kickpi_k7_touch_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 触摸初始化失败: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RK3576_DWMMC
+  /* SD 卡（TF）控制器。与 eMMC 是两种不同的 IP，各走各的驱动。 */
+
+  ret = rk3576_dwmmc_probe(RK3576_DWMMC_SD_BASE);
+  if (ret < 0)
+    {
+      /* -ENODEV 是"卡不在位"，不是故障 —— SD 卡本来就是可插拔的，
+       * 这里分开说，免得把"没插卡"记成"驱动坏了"。
+       */
+
+      syslog(ret == -ENODEV ? LOG_INFO : LOG_ERR,
+             "SD 卡: %s (%d)\n",
+             ret == -ENODEV ? "未插卡，跳过" : "控制器探测失败", ret);
+    }
+  else
+    {
+      struct sdio_dev_s *sd = rk3576_dwmmc_initialize(RK3576_DWMMC_SD_BASE);
+
+      if (sd == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: SD 卡 sdio_dev 初始化失败\n");
+        }
+      else
+        {
+          ret = mmcsd_slotinitialize(1, sd);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR,
+                     "ERROR: SD 卡 mmcsd_slotinitialize 失败: %d\n", ret);
+            }
+          else
+            {
+              /* 同 eMMC：返回值不足为凭，实际 stat 节点才算数。 */
+
+              struct stat sdst;
+
+              if (stat("/dev/mmcsd1", &sdst) == 0)
+                {
+                  syslog(LOG_INFO, "SD 卡: /dev/mmcsd1 就绪\n");
+                }
+              else
+                {
+                  syslog(LOG_ERR,
+                         "ERROR: SD 卡未被识别，/dev/mmcsd1 不存在\n");
+                }
+            }
+        }
+    }
+#endif
+
+#ifdef CONFIG_RK3576_I2C
+  /* 摄像头传感器探测（不建立取图通路，见 kickpi_k7_camera.c 说明） */
+
+  ret = kickpi_k7_camera_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: 摄像头探测失败: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RK3576_VIDEO
+  /* ★ V4L2 设备要在摄像头初始化之后注册。
+   *
+   *   探测、MCLK、传感器寄存器表都在上一步做完；本步只把
+   *   imgsensor + imgdata 交给视频框架。顺序反了的话，
+   *   capture_register() 会在传感器还没上电时去问 is_available()。
+   */
+
+  ret = kickpi_k7_video_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: V4L2 设备注册失败: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_LVX_USE_DEMO_CONTEST2026_423_KICKPI_UI
+  /* ★ 仪表盘放在**所有设备都注册完之后**再拉起来。
+   *
+   *   一、它要用 /dev/fb0 和 /dev/input0 两个节点，而触摸是在显示之后
+   *      才注册的。一开始图省事放在 fb_register() 后面，结果每次都是
+   *      「警告：打不开 /dev/input0 —— 触摸不可用，仅显示」 ——
+   *      不是触摸坏了，是**界面比触摸先起来**。
+   *
+   *   二、开机自启本身有两个理由：这是块带屏的板子，上电就该有画面；
+   *      而且它每 250ms 刷一次，是一个**不依赖串口的旁路心跳**。
+   *      AMP 调试期观察到过 openvela 打印到 NSH 横幅后串口彻底安静，
+   *      「死了」和「活着但收不到 UART 中断」在串口上长得一模一样，
+   *      靠屏幕动不动才分得开（那次是 Linux 的 gic_dist_config() 把
+   *      openvela 的中断使能位清掉了，见 amp/linux/0001）。
+   */
+
+  {
+    int pid = task_create("kickpi_ui",
+                          CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_PRIORITY,
+                          CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_STACKSIZE,
+                          kickpi_ui_main, NULL);
+
+    if (pid < 0)
+      {
+        syslog(LOG_ERR, "ERROR: 启动 kickpi_ui 失败: %d\n", pid);
+      }
+    else
+      {
+        syslog(LOG_INFO, "界面: kickpi_ui 已启动（pid %d）\n", pid);
+      }
+  }
+#endif
+
+  UNUSED(ret);
+  return 0;
+}
+
+/****************************************************************************
  * Name: board_app_initialize
  *
  * Description:
@@ -606,63 +754,17 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_INPUT_FT5X06
-  ret = kickpi_k7_touch_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: 触摸初始化失败: %d\n", ret);
-    }
-#endif
+  /* 触摸、TF 卡、摄像头和界面放到后台（见 devinit_thread 的说明） */
 
-#ifdef CONFIG_RK3576_DWMMC
-  /* SD 卡（TF）控制器。与 eMMC 是两种不同的 IP，各走各的驱动。 */
+  {
+    int tid = kthread_create("devinit", 100, 8192, devinit_thread, NULL);
 
-  ret = rk3576_dwmmc_probe(RK3576_DWMMC_SD_BASE);
-  if (ret < 0)
-    {
-      /* -ENODEV 是"卡不在位"，不是故障 —— SD 卡本来就是可插拔的，
-       * 这里分开说，免得把"没插卡"记成"驱动坏了"。
-       */
+    if (tid < 0)
+      {
+        syslog(LOG_ERR, "ERROR: devinit 后台线程创建失败: %d\n", tid);
+      }
+  }
 
-      syslog(ret == -ENODEV ? LOG_INFO : LOG_ERR,
-             "SD 卡: %s (%d)\n",
-             ret == -ENODEV ? "未插卡，跳过" : "控制器探测失败", ret);
-    }
-  else
-    {
-      struct sdio_dev_s *sd = rk3576_dwmmc_initialize(RK3576_DWMMC_SD_BASE);
-
-      if (sd == NULL)
-        {
-          syslog(LOG_ERR, "ERROR: SD 卡 sdio_dev 初始化失败\n");
-        }
-      else
-        {
-          ret = mmcsd_slotinitialize(1, sd);
-          if (ret < 0)
-            {
-              syslog(LOG_ERR,
-                     "ERROR: SD 卡 mmcsd_slotinitialize 失败: %d\n", ret);
-            }
-          else
-            {
-              /* 同 eMMC：返回值不足为凭，实际 stat 节点才算数。 */
-
-              struct stat sdst;
-
-              if (stat("/dev/mmcsd1", &sdst) == 0)
-                {
-                  syslog(LOG_INFO, "SD 卡: /dev/mmcsd1 就绪\n");
-                }
-              else
-                {
-                  syslog(LOG_ERR,
-                         "ERROR: SD 卡未被识别，/dev/mmcsd1 不存在\n");
-                }
-            }
-        }
-    }
-#endif
 
 /* 蓝牙（SKW6621S）的 SDIO 探测不再放在启动路径上（2026-09-19）。
  *
@@ -735,30 +837,6 @@ int board_app_initialize(uintptr_t arg)
   }
 #endif
 
-#ifdef CONFIG_RK3576_I2C
-  /* 摄像头传感器探测（不建立取图通路，见 kickpi_k7_camera.c 说明） */
-
-  ret = kickpi_k7_camera_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: 摄像头探测失败: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_RK3576_VIDEO
-  /* ★ V4L2 设备要在摄像头初始化之后注册。
-   *
-   *   探测、MCLK、传感器寄存器表都在上一步做完；本步只把
-   *   imgsensor + imgdata 交给视频框架。顺序反了的话，
-   *   capture_register() 会在传感器还没上电时去问 is_available()。
-   */
-
-  ret = kickpi_k7_video_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: V4L2 设备注册失败: %d\n", ret);
-    }
-#endif
 
 
 
@@ -854,38 +932,6 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_LVX_USE_DEMO_CONTEST2026_423_KICKPI_UI
-  /* ★ 仪表盘放在**所有设备都注册完之后**再拉起来。
-   *
-   *   一、它要用 /dev/fb0 和 /dev/input0 两个节点，而触摸是在显示之后
-   *      才注册的。一开始图省事放在 fb_register() 后面，结果每次都是
-   *      「警告：打不开 /dev/input0 —— 触摸不可用，仅显示」 ——
-   *      不是触摸坏了，是**界面比触摸先起来**。
-   *
-   *   二、开机自启本身有两个理由：这是块带屏的板子，上电就该有画面；
-   *      而且它每 250ms 刷一次，是一个**不依赖串口的旁路心跳**。
-   *      AMP 调试期观察到过 openvela 打印到 NSH 横幅后串口彻底安静，
-   *      「死了」和「活着但收不到 UART 中断」在串口上长得一模一样，
-   *      靠屏幕动不动才分得开（那次是 Linux 的 gic_dist_config() 把
-   *      openvela 的中断使能位清掉了，见 amp/linux/0001）。
-   */
-
-  {
-    int pid = task_create("kickpi_ui",
-                          CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_PRIORITY,
-                          CONFIG_LVX_DEMO_CONTEST2026_423_KICKPI_UI_STACKSIZE,
-                          kickpi_ui_main, NULL);
-
-    if (pid < 0)
-      {
-        syslog(LOG_ERR, "ERROR: 启动 kickpi_ui 失败: %d\n", pid);
-      }
-    else
-      {
-        syslog(LOG_INFO, "界面: kickpi_ui 已启动（pid %d）\n", pid);
-      }
-  }
-#endif
 
   return OK;
 }
