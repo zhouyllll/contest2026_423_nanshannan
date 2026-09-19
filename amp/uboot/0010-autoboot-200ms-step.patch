@@ -1,0 +1,48 @@
+U-Boot 倒计时每档 200ms（bootdelay=1 从 1 秒变成 0.2 秒）
+
+应用：叠在 0009 之上，在 u-boot/ 下 `patch -p1 < 本文件`。
+编译：必须用 openvela 的 aarch64-none-elf-gcc 13.4（与 09-17 上板的一致），
+  KCFLAGS=-Wno-error ./make.sh rk3576-kickpi-k7 CROSS_COMPILE=<.../aarch64-none-elf->
+  （gcc 13 在 common/edid.c 报 maybe-uninitialized；make.sh 要一个 python2 壳）。
+  与旧 u-boot.bin 逐字节对比只差 9 字节：cmp 立即数 999→199，以及编译日期。
+烧写：scripts/flash.sh --stay 后 scripts/flash-uboot.sh（备份/回读/回滚）。
+
+实测（2026-09-19）："Hit key" → 读 eMMC 从 1.05s 变 0.20s；
+flash.sh 的 Ctrl-C 打断路径仍能停在 =>（Rockchip 在倒计时前先查一次 ctrlc，
+flash.sh 从 SPL 的 "U-Boot" 字样起就连发）。
+
+--- a/common/autoboot.c
++++ b/common/autoboot.c
+@@ -208,6 +208,14 @@
+ static int menukey;
+ #endif
+ 
++/*
++ * K7 AMP：倒计时每档 200ms。bootdelay=1 原来要白等 1 秒，是开机最大的一块
++ * 空等。进 U-Boot 的途径不受影响：Rockchip 在倒计时前先查一次 ctrlc()，
++ * scripts/flash.sh 从串口出现 "U-Boot"（SPL 阶段）起就连发 Ctrl-C，比
++ * 倒计时早 1 秒以上。
++ */
++#define AUTOBOOT_STEP_MS 200
++
+ static int __abortboot(int bootdelay)
+ {
+ 	int abort = 0;
+@@ -234,7 +242,7 @@
+ 
+ 	while ((bootdelay > 0) && (!abort)) {
+ 		--bootdelay;
+-		/* delay 1000 ms */
++		/* delay AUTOBOOT_STEP_MS（K7 AMP：每档 200ms，不是 1 秒） */
+ 		ts = get_timer(0);
+ 		do {
+ 			if (ctrlc()) {	/* we got a ctrl+c key press	*/
+@@ -246,7 +254,7 @@
+ 				break;
+ 			}
+ 			udelay(10000);
+-		} while (!abort && get_timer(ts) < 1000);
++		} while (!abort && get_timer(ts) < AUTOBOOT_STEP_MS);
+ 
+ 		printf("\b\b\b%2d ", bootdelay);
+ 	}
