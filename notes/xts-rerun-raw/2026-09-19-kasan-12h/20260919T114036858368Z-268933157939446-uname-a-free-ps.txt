@@ -1,0 +1,27 @@
+
+NuttShell (NSH)
+nsh> [Kuname -a; free; ps
+NuttX  0.0.0 ed8f69ad-dirty Sep 19 2026 19:35:37 arm64 kickpi-k7
+      total       used       free    maxused    maxfree  nused  nfree name
+   62072624   10116784   51955840   10119424   51946880    358      7 Umem
+  PID GROUP CPU(AFFINITY)   PRI POLICY   TYPE    NPX STATE    EVENT     SIGMASK            STACK    USED FILLED COMMAND
+    0     0 000(0x0000000f)   0 FIFO     Kthread   - Assigned           0000000000000000 0008016 0001168  14.5%  CPU0 IDLE
+    1     0 001(0x0000000f)   0 FIFO     Kthread   - Running            0000000000000000 0008016 0000160   1.9%  CPU1 IDLE
+    2     0 002(0x0000000f)   0 FIFO     Kthread   - Running            0000000000000000 0008016 0000160   1.9%  CPU2 IDLE
+    3     0 003(0x0000000f)   0 FIFO     Kthread   - Running            0000000000000000 0008016 0000160   1.9%  CPU3 IDLE
+    4     0 ---(0x0000000d) 192 RR       Kthread   - Waiting  Semaphore 0000000000000000 0007952 0001680  21.1%  hpwork 0x4a746600 0x4a746688
+    5     0 ---(0x0000000d) 100 RR       Kthread   - Waiting  Semaphore 0000000000000000 0007952 0001952  24.5%  lpwork 0x4a746540 0x4a7465c8
+    7     7 ---(0x0000000d) 100 RR       Task      - Waiting  Semaphore 0000000000000000 0007984 0002480  31.0%  nsh_main
+   10     0 ---(0x0000000d) 224 RR       Kthread   - Waiting  Semaphore 0000000000000000 0003840 0001296  33.7%  rpmsg-linux-0 0x4aeee2f0 0x4aeee378
+   13    13 ---(0x0000000d) 100 RR       Task      - Waiting  Semaphore 0000000000020000 0007984 0001952  24.4%  telnetd
+   14    14 ---(0x0000000d)  50 RR       Task      - Waiting  Signal    0000000000000000 0001840 0001248  67.8%  tpmon
+   15    15 ---(0x0000000d) 100 RR       Task      - Waiting  Signal    0000000000000000 0032560 0009120  28.0%  kickpi_ui
+   24    24 ---(0x0000000d) 100 RR       Task      - Waiting  Signal    0000000000000000 0032560 0003440  10.5%  ai_agent
+   25    24 ---(0x0000000d)  50 FIFO     pthread   - Waiting  Semaphore 0000000000000000 0016208 0002160  13.3%  ai_agent 0x4a4a7bd8 0x4b108590
+   26    24 ---(0x0000000d)  40 FIFO     pthread   - Waiting  Semaphore 0000000000000000 0008016 0001504  18.7%  ai_agent 0x4a4a7cf8 0x4b1085b0
+   27    24 ---(0x0000000d)   3 FIFO     pthread   - Waiting  Signal    0000000000000000 0008016 0001248  15.5%  ai_agent 0x4a4a7d40 0x4b146e40
+   30    24 ---(0x0000000d)  50 FIFO     pthread   - Waiting  Semaphore 0000000000000000 0020304 0002320  11.4%  ai_agent 0x4a4a7c20 0x4aeec3b0
+   31    24 ---(0x0000000d)  60 FIFO     pthread   - Waiting  Semaphore 0000000000000000 0032592 0003920  12.0%  ai_agent 0x4a4a7cb0 0x4b108590
+   38    24 ---(0x0000000d)  50 RR       pthread   - Waiting  Semaphore 0000000000000000 0016208 0001520   9.3%  ai_agent 0x4a4b0900 0
+   40    40 000(0x0000000d) 100 RR       Task      - Running            0000000000020000 0007984 0004464  55.9%  Telnet_session
+nsh> 

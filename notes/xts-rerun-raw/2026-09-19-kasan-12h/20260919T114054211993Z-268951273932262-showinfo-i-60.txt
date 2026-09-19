@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> [Kshowinfo -i 60 &
+showinfo [43:100]
+nsh> 
