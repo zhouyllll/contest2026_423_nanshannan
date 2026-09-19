@@ -36,6 +36,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <string.h>
 #include <syslog.h>
 
 #include <nuttx/sdio.h>
@@ -979,13 +980,35 @@ struct rk3576_dwmmc_dev_s
    */
 
   int               last_result;
+
+  /* ★ 卡槽不接 MMC（TF 卡槽）：CMD1 不上总线，直接当"没响应"。
+   *
+   *   mmcsd 识别卡时先发 CMD1 看是不是 MMC。SD 卡对 CMD1 不响应，等满
+   *   超时后 mmcsd_sendcmdpoll() 打一行 ERROR —— 每次开机都有，xTS 1.2.1
+   *   判启动日志时它就是"异常"。厂商设备树对这个槽写了 no-mmc
+   *   （rk3576-kickpi-evb.dtsi，k7 继承；k7 另加的 supports-emmc 在内核
+   *   里没有任何代码解析），Linux 在这个槽上根本不走 MMC 识别。
+   *   这里照做：sendcmd 直接返回错误，mmcsd 只打一行 WARNING 然后继续
+   *   CMD8 走 SD 流程，还省掉一次超时等待。
+   */
+
+  bool              no_mmc;
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct rk3576_dwmmc_dev_s g_dwmmc;
+/* ★ 每个控制器一份状态，不能共用。
+ *
+ *   原来只有一个 g_dwmmc：`bt probe` 初始化 SDIO 控制器时会把 TF 卡已经
+ *   注册出去的那份 base 改掉，此后 /dev/mmcsd1 的读写全发到 SDIO 控制器
+ *   上。现在 bt probe 在 SDIO 探测阶段就失败返回，碰不到这一步，但只要
+ *   蓝牙枚举一通就会踩中。
+ */
+
+static struct rk3576_dwmmc_dev_s g_dwmmc_sd;
+static struct rk3576_dwmmc_dev_s g_dwmmc_sdio;
 
 /****************************************************************************
  * Private Functions
@@ -1316,6 +1339,12 @@ static int rk3576_dwmmc_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
   uint32_t regval = DWMMC_CMD_START | DWMMC_CMD_USE_HOLD_REG;
   uint32_t datalen;
   int us;
+
+  if (priv->no_mmc && cmd == MMC_CMD1)
+    {
+      priv->last_result = -ENOSYS;
+      return -ENOSYS;
+    }
 
   regval |= DWMMC_CMD_INDX(cmd & MMCSD_CMDIDX_MASK);
 
@@ -1876,13 +1905,15 @@ static const struct sdio_dev_s g_dwmmc_ops =
 
 struct sdio_dev_s *rk3576_dwmmc_initialize(uint32_t base)
 {
-  struct rk3576_dwmmc_dev_s *priv = &g_dwmmc;
+  struct rk3576_dwmmc_dev_s *priv =
+    base == RK3576_DWMMC_SD_BASE ? &g_dwmmc_sd : &g_dwmmc_sdio;
   uint32_t hcon;
-
-  priv->base = base;
   uint32_t depth;
 
-  priv->dev = g_dwmmc_ops;
+  memset(priv, 0, sizeof(*priv));
+  priv->base   = base;
+  priv->no_mmc = base == RK3576_DWMMC_SD_BASE;
+  priv->dev    = g_dwmmc_ops;
 
   /* FIFO 数据窗口的偏移由 IP 版本决定，不是数据总线宽度（见头文件说明）。
    * 取错的话数据写进 CDTHRCTL，不报错但一个字节也到不了卡上。
