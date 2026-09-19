@@ -1,6 +1,6 @@
 # 交接说明（给下一个 Claude Code 会话）
 
-更新：2026-09-18。上一段会话太长，这里是**接手时必须知道的全部事实**。
+更新：2026-09-19（第二版，覆盖 09-19 全天的工作）。上一段会话太长，这里是**接手时必须知道的全部事实**。
 细节以 git log 和各文件注释为准；本文只讲现状、规矩和坑。
 
 ---
@@ -57,23 +57,42 @@ cd ../contest2026_423_nanshannan && bash scripts/flash.sh          # 双系统�
 - 串口：`/dev/ttyUSB0`，**1500000**（U-Boot 和 NuttX 都是）。usbipd 在 WSL 里：`/mnt/c/Program Files/usbipd-win/usbipd.exe`。
 - 网络：板子 **192.168.1.50**，网关/DNS 192.168.1.1，**网线插 GMAC1 口**（`k7diag eth` 可查两个口链路）。
   电脑是 192.168.1.100。telnet NSH：`192.168.1.50:2323`。
-- 串口调试入口：`echo 1 > /tmp/k7-open-camera`（开相机页）、`echo 1 > /tmp/k7-ask`（agent 看桌面，回复写 syslog）。
+- 界面的调试入口（telnet 里 `echo … > 文件`，界面 250ms 轮询一次）：
+  | 文件 | 作用 |
+  |---|---|
+  | `/tmp/k7-open-camera` | 开相机页 |
+  | `/tmp/k7-ask` | 等同点"桌上有什么？"（拍照 + 视觉，回复写 syslog） |
+  | `/tmp/k7-rec` / `/tmp/k7-play` / `/tmp/k7-beep` | 录音机录 5 秒 / 放音 / 1kHz 测试音 |
+  | `/tmp/k7-vol`（写数字 0~100） | 音量 |
+  | `/tmp/k7-say`（写文字） | 直接朗读 |
+  | `/tmp/k7-wake`（写 1/0） | 开/关语音唤醒 |
+- 唤醒识别留底：`/tmp/k7-wake.log`（每句时长、峰值、增益、识别文字）、`/tmp/k7-wake-{0,1,2}.wav`。
+- 板上文件取回主机：nsh 的 `hexdump` 经 telnet 导出，按"at 基址 + 行偏移"拼（示例见会话脚本 pullhex.py 的做法），
+  TFTP `put` 用不了（固定 69 端口，WSL 绑不了）。
+- 界面文字改完跑 `python3 scripts/check-ui-glyphs.py`：查字库缺字、以及中文字库标签上误用 `LV_SYMBOL_*` 图标（显示成方框）。
+  字库由 `scripts/gen-cjk-font.sh` 生成（ASCII + GB2312 一级 + 常用符号，3888 字形）。
+- Linux 侧：`bash amp/linux/rootfs/build-rootfs.sh` 出 `~/rk3576-amp/out/Image-amp-rootfs`；
+  `flash.sh --stay` 后 `scripts/flash-kernel.sh <Image>` 写 LBA 49152（整区备份 / 回读 / 回滚）。
 
 ## 5. 现在能用的（已上板验证）
 
-最后一版干净验证镜像：`~/rk3576-amp/backup/images/20260918_dual_agent-e2e_verified.itb`（提交 27f497a）。
-
-- 双系统启动、rpmsg 握手、屏幕/触摸（LVGL PARTIAL）、音频
-- 摄像头：`/dev/video0`（IMX415），`v4l2cap`；界面相机页实时画面约 30fps
-- 网络：ping、DNS、telnet NSH
-- **桌面助手端到端**：开机自启 `ai_agent` → 拍照 → mimo-v2.5 看图 → 作答，界面收到回答（实测 193s）
-  - Token Plan：地址 `https://token-plan-cn.xiaomimimo.com/v1`，模型 **mimo-v2.5**（不支持 mimo-v2-flash/omni）
-
-- **Linux 用户态**（09-18）：initramfs + `k7d`，nsh 里 `ampctl exec <命令>` 在 A72 的 Linux 上执行并回显。
-  构建 `bash amp/linux/rootfs/build-rootfs.sh`，刷写 `flash.sh --stay` 后 `scripts/flash-kernel.sh ~/rk3576-amp/out/Image-amp-rootfs`。
-  详见 `amp/README.md`「Linux 用户态」。
-- **telnetd 不再被一次探测打死**：`bsp/upstream/telnetd-survive-bad-connection.patch`（apps 仓工作区已改）。
-  **别用 `bash /dev/tcp` 探 2323**，旧镜像上一次就会让 telnet 永久下线。
+- 双系统启动、rpmsg、屏幕/触摸、摄像头（`/dev/video0`、`v4l2cap`、相机页约 30fps）、网络（ping/DNS/telnet）。
+- **Linux 用户态**：Image 内嵌 initramfs（静态 busybox + `k7d`），开机约 3.1s 进用户态。
+  `ampctl exec <命令>` 在 A72 上执行并回显（`rpmsg-raw` → `/dev/rpmsgN`）。k7d 每个通道 fork 一个子进程。
+- **界面（kickpi_ui）**，页签 AMP / DEV / LIVE / DESK / AGENT / VOICE / ABOUT：
+  - AGENT：中文气泡问答、等待计秒、三个提问按钮、桌面守护、**语音播报**（回答用 mimo-v2.5-tts 念出来）、**语音唤醒**开关与电平。
+  - VOICE：**喇叭音量**滑块（ES8388 DAC 硬件音量）、**录音机**（录 5 秒、波形、放音）。
+  - DEV：16 项设备节点，✓ / 灰色"未启用"原因 / ✗ 三态。
+- **桌面问答**（`k7_vision.c`）：`v4l2cap` 拍 1280x720 → 一次 mimo-v2.5 视觉请求（关深度思考）→ 回答。
+  板上实测 4.5~27s（网络波动）。**不再走 ai_agent 循环**（原因见第 6 节）。
+- **录音 / 放音**：`k7_audio.c`（pcm1，48k 立体声）。录音开 ALC + 噪声门、差分输入 LIN2-RIN2；
+  放音一条流只配置一次；喇叭功放 GPIO2_B1 随放音开关。
+- **语音唤醒**（`k7_wake.c` + k7d）："你好 openvela，桌上有什么？" → 识别 → 拍照看图作答 → 朗读。
+  openvela 采集 48k→FIR→16k、环形缓冲 12s、经 rpmsg 送 PCM；**A72 的 k7d 做端点检测（VAD）**，回发整句区间；
+  openvela 取段 → mimo-v2.5-asr（约 0.9s）→ 匹配唤醒词。识别器会把 openvela 写成"OpenAI / Open Wheel / OPPO VELA / 薇拉"，
+  匹配规则靠"你好 + open/vela/维拉…"兜住（说"你好 OpenAI"也会唤醒）。用户 09-19 实测"都识别到了"。
+- Token Plan：`https://token-plan-cn.xiaomimimo.com/v1`；文本/视觉 `mimo-v2.5`，TTS `mimo-v2.5-tts`（voice 冰糖，pcm16 24k），
+  ASR `mimo-v2.5-asr`（input_audio base64 WAV，asr_options.language=zh）。深度思考用 `"thinking":{"type":"disabled"}` 关。
 
 ## 6. 上段会话修过的关键缺陷（别再踩）
 
@@ -89,19 +108,25 @@ cd ../contest2026_423_nanshannan && bash scripts/flash.sh          # 双系统�
 | 拍两次照后堆损坏 | **CIF DMA 每帧越界写约 2920 字节** | RAW 缓冲尾部哨兵 + 余量 |
 | agent 回答被丢 | 60s 看门狗 < mimo-v2.5 推理 86~99s | 180s（`bsp/upstream/ai_agent.patch`） |
 | 界面卡在"让我查一下..." | 过渡消息用掉 SDK 一次性回调 | local_client 不发过渡消息 |
+| **（09-19）** 录音全是 0 夹 0x7fxx，8KB 缓冲 1ms 就"收完" | PL330 接收用了 SINGLE 条件，没等请求线 | `rk3576_pl330.c` 改 BURST（照原厂 `_bursts()`） |
+| 改 BURST 后 DMA 永远等不到请求 | ①把 RXFIFOLR bit23 当"满"标志（其实是 rfl3 最高位）反复清 RXC ②先开 RXS 后起 DMA，FIFO 0.33ms 溢出 ③es8388 录音超时算成 0 → 20ms，而一个缓冲要 21.3ms | `rk3576_sai.c` |
+| 样本全是真值右移一位（0xFFC0 读成 0x7FE0） | 接收早采一位 | `RX_SHIFT` RIGHT(2)→RIGHT(4) |
+| 放音"卡一卡的电音"、5 秒放 30 秒 | `sai_send` 每个缓冲都 sai_configure（含复位）+ 启停 | 一条流只配一次，AUDIO_APB_FINAL 才停 |
+| 只有耳机响、喇叭不响 | 喇叭功放使能 GPIO2_B1 没人拉高 | 板级 + SAI txhook 随放音开关 |
+| 录音回放电流声比人声大 | 麦克风是差分对，驱动按单端 LIN2 采；另外 PGA +24dB、无 ALC/噪声门 | k7_audio 写 0x0A=0xF0 0x0B=0x82 与原厂 ALC 值 |
+| 问一次 196 秒 | mimo-v2.5 默认深度思考，agent 三轮 | 关思考（`bsp/upstream/agent-mimo-no-thinking.patch`）+ 直连视觉 |
+| agent 一直答"摄像头不可用"、0ms 复用旧回答 | agent 的 camera_capture 拿到 0 字节后靠会话记忆；另有未查清的复用 | 桌面问答绕开 agent |
+| pthread 里 waitpid(WNOHANG) 收不到 v4l2cap | 未深究 | 看输出文件"存在且大小稳定" |
+| 界面方框 | 字库缺 → 「」；DEV 页用中文字库却放 LV_SYMBOL 图标 | 补字形 + 检查脚本 |
 
 ## 7. 未解决（按用户要的顺序）
 
-### 7.1 蓝牙（用户正在做，先接着做）
-- K7 实焊 **SKW6621S（SDIO 0x2a320000）**，不是 dtsi 里的 AP6256/BCM UART。设计/需求/任务在
-  `chip/rk3576/skw6621s/{requirements,design,tasks}.md`（**用户的未跟踪文件，别动别提交**）。
-- 现状：`bt probe` → CMD5 响应无效（`RINTSTS=0x2`，RESP0=0）。用户 09-18 已提交多轮 A/B 试验
-  （commit 22239d0..b946208，记录在 `notes/bt-*-ab-2026-09-18/`），先读这些再动手。
-- 我本地**未提交**：`amp-dual/defconfig` 打开 `RK3576_SKW6621S/RK3576_DWMMC/MMCSD_SDIO`、去掉 BCM4343X。
-  与用户的配置对齐前别提交。
-- 原厂依据：`~/rk3576-amp/kernel-6.1/arch/arm64/boot/dts/rockchip/rk3576-kickpi-k7-wifi.dtsi`
-  （pwrseq：GPIO1_C6 active-low reset，post-power-on 200ms；BT_REG_ON GPIO1_C7）。
-  32K 时钟来自 HYM8563 CLKOUT（RTC 须先于 SDIO 初始化）。Linux 内核无 MMC 驱动，不碰 SDIO。
+### 7.1 蓝牙 —— **截止前已停止**（用户决定）
+- K7 实焊 SKW6621S（SDIO 0x2a320000）。`bt probe` 卡在枚举：CMD52/CMD5 均 RE、空闲 DAT0 恒低。
+- 09-18 用户六轮 A/B（`notes/bt-*-ab-2026-09-18/`）+ 09-19 整体核对（`notes/bt-final-2026-09-19/README.md`）：
+  引脚、时钟、电源域、复位时序、Linux 干扰、GMAC1 引脚、IO 电压域在软件侧均与原厂一致；剩余可能在硬件，需要仪器。
+- `amp-dual/defconfig` 的 SKW/DWMMC 改动仍是**用户未提交的本地修改**；`chip/rk3576/skw6621s/*.md` 是用户的未跟踪文件，别动。
+- 附带：`rk3576_gmac.c` 把 GMAC1 25M 也从 GPIO1_D5（模组 HOST_WAKE）输出，与原厂不一致，后续应去掉（与蓝牙失败无关，已实验排除）。
 
 ### 7.2 CPU1（双系统下不接任务）
 - 事实：CPU1 启动阶段走完（进 IDLE），但之后绑到 CPU1 的线程永远不跑；单系统四核都正常；
@@ -113,13 +138,16 @@ cd ../contest2026_423_nanshannan && bash scripts/flash.sh          # 双系统�
 - 怀疑方向：共享 GIC 模式（`CONFIG_ARM64_GICV2_SHARED_DIST`）下的 banked 寄存器 / SGI 配置；
   U-Boot `smc_cpu_on` 的 `sip_smc_amp_cfg(AMP_PE_STATE…)` 是否把配置记到了 A53 core1。
 
-### 7.3 本地语音唤醒（未开始）
-- `docs/k7-ai-agent-design.md` 有设计：本地匹配固定唤醒词"你好，openvela"→ ASR → agent → TTS。
-- Token Plan 里有 `mimo-v2.5-asr` / `mimo-v2.5-tts`；麦克风先用 `mic` 命令验证信号（MIC 走 LINE2）。
+### 7.3 语音 —— 已完成（见第 5 节），可改进
+- 麦克风电平偏低：20cm 处说话峰值多在 1000~3800（满量程 32767），送识别前放大到上限 8 倍。
+- 唤醒词匹配偏宽（"你好 open…"就算）；若要更严，可换更好识别的唤醒词，或在 Linux 侧做本地模板匹配（MFCC+DTW）。
+- 朗读与唤醒互斥：朗读 / 录音机期间唤醒采集暂停，每次恢复丢开头 500ms（ALC 起步冲击）。
 
 ### 7.4 其他已知问题
 - CIF DMA 为什么多写一行未查（传感器实际行数 > 配置？）。现在靠余量挡着。
-- agent 一次回答约 3 分钟（模型端推理）。
+- 摄像头画面很暗、噪点多：视觉模型两次都说"像雪花屏"。没有 ISP，RAW 直接转 JPEG；也可能光线 / 镜头朝向。
+- eMMC 在 amp-dual 下没开（83b8f3c 打通阶段关掉的，未加回）：`/data` 是 tmpfs，断电即丢。要加回需在 Linux DTB 声明 SDHCI 中断归 openvela。
+- ai_agent 进程仍开机自启（飞书等通道），但界面的桌面问答已不经过它。
 - 带诊断代码的镜像从 Maskrom 起来时，用户在 **115200** 看到过 nsh —— 原因未查。
 - telnet：连上立即 RST 且连发十几次时，个别 `Telnet_session` 卡住不退，占住 8 个预分配 TCP 连接之一（正常断开/间隔 0.5s 的 RST 不漏）。
 - xTS：1.3.15 看门狗 api 子项（GLB_RST_ST 被上游清零）未过；stash@{0} 的内容已提交（e84061b），stash 可删。
