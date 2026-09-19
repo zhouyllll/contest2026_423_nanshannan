@@ -57,6 +57,21 @@
 #define WAKE_ASR_PATH    "/v1/chat/completions"
 #define WAKE_RESP_CAP    (16 * 1024)
 #define WAKE_WOKEN_S     10               /* 只说唤醒词后等问题的时长 */
+#define WAKE_KEEP        3                /* 保留最近几句送识别的音频 */
+
+/* 48k → 16k 抽取前的低通：31 抽头 Hamming 窗 sinc，截止 7kHz，Q15。
+ * 3.4kHz 内平坦，8kHz -14dB，9kHz -30dB，12kHz -60dB。原来的三点平均
+ * 在 8kHz 附近只衰减几 dB，8~24kHz 的成分折叠进语音频段，识别变差。
+ */
+
+#define WAKE_TAPS        31
+
+static const int16_t g_lpf[WAKE_TAPS] =
+{
+  51, 17, -58, -146, -134, 84, 426, 555, 114, -838, -1592, -1105, 1213,
+  4834, 8186, 9551, 8186, 4834, 1213, -1105, -1592, -838, 114, 555, 426,
+  84, -134, -146, -58, 17, 51
+};
 
 struct wake_seg_s
 {
@@ -94,8 +109,9 @@ struct wake_s
 
   int16_t         out[WAKE_FRAME];
   int             out_n;
-  int32_t         acc;
-  int             acc_n;
+  int16_t         hist[WAKE_TAPS];   /* 最近的 48k 输入，环形 */
+  int             hist_pos;
+  int             phase;             /* 每 3 个输入出 1 个 */
 
   /* 待识别的段 */
 
@@ -106,6 +122,9 @@ struct wake_s
 
   bool            speaking;
   bool            recognizing;
+  int             last_peak;       /* 最近一段的峰值与增益（Q4），诊断用 */
+  int             last_gain;
+  int             keep_idx;
   int             level;
   time_t          woken_until;
 
@@ -258,16 +277,28 @@ static bool wake_capture_cb(const int16_t *st, size_t frames, void *priv)
       return true;
     }
 
-  /* 48k → 16k：三点平均（顺带做了一点低通），左右声道一样，取左 */
+  /* 48k → 16k：低通 FIR 后每 3 个取 1 个。左右声道一样，取左 */
 
   for (i = 0; i < frames; i++)
     {
-      w->acc += st[2 * i];
-      if (++w->acc_n == 3)
+      w->hist[w->hist_pos] = st[2 * i];
+      w->hist_pos = (w->hist_pos + 1) % WAKE_TAPS;
+
+      if (++w->phase == 3)
         {
-          w->out[w->out_n++] = (int16_t)(w->acc / 3);
-          w->acc = 0;
-          w->acc_n = 0;
+          int32_t y = 0;
+          int k;
+
+          w->phase = 0;
+          for (k = 0; k < WAKE_TAPS; k++)
+            {
+              y += (int32_t)g_lpf[k] *
+                   w->hist[(w->hist_pos + k) % WAKE_TAPS];
+            }
+
+          y >>= 15;
+          w->out[w->out_n++] = (int16_t)(y > 32767 ? 32767 :
+                                         (y < -32768 ? -32768 : y));
           if (w->out_n == WAKE_FRAME)
             {
               wake_flush_frame(w);
@@ -296,8 +327,9 @@ static void *wake_capture_thread(void *arg)
 
           w->wr = 0;
           w->out_n = 0;
-          w->acc = 0;
-          w->acc_n = 0;
+          w->phase = 0;
+          w->hist_pos = 0;
+          memset(w->hist, 0, sizeof(w->hist));
           if (rpmsg_send(&w->ept, &a, 1) >= 0)
             {
               w->streaming = true;
@@ -423,11 +455,46 @@ static uint8_t *wake_make_wav(struct wake_s *w, uint32_t start,
   memcpy(wav + 36, "data", 4);
   put_le(wav + 40, data, 4);
 
-  for (i = 0; i < n; i++)
-    {
-      put_le(wav + 44 + 2 * i,
-             (uint16_t)w->ring[(start + i) % WAKE_RING], 2);
-    }
+  /* ★ 送识别前按峰值归一化到约 -3dB（最多放大 8 倍）：ALC 下一句话的
+   * 电平仍会随距离、音量差好几倍，太小的段识别明显变差。
+   */
+
+  {
+    int peak = 1;
+    int gain;
+
+    for (i = 0; i < n; i++)
+      {
+        int v = w->ring[(start + i) % WAKE_RING];
+
+        v = v < 0 ? -v : v;
+        if (v > peak)
+          {
+            peak = v;
+          }
+      }
+
+    gain = 23000 * 16 / peak;             /* Q4 */
+    if (gain > 8 * 16)
+      {
+        gain = 8 * 16;
+      }
+    else if (gain < 16)
+      {
+        gain = 16;
+      }
+
+    for (i = 0; i < n; i++)
+      {
+        int32_t v = (int32_t)w->ring[(start + i) % WAKE_RING] * gain / 16;
+
+        v = v > 32767 ? 32767 : (v < -32768 ? -32768 : v);
+        put_le(wav + 44 + 2 * i, (uint16_t)(int16_t)v, 2);
+      }
+
+    w->last_peak = peak;
+    w->last_gain = gain;
+  }
 
   *len = 44 + data;
   return wav;
@@ -744,8 +811,40 @@ static void *wake_asr_thread(void *arg)
         }
       else
         {
+          char path[32];
+          FILE *fp;
+          int ret;
+
+          /* 留下最近几句的原始音频，识别效果差时能拿出来听、做对比 */
+
+          snprintf(path, sizeof(path), "/tmp/k7-wake-%d.wav", w->keep_idx);
+          w->keep_idx = (w->keep_idx + 1) % WAKE_KEEP;
+          fp = fopen(path, "wb");
+          if (fp != NULL)
+            {
+              fwrite(wav, 1, len, fp);
+              fclose(fp);
+            }
+
           text[0] = '\0';
-          if (wake_asr(wav, len, text, sizeof(text)) == 0)
+          ret = wake_asr(wav, len, text, sizeof(text));
+          syslog(LOG_INFO, "唤醒: 段 %" PRIu32 " ms 峰值 %d 增益 %d.%d "
+                 "ret=%d 已存 %s\n", (seg.end - seg.start) / 16,
+                 w->last_peak, w->last_gain / 16, w->last_gain % 16 * 10 / 16,
+                 ret, path);
+          /* 同样一行追加进文件：测试时不一定有人盯着串口 */
+
+          fp = fopen("/tmp/k7-wake.log", "a");
+          if (fp != NULL)
+            {
+              fprintf(fp, "%ld %s %" PRIu32 "ms peak=%d gain=%d.%d ret=%d 「%s」\n",
+                      (long)time(NULL), path, (seg.end - seg.start) / 16,
+                      w->last_peak, w->last_gain / 16,
+                      w->last_gain % 16 * 10 / 16, ret, text);
+              fclose(fp);
+            }
+
+          if (ret == 0)
             {
               wake_handle_text(w, text);
             }
