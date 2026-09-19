@@ -99,11 +99,17 @@
  * Private Types
  ****************************************************************************/
 
+/* 中文字库（lv_font_k7_cjk_20.c，scripts/gen-cjk-font.sh 生成） */
+
+LV_FONT_DECLARE(lv_font_k7_cjk_20);
+
 struct devrow_s
 {
   const char *label;
   const char *path;
-  const char *note;      /* 不在时给出的一句解释，NULL 表示没什么好说的 */
+  const char *off;       /* 非 NULL：这一项是配置里有意没开的（或可选的），
+                          * 不在时显示灰色的这句原因，而不是红色 ×
+                          */
 };
 
 /****************************************************************************
@@ -125,19 +131,28 @@ struct devrow_s
 
 static const struct devrow_s g_devices[] =
 {
-  { "framebuffer",  "/dev/fb0",          "U-Boot 没点亮显示链路"        },
-  { "touch",        "/dev/input0",       "FT8756 未探到"                },
-  { "console",      "/dev/console",      NULL                           },
-  { "rpmsg link",   "/dev/rpmsg/linux",  "Linux 侧还没建通道"           },
-  { "eMMC",         "/dev/mmcsd0",       "amp-dual 下存储默认关闭"      },
-  { "TF card",      "/dev/mmcsd1",       "没插卡，或存储关闭"           },
-  { "I2C bus 1",    "/dev/i2c1",         NULL                           },
-  { "SPI bus 0",    "/dev/spi0",         NULL                           },
-  { "GPIO out",     "/dev/gpio2",        NULL                           },
-  { "GPIO in",      "/dev/gpio3",        NULL                           },
-  { "watchdog",     "/dev/watchdog0",    NULL                           },
-  { "video in",     "/dev/video0",       "CIF/CSI 未使能"               },
-  { "random",       "/dev/urandom",      NULL                           },
+  { "显示",           "/dev/fb0",          NULL },
+  { "触摸",           "/dev/input0",       NULL },
+  { "摄像头",         "/dev/video0",       NULL },
+  { "放音",           "/dev/audio/pcm0",   NULL },
+  { "录音",           "/dev/audio/pcm1",   NULL },
+  { "Linux 通道",     "/dev/rpmsg/linux",  NULL },
+  { "网络 telnet",    "/dev/telnet",       NULL },
+  { "RTC",            "/dev/rtc0",         NULL },
+  { "看门狗",         "/dev/watchdog0",    NULL },
+  { "随机数",         "/dev/random",       NULL },
+  { "I2C3 音频",      "/dev/i2c3",         NULL },
+  { "SPI4",           "/dev/spi4",         NULL },
+  { "GPIO",           "/dev/gpio2",        NULL },
+  { "蓝牙串口",       "/dev/ttyS1",        NULL },
+  { "TF 卡",          "/dev/mmcsd1",       "没插卡" },
+
+  /* 双系统打通阶段把 eMMC 驱动关了（提交 83b8f3c），之后没加回来：
+   * 它用中断，要在 Linux 的 DTB 里声明成 openvela 的；而且 eMMC 上就是
+   * U-Boot、Linux 内核和本镜像，不值得在截止前冒险。单系统配置里是开的。
+   */
+
+  { "eMMC",           "/dev/mmcsd0",       "双系统下未启用" },
 };
 
 static lv_obj_t  *g_tabview;
@@ -436,27 +451,48 @@ static void amp_refresh(void)
 
 static void dev_refresh(void)
 {
-  int missing = 0;
+  int ok_n = 0;
+  int off_n = 0;
+  int bad_n = 0;
   size_t i;
 
   for (i = 0; i < sizeof(g_devices) / sizeof(g_devices[0]); i++)
     {
       bool ok = path_exists(g_devices[i].path);
+      uint32_t color;
 
-      lv_label_set_text(g_dev_marks[i],
-                        ok ? LV_SYMBOL_OK : LV_SYMBOL_CLOSE);
-      lv_obj_set_style_text_color(g_dev_marks[i],
-                                  lv_color_hex(ok ? UI_OK : UI_BAD), 0);
-      if (!ok)
+      if (ok)
         {
-          missing++;
+          lv_label_set_text(g_dev_marks[i], LV_SYMBOL_OK);
+          color = UI_OK;
+          ok_n++;
         }
+      else if (g_devices[i].off != NULL)
+        {
+          lv_label_set_text(g_dev_marks[i], g_devices[i].off);
+          color = UI_DIM;
+          off_n++;
+        }
+      else
+        {
+          lv_label_set_text(g_dev_marks[i], LV_SYMBOL_CLOSE);
+          color = UI_BAD;
+          bad_n++;
+        }
+
+      lv_obj_set_style_text_color(g_dev_marks[i], lv_color_hex(color), 0);
     }
 
-  lv_label_set_text_fmt(g_dev_hint, "%d of %d present",
-                        (int)(sizeof(g_devices) / sizeof(g_devices[0]))
-                        - missing,
-                        (int)(sizeof(g_devices) / sizeof(g_devices[0])));
+  if (bad_n > 0)
+    {
+      lv_label_set_text_fmt(g_dev_hint, "%d 项就绪 · %d 项未启用 · %d 项缺失",
+                            ok_n, off_n, bad_n);
+    }
+  else
+    {
+      lv_label_set_text_fmt(g_dev_hint, "%d 项就绪 · %d 项未启用",
+                            ok_n, off_n);
+    }
 }
 
 static void dev_refresh_cb(lv_event_t *e)
@@ -469,39 +505,56 @@ static void dev_build(lv_obj_t *tab)
 {
   lv_obj_t *card;
   lv_obj_t *btn;
+  lv_obj_t *lbl;
   size_t i;
 
   lv_obj_set_flex_flow(tab, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_row(tab, 8, 0);
 
-  card = card_create(tab, "device nodes");
+  card = card_create(tab, NULL);
+  lbl = lv_label_create(card);
+  lv_obj_set_style_text_font(lbl, &lv_font_k7_cjk_20, 0);
+  lv_obj_set_style_text_color(lbl, lv_color_hex(UI_ACCENT), 0);
+  lv_label_set_text(lbl, "设备节点");
 
   for (i = 0; i < sizeof(g_devices) / sizeof(g_devices[0]); i++)
     {
       lv_obj_t *row = lv_obj_create(card);
       lv_obj_t *name;
+      lv_obj_t *path;
 
       lv_obj_remove_style_all(row);
       lv_obj_set_width(row, LV_PCT(100));
       lv_obj_set_height(row, LV_SIZE_CONTENT);
       lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
-      lv_obj_set_flex_align(row, LV_FLEX_ALIGN_SPACE_BETWEEN,
+      lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START,
                             LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+      lv_obj_set_style_pad_column(row, 10, 0);
 
       name = lv_label_create(row);
-      lv_label_set_text_fmt(name, "%s  %s",
-                            g_devices[i].label, g_devices[i].path);
+      lv_obj_set_style_text_font(name, &lv_font_k7_cjk_20, 0);
       lv_obj_set_style_text_color(name, lv_color_white(), 0);
+      lv_obj_set_width(name, 150);
+      lv_label_set_text(name, g_devices[i].label);
+
+      path = lv_label_create(row);
+      lv_obj_set_style_text_color(path, lv_color_hex(UI_DIM), 0);
+      lv_obj_set_flex_grow(path, 1);
+      lv_label_set_text(path, g_devices[i].path);
 
       g_dev_marks[i] = lv_label_create(row);
+      lv_obj_set_style_text_font(g_dev_marks[i], &lv_font_k7_cjk_20, 0);
     }
 
   g_dev_hint = lv_label_create(card);
+  lv_obj_set_style_text_font(g_dev_hint, &lv_font_k7_cjk_20, 0);
   lv_obj_set_style_text_color(g_dev_hint, lv_color_hex(UI_DIM), 0);
 
   btn = lv_button_create(card);
   lv_obj_add_event_cb(btn, dev_refresh_cb, LV_EVENT_CLICKED, NULL);
-  lv_label_set_text(lv_label_create(btn), LV_SYMBOL_REFRESH "  rescan");
+  lbl = lv_label_create(btn);
+  lv_obj_set_style_text_font(lbl, &lv_font_k7_cjk_20, 0);
+  lv_label_set_text(lbl, "重新扫描");
 
   dev_refresh();
 }
@@ -1210,7 +1263,6 @@ static void camera_poll(void)
  *   三分钟里界面一动不动，谁都会以为卡了。
  ****************************************************************************/
 
-LV_FONT_DECLARE(lv_font_k7_cjk_20);
 
 #define ASSIST_MAX_BUBBLES 12
 #define ASSIST_BOT_BG      0x223041
