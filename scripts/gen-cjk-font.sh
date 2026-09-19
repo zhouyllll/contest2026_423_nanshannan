@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # 生成 kickpi_ui 用的中文字库 app/kickpi_ui/lv_font_k7_cjk_20.c
 #
-# 字符集：ASCII + GB2312 一级汉字（3755 个常用字）+ 常用中文标点，共 3877 字形，
+# 字符集：ASCII + GB2312 一级汉字（3755 个常用字）+ 常用中文标点与符号，约 3890 字形，
 # 20px / 4bpp，约 430KB 进 .rodata（FIT 窗口 8192 扇区，加上后仍有余量）。
 #
 # 字体来源（都允许再分发）：
 #   ASCII        Montserrat-Medium  （OFL，LVGL 自带，和界面其余英文字体一致）
-#   “”‘’…—·×÷°  DejaVuSans         （LVGL 自带；前两者都没有这几个符号）
+#   “”‘’…—·×÷°→←↑↓✓✗℃  DejaVuSans（LVGL 自带；前两者都没有这几个符号）
 #   汉字/全角标点 DroidSansFallbackFull（Apache-2.0，Debian fonts-droid-fallback）
 #
 # DroidSansFallback 是纯 CJK 的回退字体，**没有拉丁字母**，所以不能单用它。
@@ -18,7 +18,7 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 LVGL_FONTS=${LVGL_FONTS:-$ROOT/../apps/graphics/lvgl/lvgl/scripts/built_in_font}
 WORK=${WORK:-$HOME/rk3576-amp/font}
 OUT=$ROOT/app/kickpi_ui/lv_font_k7_cjk_20.c
-PUNCT="“”‘’…—·×÷°"
+PUNCT="“”‘’…—·×÷°→←↑↓✓✗℃"
 
 mkdir -p "$WORK"
 cd "$WORK"
@@ -37,7 +37,7 @@ for hi in range(0xB0, 0xD8):            # GB2312 一级汉字区
             out.append(bytes([hi, lo]).decode('gb2312'))
         except UnicodeDecodeError:
             pass
-out += [c for c in '，。！？、；：（）《》【】～％＋－' if c not in sys.argv[1]]
+out += [c for c in '，。！？、；：（）《》【】～％＋－「」『』' if c not in sys.argv[1]]
 sys.stdout.write(''.join(out))
 PY
 
