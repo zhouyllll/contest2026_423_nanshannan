@@ -1,0 +1,33 @@
+U-Boot：resource 找不到时退到 dtbo 分区（开机 logo）
+
+应用：叠在 0010 之上，在 u-boot/ 下 `patch -p1 < 本文件`；编译同 0010。
+配套：scripts/gen-boot-logo.py 生成 resource-logo.img，scripts/flash-logo.sh 写 LBA 40960。
+
+本板 GPT 没有 resource 分区；boot 分区里是 AMP 的 Linux 内核（不是 Android 镜像），
+原来每次开机 "No resource file: logo.bmp" / "VP1 fail to load kernel logo"。
+dtbo 分区只有 Android 启动流程读（common/android_bootloader.c），bootamp 不走。
+K7 的 U-Boot 配置关了 USING_KERNEL_DTB，resource 里的 dtb 查找不会被触发，
+所以借用 dtbo 只影响 logo。
+
+上板（2026-09-19）："RESC: 'dtbo', blk@0x0000a000"，两行 logo 报错消失；
+drm-logo 预留 0x384000 → 0x708000；启动多约 0.08s。
+
+--- a/arch/arm/mach-rockchip/resource_img.c
++++ b/arch/arm/mach-rockchip/resource_img.c
+@@ -345,7 +345,15 @@
+ {
+ 	disk_partition_t part;
+ 
+-	if (part_get_info_by_name(desc, PART_RESOURCE, &part) < 0)
++	/*
++	 * K7 AMP：本板 GPT 没有 resource 分区，boot 分区里放的是 AMP 的
++	 * Linux 内核（从 vbmeta 起连续写，不是 Android 镜像），所以原来每次
++	 * 开机都是 "No resource file: logo.bmp"。开机 logo 的 resource 镜像
++	 * 放在空闲的 dtbo 分区（LBA 40960，只有 Android 启动流程会读它，
++	 * bootamp 不走那条路）。见仓库 scripts/gen-boot-logo.py。
++	 */
++	if (part_get_info_by_name(desc, PART_RESOURCE, &part) < 0 &&
++	    part_get_info_by_name(desc, PART_DTBO, &part) < 0)
+ 		return -ENODEV;
+ 
+ 	*out_part = part;
