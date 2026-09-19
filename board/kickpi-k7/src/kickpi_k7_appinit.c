@@ -664,19 +664,12 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_RK3576_DWMMC
-  /* Probe the SDIO host and attached SKW6621S module. The host probe
-   * validates CMD5/R4 before the manual "bt probe" command performs
-   * standard SDIO enumeration and reads the chip identity. No block device
-   * is registered for this non-storage SDIO function.
-   */
-
-  ret = rk3576_dwmmc_probe(RK3576_DWMMC_SDIO_BASE);
-  if (ret < 0)
-    {
-      syslog(LOG_WARNING, "SKW6621S SDIO: host probe failed (%d)\n", ret);
-    }
-#endif
+/* 蓝牙（SKW6621S）的 SDIO 探测不再放在启动路径上（2026-09-19）。
+ *
+ *   枚举至今没通过（notes/bt-final-2026-09-19/README.md），用户决定截止前
+ *   停止。留在启动路径上，每次开机都打出 SDIO 报错、多等 200ms 以上 ——
+ *   xTS 1.2.1 要求启动日志无异常。需要时用 `bt probe` 手动触发。
+ */
 
 /* ★ 蓝牙**不在**启动路径上初始化，由 `bt init` 命令手动触发。
  *
