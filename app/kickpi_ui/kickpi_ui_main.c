@@ -65,6 +65,7 @@
 
 #include "k7_audio.h"
 #include "k7_tts.h"
+#include "k7_vision.h"
 
 #include <arch/board/board.h>
 
@@ -182,7 +183,6 @@ static pid_t         g_camera_pid = -1;
 static lv_obj_t     *g_assist_list;
 static lv_obj_t     *g_assist_state;
 static lv_obj_t     *g_assist_spinner;
-static velaclaw_client_t *g_agent_client;
 static pthread_mutex_t g_agent_lock = PTHREAD_MUTEX_INITIALIZER;
 static char          g_agent_reply[2048];
 static bool          g_agent_reply_ready;
@@ -1476,11 +1476,29 @@ static void agent_reply_cb(int status, const char *reply, void *cookie)
   pthread_mutex_unlock(&g_agent_lock);
 }
 
+/* 桌面问答的工作线程：拍照 + 一次视觉请求（见 k7_vision.c 开头为什么
+ * 不走 ai_agent 的循环）。失败时 answer 里是给用户看的说明，一样当回答
+ * 显示出来。
+ */
+
+static void *desk_worker(void *arg)
+{
+  static char answer[2048];
+  char *question = arg;
+
+  k7_vision_ask(question, answer, sizeof(answer));
+  free(question);
+  agent_reply_cb(0, answer, NULL);
+  return NULL;
+}
+
 /* question 发给模型，shown 显示在气泡里（NULL 表示不显示，桌面守护用） */
 
 static void agent_ask(const char *question, const char *shown)
 {
-  velaclaw_ask_req_t request;
+  pthread_attr_t attr;
+  pthread_t tid;
+  char *copy;
   int ret;
 
   if (g_agent_busy)
@@ -1489,30 +1507,28 @@ static void agent_ask(const char *question, const char *shown)
       return;
     }
 
-  /* agent 的 camera_capture 走 /dev/video0，和预览抢 CIF */
+  /* 拍照走 /dev/video0，和相机页的预览抢 CIF，先停预览 */
 
   live_page_close();
 
-  if (g_agent_client == NULL)
+  copy = strdup(question);
+  if (copy == NULL)
     {
-      g_agent_client = velaclaw_client_open("k7-desk-ui");
-      if (g_agent_client == NULL)
-        {
-          assist_state("助手离线：ai_agent 没在运行。");
-          return;
-        }
-    }
-
-  request.text = question;
-  /* mimo-v2.5 是推理模型：拍照 + 看图 + 作答三轮，实测第二轮就要 99s */
-
-  request.timeout_ms = UI_AGENT_TIMEOUT_S * 1000;
-  ret = velaclaw_ask(g_agent_client, &request, agent_reply_cb, NULL);
-  if (ret < 0)
-    {
-      lv_label_set_text_fmt(g_assist_state, "请求没发出去（%d）。", ret);
       return;
     }
+
+  pthread_attr_init(&attr);
+  pthread_attr_setstacksize(&attr, 32768);   /* TLS 握手 + cJSON */
+  ret = pthread_create(&tid, &attr, desk_worker, copy);
+  pthread_attr_destroy(&attr);
+  if (ret != 0)
+    {
+      free(copy);
+      lv_label_set_text_fmt(g_assist_state, "起不了工作线程（%d）。", ret);
+      return;
+    }
+
+  pthread_detach(tid);
 
   if (shown != NULL)
     {
@@ -1522,7 +1538,7 @@ static void agent_ask(const char *question, const char *shown)
   g_agent_busy = true;
   g_agent_started = time(NULL);
   lv_obj_remove_flag(g_assist_spinner, LV_OBJ_FLAG_HIDDEN);
-  assist_state("思考中…");
+  assist_state("拍照、看图中…");
 }
 
 /* 回答要求：中文、短、不要 Markdown。字库只有 GB2312 一级常用字，
@@ -1531,36 +1547,26 @@ static void agent_ask(const char *question, const char *shown)
 
 #define ASSIST_STYLE "请用简体中文回答，不超过 120 字，不要用 Markdown 格式。"
 
-/* camera_capture 的 resolution 缺省是 320x180，模型也会自己选低的
- * （实测一次只拍了 8.9KB 的图），看小物件基本靠猜。明确要 high。
- */
-
-#define ASSIST_CAM "Call camera_capture with resolution \"high\". "
-
 static void agent_look_cb(lv_event_t *event)
 {
   (void)event;
-  agent_ask(ASSIST_CAM "Use camera_capture to inspect the current desk image and "
-            "describe the main objects. " ASSIST_STYLE,
+  agent_ask("这是桌面摄像头刚拍的照片。桌上有哪些主要物体？" ASSIST_STYLE,
             "桌上有什么？");
 }
 
 static void agent_items_cb(lv_event_t *event)
 {
   (void)event;
-  agent_ask(ASSIST_CAM "Use camera_capture to inspect the current desk image. "
-            "Are the keys and cup visible? Say unknown if an item is "
-            "obscured or the camera tool fails. Do not guess. "
-            ASSIST_STYLE,
+  agent_ask("这是桌面摄像头刚拍的照片。画面里有钥匙和杯子吗？被挡住或"
+            "看不清就说不确定，不要猜。" ASSIST_STYLE,
             "钥匙和杯子在吗？");
 }
 
 static void agent_tidy_cb(lv_event_t *event)
 {
   (void)event;
-  agent_ask(ASSIST_CAM "Use camera_capture to inspect the current desk image. "
-            "Is the desk tidy? Give at most three concrete suggestions. "
-            ASSIST_STYLE,
+  agent_ask("这是桌面摄像头刚拍的照片。桌面整洁吗？最多给三条具体的"
+            "收拾建议。" ASSIST_STYLE,
             "桌面乱不乱？怎么收拾？");
 }
 
@@ -1698,7 +1704,7 @@ static void agent_poll(void)
     }
   else if (g_agent_busy && elapsed >= UI_AGENT_TIMEOUT_S)
     {
-      assist_bubble(false, "这次等了 4 分钟还没有回答，已放弃。"
+      assist_bubble(false, "这次等了很久还没有回答，已放弃。"
                            "可以再问一次。");
       assist_state("超时");
       lv_obj_add_flag(g_assist_spinner, LV_OBJ_FLAG_HIDDEN);
@@ -1711,7 +1717,7 @@ static void agent_poll(void)
 
       shown_elapsed = elapsed;
       lv_label_set_text_fmt(g_assist_state,
-                            "%s %ld 秒（拍照→看图→作答，通常 2~3 分钟）",
+                            "%s %ld 秒（拍照 → 看图作答，通常十几秒）",
                             g_guard_request ? "桌面守护检查中" : "思考中",
                             (long)elapsed);
     }
@@ -1719,10 +1725,10 @@ static void agent_poll(void)
   if (g_guard_enabled && !g_agent_busy && time(NULL) >= g_guard_next)
     {
       g_guard_request = true;
-      agent_ask(ASSIST_CAM "Use camera_capture to inspect the desk. Return one JSON "
+      agent_ask("This is a fresh photo of the desk. Return one JSON "
                 "object only: {\"keys\":true|false|null,"
-                "\"cup\":true|false|null}. Use null when obscured, "
-                "uncertain, or capture fails. Do not guess.", NULL);
+                "\"cup\":true|false|null}. Use null when obscured or "
+                "uncertain. Do not guess.", NULL);
       if (!g_agent_busy)
         {
           g_guard_request = false;
@@ -1790,7 +1796,7 @@ static void assist_build(lv_obj_t *tab)
   lv_obj_set_scroll_dir(g_assist_list, LV_DIR_VER);
 
   assist_bubble(false, "你好，我是桌面助手。点下面的按钮，我会用摄像头"
-                       "看一眼桌面再回答。每次大约需要 2~3 分钟。");
+                       "看一眼桌面再回答，一般十几秒。");
 
   /* 提问按钮 */
 

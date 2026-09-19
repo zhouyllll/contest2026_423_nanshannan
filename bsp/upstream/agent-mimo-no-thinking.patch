@@ -1,0 +1,98 @@
+diff --git a/src/llm/llm_proxy.c b/src/llm/llm_proxy.c
+index 48157cc..d37b57c 100644
+--- a/src/llm/llm_proxy.c
++++ b/src/llm/llm_proxy.c
+@@ -38,6 +38,32 @@
+ #include <stdlib.h>
+ #include <string.h>
+ 
++/* ★ 小米 MiMo 的推理模型默认开"深度思考"：实测看一张图 20s，关掉后 4.3s，
++ *   纯文本 8.6s → 2.1s；板上一次"拍照 → 看图 → 作答"三轮要 196s。
++ *   桌面助手要的是快速、简短的回答，所以对 MiMo 的地址关掉思考
++ *   （Token Plan 文档：请求体顶层 "thinking": {"type": "disabled"}）。
++ *   别家模型不认这个字段，只对 xiaomimimo 加。
++ */
++
++#ifndef AGENT_LLM_DISABLE_THINKING
++#  define AGENT_LLM_DISABLE_THINKING 1
++#endif
++
++static void add_thinking_off(cJSON* body, const char* host)
++{
++#if AGENT_LLM_DISABLE_THINKING
++    if (host != NULL && strstr(host, "xiaomimimo") != NULL) {
++        cJSON* th = cJSON_AddObjectToObject(body, "thinking");
++        if (th != NULL)
++            cJSON_AddStringToObject(th, "type", "disabled");
++    }
++#else
++    (void)body;
++    (void)host;
++#endif
++}
++
++
+ static const char* TAG = "llm";
+ 
+ static char s_api_key[128] = { 0 };
+@@ -590,6 +616,7 @@ int llm_chat(const char* system_prompt, const char* messages_json,
+     cJSON* body = cJSON_CreateObject();
+     cJSON_AddStringToObject(body, "model",
+         model_name_for_api(model, llm_host));
++    add_thinking_off(body, llm_host);
+ 
+     if (is_openai_compat_host(llm_host))
+         cJSON_AddNumberToObject(body, "max_completion_tokens",
+@@ -706,6 +733,7 @@ int llm_chat_tools(const char* system_prompt, cJSON* messages,
+ 
+     cJSON_AddStringToObject(body, "model",
+         model_name_for_api(model, llm_host));
++    add_thinking_off(body, llm_host);
+ 
+     if (is_openai_compat_host(llm_host)) {
+         cJSON_AddNumberToObject(body, "max_completion_tokens",
+diff --git a/src/llm/llm_vision.c b/src/llm/llm_vision.c
+index 549a15b..7b557b7 100644
+--- a/src/llm/llm_vision.c
++++ b/src/llm/llm_vision.c
+@@ -34,6 +34,32 @@
+ #include <string.h>
+ #include <syslog.h>
+ 
++/* ★ 小米 MiMo 的推理模型默认开"深度思考"：实测看一张图 20s，关掉后 4.3s，
++ *   纯文本 8.6s → 2.1s；板上一次"拍照 → 看图 → 作答"三轮要 196s。
++ *   桌面助手要的是快速、简短的回答，所以对 MiMo 的地址关掉思考
++ *   （Token Plan 文档：请求体顶层 "thinking": {"type": "disabled"}）。
++ *   别家模型不认这个字段，只对 xiaomimimo 加。
++ */
++
++#ifndef AGENT_LLM_DISABLE_THINKING
++#  define AGENT_LLM_DISABLE_THINKING 1
++#endif
++
++static void add_thinking_off(cJSON* body, const char* host)
++{
++#if AGENT_LLM_DISABLE_THINKING
++    if (host != NULL && strstr(host, "xiaomimimo") != NULL) {
++        cJSON* th = cJSON_AddObjectToObject(body, "thinking");
++        if (th != NULL)
++            cJSON_AddStringToObject(th, "type", "disabled");
++    }
++#else
++    (void)body;
++    (void)host;
++#endif
++}
++
++
+ static const char* TAG = "llm_vision";
+ 
+ /* ── Public: vision chat (text + image) ───────────────────── */
+@@ -111,6 +137,7 @@ int llm_chat_vision(const char* prompt, const char* image_b64,
+ 
+     cJSON_AddStringToObject(body, "model",
+         model_name_for_api(model, llm_host));
++    add_thinking_off(body, llm_host);
+ 
+     if (is_openai_compat_host(llm_host))
+         cJSON_AddNumberToObject(body, "max_completion_tokens",

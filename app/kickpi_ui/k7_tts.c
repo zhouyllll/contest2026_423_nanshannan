@@ -31,6 +31,7 @@
 #include <cJSON.h>
 
 #include "k7_audio.h"
+#include "k7_net.h"
 #include "k7_tts.h"
 
 #ifdef __has_include
@@ -45,19 +46,6 @@
 #define TTS_RATE      24000
 #define TTS_RESP_CAP  (4 * 1024 * 1024)
 #define TTS_TEXT_MAX  600               /* 字节，约 200 个汉字 */
-
-/* ai_agent 的 HTTPS 客户端（src/infra/vela_tls.h），这里只声明用到的 */
-
-typedef struct
-{
-  const char *name;
-  const char *value;
-} vela_header_t;
-
-int vela_https_post_json(const char *host, const char *port,
-                         const char *path, const vela_header_t *headers,
-                         const char *json_body,
-                         char *resp_buf, size_t resp_cap);
 
 static int b64_val(int c)
 {
