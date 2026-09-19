@@ -206,6 +206,7 @@ config RK3576_VOP2
 config RK3576_RNG
 	bool "硬件随机数 (/dev/random)"
 	default n
+	select ARCH_HAVE_RNG
 	---help---
 		RK3576 的硬件随机数（0x2a410000，compatible "rockchip,rkrng"）。
 

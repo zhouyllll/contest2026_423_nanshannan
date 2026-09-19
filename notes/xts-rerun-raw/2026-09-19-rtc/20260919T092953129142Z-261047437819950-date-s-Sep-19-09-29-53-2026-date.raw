@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kdate -s "Sep 19 09:29:53 2026"; date
+ÿüSat, Sep 19 09:29:53 2026
+nsh> 

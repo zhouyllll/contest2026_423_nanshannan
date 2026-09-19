@@ -1,0 +1,8 @@
+[CPU0] [==========] tests: Running 3 test(s).
+[CPU0] [ RUN     [CPU0] [       OK ] drivertest_rtc_api
+[CPU0] [ RUN      ] driv[CPU0] [       OK ] drivertest_rtc_alarm
+[CPU0] [ RUN      ] drivertest_rtc_periodic
+[CPU0] rtc periodic callback trigger!!!
+[CPU0] [       OK ] drivertest_rtc_periodic
+[CPU0] [==========]: 3 test(s) run.
+[CPU0] [  PASSED  ] 3 test(s).

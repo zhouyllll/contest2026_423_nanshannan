@@ -1,0 +1,20 @@
+diff --git a/libs/libc/stdio/lib_fopen.c b/libs/libc/stdio/lib_fopen.c
+index 0e4ff66a..7580d7b9 100644
+--- a/libs/libc/stdio/lib_fopen.c
++++ b/libs/libc/stdio/lib_fopen.c
+@@ -90,7 +90,14 @@ FAR FILE *fdopen(int fd, FAR const char *mode)
+           return NULL;
+         }
+ 
+-      if (list->sl_count >= _POSIX_STREAM_MAX)
++      /* _POSIX_STREAM_MAX (16) is the minimum POSIX guarantees, not a
++       * cap.  Bound the list by the configured OPEN_MAX instead: FILE
++       * structures are allocated on demand, and a stream needs a file
++       * descriptor anyway, which is limited to OPEN_MAX.  NIST STS keeps
++       * 32 streams open (stats + results for each of its 15 tests).
++       */
++
++      if (list->sl_count >= OPEN_MAX)
+         {
+           nxmutex_unlock(&list->sl_lock);
+           set_errno(EMFILE);

@@ -1,0 +1,7 @@
+
+NuttShell (NSH)
+nsh> [Kdate; ls /dev/rtc0; uname -a
+Mon, Mar 02 15:17:08 2026
+ /dev/rtc0
+NuttX  0.0.0 3b51eaa1-dirty Sep 19 2026 17:25:46 arm64 kickpi-k7
+nsh> 

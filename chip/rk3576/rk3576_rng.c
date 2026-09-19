@@ -213,7 +213,58 @@ int rk3576_rng_initialize(void)
          "RNG: 自检通过，两批取数不同（0x%02x%02x… vs 0x%02x%02x…）\n",
          a[0], a[1], b[0], b[1]);
 
-  return register_driver("/dev/random", &g_rng_fops, 0444, NULL);
+  ret = register_driver("/dev/random", &g_rng_fops, 0444, NULL);
+
+#ifdef CONFIG_DEV_URANDOM_ARCH
+  /* /dev/urandom 指向同一个硬件（见下面 devurandom_register 的说明）。 */
+
+  if (ret >= 0)
+    {
+      ret = register_driver("/dev/urandom", &g_rng_fops, 0444, NULL);
+    }
+#endif
+
+  return ret;
 }
+
+#ifdef CONFIG_DEV_RANDOM
+/****************************************************************************
+ * Name: devrandom_register
+ *
+ * Description:
+ *   选了 ARCH_HAVE_RNG 后 CONFIG_DEV_RANDOM 默认打开，drivers_initialize()
+ *   会调它。留空，理由同下面的 devurandom_register：/dev/random 在
+ *   rk3576_rng_initialize() 里开时钟、自检通过之后才注册。
+ *
+ ****************************************************************************/
+
+void devrandom_register(void)
+{
+}
+#endif
+
+#ifdef CONFIG_DEV_URANDOM_ARCH
+/****************************************************************************
+ * Name: devurandom_register
+ *
+ * Description:
+ *   CONFIG_DEV_URANDOM_ARCH 要求芯片层提供它。
+ *
+ * ★ 这里留空，/dev/urandom 由 rk3576_rng_initialize() 注册。
+ *
+ *   drivers_initialize() 在 OS 启动早期就调这个函数，那时 RNG 的时钟
+ *   还没开、自检还没做。在这里注册的话，节点先于硬件就绪出现，而且
+ *   自检失败（取到常量）时也挡不住 —— 那恰恰是 /dev/urandom 最不该
+ *   交出去的东西。所以和 /dev/random 一起，自检通过后再注册。
+ *
+ *   不用 NuttX 自带的软件 /dev/urandom（xorshift128）：xTS 1.3.16 用
+ *   nist_sts 读 /dev/urandom，测软件伪随机数证明不了本板的 RNG。
+ *
+ ****************************************************************************/
+
+void devurandom_register(void)
+{
+}
+#endif
 
 #endif /* CONFIG_RK3576_RNG */
