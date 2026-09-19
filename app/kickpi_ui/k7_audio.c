@@ -337,6 +337,18 @@ static void k7a_codec_tune_capture(void)
   static const uint8_t regs[][2] =
   {
     { 0x09, 0x00 },
+
+    /* ★ 差分输入：板上麦克风是一对差分线 MIC2P/MIC2N，接 LIN2/RIN2。
+     *   上游驱动的 LINE2 是单端（0x0A=0x50），只取 MIC2P 对地，50Hz
+     *   工频这类共模干扰原样进来 —— 实测一句话里 100Hz 以下占能量的
+     *   99.8%、最强频点 50Hz，用户听到"电流声比说话声还大"。驱动自带的
+     *   DIFFERENTIAL 选项又把差分对写死成 LIN1-RIN1（耳机座），不能用。
+     *     0x0A = LINSEL=差分 | RINSEL=差分
+     *     0x0B = DS(bit7)=LIN2-RIN2 | bit1 默认值
+     */
+
+    { 0x0a, 0xf0 },
+    { 0x0b, 0x82 },
     { 0x12, 0xea },
     { 0x13, 0xc0 },
     { 0x14, 0x05 },

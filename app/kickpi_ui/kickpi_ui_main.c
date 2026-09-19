@@ -38,6 +38,7 @@
 
 #include <dirent.h>
 #include <inttypes.h>
+#include <math.h>
 #include <malloc.h>
 #include <errno.h>
 #include <pthread.h>
@@ -2069,6 +2070,7 @@ struct rec_s
   int             chan;        /* 选中的声道 0 = 左 1 = 右 */
   int             gain;        /* 放音放大倍数 */
   int             result;      /* 最近一次操作的返回值 */
+  int             hum[3];      /* 50/100/150Hz 幅度（诊断） */
   bool            done;        /* 一次操作刚结束，界面还没处理 */
   int             done_what;   /* 刚结束的是 REC_RECORDING 还是 REC_PLAYING */
 };
@@ -2243,6 +2245,43 @@ static void rec_analyse(void)
 
   syslog(LOG_INFO, "录音机: 最大尖峰 %d 在第 %zu 帧（%zu ms），99.5%% 电平 %d\n",
          peak, peak_at, peak_at * 1000 / K7A_RATE, p995);
+
+  /* 诊断：工频干扰强度。Goertzel 算 50/100/150Hz 三个频点的幅度，和
+   * 整段 RMS 放一起看 —— 电流声就是这几个频点。
+   */
+
+  {
+    static const int hz[3] = { 50, 100, 150 };
+    double rms = 0;
+    int h;
+
+    for (i = 0; i < g_rec.frames; i++)
+      {
+        rms += (double)g_rec.mono[i] * g_rec.mono[i];
+      }
+
+    rms = sqrt(rms / (g_rec.frames ? g_rec.frames : 1));
+    for (h = 0; h < 3; h++)
+      {
+        double c = 2 * cos(2 * M_PI * hz[h] / K7A_RATE);
+        double s0;
+        double s1 = 0;
+        double s2 = 0;
+
+        for (i = 0; i < g_rec.frames; i++)
+          {
+            s0 = g_rec.mono[i] + c * s1 - s2;
+            s2 = s1;
+            s1 = s0;
+          }
+
+        g_rec.hum[h] = (int)(2 * sqrt(s1 * s1 + s2 * s2 - c * s1 * s2) /
+                             (g_rec.frames ? g_rec.frames : 1));
+      }
+
+    syslog(LOG_INFO, "录音机: RMS %d，工频幅度 50Hz %d / 100Hz %d / "
+           "150Hz %d\n", (int)rms, g_rec.hum[0], g_rec.hum[1], g_rec.hum[2]);
+  }
 
   /* 诊断：每 100ms 一个峰值，看噪声是均匀的底噪还是周期性的突发 */
 
