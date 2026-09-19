@@ -144,7 +144,6 @@ static const struct devrow_s g_devices[] =
   { "I2C3 音频",      "/dev/i2c3",         NULL },
   { "SPI4",           "/dev/spi4",         NULL },
   { "GPIO",           "/dev/gpio2",        NULL },
-  { "蓝牙串口",       "/dev/ttyS1",        NULL },
   { "TF 卡",          "/dev/mmcsd1",       "没插卡" },
 
   /* 双系统打通阶段把 eMMC 驱动关了（提交 83b8f3c），之后没加回来：
