@@ -66,6 +66,7 @@
 #include "k7_audio.h"
 #include "k7_tts.h"
 #include "k7_vision.h"
+#include "k7_wake.h"
 
 #include <arch/board/board.h>
 
@@ -1352,7 +1353,12 @@ static void *tts_worker(void *arg)
   int ret;
 
   (void)arg;
+
+  /* 放音要用音频设备：先让唤醒的采集停下（也免得把自己的声音听进去） */
+
+  k7_wake_pause(true);
   ret = k7_tts_speak(g_tts.text);
+  k7_wake_pause(false);
   syslog(LOG_INFO, "播报: 结束 ret=%d\n", ret);
 
   pthread_mutex_lock(&g_tts.lock);
@@ -1370,7 +1376,7 @@ static void tts_start(const char *text)
   pthread_attr_t attr;
   pthread_t tid;
 
-  if (g_tts.busy || k7a_busy())
+  if (g_tts.busy)
     {
       return;
     }
@@ -1737,6 +1743,114 @@ static void agent_poll(void)
     }
 }
 
+/* 语音唤醒 */
+
+static lv_obj_t *g_wake_state;
+static lv_obj_t *g_wake_bar;
+static char      g_wake_shown[96];
+
+static void wake_switch_cb(lv_event_t *event)
+{
+  if (lv_obj_has_state(lv_event_get_target(event), LV_STATE_CHECKED))
+    {
+      if (k7_wake_start() < 0)
+        {
+          lv_label_set_text(g_wake_state, "语音唤醒启动失败。");
+        }
+    }
+  else
+    {
+      k7_wake_stop();
+      lv_bar_set_value(g_wake_bar, 0, LV_ANIM_OFF);
+      lv_label_set_text(g_wake_state, "语音唤醒已关闭。");
+      g_wake_shown[0] = '\0';
+    }
+}
+
+static void wake_show(const char *text)
+{
+  if (strcmp(text, g_wake_shown) != 0)
+    {
+      snprintf(g_wake_shown, sizeof(g_wake_shown), "%s", text);
+      lv_label_set_text(g_wake_state, text);
+    }
+}
+
+static void wake_poll(void)
+{
+  static char heard[160];
+  static time_t heard_until;
+  struct k7_wake_status_s st;
+  char text[512];
+  char question[512];
+  char prompt[1024];
+  int ev;
+
+  k7_wake_get_status(&st);
+  if (!st.running && !st.linking)
+    {
+      return;
+    }
+
+  lv_bar_set_value(g_wake_bar, st.level, LV_ANIM_OFF);
+
+  ev = k7_wake_get_event(text, sizeof(text), question, sizeof(question));
+  switch (ev)
+    {
+      case K7_WAKE_ASK:
+        if (g_agent_busy)
+          {
+            assist_bubble(true, text);
+            assist_bubble(false, "上一个问题还在处理，稍后再问我。");
+            break;
+          }
+
+        snprintf(prompt, sizeof(prompt),
+                 "这是桌面摄像头刚拍的照片。用户说：%s。请回答用户的问题；"
+                 "如果问题和照片无关，就直接回答。" ASSIST_STYLE, question);
+        agent_ask(prompt, text);
+        break;
+
+      case K7_WAKE_ONLY:
+        assist_bubble(true, text);
+        assist_bubble(false, "我在，请说。");
+        break;
+
+      case K7_WAKE_HEARD:
+        snprintf(heard, sizeof(heard), "听到：%.120s（没有唤醒词）", text);
+        heard_until = time(NULL) + 3;
+        break;
+
+      default:
+        break;
+    }
+
+  if (st.linking)
+    {
+      wake_show("正在连接 A72 上的 Linux（端点检测在那边跑）…");
+    }
+  else if (st.woken)
+    {
+      wake_show("我在，请说问题…");
+    }
+  else if (st.recognizing)
+    {
+      wake_show("识别中…");
+    }
+  else if (st.speaking)
+    {
+      wake_show("在听你说…");
+    }
+  else if (time(NULL) <= heard_until)
+    {
+      wake_show(heard);
+    }
+  else
+    {
+      wake_show("说「你好 openvela」叫醒我，可以接着说问题。");
+    }
+}
+
 static lv_obj_t *assist_button(lv_obj_t *parent, const char *text,
                                lv_event_cb_t cb)
 {
@@ -1849,6 +1963,33 @@ static void assist_build(lv_obj_t *tab)
   lv_obj_set_style_text_font(label, &lv_font_k7_cjk_20, 0);
   lv_label_set_text(label, "语音播报");
   assist_button(row, "再读一遍", tts_again_cb);
+
+  /* 语音唤醒 */
+
+  row = lv_obj_create(card);
+  lv_obj_remove_style_all(row);
+  lv_obj_set_size(row, LV_PCT(100), LV_SIZE_CONTENT);
+  lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
+                        LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_column(row, 10, 0);
+
+  button = lv_switch_create(row);
+  lv_obj_add_event_cb(button, wake_switch_cb, LV_EVENT_VALUE_CHANGED, NULL);
+  label = lv_label_create(row);
+  lv_obj_set_style_text_font(label, &lv_font_k7_cjk_20, 0);
+  lv_label_set_text(label, "语音唤醒");
+  g_wake_bar = lv_bar_create(row);
+  lv_obj_set_flex_grow(g_wake_bar, 1);
+  lv_obj_set_height(g_wake_bar, 12);
+  lv_bar_set_range(g_wake_bar, 0, 100);
+
+  g_wake_state = lv_label_create(card);
+  lv_obj_set_width(g_wake_state, LV_PCT(100));
+  lv_label_set_long_mode(g_wake_state, LV_LABEL_LONG_WRAP);
+  lv_obj_set_style_text_font(g_wake_state, &lv_font_k7_cjk_20, 0);
+  lv_obj_set_style_text_color(g_wake_state, lv_color_hex(UI_DIM), 0);
+  lv_label_set_text(g_wake_state, "语音唤醒已关闭。");
 }
 
 static void camera_build(lv_obj_t *tab)
@@ -2140,6 +2281,8 @@ static void *rec_worker(void *arg)
   int what = (int)(intptr_t)arg;
   int ret;
 
+  k7_wake_pause(true);            /* 录音机要独占音频设备 */
+
   if (what == REC_RECORDING)
     {
       g_rec.frames = 0;
@@ -2195,6 +2338,8 @@ static void *rec_worker(void *arg)
         }
     }
 
+  k7_wake_pause(false);
+
   pthread_mutex_lock(&g_rec.lock);
   g_rec.result = ret;
   g_rec.done_what = what;
@@ -2214,11 +2359,6 @@ static void rec_start(int what)
       return;
     }
 
-  if (k7a_busy())
-    {
-      lv_label_set_text(g_rec_state, "音频设备正被占用（语音唤醒在听？）");
-      return;
-    }
 
   if (g_rec.st == NULL)
     {
@@ -2625,6 +2765,7 @@ static void tick_cb(lv_timer_t *t)
 
   camera_poll();
   agent_poll();
+  wake_poll();
   tts_poll();
   rec_poll();
 
@@ -2654,6 +2795,32 @@ static void tick_cb(lv_timer_t *t)
     {
       rec_start(REC_PLAYING);
     }
+
+  /* echo 1 / 0 > /tmp/k7-wake：开 / 关语音唤醒（调试入口） */
+
+  {
+    FILE *fp = fopen("/tmp/k7-wake", "r");
+
+    if (fp != NULL)
+      {
+        int on = 0;
+
+        if (fscanf(fp, "%d", &on) == 1)
+          {
+            if (on)
+              {
+                k7_wake_start();
+              }
+            else
+              {
+                k7_wake_stop();
+              }
+          }
+
+        fclose(fp);
+        unlink("/tmp/k7-wake");
+      }
+  }
 
   /* echo 数值 > /tmp/k7-vol：设音量（0~100），等同于拖滑块 */
 

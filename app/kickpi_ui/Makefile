@@ -20,5 +20,6 @@ CSRCS += lv_font_k7_cjk_20.c
 CSRCS += k7_audio.c
 CSRCS += k7_tts.c
 CSRCS += k7_vision.c
+CSRCS += k7_wake.c
 
 include $(APPDIR)/Application.mk
