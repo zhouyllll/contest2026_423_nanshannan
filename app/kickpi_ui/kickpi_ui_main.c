@@ -314,7 +314,7 @@ static void selftest_cb(lv_event_t *e)
 
   (void)e;
 
-  lv_label_set_text(g_amp_selftest, "running...");
+  lv_label_set_text(g_amp_selftest, "自检中…");
   lv_refr_now(NULL);
 
   /* 正例：自己给自己按门铃，必须收到原样的 cmd/data。 */
@@ -333,16 +333,16 @@ static void selftest_cb(lv_event_t *e)
   if (pos == 0 && cmd == 0x5a5a5a5a && data == 0xa5a5a5a5 && neg != 0)
     {
       lv_label_set_text_fmt(g_amp_selftest,
-                            LV_SYMBOL_OK " pass  rx %08" PRIx32
-                            "/%08" PRIx32 ", no-trigger timed out",
+                            LV_SYMBOL_OK " 通过  收到 %08" PRIx32
+                            "/%08" PRIx32 "，不触发时如期超时",
                             cmd, data);
       lv_obj_set_style_text_color(g_amp_selftest, lv_color_hex(UI_OK), 0);
     }
   else
     {
       lv_label_set_text_fmt(g_amp_selftest,
-                            LV_SYMBOL_CLOSE " fail  pos=%d rx %08" PRIx32
-                            "/%08" PRIx32 "  neg=%d", pos, cmd, data, neg);
+                            LV_SYMBOL_CLOSE " 失败  正例=%d 收到 %08" PRIx32
+                            "/%08" PRIx32 "  反例=%d", pos, cmd, data, neg);
       lv_obj_set_style_text_color(g_amp_selftest, lv_color_hex(UI_BAD), 0);
     }
 }
@@ -357,7 +357,7 @@ static void amp_build(lv_obj_t *tab)
   lv_obj_set_flex_flow(tab, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_row(tab, 8, 0);
 
-  card = card_create(tab, "openvela A53 x4   <->   Linux A72 x4");
+  card = card_create(tab, "openvela（A53 ×4） ← → Linux（A72 ×4）");
 
   row = lv_obj_create(card);
   lv_obj_remove_style_all(row);
@@ -371,34 +371,34 @@ static void amp_build(lv_obj_t *tab)
       g_amp_badges[i] = badge_create(row);
     }
 
-  card = card_create(tab, "doorbell");
-  g_amp_values[0] = kv_create(card, "kicks RX");
-  g_amp_values[1] = kv_create(card, "kicks TX");
-  g_amp_values[2] = kv_create(card, "TX busy");
-  g_amp_values[3] = kv_create(card, "last cmd");
-  g_amp_values[4] = kv_create(card, "last data");
+  card = card_create(tab, "门铃（mailbox）");
+  g_amp_values[0] = kv_create(card, "收到门铃");
+  g_amp_values[1] = kv_create(card, "发出门铃");
+  g_amp_values[2] = kv_create(card, "发送被挡回");
+  g_amp_values[3] = kv_create(card, "最后 cmd");
+  g_amp_values[4] = kv_create(card, "最后 data");
 
-  card = card_create(tab, "shared memory (must match Linux DTS)");
+  card = card_create(tab, "共享内存（须与 Linux 设备树一致）");
 #ifdef CONFIG_RK3576_RPTUN
-  lv_label_set_text_fmt(kv_create(card, "vring0 ->Linux"),
+  lv_label_set_text_fmt(kv_create(card, "vring0 → Linux"),
                         "0x%08lx  %ldK",
                         (unsigned long)RK3576_RPTUN_VRING0_DA,
                         (long)RK3576_RPTUN_VRING_SIZE / 1024);
-  lv_label_set_text_fmt(kv_create(card, "vring1 ->vela"),
+  lv_label_set_text_fmt(kv_create(card, "vring1 → openvela"),
                         "0x%08lx  %ldK",
                         (unsigned long)RK3576_RPTUN_VRING1_DA,
                         (long)RK3576_RPTUN_VRING_SIZE / 1024);
-  lv_label_set_text_fmt(kv_create(card, "buffer pool"),
+  lv_label_set_text_fmt(kv_create(card, "缓冲池"),
                         "0x%08lx  %ldK",
                         (unsigned long)RK3576_RPTUN_POOL_DA,
                         (long)RK3576_RPTUN_POOL_LEN / 1024);
 #else
-  lv_label_set_text(kv_create(card, "rptun"), "not built in");
+  lv_label_set_text(kv_create(card, "rptun"), "未编入");
 #endif
 
-  card = card_create(tab, "mailbox selftest (group 5, loopback only)");
+  card = card_create(tab, "门铃自检（group 5，本端回环）");
   g_amp_selftest = lv_label_create(card);
-  lv_label_set_text(g_amp_selftest, "not run");
+  lv_label_set_text(g_amp_selftest, "未运行");
   lv_obj_set_style_text_color(g_amp_selftest, lv_color_hex(UI_DIM), 0);
   lv_label_set_long_mode(g_amp_selftest, LV_LABEL_LONG_WRAP);
   lv_obj_set_width(g_amp_selftest, LV_PCT(100));
@@ -408,7 +408,7 @@ static void amp_build(lv_obj_t *tab)
     lv_obj_t *btn = lv_button_create(card);
     lv_obj_t *lbl = lv_label_create(btn);
 
-    lv_label_set_text(lbl, LV_SYMBOL_PLAY "  run selftest");
+    lv_label_set_text(lbl, LV_SYMBOL_PLAY "  运行自检");
     lv_obj_add_event_cb(btn, selftest_cb, LV_EVENT_CLICKED, NULL);
   }
 #endif
@@ -421,17 +421,17 @@ static void amp_refresh(void)
 
   if (rk3576_rptun_getstat(&st) < 0)
     {
-      badge_set(g_amp_badges[0], "rptun ?", false);
+      badge_set(g_amp_badges[0], "rptun 状态未知", false);
       return;
     }
 
   badge_set(g_amp_badges[0],
-            st.registered ? "rptun up" : "rptun down", st.registered);
+            st.registered ? "rptun 已注册" : "rptun 未注册", st.registered);
   badge_set(g_amp_badges[1],
-            st.driver_ok ? "handshake ok" : "no handshake", st.driver_ok);
+            st.driver_ok ? "握手完成" : "未握手", st.driver_ok);
   badge_set(g_amp_badges[2],
-            path_exists("/dev/rpmsg/linux") ? "/dev/rpmsg/linux"
-                                            : "no rpmsg node",
+            path_exists("/dev/rpmsg/linux") ? "rpmsg 通道就绪"
+                                            : "无 rpmsg 节点",
             path_exists("/dev/rpmsg/linux"));
 
   lv_label_set_text_fmt(g_amp_values[0], "%" PRIu32, st.kicks_rx);
@@ -440,7 +440,7 @@ static void amp_refresh(void)
   lv_label_set_text_fmt(g_amp_values[3], "%08" PRIx32, st.last_cmd);
   lv_label_set_text_fmt(g_amp_values[4], "%08" PRIx32, st.last_data);
 #else
-  badge_set(g_amp_badges[0], "rptun not built", false);
+  badge_set(g_amp_badges[0], "rptun 未编入", false);
 #endif
 }
 
@@ -596,7 +596,7 @@ static void live_build(lv_obj_t *tab)
   lv_obj_set_flex_flow(tab, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_row(tab, 8, 0);
 
-  card = card_create(tab, "free heap (KiB)");
+  card = card_create(tab, "空闲堆（KiB）");
   g_chart_heap = lv_chart_create(card);
   lv_obj_set_width(g_chart_heap, LV_PCT(100));
   lv_obj_set_height(g_chart_heap, 120);
@@ -606,7 +606,7 @@ static void live_build(lv_obj_t *tab)
   g_ser_heap = lv_chart_add_series(g_chart_heap, lv_color_hex(UI_ACCENT),
                                    LV_CHART_AXIS_PRIMARY_Y);
 
-  card = card_create(tab, "doorbells per second");
+  card = card_create(tab, "每秒门铃数");
   g_chart_kick = lv_chart_create(card);
   lv_obj_set_width(g_chart_kick, LV_PCT(100));
   lv_obj_set_height(g_chart_kick, 120);
@@ -617,7 +617,7 @@ static void live_build(lv_obj_t *tab)
   g_ser_kick = lv_chart_add_series(g_chart_kick, lv_color_hex(UI_OK),
                                    LV_CHART_AXIS_PRIMARY_Y);
 
-  card = card_create(tab, "counters");
+  card = card_create(tab, "计数");
   g_live_stats = lv_label_create(card);
   lv_obj_set_style_text_color(g_live_stats, lv_color_white(), 0);
   lv_label_set_text(g_live_stats, "-");
@@ -647,10 +647,10 @@ static void live_refresh(void)
   lv_chart_set_next_value(g_chart_kick, g_ser_kick, rate);
 
   lv_label_set_text_fmt(g_live_stats,
-                        "heap  %u / %u KiB used\n"
-                        "tasks %d\n"
-                        "up    %lu s\n"
-                        "kicks %" PRIu32 " total, %" PRId32 "/s",
+                        "堆    已用 %u / %u KiB\n"
+                        "任务  %d 个\n"
+                        "运行  %lu 秒\n"
+                        "门铃  共 %" PRIu32 " 次，%" PRId32 " 次/秒",
                         (unsigned)(mi.uordblks / 1024),
                         (unsigned)(mi.arena / 1024),
                         tasks,
@@ -825,7 +825,7 @@ static void camera_start(void)
     }
 
   lv_obj_add_state(g_camera_button, LV_STATE_DISABLED);
-  lv_label_set_text(g_camera_status, "Capturing desk image...");
+  lv_label_set_text(g_camera_status, "正在拍照…");
 }
 
 /****************************************************************************
@@ -973,14 +973,14 @@ static void live_timer_cb(lv_timer_t *t)
 
   if (err != 0 && err != -ETIMEDOUT)
     {
-      lv_label_set_text_fmt(g_live_info, "Camera stopped: %d", err);
+      lv_label_set_text_fmt(g_live_info, "相机已停止（%d）", err);
     }
   else if (fresh && (g_live_shown % 15) == 1)
     {
       time_t dt = time(NULL) - g_live_t0;
       unsigned fps = dt > 0 ? (unsigned)(g_live_shown / dt) : 0;
 
-      lv_label_set_text_fmt(g_live_info, "Live  %u frames  %u fps",
+      lv_label_set_text_fmt(g_live_info, "实时  %u 帧  %u fps",
                             g_live_shown, fps);
       if ((g_live_shown % 150) == 1 && dt > 0)
         {
@@ -1076,14 +1076,14 @@ static bool live_page_create(void)
 
   lv_obj_set_style_text_color(lv_label_create(g_live_page),
                               lv_color_hex(UI_ACCENT), 0);
-  lv_label_set_text(lv_obj_get_child(g_live_page, 0), "Desk camera");
+  lv_label_set_text(lv_obj_get_child(g_live_page, 0), "桌面摄像头");
 
   g_live_img = lv_image_create(g_live_page);
   lv_image_set_src(g_live_img, g_live_buf);
 
   g_live_info = lv_label_create(g_live_page);
   lv_obj_set_style_text_color(g_live_info, lv_color_hex(UI_DIM), 0);
-  lv_label_set_text(g_live_info, "Starting camera...");
+  lv_label_set_text(g_live_info, "正在打开相机…");
 
   bar = lv_obj_create(g_live_page);
   lv_obj_set_size(bar, LV_PCT(100), LV_SIZE_CONTENT);
@@ -1096,14 +1096,14 @@ static bool live_page_create(void)
 
   btn = lv_button_create(bar);
   lv_obj_set_size(btn, 200, 72);
-  lv_label_set_text(lv_label_create(btn), "Snapshot");
+  lv_label_set_text(lv_label_create(btn), "拍照");
   lv_obj_center(lv_obj_get_child(btn, 0));
   lv_obj_add_event_cb(btn, live_snapshot_cb, LV_EVENT_CLICKED, NULL);
 
   btn = lv_button_create(bar);
   lv_obj_set_size(btn, 200, 72);
   lv_obj_set_style_bg_color(btn, lv_color_hex(UI_BAD), 0);
-  lv_label_set_text(lv_label_create(btn), "Close");
+  lv_label_set_text(lv_label_create(btn), "关闭");
   lv_obj_center(lv_obj_get_child(btn, 0));
   lv_obj_add_event_cb(btn, live_close_cb, LV_EVENT_CLICKED, NULL);
 
@@ -1116,13 +1116,13 @@ static void live_page_open(void)
 
   if (g_camera_pid > 0)
     {
-      lv_label_set_text(g_camera_status, "Snapshot in progress, wait...");
+      lv_label_set_text(g_camera_status, "正在拍照，请稍等…");
       return;
     }
 
   if (g_live_page == NULL && !live_page_create())
     {
-      lv_label_set_text(g_camera_status, "Camera page: out of memory");
+      lv_label_set_text(g_camera_status, "相机页：内存不够");
       syslog(LOG_ERR, "界面: 相机页创建失败\n");
       return;
     }
@@ -1135,8 +1135,8 @@ static void live_page_open(void)
   if (ret < 0)
     {
       lv_label_set_text_fmt(g_live_info,
-                            ret == -EBUSY ? "Camera busy (%d), try again" :
-                            "Camera start failed: %d", ret);
+                            ret == -EBUSY ? "相机正忙（%d），稍后再试" :
+                            "相机启动失败（%d）", ret);
       return;
     }
 
@@ -1166,13 +1166,13 @@ static void live_page_open(void)
     {
       g_live_run = false;
       kickpi_camera_live_stop();
-      lv_label_set_text(g_live_info, "Cannot start preview thread");
+      lv_label_set_text(g_live_info, "起不了预览线程");
       return;
     }
 
   g_live_thread_ok = true;
   pthread_setname_np(g_live_thread, "ui_camera");
-  lv_label_set_text(g_live_info, "Live");
+  lv_label_set_text(g_live_info, "实时");
   g_live_timer = lv_timer_create(live_timer_cb, LIVE_TIMER_MS, NULL);
 }
 
@@ -1221,14 +1221,14 @@ static void camera_poll(void)
   lv_obj_remove_state(g_camera_button, LV_STATE_DISABLED);
   if (done < 0 || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
     {
-      lv_label_set_text(g_camera_status, "Capture failed; check /dev/video0");
+      lv_label_set_text(g_camera_status, "拍照失败，检查 /dev/video0");
       return;
     }
 
   next = camera_decode(UI_CAMERA_FILE);
   if (next == NULL)
     {
-      lv_label_set_text(g_camera_status, "JPEG decode failed");
+      lv_label_set_text(g_camera_status, "照片解码失败");
       return;
     }
 
@@ -1241,7 +1241,7 @@ static void camera_poll(void)
   g_camera_frame = next;
   lv_image_set_src(g_camera_image, g_camera_frame);
   lv_label_set_text(g_camera_status,
-                    "Snapshot ready. Ask the assistant on the AGENT tab.");
+                    "拍好了。想问桌上的东西，去「助手」页。");
 }
 
 /****************************************************************************
@@ -2055,15 +2055,15 @@ static void camera_build(lv_obj_t *tab)
   lv_obj_set_flex_flow(tab, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_row(tab, 8, 0);
 
-  card = card_create(tab, "desk camera");
+  card = card_create(tab, "桌面摄像头");
   g_camera_status = lv_label_create(card);
   lv_label_set_text(g_camera_status,
-                    "Open camera for live view; Snapshot saves a still.");
+                    "「打开相机」看实时画面，画面里可以拍照。");
   lv_label_set_long_mode(g_camera_status, LV_LABEL_LONG_WRAP);
   lv_obj_set_width(g_camera_status, LV_PCT(100));
 
   g_camera_button = lv_button_create(card);
-  lv_label_set_text(lv_label_create(g_camera_button), "Open camera");
+  lv_label_set_text(lv_label_create(g_camera_button), "打开相机");
   lv_obj_add_event_cb(g_camera_button, camera_click_cb,
                       LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(g_camera_button, camera_click_cb,
@@ -2699,7 +2699,7 @@ static void touch_event_cb(lv_event_t *e)
     }
 
   lv_obj_set_pos(g_dot, p.x - 15, p.y - 15);
-  lv_label_set_text_fmt(g_touch_label, "X=%d  Y=%d   presses %u",
+  lv_label_set_text_fmt(g_touch_label, "X=%d  Y=%d   按下 %u 次",
                         (int)p.x, (int)p.y, g_touch_count);
 }
 
@@ -2712,19 +2712,19 @@ static void about_build(lv_obj_t *tab)
   lv_obj_set_flex_flow(tab, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_row(tab, 8, 0);
 
-  card = card_create(tab, "board");
-  lv_label_set_text(kv_create(card, "SoC"), "Rockchip RK3576");
-  lv_label_set_text(kv_create(card, "board"), "KICKPI-K7");
-  lv_label_set_text_fmt(kv_create(card, "framebuffer"), "%d x %d",
+  card = card_create(tab, "板卡");
+  lv_label_set_text(kv_create(card, "芯片"), "Rockchip RK3576");
+  lv_label_set_text(kv_create(card, "板子"), "KICKPI-K7");
+  lv_label_set_text_fmt(kv_create(card, "屏幕分辨率"), "%d × %d",
                         (int)lv_display_get_horizontal_resolution(disp),
                         (int)lv_display_get_vertical_resolution(disp));
-  lv_label_set_text(kv_create(card, "built"), __DATE__ " " __TIME__);
+  lv_label_set_text(kv_create(card, "编译时间"), __DATE__ " " __TIME__);
 
   /* 触摸自检。原来这就是整个程序 —— 一个动作同时证明 VOP2 出图和
    * FT8756 上报都通了，比只看日志可靠，所以留着。
    */
 
-  card = card_create(tab, "touch check (drag inside the box)");
+  card = card_create(tab, "触摸测试（在框里拖动）");
   pad = lv_obj_create(card);
   lv_obj_set_width(pad, LV_PCT(100));
   lv_obj_set_height(pad, 220);
@@ -2742,7 +2742,7 @@ static void about_build(lv_obj_t *tab)
 
   g_touch_label = lv_label_create(card);
   lv_obj_set_style_text_color(g_touch_label, lv_color_hex(UI_DIM), 0);
-  lv_label_set_text(g_touch_label, "no touch yet");
+  lv_label_set_text(g_touch_label, "还没有触摸");
 
   lv_obj_add_flag(pad, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_add_event_cb(pad, touch_event_cb, LV_EVENT_PRESSED, NULL);
@@ -2972,19 +2972,30 @@ static void build_ui(void)
   lv_obj_set_size(g_tabview, LV_PCT(100), LV_PCT(100));
   lv_obj_set_style_bg_color(g_tabview, lv_color_hex(UI_BG), 0);
 
-  amp_build(lv_tabview_add_tab(g_tabview, "AMP"));
-  dev_build(lv_tabview_add_tab(g_tabview, "DEV"));
-  g_tab_live = lv_tabview_add_tab(g_tabview, "LIVE");
-  live_build(g_tab_live);
-  camera_build(lv_tabview_add_tab(g_tabview, "DESK"));
-
-  /* 助手页放在 DESK 后面：tick_cb 里 LIVE 页是按下标 2 判断的，
-   * 插在前面会把它挤走。
+  /* ★ 整屏默认用中文字库：字体沿对象树继承，所有页、页签、按钮都生效。
+   *   中文字库设了后备 lv_font_montserrat_14（gen-cjk-font.sh），
+   *   LV_SYMBOL_* 图标在后备里找得到，不会变方框。
    */
 
-  assist_build(lv_tabview_add_tab(g_tabview, "AGENT"));
-  voice_build(lv_tabview_add_tab(g_tabview, "VOICE"));
-  about_build(lv_tabview_add_tab(g_tabview, "ABOUT"));
+  lv_obj_set_style_text_font(scr, &lv_font_k7_cjk_20, 0);
+
+  amp_build(lv_tabview_add_tab(g_tabview, "双核"));
+  dev_build(lv_tabview_add_tab(g_tabview, "设备"));
+  g_tab_live = lv_tabview_add_tab(g_tabview, "曲线");
+  live_build(g_tab_live);
+  /* 助手页：tick_cb 里"曲线"页是按下标 2 判断的，前三页顺序别动 */
+
+  assist_build(lv_tabview_add_tab(g_tabview, "助手"));
+
+  /* 音视频页：录音机 + 桌面摄像头（原来单独的 DESK 页并进来） */
+
+  {
+    lv_obj_t *media = lv_tabview_add_tab(g_tabview, "音视频");
+
+    voice_build(media);
+    camera_build(media);
+  }
+  about_build(lv_tabview_add_tab(g_tabview, "关于"));
 
   lv_timer_create(tick_cb, TICK_MS, NULL);
 }

@@ -11,6 +11,9 @@
 #
 # DroidSansFallback 是纯 CJK 的回退字体，**没有拉丁字母**，所以不能单用它。
 #
+# 后备字体 lv_font_montserrat_14：LVGL 的 LV_SYMBOL_* 图标（FontAwesome，
+# 私有区码位）只在 Montserrat 里有。设了后备，整屏用本字库时图标也能显示。
+#
 # 依赖：node（npx 拉 lv_font_conv@1.5.3）、apt-get download（不需要 root）。
 set -euo pipefail
 
@@ -45,7 +48,8 @@ npx -y lv_font_conv@1.5.3 --size 20 --bpp 4 --format lvgl --no-compress \
   --font "$LVGL_FONTS/Montserrat-Medium.ttf" -r 0x20-0x7E \
   --font "$LVGL_FONTS/DejaVuSans.ttf" --symbols "$PUNCT" \
   --font "$DROID" --symbols "$(cat chars_cjk.txt)" \
-  --lv-font-name lv_font_k7_cjk_20 -o "$OUT"
+  --lv-font-name lv_font_k7_cjk_20 --lv-fallback lv_font_montserrat_14 \
+  -o "$OUT"
 
 # 头部那行 Opts 里是 3000 多个汉字，没有参考价值，换成一句说明
 python3 - "$OUT" <<'PY'

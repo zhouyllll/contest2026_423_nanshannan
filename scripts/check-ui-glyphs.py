@@ -38,7 +38,11 @@ def base(expr):
 FONT_RE = r"lv_obj_set_style_text_font\(\s*([^,]+),\s*&lv_font_k7_cjk_20"
 SYM_RE = r"lv_label_set_text(?:_fmt)?\(\s*([^,]+),([^;]*LV_SYMBOL_[^;]*);"
 
-for name in SHOWN:
+# 字库设了 Montserrat 后备（gen-cjk-font.sh 的 --lv-fallback）时，图标会在
+# 后备里找到，这条检查就不需要了。
+HAS_FALLBACK = ".fallback = &lv_font_montserrat" in font
+
+for name in ([] if HAS_FALLBACK else SHOWN):
     code = re.sub(r"/\*.*?\*/", "", (ui / name).read_text(encoding="utf-8"),
                   flags=re.S)
     funcs = re.split(r"\n(?=[a-z][^\n;]*\([^\n;]*\)\s*\n\{)", code)
