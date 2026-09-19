@@ -1219,10 +1219,29 @@ static void camera_poll(void)
 
   g_camera_pid = -1;
   lv_obj_remove_state(g_camera_button, LV_STATE_DISABLED);
-  if (done < 0 || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
+
+  /* ★ 退出码只在 waitpid 真拿到时才算数。
+   *
+   *   CONFIG_SCHED_CHILD_STATUS 没开：子进程退出后状态不保留，250ms 一次
+   *   的轮询赶不上时 waitpid 返回 -1（ECHILD）。原来把这当成失败，于是
+   *   照片明明拍好了，界面却报"拍照失败"。拿不到退出码就看结果文件。
+   */
+
+  if (done > 0 && (!WIFEXITED(status) || WEXITSTATUS(status) != 0))
     {
       lv_label_set_text(g_camera_status, "拍照失败，检查 /dev/video0");
       return;
+    }
+
+  if (done < 0)
+    {
+      struct stat st;
+
+      if (stat(UI_CAMERA_FILE, &st) < 0 || st.st_size < 1024)
+        {
+          lv_label_set_text(g_camera_status, "拍照失败，检查 /dev/video0");
+          return;
+        }
     }
 
   next = camera_decode(UI_CAMERA_FILE);
@@ -2853,6 +2872,8 @@ static void agent_autostart(void)
  * 定时刷新
  ****************************************************************************/
 
+static void kickpi_screenshot(const char *path);
+
 static void tick_cb(lv_timer_t *t)
 {
   (void)t;
@@ -2889,6 +2910,27 @@ static void tick_cb(lv_timer_t *t)
     {
       rec_start(REC_PLAYING);
     }
+
+  /* echo N > /tmp/k7-shot：截屏到 /tmp/k7-shot.jpg；N 为 0~5 时先切到第 N 个页签 */
+
+  {
+    FILE *fp = fopen("/tmp/k7-shot", "r");
+
+    if (fp != NULL)
+      {
+        int tab = -1;
+
+        if (fscanf(fp, "%d", &tab) == 1 && tab >= 0 && tab < 6)
+          {
+            lv_tabview_set_active(g_tabview, tab, LV_ANIM_OFF);
+            lv_refr_now(NULL);
+          }
+
+        fclose(fp);
+        unlink("/tmp/k7-shot");
+        kickpi_screenshot("/tmp/k7-shot.jpg");
+      }
+  }
 
   /* echo 1 / 0 > /tmp/k7-wake：开 / 关语音唤醒（调试入口） */
 
@@ -2964,6 +3006,36 @@ static void tick_cb(lv_timer_t *t)
 static void build_ui(void)
 {
   lv_obj_t *scr = lv_screen_active();
+  lv_display_t *disp = lv_display_get_default();
+
+  /* ★ 整屏用中文字库：换的是**主题**的字体，不是在屏幕上设。
+   *
+   *   上一版在屏幕根对象上 set_style_text_font，以为会沿对象树继承 ——
+   *   但默认主题给页签按钮、按钮、标签等各自直接挂了主题字体
+   *   （LV_FONT_DEFAULT = Montserrat 14），继承根本轮不到，中文全成了
+   *   方框（页签、第一页、最后一页、"打开相机"……）。
+   *
+   *   这里按 LVGL 建显示时的主色（蓝 / 红，见 lv_display_create）重建
+   *   默认主题，字体换成中文字库，并用**深色**模式：界面底色是深色卡片，
+   *   浅色模式下没单独设颜色的文字是黑的，截图里几乎看不见（开关旁的
+   *   说明、录音机和摄像头的提示），曲线图也是白底。中文字库带
+   *   Montserrat 14 后备，LV_SYMBOL_* 图标照样显示。必须在创建任何控件
+   *   之前做。
+   */
+
+  lv_display_set_theme(disp,
+                       lv_theme_default_init(disp,
+                                             lv_palette_main(LV_PALETTE_BLUE),
+                                             lv_palette_main(LV_PALETTE_RED),
+                                             true, &lv_font_k7_cjk_20));
+
+  /* 相机全屏页挂在 lv_layer_top() 上。换主题只刷新当前屏幕，顶层图层在
+   * 换主题之前就建好了，还是旧主题的 Montserrat —— 相机页全是方框。
+   * 单独给它设字体（不能对它 lv_theme_apply：主题会给它铺不透明底色，
+   * 把整屏盖住）。
+   */
+
+  lv_obj_set_style_text_font(lv_layer_top(), &lv_font_k7_cjk_20, 0);
 
   lv_obj_set_style_bg_color(scr, lv_color_hex(UI_BG), LV_PART_MAIN);
 
@@ -2972,12 +3044,6 @@ static void build_ui(void)
   lv_obj_set_size(g_tabview, LV_PCT(100), LV_PCT(100));
   lv_obj_set_style_bg_color(g_tabview, lv_color_hex(UI_BG), 0);
 
-  /* ★ 整屏默认用中文字库：字体沿对象树继承，所有页、页签、按钮都生效。
-   *   中文字库设了后备 lv_font_montserrat_14（gen-cjk-font.sh），
-   *   LV_SYMBOL_* 图标在后备里找得到，不会变方框。
-   */
-
-  lv_obj_set_style_text_font(scr, &lv_font_k7_cjk_20, 0);
 
   amp_build(lv_tabview_add_tab(g_tabview, "双核"));
   dev_build(lv_tabview_add_tab(g_tabview, "设备"));
@@ -3016,6 +3082,74 @@ struct kickpi_fb_s
 };
 
 static struct kickpi_fb_s g_kfb;
+
+/* 调试截屏：把帧缓冲缩小一半编成 JPEG（/tmp/k7-shot.jpg，几十 KB），
+ * 经 telnet 的 hexdump 取回主机看。开发时看不到屏幕，全靠它核对界面
+ * （上一版"整屏换中文字库"就是凭推测改错、满屏方框才被发现的）。
+ */
+
+static void kickpi_screenshot(const char *path)
+{
+  struct jpeg_compress_struct cinfo;
+  struct jpeg_error_mgr jerr;
+  unsigned char *row;
+  uint32_t w = g_kfb.xres / 2;
+  uint32_t h = g_kfb.yres / 2;
+  uint32_t y;
+  FILE *fp;
+
+  if (g_kfb.mem == NULL || g_kfb.mem == MAP_FAILED)
+    {
+      return;
+    }
+
+  fp = fopen(path, "wb");
+  row = malloc(w * 3);
+  if (fp == NULL || row == NULL)
+    {
+      if (fp != NULL)
+        {
+          fclose(fp);
+        }
+
+      free(row);
+      return;
+    }
+
+  cinfo.err = jpeg_std_error(&jerr);
+  jpeg_create_compress(&cinfo);
+  jpeg_stdio_dest(&cinfo, fp);
+  cinfo.image_width = w;
+  cinfo.image_height = h;
+  cinfo.input_components = 3;
+  cinfo.in_color_space = JCS_RGB;
+  jpeg_set_defaults(&cinfo);
+  jpeg_set_quality(&cinfo, 70, TRUE);
+  jpeg_start_compress(&cinfo, TRUE);
+
+  for (y = 0; y < h; y++)
+    {
+      const uint8_t *src = g_kfb.mem + (size_t)(y * 2) * g_kfb.stride;
+      uint32_t x;
+
+      for (x = 0; x < w; x++)
+        {
+          const uint8_t *px = src + x * 2 * 4;   /* 内存里是 B G R A */
+
+          row[3 * x]     = px[2];
+          row[3 * x + 1] = px[1];
+          row[3 * x + 2] = px[0];
+        }
+
+      jpeg_write_scanlines(&cinfo, &row, 1);
+    }
+
+  jpeg_finish_compress(&cinfo);
+  jpeg_destroy_compress(&cinfo);
+  fclose(fp);
+  free(row);
+  syslog(LOG_INFO, "界面: 截屏 %" PRIu32 "x%" PRIu32 " → %s\n", w, h, path);
+}
 
 /* ★ 绘制缓冲必须在堆上分配，不能写成静态数组。
  *
