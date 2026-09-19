@@ -337,7 +337,12 @@ static void k7a_fill(struct ap_buffer_s *apb, int bufbytes,
 
   apb->nbytes  = n * 4;
   apb->curbyte = 0;
-  apb->flags   = 0;
+
+  /* 数据到头的这一块标成最后一块：SAI 发送据此排空后停下，缓冲之间
+   * 则一直不停（见 rk3576_sai_send）。
+   */
+
+  apb->flags   = *pos >= frames ? AUDIO_APB_FINAL : 0;
 }
 
 int k7a_play_mono(const int16_t *mono, size_t frames)
@@ -361,7 +366,7 @@ int k7a_play_mono(const int16_t *mono, size_t frames)
       return ret;
     }
 
-  for (i = 0; i < d.nbuf; i++)
+  for (i = 0; i < d.nbuf && pos < frames; i++)
     {
       k7a_fill(d.bufs[i], d.bufbytes, mono, frames, &pos);
       if (k7a_enqueue(&d, d.bufs[i]) == 0)

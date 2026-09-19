@@ -413,6 +413,7 @@ struct rk3576_sai_dev_s
   int              rxchannels;
 
   bool             rx_running;   /* 已配置并启动接收，勿重复复位 */
+  bool             tx_running;   /* 已配置并启动发送，缓冲之间不停 */
 
   /* ★ DMA 接收侧（PL330 dmac0，SAI1 RX 请求号 3）。
    *   rxdma 在 appinit 里已 rk3576_pl330_initialize(0)，这里只取句柄；
@@ -638,6 +639,7 @@ static uint32_t rk3576_sai_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
   struct rk3576_sai_dev_s *priv = (struct rk3576_sai_dev_s *)dev;
 
   priv->txsamplerate = rate;
+  priv->tx_running   = false;   /* 新的一次配置 = 新的一条流 */
   return rate;
 }
 
@@ -761,6 +763,7 @@ static int rk3576_sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
        */
 
       start_xfer = true;
+      priv->tx_running = false;   /* sai_configure 里复位了整个控制器 */
     }
 
   /* ★ 这里原来有一段"FIFO 满就停 RXS、清 RXC、再重开"，判据是
@@ -1087,17 +1090,33 @@ static int rk3576_sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       return ret;
     }
 
-  /* 发送方向的 sai_configure() 里含 sai_reset()，控制器一复位接收侧的
-   * 配置就没了 —— 必须让下一次 receive 重新配一遍。
+  /* ★ 只在一条流的第一个缓冲配置并启动，之后缓冲之间**不停、不复位**。
+   *
+   *   原来每个缓冲（8KB ≈ 43ms 的声音）都：sai_configure()（含 sai_reset，
+   *   CLR 自清不了就退到 CRU 复位 —— 串口上那一大片"CLR 自清超时"）→
+   *   开 TX → 写完 → 等空闲 → XFER=0 停掉。每 43ms 的声音夹一次复位和
+   *   一次启停，而 TX FIFO 只有 32 个字（0.33ms）。用户听到的是"卡一卡的
+   *   电音"，5 秒的录音放了约 30 秒。
+   *
+   *   现在：第一个缓冲配置 + 启动；中间缓冲只往 FIFO 里写；带
+   *   AUDIO_APB_FINAL 的最后一个缓冲写完后等排空再停。重新配置采样率
+   *   或接收侧重配时 tx_running 清零，下一次发送重新来。
    */
 
-  priv->rx_running = false;
+  if (!priv->tx_running)
+    {
+      /* 发送方向的 sai_configure() 里含 sai_reset()，控制器一复位接收侧
+       * 的配置就没了 —— 必须让下一次 receive 重新配一遍。
+       */
 
-  sai_configure(priv, false);
+      priv->rx_running = false;
+      sai_configure(priv, false);
 
-  sai_putreg(RK3576_SAI_XFER, SAI_XFER_CLK_EN | SAI_XFER_FSS_EN);
-  sai_putreg(RK3576_SAI_XFER,
-             SAI_XFER_CLK_EN | SAI_XFER_FSS_EN | SAI_XFER_TXS_EN);
+      sai_putreg(RK3576_SAI_XFER, SAI_XFER_CLK_EN | SAI_XFER_FSS_EN);
+      sai_putreg(RK3576_SAI_XFER,
+                 SAI_XFER_CLK_EN | SAI_XFER_FSS_EN | SAI_XFER_TXS_EN);
+      priv->tx_running = true;
+    }
 
   samples = (const uint32_t *)(apb->samp + apb->curbyte);
   nwords  = (apb->nbytes - apb->curbyte) / 4;
@@ -1128,19 +1147,24 @@ static int rk3576_sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       sai_putreg(RK3576_SAI_TXDR, samples[i]);
     }
 
-  /* 等 FIFO 排空再停，否则尾部样本会被截断 */
+  /* 最后一个缓冲（或出错）：等 FIFO 排空再停，否则尾部样本会被截断 */
 
-  for (us = 0; us < 100000; us++)
+  if ((apb->flags & AUDIO_APB_FINAL) != 0 || ret < 0)
     {
-      if ((sai_getreg(RK3576_SAI_XFER) & SAI_XFER_TX_IDLE) != 0)
+      for (us = 0; us < 100000; us++)
         {
-          break;
+          if ((sai_getreg(RK3576_SAI_XFER) & SAI_XFER_TX_IDLE) != 0)
+            {
+              break;
+            }
+
+          up_udelay(1);
         }
 
-      up_udelay(1);
+      sai_putreg(RK3576_SAI_XFER, 0);
+      priv->tx_running = false;
     }
 
-  sai_putreg(RK3576_SAI_XFER, 0);
   nxmutex_unlock(&priv->lock);
 
   sai_post_done(dev, apb, callback, arg, ret);
@@ -1191,6 +1215,7 @@ struct i2s_dev_s *rk3576_sai_initialize(int port)
   priv->rxdatawidth  = 16;
   priv->rxchannels   = 2;
   priv->rx_running   = false;
+  priv->tx_running   = false;
   priv->rxdma        = NULL;
   priv->rxchan       = NULL;
   priv->rx_seminit   = false;
