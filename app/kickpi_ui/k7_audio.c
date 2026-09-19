@@ -349,7 +349,11 @@ static void k7a_codec_tune_capture(void)
 
     { 0x0a, 0xf0 },
     { 0x0b, 0x82 },
-    { 0x12, 0xea },
+    /* ALC：双声道，最大增益 +29.5dB（原厂 0xEA 为 +23.5dB）。
+     * 用户 20cm 正常说话峰值只有 1000~2300，抬一档。
+     */
+
+    { 0x12, 0xf2 },
     { 0x13, 0xc0 },
     { 0x14, 0x05 },
     { 0x15, 0x06 },

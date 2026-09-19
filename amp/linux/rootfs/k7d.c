@@ -76,11 +76,17 @@
 #define VAD_RATE        16000
 #define VAD_FRAME       160
 #define VAD_START_N     3       /* 连续 3 帧有声算开口            */
-#define VAD_END_N       50      /* 连续 500ms 无声算说完          */
-#define VAD_PREROLL     20      /* 起点往前补 200ms，免得吃掉首字 */
+#define VAD_END_N       70      /* 连续 700ms 无声算说完（句中停顿别切断） */
+#define VAD_PREROLL     50      /* 起点往前补 500ms，免得吃掉首字 */
 #define VAD_MIN_N       30      /* 短于 300ms 的不送（咳嗽、敲桌） */
 #define VAD_MAX_N       800     /* 最长 8s 强制切断               */
-#define VAD_ABS_MIN     300     /* 有声的绝对下限（RMS）          */
+#define VAD_ABS_MIN     120     /* 有声的绝对下限（RMS）
+                                 *
+                                 * 原来 300：用户 20cm 说话峰值 1000~2300、RMS 只有
+                                 * 几百，只有最响的尾音"…ela"过线，识别成
+                                 * "Yeah./诶。"。开着噪声门时安静 RMS 仅个位数，
+                                 * 120 仍有余量。
+                                 */
 
 static void klog(const char *fmt, ...)
 {
