@@ -1,0 +1,33 @@
+[CPU0] [==========] nuttx_sched_test_suites: Running 16 test(s).U0] [ RUN      ] test_nuttx_sched_pthread01
+[CPU0] [       OK ] test_nuttx_sched_pthread01
+[CPU0] [ RUN      ] test_nuttx_schehread02
+[CPU0] [       OK ] test_nuttx_sched_pthread02
+[CPU0] [ RUN      ] test_nuttx_sched_pthread03
+[CPU0] [       OK ] testtx_sched_pthread03
+[CPU0] [ RUN      ] test_nuttx_sched_pthread04
+[CPU0] [       OK ] test_nuttx_sched_pthread04
+[CPU0] [ RU  ] test_nuttx_sched_pthread05
+[CPU0] [       OK ] test_nuttx_sched_pthread05
+[CPU0] [ RUN      ] test_nuttx_sched_pthread06
+0] [       OK ] test_nuttx_sched_pthread06
+[CPU0] [ RUN      ] test_nuttx_sched_pthread07
+[CPU0] [       OK ] test_nuttx_sched_pthread07
+[CPU0] [ RUN      ] test_nuttx_sched_pthread08
+[CPU0] [       OK ] test_nuttx_sched_pthread08
+[CPU0] [ RUN    x_sched_pthread09
+[CPU0] [       OK ] test_nuttx_sched_pthread09
+[CPU0] [ RUN      ] test_nutt[CPU0] [       OK ] test_nuttx_sched_task01
+[CPU0] [ RUN      ] test_nuttx_sched_task02
+[CPU0] [       OK ] test_nuttx_sched_task02
+[CPU0] [ RUN      ]tx_sched_task03
+[CPU0] [       OK ] test_nuttx_sched_task03
+[CPU0] [ RUN      ]x_sched_task04
+[CPU0] [test_nuttx_sched_task04]:scheduling policy is RR!
+[CPU0] [       OK ] test_nuttx_sched_task04
+[CPU0] [ RUN      ]uttx_sched_task05
+[CPU0] [       OK ] test_nuttx_sched_task05
+[CPU0] [ RUN      ] test_nuttx_sched_task06
+[CPU0] [       OK ] test_nuttx_sched_task06
+[CPU0][CPU0] [       OK ] test_nuttx_sched_task07
+[CPU0] [==========]sched_test_suites: 16 test(s) run.
+[CPU0] [  PASSED  ] 16 test(s).

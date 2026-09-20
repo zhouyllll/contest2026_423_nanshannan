@@ -1,0 +1,4 @@
+[Kcmocka_aescbc
+
+nsh> 
+{"command": "cmocka_aescbc", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789895058.918186, "host_at_done": 1789895058.9994783, "elapsed_monotonic_s": 0.08129231899511069, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090418909212Z-347897009247215-cmocka-aescbc.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090418909212Z-347897009247215-cmocka-aescbc.txt", "prompt_returned": true}

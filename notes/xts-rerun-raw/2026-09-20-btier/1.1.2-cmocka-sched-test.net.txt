@@ -1,0 +1,4 @@
+[Kcmocka_sched_test
+
+nsh> 
+{"command": "cmocka_sched_test", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789894829.2933862, "host_at_done": 1789894830.193585, "elapsed_monotonic_s": 0.9001988120144233, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090029284552Z-347658435696840-cmocka-sched-test.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090029284552Z-347658435696840-cmocka-sched-test.txt", "prompt_returned": true}

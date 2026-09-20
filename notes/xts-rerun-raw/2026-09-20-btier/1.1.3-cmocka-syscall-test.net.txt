@@ -1,0 +1,4 @@
+[Kcmocka_syscall_test
+
+nsh> 
+{"command": "cmocka_syscall_test", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789894831.6521757, "host_at_done": 1789894845.3617575, "elapsed_monotonic_s": 13.709582195966505, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090031644091Z-347660795232930-cmocka-syscall-test.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090031644091Z-347660795232930-cmocka-syscall-test.txt", "prompt_returned": true}

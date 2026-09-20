@@ -1,0 +1,40 @@
+[Kcmocka_aesctr
+
+OK test vector 0
+
+OK test vector 0 stream mode
+
+OK test vector 1
+
+OK test vector 1 stream mode
+
+OK test vector 2
+
+OK test vector 2 stream mode
+
+OK test vector 3
+
+OK test vector 3 stream mode
+
+OK test vector 4
+
+OK test vector 4 stream mode
+
+OK test vector 5
+
+OK test vector 5 stream mode
+
+OK test vector 6
+
+OK test vector 6 stream mode
+
+OK test vector 7
+
+OK test vector 7 stream mode
+
+OK test vector 8
+
+OK test vector 8 stream mode
+
+nsh> 
+{"command": "cmocka_aesctr", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789895060.4598167, "host_at_done": 1789895060.5765908, "elapsed_monotonic_s": 0.11677424801746383, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090420451395Z-347898551427404-cmocka-aesctr.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090420451395Z-347898551427404-cmocka-aesctr.txt", "prompt_returned": true}

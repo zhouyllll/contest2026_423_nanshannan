@@ -1,0 +1,110 @@
+[Kpopen
+
+Calling popen("help")
+
+help usage:  help [-v] [<cmd>]
+
+
+    .             dd            ifconfig      pidof         source        
+
+    [             df            ifdown        printf        test          
+
+    ?             dmesg         ifup          ps            time          
+
+    alias         echo          kill          put           true          
+
+    unalias       env           pkill         pwd           truncate      
+
+    arp           exec          ln            readlink      uname         
+
+    basename      exit          ls            reboot        umount        
+
+    break         expr          mkdir         resetcause    unset         
+
+    cat           false         mkfatfs       rm            uptime        
+
+    cd            fdinfo        mkfifo        rmdir         usleep        
+
+    cp            free          mkrd          rpmsg         watch         
+
+    cmp           get           mount         rptun         wget          
+
+    dirname       help          mv            set           xd            
+
+    date          hexdump       nslookup      sleep         wait          
+
+
+Builtin Apps:
+
+    abnormal_test_backtrace        getprime                       
+
+    ai_agent                       gpio                           
+
+    ampctl                         hdmi                           
+
+    bt                             hello                          
+
+    cam                            helloxx                        
+
+    cmocka                         i2c                            
+
+    cmocka_aescbc                  k7diag                         
+
+    cmocka_aesctr                  kickpi_ui                      
+
+    cmocka_aesxts                  loader                         
+
+    cmocka_crc32                   md5_test                       
+
+    cmocka_des3cbc                 mem_batch_opt_perf_test        
+
+    cmocka_driver_audio            mem_cycle_opt_perf_test        
+
+    cmocka_driver_block            memstress                      
+
+    cmocka_driver_framebuffer      mic                            
+
+    cmocka_driver_gpio             mm                             
+
+    cmocka_driver_i2c_read         nsh                            
+
+    cmocka_driver_i2c_write        nxlooper                       
+
+    cmocka_driver_i2cdev_master    nxplayer                       
+
+    cmocka_driver_oneshot          nxrecorder                     
+
+    cmocka_driver_simple           ostest                         
+
+    cmocka_driver_spidev_master    ping                           
+
+    cmocka_driver_touchpanel       pipe                           
+
+    cmocka_driver_uart             popen                          
+
+    cmocka_driver_watchdog         ramtest                        
+
+    cmocka_ecdsa                   rb                             
+
+    cmocka_hash                    sb                             
+
+    cmocka_hmac                    scanftest                      
+
+    cmocka_mm_test                 sh                             
+
+    cmocka_sched_test              spi_selftest                   
+
+    cmocka_syscall_test            telnetd                        
+
+    cxxtest                        v4l2cap                        
+
+    fstest                         
+
+End of data
+
+Calling pclose()
+
+The shell has already exited (and exit status is not available)
+
+nsh> 
+{"command": "popen", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789894855.5703902, "host_at_done": 1789894855.7723954, "elapsed_monotonic_s": 0.2020051790168509, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090055561844Z-347686020093912-popen.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090055561844Z-347686020093912-popen.txt", "prompt_returned": true}

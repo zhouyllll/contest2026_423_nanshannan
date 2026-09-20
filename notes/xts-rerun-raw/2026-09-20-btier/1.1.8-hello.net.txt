@@ -1,0 +1,6 @@
+[Khello
+
+Hello, World!!
+
+nsh> 
+{"command": "hello", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789894852.466855, "host_at_done": 1789894852.5325344, "elapsed_monotonic_s": 0.06567929498851299, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090052458417Z-347682916668918-hello.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090052458417Z-347682916668918-hello.txt", "prompt_returned": true}
