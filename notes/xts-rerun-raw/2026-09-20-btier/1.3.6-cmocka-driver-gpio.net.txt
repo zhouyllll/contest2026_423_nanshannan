@@ -1,0 +1,5 @@
+[Kcmocka_driver_gpio -i /dev/gpio3 -o /dev/gpio2
+[write and read output]  writevalue is 1, outvalue is 1
+[input and output test]  outvalue is 49, invalue is 49
+nsh> 
+{"command": "cmocka_driver_gpio -i /dev/gpio3 -o /dev/gpio2", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789904036.0851674, "host_at_done": 1789904038.6365147, "elapsed_monotonic_s": 2.5513479390065186, "host_clock_moved_back": false, "raw": "/home/dministrator/openvela-amlogic/src/contest2026_423_nanshannan/notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T113356076678Z-357298716654115-cmocka-driver-gpio-i-dev-gpio3-o-dev-gpio2.raw", "text": "/home/dministrator/openvela-amlogic/src/contest2026_423_nanshannan/notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T113356076678Z-357298716654115-cmocka-driver-gpio-i-dev-gpio3-o-dev-gpio2.txt", "prompt_returned": true}

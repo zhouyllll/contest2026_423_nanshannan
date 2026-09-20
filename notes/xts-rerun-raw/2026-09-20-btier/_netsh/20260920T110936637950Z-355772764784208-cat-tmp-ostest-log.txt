@@ -1,4 +1,6 @@
-[Kcat /tmp/ostest.log
+
+NuttShell (NSH)
+nsh> [Kcat /tmp/ostest.log
 stdio_test: write fd=1
 stdio_test: Standard I/O Check: printf
 stdio_test: write fd=2
@@ -12,7 +14,7 @@
 show_variable: Variable=Variable1 has value=GoodValue1
 show_variable: Variable=Variable2 has value=GoodValue2
 show_variable: Variable=Variable3 has value=GoodValue3
-ostest_main: Started user_main at PID=694
+ostest_main: Started user_main at PID=43
 
 user_main: Begin argument test
 user_main: Started with argc=5
@@ -26,10 +28,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         5        5
-mxordblk  32cd490  32cd490
-uordblks   9ca8a0   9ca8a0
-fordblks  32ce760  32ce760
+ordblks        10       10
+mxordblk  32eace0  32eace0
+uordblks   9aac70   9aac70
+fordblks  32ee390  32ee390
 
 user_main: getopt() test
 getopt():  Simple test
@@ -49,10 +51,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         5        6
-mxordblk  32cd490  32cd490
-uordblks   9ca8a0   9caab0
-fordblks  32ce760  32ce550
+ordblks        10       11
+mxordblk  32eace0  32eace0
+uordblks   9aac70   9aae80
+fordblks  32ee390  32ee180
 
 user_main: libc tests
 
@@ -60,10 +62,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         6        8
-mxordblk  32cd490  32cd490
-uordblks   9caab0   9c79c0
-fordblks  32ce550  32d1640
+ordblks        11       11
+mxordblk  32eace0  32eace0
+uordblks   9aae80   9ab090
+fordblks  32ee180  32edf70
 show_variable: Variable=Variable1 has value=GoodValue1
 show_variable: Variable=Variable2 has value=GoodValue2
 show_variable: Variable=Variable3 has value=GoodValue3
@@ -75,10 +77,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         8        9
-mxordblk  32cd490  32cd490
-uordblks   9c79c0   9c7bb0
-fordblks  32d1640  32d1450
+ordblks        11       12
+mxordblk  32eace0  32eace0
+uordblks   9ab090   9ab280
+fordblks  32edf70  32edd80
 show_variable: Variable=Variable1 has no value
 show_variable: Variable=Variable2 has no value
 show_variable: Variable=Variable3 has no value
@@ -87,10 +89,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32cd490  32cd490
-uordblks   9c7bb0   9c7b00
-fordblks  32d1450  32d1500
+ordblks        12       12
+mxordblk  32eace0  32eace0
+uordblks   9ab280   9ab1d0
+fordblks  32edd80  32ede30
 tls: Successfully set 0
 tls: Successfully set ffffffff
 tls: Successfully set 55555555
@@ -100,10 +102,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32cd490  32cd490
-uordblks   9c7b00   9c7d10
-fordblks  32d1500  32d12f0
+ordblks        12       12
+mxordblk  32eace0  32eace0
+uordblks   9ab1d0   9ab3e0
+fordblks  32ede30  32edc20
 
 user_main: setvbuf test
 setvbuf_test: Test NO buffering
@@ -117,10 +119,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32cd490  32cd490
-uordblks   9c7d10   9c7f10
-fordblks  32d12f0  32d10f0
+ordblks        12       12
+mxordblk  32eace0  32eace0
+uordblks   9ab3e0   9ab5e0
+fordblks  32edc20  32eda20
 
 user_main: /dev/null test
 dev_null: Read 0 bytes from /dev/null
@@ -130,17 +132,17 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32cd490  32cd490
-uordblks   9c7f10   9c8120
-fordblks  32d10f0  32d0ee0
+ordblks        12       12
+mxordblk  32eace0  32eace0
+uordblks   9ab5e0   9ab7f0
+fordblks  32eda20  32ed810
 
 user_main: FPU test
 Starting task FPU#1
-fpu_test: Started task FPU#1 at PID=696
+fpu_test: Started task FPU#1 at PID=48
 FPU#1: pass 1
 Starting task FPU#2
-fpu_test: Started task FPU#2 at PID=697
+fpu_test: Started task FPU#2 at PID=49
 FPU#2: pass 1
 FPU#1: pass 2
 FPU#2: pass 2
@@ -180,16 +182,16 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9       10
-mxordblk  32cd490  32c9b50
-uordblks   9c8120   9c8320
-fordblks  32d0ee0  32d0ce0
+ordblks        12       13
+mxordblk  32eace0  32e5a10
+uordblks   9ab7f0   9ab9f0
+fordblks  32ed810  32ed610
 
 user_main: task_restart test
 
 Test task_restart()
 restart_main: setenv(VarName, VarValue, TRUE)
-restart_main: Started restart_main at PID=698
+restart_main: Started restart_main at PID=50
 restart_main: Started with argc=4
 restart_main: argv[0]="ostest"
 restart_main: argv[1]="This is argument 1"
@@ -202,7 +204,7 @@
 restart_main: argv[2]="Argument 2 here"
 restart_main: argv[3]="Lastly, the 3rd argument"
 restart_main: Variable=VarName has value=VarValue
-restart_main: Started restart_main at PID=698
+restart_main: Started restart_main at PID=50
 restart_main: Started with argc=4
 restart_main: argv[0]="ostest"
 restart_main: argv[1]="This is argument 1"
@@ -215,85 +217,85 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks        10        9
-mxordblk  32c9b50  32c9b50
-uordblks   9c8320   9c89c0
-fordblks  32d0ce0  32d0640
+ordblks        13       11
+mxordblk  32e5a10  32e5a10
+uordblks   9ab9f0   9ac0a0
+fordblks  32ed610  32ecf60
 
 user_main: waitpid test
 
 Test waitpid()
-waitpid_start_child: Started waitpid_main at PID=699
-waitpid_start_child: Started waitpid_main at PID=700
-waitpid_start_child: Started waitpid_main at PID=701
-waitpid_test: Waiting for PID=699 with waitpid()
-waitpid_main: PID 699 Started
-waitpid_main: PID 700 Started
-waitpid_main: PID 701 Started
-waitpid_main: PID 699 exitting with result=14
-waitpid_main: PID 700 exitting with result=14
-waitpid_main: PID 701 exitting with result=14
-waitpid_test: PID 699 waitpid succeeded with stat_loc=0e00
-waitpid_last: Waiting for PID=701 with waitpid()
-waitpid_last: PASS: PID 701 waitpid failed with ECHILD.  That may be
+waitpid_start_child: Started waitpid_main at PID=51
+waitpid_start_child: Started waitpid_main at PID=52
+waitpid_start_child: Started waitpid_main at PID=53
+waitpid_test: Waiting for PID=51 with waitpid()
+waitpid_main: PID 51 Started
+waitpid_main: PID 52 Started
+waitpid_main: PID 53 Started
+waitpid_main: PID 51 exitting with result=14
+waitpid_main: PID 52 exitting with result=14
+waitpid_main: PID 53 exitting with result=14
+waitpid_test: PID 51 waitpid succeeded with stat_loc=0e00
+waitpid_last: Waiting for PID=53 with waitpid()
+waitpid_last: PASS: PID 53 waitpid failed with ECHILD.  That may be
               acceptable because child status is disabled on this thread.
 
 Test waitid(P_PID)
-waitpid_start_child: Started waitpid_main at PID=702
-waitpid_start_child: Started waitpid_main at PID=703
-waitpid_start_child: Started waitpid_main at PID=710
-waitpid_test: Waiting for PID=702 with waitid()
-waitpid_main: PID 702 Started
-waitpid_main: PID 703 Started
-waitpid_main: PID 710 Started
-waitpid_main: PID 702 exitting with result=14
-waitpid_main: PID 703 exitting with result=14
-waitpid_main: PID 710 exitting with result=14
-waitpid_test: waitid PID 702 succeeded with si_status=14
-waitpid_last: Waiting for PID=710 with waitpid()
-waitpid_last: PASS: PID 710 waitpid failed with ECHILD.  That may be
+waitpid_start_child: Started waitpid_main at PID=54
+waitpid_start_child: Started waitpid_main at PID=55
+waitpid_start_child: Started waitpid_main at PID=60
+waitpid_test: Waiting for PID=54 with waitid()
+waitpid_main: PID 54 Started
+waitpid_main: PID 55 Started
+waitpid_main: PID 60 Started
+waitpid_main: PID 54 exitting with result=14
+waitpid_main: PID 55 exitting with result=14
+waitpid_main: PID 60 exitting with result=14
+waitpid_test: waitid PID 54 succeeded with si_status=14
+waitpid_last: Waiting for PID=60 with waitpid()
+waitpid_last: PASS: PID 60 waitpid failed with ECHILD.  That may be
               acceptable because child status is disabled on this thread.
 
 Test waitid(P_ALL)
-waitpid_start_child: Started waitpid_main at PID=712
-waitpid_start_child: Started waitpid_main at PID=713
-waitpid_start_child: Started waitpid_main at PID=714
+waitpid_start_child: Started waitpid_main at PID=61
+waitpid_start_child: Started waitpid_main at PID=72
+waitpid_start_child: Started waitpid_main at PID=73
 waitpid_test: Waiting for any child with waitid()
-waitpid_test: PID 710 waitid succeeded with si_status=14
-waitpid_last: Waiting for PID=714 with waitpid()
-waitpid_main: PID 712 Started
-waitpid_main: PID 713 Started
-waitpid_main: PID 714 Started
-waitpid_main: PID 712 exitting with result=14
-waitpid_main: PID 713 exitting with result=14
-waitpid_main: PID 714 exitting with result=14
-waitpid_last: PASS: PID 714 waitpid failed with ECHILD.  That may be
+waitpid_test: PID 60 waitid succeeded with si_status=14
+waitpid_last: Waiting for PID=73 with waitpid()
+waitpid_main: PID 61 Started
+waitpid_main: PID 72 Started
+waitpid_main: PID 73 Started
+waitpid_main: PID 61 exitting with result=14
+waitpid_main: PID 72 exitting with result=14
+waitpid_main: PID 73 exitting with result=14
+waitpid_last: PASS: PID 73 waitpid failed with ECHILD.  That may be
               acceptable because child status is disabled on this thread.
 
 Test wait()
-waitpid_start_child: Started waitpid_main at PID=715
-waitpid_start_child: Started waitpid_main at PID=720
-waitpid_start_child: Started waitpid_main at PID=721
+waitpid_start_child: Started waitpid_main at PID=80
+waitpid_start_child: Started waitpid_main at PID=81
+waitpid_start_child: Started waitpid_main at PID=82
 waitpid_test: Waiting for any child with wait()
-waitpid_test: PID 714 wait succeeded with stat_loc=0e00
-waitpid_last: Waiting for PID=721 with waitpid()
-waitpid_main: PID 715 Started
-waitpid_main: PID 720 Started
-waitpid_main: PID 721 Started
-waitpid_main: PID 715 exitting with result=14
-waitpid_main: PID 720 exitting with result=14
-waitpid_main: PID 721 exitting with result=14
-waitpid_last: PASS: PID 721 waitpid failed with ECHILD.  That may be
+waitpid_test: PID 73 wait succeeded with stat_loc=0e00
+waitpid_last: Waiting for PID=82 with waitpid()
+waitpid_main: PID 80 Started
+waitpid_main: PID 81 Started
+waitpid_main: PID 82 Started
+waitpid_main: PID 80 exitting with result=14
+waitpid_main: PID 81 exitting with result=14
+waitpid_main: PID 82 exitting with result=14
+waitpid_last: PASS: PID 82 waitpid failed with ECHILD.  That may be
               acceptable because child status is disabled on this thread.
 
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32c9b50  32c9b50
-uordblks   9c89c0   9c9430
-fordblks  32d0640  32cfbd0
+ordblks        11       11
+mxordblk  32e5a10  32e5a10
+uordblks   9ac0a0   9acb00
+fordblks  32ecf60  32ec500
 
 user_main: wqueue test
 wqueue_test: HPWORK
@@ -397,28 +399,28 @@
 wqueue_test: delay test
 Threads' Priorities:{5} [ 148 149 150 151 152 ]
 Work Queues' Priorities:{3} [ 149 150 151 ]
-Delays:{20} [ 310 172 227 401 191 90 231 427 312 105 369 324 333 128 315 362 403 126 404 134 ]
+Delays:{20} [ 351 227 139 188 66 135 394 176 251 391 438 398 290 272 484 436 235 475 318 180 ]
 Waiting for all works to finish... timeout_cnt:100/2147483647Waiting for all works to finish... timeout_cnt:200/2147483647Waiting for all works to finish... timeout_cnt:300/2147483647Waiting for all works to finish... timeout_cnt:400/2147483647  done
-Work[  0] in [0] [    Passed] added at 1933473, qtime expected: 1933784    actual:1933784   ,	delay expected :310    actual:311     
-Work[  1] in [0] [    Passed] added at 1933473, qtime expected: 1933646    actual:1933646   ,	delay expected :172    actual:173     
-Work[  2] in [0] [    Passed] added at 1933473, qtime expected: 1933701    actual:1933701   ,	delay expected :227    actual:228     
-Work[  3] in [0] [    Passed] added at 1933473, qtime expected: 1933875    actual:1933875   ,	delay expected :401    actual:402     
-Work[  4] in [0] [    Passed] added at 1933473, qtime expected: 1933665    actual:1933665   ,	delay expected :191    actual:192     
-Work[  5] in [1] [    Passed] added at 1933574, qtime expected: 1933665    actual:1933665   ,	delay expected :90     actual:91      
-Work[  6] in [1] [    Passed] added at 1933574, qtime expected: 1933806    actual:1933806   ,	delay expected :231    actual:232     
-Work[  7] in [1] [    Passed] added at 1933574, qtime expected: 1934002    actual:1934002   ,	delay expected :427    actual:428     
-Work[  8] in [1] [    Passed] added at 1933574, qtime expected: 1933887    actual:1933887   ,	delay expected :312    actual:313     
-Work[  9] in [1] [    Passed] added at 1933574, qtime expected: 1933680    actual:1933680   ,	delay expected :105    actual:106     
-Work[ 10] in [2] [    Passed] added at 1933675, qtime expected: 1934045    actual:1934045   ,	delay expected :369    actual:370     
-Work[ 11] in [2] [    Passed] added at 1933675, qtime expected: 1934000    actual:1934000   ,	delay expected :324    actual:325     
-Work[ 12] in [2] [    Passed] added at 1933675, qtime expected: 1934009    actual:1934009   ,	delay expected :333    actual:334     
-Work[ 13] in [2] [    Passed] added at 1933675, qtime expected: 1933804    actual:1933804   ,	delay expected :128    actual:129     
-Work[ 14] in [2] [    Passed] added at 1933675, qtime expected: 1933991    actual:1933991   ,	delay expected :315    actual:316     
-Work[ 15] in [0] [    Passed] added at 1933776, qtime expected: 1934139    actual:1934139   ,	delay expected :362    actual:363     
-Work[ 16] in [0] [    Passed] added at 1933776, qtime expected: 1934180    actual:1934180   ,	delay expected :403    actual:404     
-Work[ 17] in [0] [    Passed] added at 1933776, qtime expected: 1933903    actual:1933903   ,	delay expected :126    actual:127     
-Work[ 18] in [0] [    Passed] added at 1933776, qtime expected: 1934181    actual:1934181   ,	delay expected :404    actual:405     
-Work[ 19] in [0] [    Passed] added at 1933776, qtime expected: 1933911    actual:1933911   ,	delay expected :134    actual:135     
+Work[  0] in [0] [    Passed] added at 38794, qtime expected: 39146      actual:39146     ,	delay expected :351    actual:352     
+Work[  1] in [0] [    Passed] added at 38794, qtime expected: 39022      actual:39022     ,	delay expected :227    actual:228     
+Work[  2] in [0] [    Passed] added at 38794, qtime expected: 38934      actual:38934     ,	delay expected :139    actual:140     
+Work[  3] in [0] [    Passed] added at 38794, qtime expected: 38983      actual:38983     ,	delay expected :188    actual:189     
+Work[  4] in [0] [    Passed] added at 38794, qtime expected: 38861      actual:38861     ,	delay expected :66     actual:67      
+Work[  5] in [1] [    Passed] added at 38895, qtime expected: 39031      actual:39031     ,	delay expected :135    actual:136     
+Work[  6] in [1] [    Passed] added at 38895, qtime expected: 39290      actual:39290     ,	delay expected :394    actual:395     
+Work[  7] in [1] [    Passed] added at 38895, qtime expected: 39072      actual:39072     ,	delay expected :176    actual:177     
+Work[  8] in [1] [    Passed] added at 38895, qtime expected: 39147      actual:39147     ,	delay expected :251    actual:252     
+Work[  9] in [1] [    Passed] added at 38895, qtime expected: 39287      actual:39287     ,	delay expected :391    actual:392     
+Work[ 10] in [2] [    Passed] added at 38996, qtime expected: 39435      actual:39435     ,	delay expected :438    actual:439     
+Work[ 11] in [2] [    Passed] added at 38996, qtime expected: 39395      actual:39395     ,	delay expected :398    actual:399     
+Work[ 12] in [2] [    Passed] added at 38996, qtime expected: 39287      actual:39287     ,	delay expected :290    actual:291     
+Work[ 13] in [2] [    Passed] added at 38996, qtime expected: 39269      actual:39269     ,	delay expected :272    actual:273     
+Work[ 14] in [2] [    Passed] added at 38996, qtime expected: 39481      actual:39481     ,	delay expected :484    actual:485     
+Work[ 15] in [0] [    Passed] added at 39097, qtime expected: 39534      actual:39534     ,	delay expected :436    actual:437     
+Work[ 16] in [0] [    Passed] added at 39097, qtime expected: 39333      actual:39333     ,	delay expected :235    actual:236     
+Work[ 17] in [0] [    Passed] added at 39097, qtime expected: 39573      actual:39573     ,	delay expected :475    actual:476     
+Work[ 18] in [0] [    Passed] added at 39097, qtime expected: 39416      actual:39416     ,	delay expected :318    actual:319     
+Work[ 19] in [0] [    Passed] added at 39097, qtime expected: 39278      actual:39278     ,	delay expected :180    actual:181     
 wqueue_test: delay test: Total=20, Success=20, Invalid=0, Warning=0, Failed=0, Timeout=0, Unexpected=0
 wqueue_test: multiple threads and queues test done
 
@@ -428,16 +430,16 @@
 Work Queues' Priorities:{1} [ 150 ]
 Delays:{2} [ 18446744073709551615 1 ]
 Waiting for all works to finish... timeout_cnt:100/2000  done
-Work[  0] in [0] [   Invalid] added at 1934281, qtime expected: 0          actual:0         ,	delay expected :18446744073709551615 actual:18446744073707617335  
-Work[  1] in [0] [    Passed] added at 1934382, qtime expected: 1934384    actual:1934384   ,	delay expected :1      actual:2       
+Work[  0] in [0] [   Invalid] added at 39602, qtime expected: 0          actual:0         ,	delay expected :18446744073709551615 actual:18446744073709512014  
+Work[  1] in [0] [    Passed] added at 39703, qtime expected: 39705      actual:39705     ,	delay expected :1      actual:2       
 wqueue_test: delay test: Total=2, Success=1, Invalid=1, Warning=0, Failed=0, Timeout=0, Unexpected=0
 wqueue_test: delay test
 Threads' Priorities:{1} [ 150 ]
 Work Queues' Priorities:{1} [ 150 ]
 Delays:{2} [ 18446744073709551615 4611686018427387903 ]
 Waiting for all works to finish... timeout_cnt:100/2000Waiting for all works to finish... timeout_cnt:200/2000Waiting for all works to finish... timeout_cnt:300/2000Waiting for all works to finish... timeout_cnt:400/2000Waiting for all works to finish... timeout_cnt:500/2000Waiting for all works to finish... timeout_cnt:600/2000Waiting for all works to finish... timeout_cnt:700/2000Waiting for all works to finish... timeout_cnt:800/2000Waiting for all works to finish... timeout_cnt:900/2000Waiting for all works to finish... timeout_cnt:1000/2000Waiting for all works to finish... timeout_cnt:1100/2000Waiting for all works to finish... timeout_cnt:1200/2000Waiting for all works to finish... timeout_cnt:1300/2000Waiting for all works to finish... timeout_cnt:1400/2000Waiting for all works to finish... timeout_cnt:1500/2000Waiting for all works to finish... timeout_cnt:1600/2000Waiting for all works to finish... timeout_cnt:1700/2000Waiting for all works to finish... timeout_cnt:1800/2000Waiting for all works to finish... timeout_cnt:1900/2000Waiting for all works to finish... timeout_cnt:2000/2000  timeout
-Work[  0] in [0] [   Invalid] added at 1934584, qtime expected: 0          actual:0         ,	delay expected :18446744073709551615 actual:18446744073707617032  
-Work[  1] in [0] [   Timeout] added at 1934685, qtime expected: 4611686018429322589 actual:0         ,	delay expected :4611686018427387903 actual:18446744073707616931  
+Work[  0] in [0] [   Invalid] added at 39905, qtime expected: 0          actual:0         ,	delay expected :18446744073709551615 actual:18446744073709511711  
+Work[  1] in [0] [   Timeout] added at 40006, qtime expected: 4611686018427427910 actual:0         ,	delay expected :4611686018427387903 actual:18446744073709511610  
 wqueue_test: delay test: Total=2, Success=0, Invalid=1, Warning=0, Failed=0, Timeout=1, Unexpected=0
 wqueue_test: special delay test done.
 
@@ -449,10 +451,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32c9b50  32b5c60
-uordblks   9c9430   9cc6a0
-fordblks  32cfbd0  32cc960
+ordblks        11       14
+mxordblk  32e5a10  32dd050
+uordblks   9acb00   9afe20
+fordblks  32ec500  32e91e0
 
 user_main: mutex test
 Initializing mutex
@@ -466,10 +468,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32b5c60  32b5c60
-uordblks   9cc6a0   9cc8a0
-fordblks  32cc960  32cc760
+ordblks        14       14
+mxordblk  32dd050  32dd050
+uordblks   9afe20   9b0020
+fordblks  32e91e0  32e8fe0
 
 user_main: timed mutex test
 mutex_test: Initializing mutex
@@ -505,10 +507,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32b5c60  32b5c60
-uordblks   9cc8a0   9cccc0
-fordblks  32cc760  32cc340
+ordblks        14       14
+mxordblk  32dd050  32dd050
+uordblks   9b0020   9b0430
+fordblks  32e8fe0  32e8bd0
 
 user_main: pthread-specific data test
 Starting thread
@@ -517,10 +519,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32b5c60  32b5c60
-uordblks   9cccc0   9cccc0
-fordblks  32cc340  32cc340
+ordblks        14       14
+mxordblk  32dd050  32dd050
+uordblks   9b0430   9b0430
+fordblks  32e8bd0  32e8bd0
 
 user_main: cancel test
 cancel_test: Test 1a: Normal Cancellation
@@ -583,10 +585,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32b5c60  32b5c60
-uordblks   9cccc0   9cd4f0
-fordblks  32cc340  32cbb10
+ordblks        14       14
+mxordblk  32dd050  32dd050
+uordblks   9b0430   9b0c70
+fordblks  32e8bd0  32e8390
 
 user_main: robust test
 robust_test: Initializing mutex
@@ -605,10 +607,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32b5c60  32b5c60
-uordblks   9cd4f0   9cd900
-fordblks  32cbb10  32cb700
+ordblks        14       14
+mxordblk  32dd050  32dd050
+uordblks   9b0c70   9b1080
+fordblks  32e8390  32e7f80
 
 user_main: semaphore test
 sem_test: Initializing semaphore to 0
@@ -643,17 +645,17 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32b5c60  32b5c60
-uordblks   9cd900   9cdd50
-fordblks  32cb700  32cb2b0
+ordblks        14       14
+mxordblk  32dd050  32dd050
+uordblks   9b1080   9b14c0
+fordblks  32e7f80  32e7b40
 
 user_main: timed semaphore test
 semtimed_test: Initializing semaphore to 0
 semtimed_test: Waiting for two second timeout
 semtimed_test: PASS: first test returned timeout
-BEFORE: (1789902722 sec, 542835583 nsec)
-AFTER:  (1789902724 sec, 543770417 nsec)
+BEFORE: (1789900827 sec, 863828791 nsec)
+AFTER:  (1789900829 sec, 864767416 nsec)
 semtimed_test: Starting poster thread
 semtimed_test: Set thread 1 priority to 160
 semtimed_test: Starting poster thread 3
@@ -663,18 +665,18 @@
 poster_func: Waiting for 10 ms
 poster_func: Posting
 semtimed_test: PASS: sem_timedwait succeeded
-BEFORE: (1789902724 sec, 543843042 nsec)
-AFTER:  (1789902724 sec, 554784625 nsec)
+BEFORE: (1789900829 sec, 864834500 nsec)
+AFTER:  (1789900829 sec, 875778416 nsec)
 poster_func: Posting
 
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32b5c60  32b5c60
-uordblks   9cdd50   9ce160
-fordblks  32cb2b0  32caea0
+ordblks        14       14
+mxordblk  32dd050  32dcf40
+uordblks   9b14c0   9b18d0
+fordblks  32e7b40  32e7730
 
 user_main: condition variable test
 cond_test: Initializing mutex
@@ -688,7 +690,7 @@
 thread_signaler: Terminating
 cond_test: signaler terminated, now cancel the waiter
 cond_test: 	Waiter	Signaler
-cond_test: Loops	64	64
+cond_test: Loops	32	32
 cond_test: Errors	0	0
 cond_test:
 cond_test: 0 times, waiter did not have to wait for data
@@ -699,28 +701,28 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        9
-mxordblk  32b5c60  32b5c60
-uordblks   9ce160   9ce370
-fordblks  32caea0  32cac90
+ordblks        14       13
+mxordblk  32dcf40  32dced0
+uordblks   9b18d0   9b1ae0
+fordblks  32e7730  32e7520
 
 user_main: pthread_exit() test
-pthread_exit_test: Started pthread_exit_main at PID=1032
-pthread_exit_main 1032: Starting pthread_exit_thread
-pthread_exit_main 1032: Sleeping for 50 ms
-pthread_exit_thread 1033: Sleeping for 100 ms
-pthread_exit_main 1032: Calling pthread_exit()
-pthread_exit_thread 1033: Still running...
-pthread_exit_thread 1033: Exiting
+pthread_exit_test: Started pthread_exit_main at PID=573
+pthread_exit_main 573: Starting pthread_exit_thread
+pthread_exit_main 573: Sleeping for 50 ms
+pthread_exit_thread 574: Sleeping for 100 ms
+pthread_exit_main 573: Calling pthread_exit()
+pthread_exit_thread 574: Still running...
+pthread_exit_thread 574: Exiting
 
 End of test memory usage:
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        8
-mxordblk  32b5c60  32b5c60
-uordblks   9ce370   9ce5a0
-fordblks  32cac90  32caa60
+ordblks        13       13
+mxordblk  32dced0  32dccc0
+uordblks   9b1ae0   9b1d10
+fordblks  32e7520  32e72f0
 
 user_main: pthread_rwlock test
 pthread_rwlock: Initializing rwlock
@@ -729,10 +731,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         8        8
-mxordblk  32b5c60  32b5c60
-uordblks   9ce5a0   9ce7b0
-fordblks  32caa60  32ca850
+ordblks        13       13
+mxordblk  32dccc0  32dcab0
+uordblks   9b1d10   9b1f20
+fordblks  32e72f0  32e70e0
 
 user_main: pthread_rwlock_cancel test
 pthread_rwlock_cancel: Starting test
@@ -741,10 +743,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         8        8
-mxordblk  32b5c60  32b5c60
-uordblks   9ce7b0   9ce7b0
-fordblks  32ca850  32ca850
+ordblks        13       13
+mxordblk  32dcab0  32dcab0
+uordblks   9b1f20   9b1f20
+fordblks  32e70e0  32e70e0
 
 user_main: timed wait test
 thread_waiter: Initializing mutex
@@ -763,10 +765,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         8        8
-mxordblk  32b5c60  32b5c60
-uordblks   9ce7b0   9cebd0
-fordblks  32ca850  32ca430
+ordblks        13       13
+mxordblk  32dcab0  32dc6a0
+uordblks   9b1f20   9b2330
+fordblks  32e70e0  32e6cd0
 
 user_main: message queue test
 mqueue_test: Starting receiver
@@ -806,10 +808,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         8        8
-mxordblk  32b5c60  32b5c60
-uordblks   9cebd0   9cf380
-fordblks  32ca430  32c9c80
+ordblks        13       14
+mxordblk  32dc6a0  32d14a0
+uordblks   9b2330   9b2b80
+fordblks  32e6cd0  32e6480
 
 user_main: timed message queue test
 timedmqueue_test: Starting sender
@@ -846,10 +848,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         8        8
-mxordblk  32b5c60  32b5c60
-uordblks   9cf380   9cf9b0
-fordblks  32c9c80  32c9650
+ordblks        14       14
+mxordblk  32d14a0  32d14a0
+uordblks   9b2b80   9b31b0
+fordblks  32e6480  32e5e50
 
 user_main: sigprocmask test
 sigprocmask_test: SUCCESS
@@ -858,23 +860,23 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         8        8
-mxordblk  32b5c60  32b5c60
-uordblks   9cf9b0   9cf9b0
-fordblks  32c9650  32c9650
+ordblks        14       14
+mxordblk  32d14a0  32d14a0
+uordblks   9b31b0   9b31b0
+fordblks  32e5e50  32e5e50
 
 user_main: signal handler test
 sighand_test: Initializing semaphore to 0
 sighand_test: Unmasking SIGCHLD
 sighand_test: Registering SIGCHLD handler
 sighand_test: Starting waiter task
-sighand_test: Started waiter_main pid=1053
+sighand_test: Started waiter_main pid=597
 waiter_main: Waiter started
 waiter_main: Unmasking signal 32
 waiter_main: Registering signal handler
 waiter_main: oact.sigaction=0 oact.sa_flags=0 oact.sa_mask=0000000000000000
 waiter_main: Waiting on semaphore
-sighand_test: Signaling pid=1053 with signo=32 sigvalue=42
+sighand_test: Signaling pid=597 with signo=32 sigvalue=42
 waiter_main: sem_wait() successfully interrupted by signal
 waiter_main: done
 sighand_test: done
@@ -883,16 +885,16 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         8        9
-mxordblk  32b5c60  32b5c60
-uordblks   9cf9b0   9cfde0
-fordblks  32c9650  32c9220
+ordblks        14       13
+mxordblk  32d14a0  32d14a0
+uordblks   9b31b0   9b35f0
+fordblks  32e5e50  32e5a10
 
 user_main: nested signal handler test
 signest_test: Starting signal waiter task at priority 151
-signest_test: Started waiter_main pid=1056
+signest_test: Started waiter_main pid=598
 signest_test: Starting interfering task at priority 152
-signest_test: Started interfere_main pid=1059
+signest_test: Started interfere_main pid=599
 interfere_main: Waiting on semaphore
 waiter_main: Waiter started
 waiter_main: Setting signal mask
@@ -916,10 +918,10 @@
 VARIABLE  BEFORE   AFTER
 ======== ======== ========
 arena     3c99000  3c99000
-ordblks         9        6
-mxordblk  32b5c60  32b5c60
-uordblks   9cfde0   9d0d30
-fordblks  32c9220  32c82d0
+ordblks        13        9
+mxordblk  32d14a0  32d14a0
+uordblks   9b35f0   9b4520
+fordblks  32e5a10  32e4ae0
 
 user_main: spinlock test
 Start Lock test:
@@ -928,24 +930,23 @@
 Test type: spinlock
 spinlock: Test Results:
 spinlock: Final counter: 100000
-spinlock: Average throughput : 38618731 op/s
-spinlock: Total execution time: 2608375 ns
+spinlock: Average throughput : 38657920 op/s
+spinlock: Total execution time: 2609250 ns
  
 Test type: rspinlock
 rspinlock: Test Results:
 rspinlock: Final counter: 100000
-rspinlock: Average throughput : 18249700 op/s
-rspinlock: Total execution time: 5491792 ns
+rspinlock: Average throughput : 18264283 op/s
+rspinlock: Total execution time: 5488875 ns
  
 Test type: seqcount
 seqcount: Test Results:
 seqcount: Final counter: 100000
-seqcount: Average throughput : 34597084 op/s
-seqcount: Total execution time: 2902667 ns
+seqcount: Average throughput : 34632034 op/s
+seqcount: Total execution time: 2900625 ns
  
 Start Lock test:
 Thread num: 2, Loop times: 100000
 
 Test type: spinlock
 nsh> 
-{"command": "cat /tmp/ostest.log", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789903136.6833239, "host_at_done": 1789903138.9308949, "elapsed_monotonic_s": 2.2475710419821553, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T111856675539Z-356361784045747-cat-tmp-ostest-log.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T111856675539Z-356361784045747-cat-tmp-ostest-log.txt", "prompt_returned": true}

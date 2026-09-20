@@ -1,5 +1,6 @@
 setvbuf_test: Using NO buffering
-setvbuf_test: Using default FULL buffering
-setvbuf_test: Using FULL buffering, buffer size setvbuf_test: Using FULL buffering, pre-allocated buffer
+setvbuf_test: Using default Fuf_test: Using FULL buffering, buffer size 64
+setvbuf_test: Using FULL buffering, pre-allocated buffer
 setvbuf_test: Using LINE buffering, buffer size 64
-setvbuf_test: Using FULL buffering, pre-allocate
+setvbuf_test: Using FULL buffering, pre-allocated buffer
+[CPU0] procfs_readdir: ERROR: PID 803 is no longer valid

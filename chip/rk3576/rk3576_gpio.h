@@ -92,6 +92,17 @@ int rk3576_gpio_write(int bank, int pin, bool value);
 int rk3576_gpio_read(int bank, int pin);
 
 /****************************************************************************
+ * Name: rk3576_gpio_read_output
+ *
+ * Description:
+ *   读输出数据寄存器（引脚被驱动成什么），而不是引脚实际电平。
+ *   输出脚读回用它；输入脚用 rk3576_gpio_read()。
+ *
+ ****************************************************************************/
+
+int rk3576_gpio_read_output(int bank, int pin);
+
+/****************************************************************************
  * Name: rk3576_gpio_verid
  *
  * Description:
