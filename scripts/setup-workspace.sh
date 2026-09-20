@@ -39,7 +39,7 @@ say "chip/rk3576" "由 ARCH_CHIP_CUSTOM_DIR 相对路径引用"
 # ── 2) 应用：链接进 packages/demos 并登记 Kconfig ────────────────────
 DEMOS="$WS/packages/demos"
 KCFG="$WS/apps/packages/demos/Kconfig"
-for app in cam v4l2cap hdmi spi_selftest mic bt kickpi_ui; do
+for app in cam v4l2cap hdmi spi_selftest mic bt kickpi_ui ampctl k7diag; do
   [ -d "$ROOT/app/$app" ] || continue
   ln -sfn "../../$TEAM/app/$app" "$DEMOS/contest2026_423_$app"
   say "packages/demos/contest2026_423_$app" "-> app/$app"

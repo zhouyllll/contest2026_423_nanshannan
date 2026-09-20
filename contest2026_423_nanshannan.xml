@@ -19,6 +19,7 @@
     <linkfile src="app/mic" dest="packages/demos/contest2026_423_mic"/>
     <linkfile src="app/kickpi_ui" dest="packages/demos/contest2026_423_kickpi_ui"/>
     <linkfile src="app/ampctl" dest="packages/demos/contest2026_423_ampctl"/>
+    <linkfile src="app/k7diag" dest="packages/demos/contest2026_423_k7diag"/>
     <linkfile src="quickapp/hello_quickapp" dest="packages/apps/contest2026_423_hello_quickapp"/>
     <linkfile src="board/kickpi-k7" dest="vendor/openvela/boards/contest2026_423_board"/>
   </project>
