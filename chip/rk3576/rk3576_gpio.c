@@ -313,6 +313,33 @@ int rk3576_gpio_write(int bank, int pin, bool value)
   return OK;
 }
 
+int rk3576_gpio_read_output(int bank, int pin)
+{
+  uint32_t regval;
+  uint32_t off;
+
+  if (bank < 0 || bank >= RK3576_GPIO_NBANKS ||
+      pin  < 0 || pin  >= RK3576_GPIO_NPINS)
+    {
+      return -EINVAL;
+    }
+
+  /* ★ 读的是输出数据寄存器，不是 EXT_PORT。
+   *
+   *   配成输出的脚，EXT_PORT 读回来不一定等于驱动值 —— 本板 GPIO4_A4
+   *   实测写 1 之后 EXT_PORT 仍读 0（引脚确实被驱动：同一根杜邦线上的
+   *   中断子项能收到边沿），说明该脚做输出时输入缓冲不工作。
+   *   xTS 1.3.6 的 drivertest_gpio_rw 写完立刻读回并要求相等，
+   *   对输出脚就该回答"我驱动的是什么"，这个值只有 DR 寄存器有。
+   *
+   *   DR 是带高 16 位写使能的寄存器，但读回来是普通值；pin >= 16 在 _H。
+   */
+
+  off = pin < 16 ? RK3576_GPIO_SWPORT_DR_L : RK3576_GPIO_SWPORT_DR_H;
+  regval = getreg32(g_gpio_base[bank] + off);
+  return (regval >> (pin & 15)) & 1;
+}
+
 int rk3576_gpio_read(int bank, int pin)
 {
   uint32_t regval;

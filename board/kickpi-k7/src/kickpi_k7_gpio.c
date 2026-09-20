@@ -274,11 +274,16 @@ static int kickpi_gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
 
   DEBUGASSERT(priv != NULL && value != NULL);
 
-  /* 读的是 EXT_PORT，即引脚上的实际电平，而不是输出寄存器的值。
-   * 两者不一致时说明引脚被外部驱动着（短路、上下拉过强等）。
+  /* ★ 输出脚读回给的是"我驱动成了什么"，取自输出数据寄存器。
+   *
+   *   原来读 EXT_PORT（引脚实际电平），想法是"两者不一致就说明被外部
+   *   驱动着"。但本板 GPIO4_A4 配成输出后 EXT_PORT 恒读 0 —— 引脚其实
+   *   有在驱动（同一根线上的中断子项收得到边沿），是该脚做输出时输入
+   *   缓冲不工作。xTS 1.3.6 的 drivertest_gpio_rw 写 1 立刻读回，
+   *   拿到 0 而失败（cmocka: 49 != 48）。
    */
 
-  ret = rk3576_gpio_read(priv->bank, priv->pin);
+  ret = rk3576_gpio_read_output(priv->bank, priv->pin);
   if (ret < 0)
     {
       return ret;

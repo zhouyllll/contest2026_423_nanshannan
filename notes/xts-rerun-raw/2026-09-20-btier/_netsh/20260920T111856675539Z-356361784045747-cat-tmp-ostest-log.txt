@@ -1,4 +1,6 @@
-[Kcat /tmp/ostest.log
+
+NuttShell (NSH)
+nsh> [Kcat /tmp/ostest.log
 stdio_test: write fd=1
 stdio_test: Standard I/O Check: printf
 stdio_test: write fd=2
@@ -948,4 +950,3 @@
 
 Test type: spinlock
 nsh> 
-{"command": "cat /tmp/ostest.log", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789903136.6833239, "host_at_done": 1789903138.9308949, "elapsed_monotonic_s": 2.2475710419821553, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T111856675539Z-356361784045747-cat-tmp-ostest-log.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T111856675539Z-356361784045747-cat-tmp-ostest-log.txt", "prompt_returned": true}
