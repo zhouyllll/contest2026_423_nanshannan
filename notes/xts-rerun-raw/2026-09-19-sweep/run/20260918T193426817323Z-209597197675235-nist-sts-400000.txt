@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> [Knist_sts 400000
+nsh: nist_sts: command not found
+nsh> 

@@ -1,0 +1,33 @@
+[
+  {
+    "direction": "upload",
+    "command": "rb -f /tmp --retry 5",
+    "host_argv": [
+      "/usr/bin/sb",
+      "--ymodem",
+      "-b",
+      "/tmp/k7-xts-1311/xts-uart-pattern.bin"
+    ],
+    "returncode": 0,
+    "elapsed": 7.195871697011171,
+    "prompt_returned": true
+  },
+  {
+    "direction": "download",
+    "command": "sb --retry 5 /tmp/xts-uart-pattern.bin",
+    "host_argv": [
+      "/usr/bin/rb",
+      "--ymodem",
+      "-b",
+      "-y"
+    ],
+    "returncode": 128,
+    "elapsed": 18.083843918982893,
+    "prompt_returned": true
+  },
+  {
+    "source_sha256": "c8f5d0341d54d951a71b136e6e2afcb14d11ed8489a7ae126a8fee0df6ecf193",
+    "received_sha256": null,
+    "exact_match": false
+  }
+]

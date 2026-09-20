@@ -1,0 +1,16 @@
+[CPU0] [==========] nuttx_mm_test_suites: Running 8 test(s).
+[CPU0] [ RUN      ] test_nuttx_mm01
+[CPU0] [       OK ] test_nuttx_mm01
+[CPU0] [ RUN      ] test_nuttx_mm02
+[CPU0] [       OK ] test_nuttx_mm02
+[CPU0] [ RUN      ] test_nuK ] test_nuttx_mm03
+[CPU0] [ RUN      ] test_nuttx_mm04
+[CPU0] [       OK ] test_nuttx_mm04
+[[CPU0] [       OK ] test_nuttx_mm05
+[CPU0] [ RUN      ] test_nuttx_mm06
+[CPU0] [       OK ] test_nuttx_mm06
+[CPU0] [ RUN      ] test_nuttx_mm07
+[CPU0] [       OK ] test_nuttx_mm07
+[CPU0] [ RUN      ] test_nuttx_mm08
+[CPU0] [       OK ] test_nuttx_mm08
+[CPU0] [==========] nuttx_mSSED  ] 8 test(s).

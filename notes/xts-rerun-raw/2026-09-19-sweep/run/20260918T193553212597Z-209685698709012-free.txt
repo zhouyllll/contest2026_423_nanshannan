@@ -1,0 +1,6 @@
+
+NuttShell (NSH)
+nsh> [Kfree
+      total       used       free    maxused    maxfree  nused  nfree name
+   63565824   12059920   51505904   14174928   51497104    410      7 Umem
+nsh> 

@@ -1,0 +1,5 @@
+[CPU0] [==========] descbc_tests: Running 1 test(s).
+[CPU0] [ R] test_3descbc
+[CPU0] [       OK ] test_3descbc
+[CPU0] [======) run.
+[CPU0] [  PASSED  ] 1 test(s).

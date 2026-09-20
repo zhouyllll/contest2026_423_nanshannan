@@ -1,0 +1,4 @@
+{
+  "repository_head": "945361d3bf4b0c867d789dcabeeeabd79e371964",
+  "note": "Host source/config is not proof of running firmware identity; see board uname. No firmware was flashed in this sweep."
+}

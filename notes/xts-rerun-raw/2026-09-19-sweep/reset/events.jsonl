@@ -1,0 +1,5 @@
+{"command": "cmocka_driver_watchdog -r 0", "tag": "watchdog-0", "elapsed_monotonic_s": 27.02267252499587, "first_nsh_monotonic_s": null, "prompt_after": true, "fail_marker": false, "boot_banner": false}
+{"command": "cmocka_driver_watchdog -r 1", "tag": "watchdog-1", "elapsed_monotonic_s": 27.01491781399818, "first_nsh_monotonic_s": null, "prompt_after": true, "fail_marker": true, "boot_banner": false}
+{"command": "cmocka_driver_watchdog -r 2", "tag": "watchdog-2", "elapsed_monotonic_s": 27.01144054697943, "first_nsh_monotonic_s": null, "prompt_after": true, "fail_marker": true, "boot_banner": false}
+{"command": "cmocka_driver_watchdog -r 3", "tag": "watchdog-3", "elapsed_monotonic_s": 27.028340752993245, "first_nsh_monotonic_s": null, "prompt_after": true, "fail_marker": true, "boot_banner": false}
+{"command": "reboot", "tag": "reboot-01", "elapsed_monotonic_s": 22.030083669000305, "first_nsh_monotonic_s": null, "prompt_after": true, "fail_marker": false, "boot_banner": false}

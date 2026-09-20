@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> [Kls -l /tmp/xts-uart-pattern.bin
+ -rwxrwxrwx   0        4096 /tmp/xts-uart-pattern.bin
+nsh> 

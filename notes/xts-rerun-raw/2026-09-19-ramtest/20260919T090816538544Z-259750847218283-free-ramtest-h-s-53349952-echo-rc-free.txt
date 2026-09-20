@@ -1,0 +1,15 @@
+
+NuttShell (NSH)
+nsh> [Kfree; ramtest -h -s 53349952; echo rc=$?; free
+      total       used       free    maxused    maxfree  nused  nfree name
+   63541248   10116800   53424448   63478352   53415488    358      6 Umem
+RAMTest: Marching ones: 4b1111d0 53349952
+RAMTest: Marching zeroes: 4b1111d0 53349952
+RAMTest: Pattern test: 4b1111d0 53349952 55555555 aaaaaaaa
+RAMTest: Pattern test: 4b1111d0 53349952 66666666 99999999
+RAMTest: Pattern test: 4b1111d0 53349952 33333333 cccccccc
+RAMTest: Address-in-address test: 4b1111d0 53349952
+rc=0
+      total       used       free    maxused    maxfree  nused  nfree name
+   63541248   10116800   53424448   63478352   53415488    358      6 Umem
+nsh> 

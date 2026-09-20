@@ -1,0 +1,16 @@
+
+NuttShell (NSH)
+nsh> [Kfree; ramtest -w -s 53415488; free
+      total       used       free    maxused    maxfree  nused  nfree name
+   63541248   10116800   53424448   10119440   53415488    358      6 Umem
+RAMTest: malloc failed, We were unableto continue with the follow-up work
+
+Usage: ramtest [-w|h|b] -a [hex-address] -s <decimal-size>
+
+Where:
+  -a [hex-address] starting address of the test,
+  -s <decimal-size> number of memory locations (in bytes).
+  -w Sets the width of a memory location to 32-bits.
+  -h Sets the width of a memory location to 16-bits (default).
+  -b Sets the width of a memory location to 8-bits.
+nsh> 

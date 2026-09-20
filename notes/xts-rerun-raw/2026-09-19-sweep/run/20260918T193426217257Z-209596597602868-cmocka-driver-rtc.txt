@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> [Kcmocka_driver_rtc
+nsh: cmocka_driver_rtc: command not found
+nsh> 

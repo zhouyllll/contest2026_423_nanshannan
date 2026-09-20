@@ -46,3 +46,7 @@ app/kickpi_ui/k7_agent_key.h
 Make.dep
 *.o
 *.a
+
+# 杂项
+__pycache__/
+*:Zone.Identifier
