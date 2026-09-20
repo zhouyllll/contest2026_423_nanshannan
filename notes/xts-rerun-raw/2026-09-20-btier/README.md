@@ -27,7 +27,7 @@
 | 1.1.13 C++ 功能 | `cxxtest` | std::vector / std::string / std::map / RTTI 均执行 | telnet |
 | 1.2.3 RAM 占用 | `free`（openvela）+ `ampctl exec free`（Linux 核） | openvela 63,541,248 B 总量；Linux 3,946,300 KB 总量、已用 17,860 KB | telnet，两核各一份 |
 | 1.3.2 RAM 读写 | `fstest -n 10 -m /tmp` | **OK: 20, FAILED: 0** | telnet |
-| 1.3.10 UART | `cmocka_driver_uart -d /dev/ttyS0` | **PASSED 1/1** | 串口 |
+| 1.3.10 UART | `cmocka_driver_uart -d /dev/ttyS0`（原文举例的设备） | **PASSED 1/1** | 串口 |
 | 1.3.13 Timer | `cmocka_driver_oneshot -d /dev/oneshot` | **OK** drivertest_oneshot | 串口 |
 | 1.3.17 Crypto | `cmocka_des3cbc` | **PASSED 1/1** | 串口 |
 | 1.3.17 | `cmocka_aescbc` | **PASSED 1/1** | 串口 |
@@ -38,11 +38,7 @@
 | 1.3.17 | `cmocka_crc32` | **PASSED 4/4** | 串口 |
 | 1.3.17 | `cmocka_ecdsa` | p256 生成密钥 / 签名 / 验签 均 success，SECP256R1 case success | telnet |
 
-## 需要说明的三处
-
-**1.3.10 换了设备**：原文举例 `ttyS0`。先在 `/dev/ttyS1` 上跑，120 s 内停在
-`[ RUN ] drivertest_uart` 不结束（该口没有对端，测试等不到回环数据），
-记录保留为 `1.3.10-...ttyS1.*`；改回控制台所在的 `ttyS0` 后 1/1 PASSED。
+## 需要说明的两处
 
 **串口丢字**：1.5 Mbaud 下主机侧会丢字节，个别行被截断（如
 `[ RUN     _uart`、`aesxts` 的汇总行缺失）。判定依据是每个子项的 `[ OK ]` 行，

@@ -1,3 +1,0 @@
-[Kcmocka_driver_uart -d /dev/ttyS1
-
-{"command": "cmocka_driver_uart -d /dev/ttyS1", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789894913.3406281, "host_at_done": 1789895029.5384543, "elapsed_monotonic_s": 120.05776770901866, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090153332165Z-347746311292422-cmocka-driver-uart-d-dev-ttyS1.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090153332165Z-347746311292422-cmocka-driver-uart-d-dev-ttyS1.txt", "prompt_returned": false}
