@@ -1,0 +1,633 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kdate -u -s "Sep 20 02:36:35 2026"; date -u +%s
+ÿü1789871795
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789871795
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789871795
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789871795
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789871797
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789872398
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789872398
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789872399
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789872997
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789872997
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789872998
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789873597
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789873597
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789873598
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789874197
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789874197
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789874198
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789874797
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789874798
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789875397
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789875397
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789875398
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789875997
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789875997
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789875998
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789876597
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789876597
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789876598
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789877198
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789877198
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789877198
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789877199
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789877797
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789877797
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789877797
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789877798
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789878397
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789878397
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789878397
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789878398
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789878996
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789878997
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789879597
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789879597
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789879597
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789879598
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789880195
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789880195
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789880196
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789880792
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789880793
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789881384
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789881384
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789881384
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789881385
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789881973
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789881973
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789881973
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789881974
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789882561
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789882561
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789882562
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789883151
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789883151
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789883151
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789883152
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789883738
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789883738
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789883738
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789883739
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789884325
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789884325
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789884326
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789884912
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789884912
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789884913
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789885497
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789885497
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789885497
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789885498
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789886082
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789886082
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789886083
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789886668
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789886668
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789886669
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789887251
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789887251
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789887252
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789887835
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789887835
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789887835
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789887836
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789888419
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789888419
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789888419
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789888420
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789889000
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789889000
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789889001
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789889582
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789889582
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789889583
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789890165
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789890165
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789890165
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789890166
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789890744
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789890745
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789891325
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789891325
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789891326
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789891906
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789891906
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789891906
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789891906
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789891907
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789892484
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789892484
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789892484
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789892485
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789893062
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789893063
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789893641
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789893642
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789894218
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789894218
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789894219
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789894795
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789894795
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789894795
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789894796
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789895381
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789895381
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789895382
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789895957
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789895957
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789895957
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789895958
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789896532
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789896532
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789896532
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789896533
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789897106
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789897107
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789897681
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789897681
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789897681
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789897682
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789898254
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789898255
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789898828
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789898828
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789898829
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789899399
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789899400
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789899971
+nsh> 
+NuttShell (NSH)
+nsh> ÿû[Kdate -u +%s
+ÿü1789899972
+nsh> 
