@@ -41,6 +41,10 @@ ifeq ($(CONFIG_RK3576_I2C),y)
 CSRCS += kickpi_k7_i2c.c
 endif
 
+ifeq ($(CONFIG_KICKPI_K7_MPU6050),y)
+CSRCS += kickpi_k7_mpu6050.c
+endif
+
 ifeq ($(CONFIG_RK3576_SPI),y)
 CSRCS += kickpi_k7_spi.c
 endif

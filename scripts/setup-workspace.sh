@@ -74,6 +74,7 @@ apply upstream/agent-monotonic-latency.patch packages/ai_agent
 apply upstream/frameworks-uv.patch           frameworks/system/utils/uv
 apply upstream/posixspawn-enoent-not-error.patch nuttx
 apply upstream/stdio-stream-limit-open-max.patch nuttx
+apply upstream/bmi160-spi-only-guard.patch    nuttx
 
 # libuv 的补丁不是打进工作副本的：libuv 源码是构建时从 GitHub 拉的，
 # 直接改会在干净构建时丢失，必须以 000*.patch 形式放进 apps/system/libuv/

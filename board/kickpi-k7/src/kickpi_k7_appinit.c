@@ -453,6 +453,18 @@ int board_app_initialize(uintptr_t arg)
    *   顺序依赖不写下来就会在重排代码时悄悄失效，所以记在这里。
    */
 
+#ifdef CONFIG_KICKPI_K7_MPU6050
+  /* 40 针口上的 MPU-6050（xTS 1.3.7 用它作 I2C 外设） */
+
+  ret = kickpi_k7_mpu6050_initialize();
+  if (ret < 0)
+    {
+      syslog(ret == -ENODEV ? LOG_INFO : LOG_ERR,
+             "MPU6050: %s (%d)\n",
+             ret == -ENODEV ? "未接器件，跳过" : "初始化失败", ret);
+    }
+#endif
+
 #ifdef CONFIG_RTC_HYM8563
   ret = kickpi_k7_rtc_initialize();
   if (ret < 0)
