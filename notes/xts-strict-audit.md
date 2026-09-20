@@ -2,7 +2,7 @@
 
 ## 2026-09-19 更新
 
-按原文步骤补齐 1.2.1（仅剩 SPL 一行，见表）、1.3.3、1.3.12、1.3.16、2.1.4；3.1.1、1.2.2、2.1.3 于 09-20 完成。启动优化后 2.1.3 冷启动需重测。
+按原文步骤补齐 1.2.1（仅剩 SPL 一行，见表）、1.3.3、1.3.12、1.3.16、2.1.4；3.1.1、1.2.2、2.1.3、1.1.5、1.1.12、1.2.4、1.3.4 于 09-20 完成。启动优化后 2.1.3 冷启动需重测。
 
 ## 2026-09-18 更新
 
@@ -47,13 +47,13 @@ PANIC、ASSERT、watchdog 或 reboot 字样。该观察只是现有镜像的 12h
 
 | 用例 | 现有记录 | 严格口径缺口 / 长测后动作 |
 |---|---|---|
-| 1.1.5 getprime | 旧表标通过，未写实际耗时输出 | 保存原命令输出；缺失则重跑 `getprime`。 |
-| 1.1.12 MD5 | `md5_test -c 100` 收到 99 行同值 | 核查是否只是串口漏行；保留完整 100 次结果或重跑并保存日志。 |
+| 1.1.5 getprime | **2026-09-20 PASS**：1230 个素数，`getprime took 149 msec` | [short](xts-rerun-raw/2026-09-20-short/README.md) |
+| 1.1.12 MD5 | **2026-09-20 PASS**：100/100 行同值，且与主机 md5sum 一致 | 旧记录 99 行确为串口丢行；原文 /etc/1.txt 改 /tmp/1.txt（本配置无 ROMFS） |
 | 1.2.1 Reboot 启动异常 | **2026-09-19 按原文 NSH `reboot` ×10**：openvela 与 U-Boot 0 条异常，仅剩厂商 SPL 探 SD 槽 `spl: mmc init failed with error: -123`（10/10） | SPL 这一行需重编 SPL + 重写 idblock 才能去掉，未做；报告中说明。记录：[reboot-logo](xts-rerun-raw/2026-09-19-reboot-logo/README.md) |
 | 1.2.2 Cold boot 启动异常 | **2026-09-20**：用户按 RESET 键 5/5 启动成功，平均 2.84s；异常仅厂商 SPL 探 SD 槽一行 | 记录：[coldboot](xts-rerun-raw/2026-09-20-coldboot/README.md) |
-| 1.2.4 Flash 占用 | `nuttx.bin` 大小约 1.20 MB | 原文要求设备端 `df -h` 及硬件 Flash 使用情况；补设备输出、分区/镜像说明。 |
+| 1.2.4 Flash 占用 | **2026-09-20 已补**：两个核的 `df` + eMMC 分区实际写入表（合计约 14.2 MB / 29824 MB） | 两核均无 Flash 上的文件系统（FIT 读进 RAM、Linux 用 initramfs） |
 | 1.3.3 RAM 读写性能 | **2026-09-19 PASS**：`free` maxfree 53,415,488 → `ramtest -w/-h/-b -s 53349952` 各 6 阶段无错，串口 0 字节 | −64 KB 的原因（ramtest 自身栈/TCB 同堆）见 [ramtest-final](xts-rerun-raw/2026-09-19-ramtest-final/README.md) |
-| 1.3.4 RAM 随机读写 | `mkrd -m 10 -s 512 2048`，block 3/3 | 原文要求 `mkrd -m 10 -s 1000 1024` 后在对应 RAM 设备运行 `cmocka_driver_block -m <设备>`；核对实际设备并按原步骤留证。 |
+| 1.3.4 RAM 随机读写 | **2026-09-20 PASS**：按原文参数 `mkrd -m 10 -s 1000 1024` + `cmocka_driver_block -m /dev/ram10`，3/3 | [short](xts-rerun-raw/2026-09-20-short/README.md) |
 | 1.3.5 Flash 功能 | SD 卡 FAT32 上 `fstest` 20/20 | 原文要求 Flash 设备上的 `cmocka_driver_block -m <设备>`；先确认测试会否破坏数据，再选可安全测试的介质。现结果只作替代功能验证。 |
 | 1.3.7 I²C/SPI | RTC/触摸 I²C 正常，SPI 时钟自检 | MPU6050 可作为 I²C 功能复测的实际外设；记录器件、接线、地址、读数及 `cmocka_driver_i2c_spi` 是否可在该器件上运行。原版脚本指定 BMI160，MPU6050 的功能结果作为替代证据，正式等效性需社区确认。另一块开发板并非这条用例的前提。 |
 | 1.3.12 RTC | **2026-09-19 PASS**：`cmocka_driver_rtc` 连跑 3 次均 api/alarm/periodic 3/3 OK | 驱动补了 wdog 闹钟/周期唤醒（HYM8563 硬件闹钟只到分钟）；记录 [rtc](xts-rerun-raw/2026-09-19-rtc/README.md) |
