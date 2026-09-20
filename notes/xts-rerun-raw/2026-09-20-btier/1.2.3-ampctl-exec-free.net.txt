@@ -1,0 +1,12 @@
+[Kampctl exec free
+
+[Linux 6.1.75 aarch64 on k7-linux, up 17764s, 45 procs]
+
+              total        used        free      shared  buff/cache   available
+
+Mem:        3946300       17860     3926096           0        2344     3906764
+
+Swap:             0           0           0
+
+nsh> 
+{"command": "ampctl exec free", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789894892.2998853, "host_at_done": 1789894892.416653, "elapsed_monotonic_s": 0.11676764796720818, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090132292079Z-347724006955329-ampctl-exec-free.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090132292079Z-347724006955329-ampctl-exec-free.txt", "prompt_returned": true}

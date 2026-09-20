@@ -1,0 +1,4 @@
+[Kcmocka_crc32
+
+nsh> 
+{"command": "cmocka_crc32", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789895066.8607645, "host_at_done": 1789895066.9431856, "elapsed_monotonic_s": 0.08242115698521957, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090426852308Z-347904952343234-cmocka-crc32.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090426852308Z-347904952343234-cmocka-crc32.txt", "prompt_returned": true}

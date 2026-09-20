@@ -1,0 +1,8 @@
+[Kfree
+
+      total       used       free    maxused    maxfree  nused  nfree name
+
+   63541248   32334528   31206720   33179984   30270432    381      9 Umem
+
+nsh> 
+{"command": "free", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789894890.7512753, "host_at_done": 1789894890.81762, "elapsed_monotonic_s": 0.06634491600561887, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090130742667Z-347722457544646-free.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090130742667Z-347722457544646-free.txt", "prompt_returned": true}

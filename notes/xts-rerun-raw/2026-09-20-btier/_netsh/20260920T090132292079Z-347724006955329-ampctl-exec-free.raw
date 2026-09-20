@@ -1,0 +1,8 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kampctl exec free
+ÿü[Linux 6.1.75 aarch64 on k7-linux, up 17764s, 45 procs]
+              total        used        free      shared  buff/cache   available
+Mem:        3946300       17860     3926096           0        2344     3906764
+Swap:             0           0           0
+nsh> 

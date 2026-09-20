@@ -1,0 +1,6 @@
+[Kcmocka_des3cbc
+
+ok, encrypt with /dev/crypto, decrypt with /dev/crypto
+
+nsh> 
+{"command": "cmocka_des3cbc", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789895057.3666356, "host_at_done": 1789895057.4501126, "elapsed_monotonic_s": 0.08347689599031582, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090417358243Z-347895458277852-cmocka-des3cbc.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090417358243Z-347895458277852-cmocka-des3cbc.txt", "prompt_returned": true}

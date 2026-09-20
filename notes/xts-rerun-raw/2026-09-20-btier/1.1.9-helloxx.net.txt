@@ -1,0 +1,16 @@
+[Khelloxx
+
+helloxx_main: Saying hello from the dynamically constructed instance
+
+CHelloWorld::HelloWorld: Hello, World!!
+
+helloxx_main: Saying hello from the instance constructed on the stack
+
+CHelloWorld::HelloWorld: Hello, World!!
+
+helloxx_main: Saying hello from the statically constructed instance
+
+CHelloWorld::HelloWorld: Hello, World!!
+
+nsh> 
+{"command": "helloxx", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789894854.0108411, "host_at_done": 1789894854.0983703, "elapsed_monotonic_s": 0.08752936602104455, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090054003066Z-347684461314811-helloxx.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T090054003066Z-347684461314811-helloxx.txt", "prompt_returned": true}
