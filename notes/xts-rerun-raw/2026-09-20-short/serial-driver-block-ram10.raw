@@ -1,0 +1,7 @@
+[CPU0] [==========] tests: Running 3 test(s).
+[CPU0] [ RUN      ] drivertest_block_stress
+[CPU0] [       OK ] drivertest_block_stress
+[CPU0] [ RUN      ]rivertest_block_single_write
+[CPU0] [       OK ] drivertest_blo RUN      ] drivertest_block_cache_write
+[CPU0] [       OK ] drivertest_block_cache_write
+[CPU0] [====== PASSED  ] 3 test(s).

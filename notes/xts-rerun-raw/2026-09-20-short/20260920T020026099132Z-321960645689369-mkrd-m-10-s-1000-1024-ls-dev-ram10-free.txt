@@ -1,0 +1,7 @@
+
+NuttShell (NSH)
+nsh> [Kmkrd -m 10 -s 1000 1024; ls /dev/ram10; free
+ /dev/ram10
+      total       used       free    maxused    maxfree  nused  nfree name
+   63541248   11141744   52399504   11142448   52391472    365      5 Umem
+nsh> 

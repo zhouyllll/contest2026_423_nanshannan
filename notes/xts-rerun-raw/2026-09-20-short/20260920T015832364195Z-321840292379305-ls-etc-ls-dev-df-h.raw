@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kls /etc; ls /dev; df -h
+ÿünsh: ls: stat failed: 2
+nsh> 

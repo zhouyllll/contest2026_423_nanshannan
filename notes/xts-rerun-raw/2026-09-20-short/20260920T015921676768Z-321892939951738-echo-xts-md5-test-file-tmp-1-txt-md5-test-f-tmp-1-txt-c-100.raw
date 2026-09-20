@@ -1,0 +1,4 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kecho xts-md5-test-file > /tmp/1.txt; md5_test -f /tmp/1.txt -c 100
+ÿünsh> 

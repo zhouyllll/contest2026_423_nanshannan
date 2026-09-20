@@ -1,0 +1,9 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kdf -h
+ÿü  Filesystem      Size      Used  Available Mounted on
+  tmpfs            19K       10K      8704B /data
+  procfs            0B        0B         0B /proc
+  tmpfs           512B      512B         0B /tests
+  tmpfs           512B      512B         0B /tmp
+nsh> 

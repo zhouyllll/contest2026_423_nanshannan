@@ -1,0 +1,4 @@
+
+NuttShell (NSH)
+nsh> [Kmd5_test -h
+nsh> 
