@@ -42,16 +42,54 @@ SESSIONS=(
   6da36939-72ed-45a4-8311-5cc9b1b96e52
   # RK3576 / KICKPI-K7 BSP 适配 —— 显示调试（VOP2 / DSI / LCD）等前期工作
   6396523f-2861-4bec-8d27-a68bbd63cfc3
+  # 09-19/20：Linux 用户态、AI 助手与语音唤醒、开机 logo、xTS 严格复测
+  a6fadf52-fde8-4859-b800-e334901c58df
 )
 
 [ -f "$TOOLS/export-session.py" ] || {
   echo "找不到 $TOOLS/export-session.py —— 是否已 repo sync？" >&2; exit 1; }
 
 if [ "${1:-}" != "--check" ]; then
+  # ★ 先把新会话扫进**本地暂存区**（~/.claude/contest-collector-staging）。
+  #   export-session.py --session 只认暂存区里已有的会话；钩子没装或会话
+  #   从工作区外启动时，新会话不在里面，直接导出会报 "No sessions matched"。
+  python3 "$TOOLS/export-session.py" --backfill --source claude --dest "$ROOT" \
+    --dry-run >/dev/null 2>&1 || true
+
   for sid in "${SESSIONS[@]}"; do
     python3 "$TOOLS/export-session.py" --session "$sid" --dest "$ROOT" --confirm \
       | sed "s/^/  [${sid:0:8}] /"
   done
+
+  # ★ 清掉白名单之外的会话。
+  #
+  #   --backfill 虽然只往暂存区写，实测它**同时**会把扫到的会话落进
+  #   logs/（2026-09-20 实测多出 6 个，其中包含校招、论文等私人对话）。
+  #   本仓是 public，所以导出之后必须按白名单再裁一遍，manifest 同步裁剪。
+  python3 - "$ROOT" "${SESSIONS[@]}" <<'PY'
+import json, sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+keep = set(sys.argv[2:])
+logs = root / 'logs' / 'zhouyllll'
+for f in sorted(logs.glob('*/*.jsonl')):
+    sid = f.stem.split('__', 1)[-1]
+    if sid not in keep:
+        print(f'  ✂ 白名单外，删除 {f.relative_to(root)}')
+        f.unlink()
+mf = logs / 'manifest.json'
+if mf.exists():
+    d = json.loads(mf.read_text())
+    before = len(d.get('sessions', []))
+    d['sessions'] = [x for x in d.get('sessions', []) if x['session_id'] in keep]
+    if len(d['sessions']) != before:
+        mf.write_text(json.dumps(d, ensure_ascii=False, indent=2) + '\n')
+        print(f'  ✂ manifest 会话 {before} -> {len(d["sessions"])}')
+for d in sorted(logs.glob('*/')):
+    if d.is_dir() and not any(d.iterdir()):
+        d.rmdir()
+PY
 fi
 
 python3 "$TOOLS/validate-log.py" "$ROOT/logs/zhouyllll"
