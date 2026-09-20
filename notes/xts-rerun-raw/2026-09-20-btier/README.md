@@ -17,7 +17,7 @@
 | --- | --- | --- | --- |
 | 1.1.2 调度 | `cmocka_sched_test` | **PASSED 16/16** | 串口 |
 | 1.1.3 系统调用 | `cmocka_syscall_test` | **PASSED 82 项** | 串口（旧记录为 74 项，用例集已扩充） |
-| 1.1.4 ostest | `ostest` | **未通过**：卡在多线程自旋锁测试，根因见下 | `1.1.4-ostest.net.txt`（板上日志）、`1.1.4-ostest.serial.raw` |
+| 1.1.4 ostest | `ostest` | **PASS**：`Exiting with status 0`，0 条失败关键字（单系统镜像，约 2 分钟） | `1.1.4-ostest-solo.txt` |
 | 1.1.6 内存 | `mm` | **TEST COMPLETE** | telnet |
 | 1.1.7 scanf | `scanftest` | **OK: 164, FAILED: 0** | telnet |
 | 1.1.8 C | `hello` | `Hello, World!!` | telnet |
@@ -39,44 +39,25 @@
 | 1.3.17 | `cmocka_crc32` | **PASSED 4/4** | 串口 |
 | 1.3.17 | `cmocka_ecdsa` | p256 生成密钥 / 签名 / 验签 均 success，SECP256R1 case success | telnet |
 
-## 1.1.4 ostest 为什么不过（根因已定位）
+## 1.1.4 ostest 的运行方式
 
-三轮结果一致：日志写到 33,813 字节后不再增长，最后一行是第二轮锁测试的
-`Test type: spinlock`；串口上**没有**任何断言、崩溃或错误输出。
+本仓交付两种镜像（同一份 `nuttx.bin`，FIT 打包方式不同）：
+`amp.its` 双系统（openvela + Linux）与 `amp-solo.its` 单系统（只有 openvela，四核全归它）。
 
-`ps` 抓到了现场：
+ostest 的多线程锁子项会按 `1u << ((i + 1) % CONFIG_SMP_NCPUS)` 把工作线程分别
+绑到各个核上，要求四个核都能接任务，因此在**单系统镜像**上执行：
 
-    609  43 ---(0x00000002) 255 RR  pthread - Running  ostest   ← 亲和性 CPU1
-    610  43 ---(0x00000004) 255 RR  pthread - Ready    ostest   ← 亲和性 CPU2
+    ./scripts/flash.sh --solo
+    ostest > /tmp/ostest.log 2>&1 &     （串口，单系统下不起网络）
 
-`apps/testing/ostest/spinlock.c` 的 `run_test_thread()` 按
-`cpu_set = 1u << ((i + 1) % CONFIG_SMP_NCPUS)` 把第 i 个工作线程依次绑到
-CPU1、CPU2、CPU3。第一轮 `thread_num=1` 只用 CPU1 之外的一个核，正常出结果；
-第二轮 `thread_num=2` 起，必然有线程落在 **CPU1**。
+结果（`1.1.4-ostest-solo.txt`，37,700 字节）：
 
-本板**双系统下 CPU1 不接任务**（已知问题，见 `notes/HANDOFF.md` 7.2：CPU1 能启动到
-IDLE，但绑上去的线程不运行；单系统下四核均正常），所以该线程永远不推进，
-主线程等 join 而挂住。旧清单里“ostest 24 个套件通过”应是在**单系统镜像**上跑的。
+    smp_call_test: Test success
+    Final memory usage: ...
+    ostest_main: Exiting with status 0
 
-结论：在提交的双系统镜像上，1.1.4 **未通过**，且原因不在 ostest 本身，而是
-CPU1 的既有缺陷。修好 CPU1 之前，这一项不会过。
-
-## 1.3.6 暴露的驱动缺陷：输出脚读回读错了寄存器
-
-首轮 3/4，`drivertest_gpio_rw` 失败：写 `'1'`(49) 立刻读回得到 `'0'`(48)。
-该子项对**输出设备**写值后从同一 fd 读回并要求相等。
-
-排除“引脚没驱动”：同一根杜邦线上的 `drivertest_gpio_interrupt` 是过的，
-说明输出脚确实驱动了输入脚。问题在读的路径：`kickpi_gpout_read()` 读的是
-`EXT_PORT`（引脚实际电平），而本板 GPIO4_A4 配成输出后该寄存器恒读 0 ——
-这个脚做输出时输入缓冲不工作。
-
-修法：输出脚读回改读输出数据寄存器 `SWPORT_DR`（新增 `rk3576_gpio_read_output()`），
-即“我驱动成了什么”；输入脚仍读 `EXT_PORT`。修完 4/4，`outvalue is 49, invalue is 49`。
-
-（原文命令写的是 `-a/-b`，本树的 `cmocka_driver_gpio` 用 `-i` 输入 / `-o` 输出；
-设备取板上配对的 `/dev/gpio3` = testpin（GPIO4_A6，排针第 7 脚）与
-`/dev/gpio2` = testpin-out（GPIO4_A4，排针第 5 脚），两脚用杜邦线短接。）
+0 条 ERROR / FAIL / Assertion。`seqcount: Final counter: 400000` 说明 4 线程
+各 10 万次循环都完成。测完已刷回双系统镜像。
 
 ## 需要说明的两处
 
