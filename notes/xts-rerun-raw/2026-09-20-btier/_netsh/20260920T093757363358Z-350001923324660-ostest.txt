@@ -1,4 +1,6 @@
-[Kostest
+
+NuttShell (NSH)
+nsh> [Kostest
 stdio_test: write fd=1
 stdio_test: Standard I/O Check: printf
 stdio_test: write fd=2
@@ -934,5 +936,4 @@
 Thread num: 2, Loop times: 100000
 
 Test type: spinlock
-
-{"command": "ostest", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789897077.37165, "host_at_done": 1789900703.5412576, "elapsed_monotonic_s": 3800.0742303349543, "host_clock_moved_back": false, "raw": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T093757363358Z-350001923324660-ostest.raw", "text": "notes/xts-rerun-raw/2026-09-20-btier/_netsh/20260920T093757363358Z-350001923324660-ostest.txt", "prompt_returned": false}
+
