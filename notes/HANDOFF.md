@@ -1,6 +1,6 @@
 # 交接说明（给下一个 Claude Code 会话）
 
-更新：2026-09-19（第二版，覆盖 09-19 全天的工作）。上一段会话太长，这里是**接手时必须知道的全部事实**。
+更新：2026-09-20（第三版，补 09-19 夜间与 09-20 的 xTS 收尾）。上一段会话太长，这里是**接手时必须知道的全部事实**。
 细节以 git log 和各文件注释为准；本文只讲现状、规矩和坑。
 
 ---
@@ -32,8 +32,9 @@ openvela（NuttX）移植到 **KICKPI-K7（RK3576）**，大赛 BSP 作品，截
 | LBA | 内容 | 说明 |
 |---:|---|---|
 | 14336 | Linux AMP DTB | `rk3576-kickpi-k7-amp.dtb`，上限 544 扇区 |
-| 16384 | U-Boot（自编，带 `bootamp`） | `bootcmd=bootamp`，`bootdelay=1` |
+| 16384 | U-Boot（自编，带 `bootamp`） | `bootcmd=bootamp`；倒计时每档 200ms（`amp/uboot/0010`）。烧写用 `scripts/flash-uboot.sh`（备份/回读/回滚） |
 | **24576** | **AMP FIT（openvela）** | trust 分区，上限 8192 扇区（09-17 从 8192 挪过来） |
+| 40960 | 开机 logo 的 resource 镜像（dtbo 分区） | `scripts/gen-boot-logo.py` 生成，`scripts/flash-logo.sh` 烧写；U-Boot 侧 `amp/uboot/0011` 让 resource 回退到 dtbo。原出厂 DTBO 备份在 `~/rk3576-amp/backup/dtbo-lba40960-factory-20260919.bin` |
 | 49152 | Linux `Image-amp-rootfs`（7.36MB，内嵌 initramfs） | `~/rk3576-amp/out/Image-amp-rootfs` sha 8f64e120；旧的无用户态版 `Image-amp` sha dfb0842a |
 | ≥65536 | rkdeveloptool **写不进去**（静默丢弃） | |
 
@@ -150,8 +151,31 @@ cd ../contest2026_423_nanshannan && bash scripts/flash.sh          # 双系统�
 - ai_agent 进程仍开机自启（飞书等通道），但界面的桌面问答已不经过它。
 - 带诊断代码的镜像从 Maskrom 起来时，用户在 **115200** 看到过 nsh —— 原因未查。
 - telnet：连上立即 RST 且连发十几次时，个别 `Telnet_session` 卡住不退，占住 8 个预分配 TCP 连接之一（正常断开/间隔 0.5s 的 RST 不漏）。
-- xTS：1.3.15 看门狗 api 子项（GLB_RST_ST 被上游清零）未过；stash@{0} 的内容已提交（e84061b），stash 可删。
+- xTS：1.3.15 看门狗 4 项过 2 项。根因已坐实：CRU_GLB_RST_ST 被 ATF（闭源 BL31，打印 `reset status: 0x1050` 后）清零，
+  openvela 里 `xd 0x27200c04` 读到全 0，所以复位原因报 CHIPPOR。修法（未做）见 `notes/xts-rerun-raw/2026-09-20-watchdog/README.md`。
 - NuttX 仓库（`../nuttx`）有未提交修改：`arm64_gicv2.c`（SHARED_DIST 支持，**必需**）、ft5x06、es8388、bt_uart 等，归属待核对，别随手 checkout。
+
+## 7.5 xTS 最终状态（2026-09-20）
+
+**汇总看 `notes/xts-final-2026-09-20.md`**（35 项分 A 严格通过 13 / B 功能通过 18 / C 未达成 4），
+逐项原始日志在 `notes/xts-rerun-raw/2026-09-1x…`、`2026-09-20-*`；审计表 `notes/xts-strict-audit.md`。
+
+09-19/20 为通过 xTS 做的改动（都已上板验证）：
+
+- 启动时间 4.47s → **2.76s**（reboot）/ **2.84s**（冷启动）：U-Boot 倒计时 0.2s（`amp/uboot/0010`）、
+  触摸/TF/摄像头/界面挪到后台线程 `devinit`（`kickpi_k7_appinit.c`）。
+- 开机 logo：`amp/uboot/0011` + `scripts/gen-boot-logo.py`（8 位 RLE8，**最后一行不写 EOL**，
+  否则 U-Boot 的 libnsbmp 判 DATA_ERROR）。
+- TF 卡按厂商设备树 `no-mmc` 跳过 CMD1（`rk3576_dwmmc.c`），并把 SD / SDIO 的驱动状态拆成两份。
+- HYM8563 用 wdog 实现闹钟与周期唤醒（nuttx `ed8f69ad`，已在 `bsp/nuttx-drivers.patch`）。
+- `/dev/urandom` 指向硬件 RNG（`rk3576_rng.c` + `DEV_URANDOM_ARCH`）。
+- 两个上游补丁：`posixspawn-enoent-not-error.patch`（每条 NSH 命令都多一行 ERROR）、
+  `stdio-stream-limit-open-max.patch`（fopen 流数上限 16，NIST 要 32）。
+- 测试镜像用叠加配置：`board/kickpi-k7/configs/xts-driver-tests.config`（RTC/NIST）、
+  `xts-kasan-longrun.config`（KASAN + showinfo，为塞进 FIT 去掉 ostest/scanftest/cxxtest）。
+
+判读时的坑（踩过）：串口 1.5M 有主机丢字；NSH 横幅与另一核 syslog 逐字节交错，必须子序列匹配；
+冷启动计时起点要取上电后第一行 DDR 日志（拔电会产生一个 0x00）。
 
 ## 8. 相关记忆文件
 
