@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kcmocka_driver_i2c_spi -d /dev/accel0
+ÿünsh: cmocka_driver_i2c_spi: command not found
+nsh> 

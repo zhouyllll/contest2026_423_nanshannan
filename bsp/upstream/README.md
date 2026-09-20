@@ -19,6 +19,7 @@ openvela 工程的其它仓里。按《新平台适配指南》「不得修改�
 | `tftpc-null-blockno.patch` | `apps` | **空指针解引用**：`netutils/tftpc/tftpc_put.c` 等 WRQ 首个 ACK 时传 `blockno = NULL`（那个块号必然为 0，调用方不关心），但 `tftp_rcvack()` 无条件写 `*blockno = rblockno`。**任何一次握手成功的 TFTP put 都会 panic**。单独成补丁而不并进 `apps.patch`，因为这是个可独立提 PR 的真实缺陷，跟那边的格式符清理不是一回事。 |
 | `posixspawn-enoent-not-error.patch` | `nuttx` | **每条 NSH 命令都带一行 `nxposix_spawn_exec: ERROR: exec failed: 2`**：开了 `LIBC_EXECFUNCS` + `NSH_BUILTIN_APPS` 时，NSH 对每条命令先用 `nsh_fileapp()`（`posix_spawnp`）当程序文件试，`free`/`echo` 这类 NSH 自带命令必然 ENOENT，然后才回退。找不到是正常的查找结果，调用方有返回码；ENOENT 降为 `sinfo`，其它错误照旧 `serr`。影响 xTS 各项"日志无异常"的判读。`LIBC_EXECFUNCS` 不能关：`posix_spawn` 本身只在它打开时编译，界面拍照（v4l2cap）和启动 ai_agent 都靠它。 |
 | `stdio-stream-limit-open-max.patch` | `nuttx` | **`fopen` 最多 16 个流**：`libs/libc/stdio/lib_fopen.c` 拿 `_POSIX_STREAM_MAX`（POSIX 规定的**最低**保证值 16）当上限，写死、不可配置。xTS 1.3.16 的 `nist_sts` 跑全部 15 项要同时开 32 个日志流，打开第 6 项 Rank 的 results.txt 时 `EMFILE`，报 "LOG FILES COULD NOT BE OPENED. MAX # OF OPENED FILES HAS BEEN REACHED = 11"。改用 `OPEN_MAX`（`CONFIG_LIBC_OPEN_MAX`，本配置 256）：FILE 结构按需分配，流又必然占一个 fd，上限本就受 OPEN_MAX 约束。 |
+| `bmi160-spi-only-guard.patch` | `nuttx` | **只开 I²C 时 bmi160_base.c 编不过**：`bmi160_configspi()` 在 `#ifdef CONFIG_SENSORS_BMI160_SPI` 内，而调用它的 `bmi160_transferspi()` 没有同样的条件编译，得到 implicit declaration 与 unused function 两个 `-Werror`。xTS 1.3.7 的用例程序 `cmocka_driver_i2c_spi` 的编译开关写死为 `CONFIG_SENSORS_BMI160` 非空，只开 I²C 就会撞上。给 `bmi160_transferspi()` 补上同样的条件编译。 |
 
 ## 另外两个必须记住的配置坑
 

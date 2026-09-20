@@ -60,6 +60,18 @@ int kickpi_k7_gpio_initialize(void);
 int kickpi_k7_i2c_initialize(void);
 
 /****************************************************************************
+ * Name: kickpi_k7_mpu6050_initialize
+ *
+ * Description:
+ *   40 针口上的 MPU-6050 注册成 /dev/accel0 与 /dev/gyro0（uORB）。
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KICKPI_K7_MPU6050
+int kickpi_k7_mpu6050_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: kickpi_k7_spi_initialize
  *
  * Description:

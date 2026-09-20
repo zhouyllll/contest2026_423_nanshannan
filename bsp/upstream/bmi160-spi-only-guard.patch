@@ -1,0 +1,20 @@
+diff --git a/drivers/sensors/bmi160_base.c b/drivers/sensors/bmi160_base.c
+index 8cc4da16..79d0ebde 100644
+--- a/drivers/sensors/bmi160_base.c
++++ b/drivers/sensors/bmi160_base.c
+@@ -59,6 +59,7 @@ static void bmi160_configspi(FAR struct spi_dev_s *spi)
+ }
+ #endif
+ 
++#ifdef CONFIG_SENSORS_BMI160_SPI
+ static void bmi160_transferspi(FAR struct spi_dev_s *spi, bool write,
+                                uint8_t regaddr, FAR void *data, int len)
+ {
+@@ -116,6 +117,7 @@ static void bmi160_transferspi(FAR struct spi_dev_s *spi, bool write,
+ 
+   SPI_LOCK(spi, false);
+ }
++#endif
+ 
+ /****************************************************************************
+  * Private Data

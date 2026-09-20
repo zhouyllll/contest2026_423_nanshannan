@@ -39,3 +39,25 @@ config KICKPI_K7_JPEG_QUALITY
 	default 85
 	range 1 100
 	depends on KICKPI_K7_IMGPROC
+
+config KICKPI_K7_MPU6050
+	bool "MPU-6050 六轴（40 针口 I2C，uORB）"
+	default n
+	depends on RK3576_I2C && SENSORS
+	---help---
+		把接在 40 针扩展口上的 MPU-6050 注册成 /dev/accel0 与 /dev/gyro0
+		（uORB 传感器框架）。xTS 1.3.7 的 cmocka_driver_i2c_spi 读的就是
+		/dev/accel0；原文用例给的是 BMI160，本板用 MPU-6050 代替。
+
+		接线（厂商规格书《40Pin 引脚定义》）：
+		  VCC -> 1 脚 3V3    GND -> 6 脚 GND
+		  SCL -> 22 脚 GPIO3_A0（I2C7_SCL_M1）
+		  SDA -> 24 脚 GPIO3_A1（I2C7_SDA_M1）
+		  AD0 -> GND（地址 0x68）
+
+config KICKPI_K7_MPU6050_I2C_BUS
+	int "MPU-6050 所在 I2C 总线号"
+	default 7
+	depends on KICKPI_K7_MPU6050
+	---help---
+		40 针扩展口上默认复用为 I2C 的是 I2C7（22/24 脚）。
