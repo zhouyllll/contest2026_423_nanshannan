@@ -1,0 +1,4 @@
+
+NuttShell (NSH)
+nsh> [Kmd5_test -f /tmp/xts-ymodem.bin -c 1
+nsh> 

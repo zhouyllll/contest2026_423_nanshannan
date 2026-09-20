@@ -1,0 +1,2 @@
+[CPU0] [==========] tests: Running 3 test(s).
+[CPU0] [ RUN      ] drivertest_block_stress

@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kcmocka_driver_block -m /dev/mmcsd1 > /tmp/sdblock.log 2>&1 &
+ÿücmocka_driver_block [50:100]
+nsh> 

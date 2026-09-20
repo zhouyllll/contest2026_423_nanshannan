@@ -1,0 +1,7 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kuname -a; free
+ÿüNuttX  0.0.0 ed8f69ad-dirty Sep 20 2026 19:51:56 arm64 kickpi-k7
+      total       used       free    maxused    maxfree  nused  nfree name
+   63537152   10117120   53420032   10119744   53411072    360      6 Umem
+nsh> 

@@ -1,0 +1,5 @@
+
+NuttShell (NSH)
+nsh> ÿû[Kls -l /tmp/xts-ymodem.bin; md5_test -f /tmp/xts-ymodem.bin -c 1
+ÿü -rwxrwxrwx   0        4096 /tmp/xts-ymodem.bin
+nsh> 
