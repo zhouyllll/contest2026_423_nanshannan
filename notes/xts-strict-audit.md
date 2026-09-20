@@ -57,7 +57,7 @@ PANIC、ASSERT、watchdog 或 reboot 字样。该观察只是现有镜像的 12h
 | 1.3.5 Flash 功能 | SD 卡 FAT32 上 `fstest` 20/20 | 原文要求 Flash 设备上的 `cmocka_driver_block -m <设备>`；先确认测试会否破坏数据，再选可安全测试的介质。现结果只作替代功能验证。 |
 | 1.3.7 I²C/SPI | RTC/触摸 I²C 正常，SPI 时钟自检 | MPU6050 可作为 I²C 功能复测的实际外设；记录器件、接线、地址、读数及 `cmocka_driver_i2c_spi` 是否可在该器件上运行。原版脚本指定 BMI160，MPU6050 的功能结果作为替代证据，正式等效性需社区确认。另一块开发板并非这条用例的前提。 |
 | 1.3.12 RTC | **2026-09-19 PASS**：`cmocka_driver_rtc` 连跑 3 次均 api/alarm/periodic 3/3 OK | 驱动补了 wdog 闹钟/周期唤醒（HYM8563 硬件闹钟只到分钟）；记录 [rtc](xts-rerun-raw/2026-09-19-rtc/README.md) |
-| 1.3.14 时间一致性 | 原采集器约 15h 串口断连，续采到 18h 后暂停，无 24h 终点 | 修正主机时钟及采样时间戳后重跑完整 24h，核对四次采样、终点与起点的相对漂移（≤2 秒）；设时命令伴随 `exec failed: 2`，需查明是否违反“无报错”。 |
+| 1.3.14 时间一致性 | **未完成（时间不够）**：原文要求静置 24h 以上，09-20 10:36 起跑，终点在截止日之后 | 09-14 那轮串口约 15h 断连作废；本轮改网络采样 + 亚秒对齐，部分数据 [time](xts-rerun-raw/2026-09-20-time/README.md) |
 | 1.3.15 Watchdog | 触发复位与恢复，四个 cmocka 子项未跑完 | 原文要求依次 `-r 0/1/2/3`、前三项 assert/栈及复位原因、末项 PASS；先解决测试和驱动行为，再逐项留证。 |
 | 1.3.16 RNG | **2026-09-19 PASS**：原文步骤 `nist_sts 400000` 读 `/dev/urandom/`（指向硬件 RNG），15 类 188 行，最小 P=0.002042，0 处 `*` | 修了 stdio 流数上限 16（lib_fopen）；记录 [nist-sts](xts-rerun-raw/2026-09-19-nist-sts/README.md) |
 | 2.1.3 Cold Boot 时间 | **2026-09-20 PASS**：用户上下电 10 次，平均 **2.844 s**（2.806–2.883），阈值 ≤4 s | 起点取上电后第一行 DDR 日志（拔电产生的 0x00 噪声不算）；记录：[coldboot](xts-rerun-raw/2026-09-20-coldboot/README.md) |
