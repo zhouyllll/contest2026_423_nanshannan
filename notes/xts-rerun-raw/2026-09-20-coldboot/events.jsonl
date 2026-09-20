@@ -1,0 +1,15 @@
+{"tag": "reset-01", "bytes": 51000, "banner_s": 45.9676, "errors": ["spl: mmc init failedTrying to boot from MMC1", "spl: mmc init failed with error: -123"]}
+{"tag": "reset-02", "bytes": 24489, "banner_s": 2.8119, "errors": ["spl: mmc init failed with error: -123"]}
+{"tag": "reset-03", "bytes": 24922, "banner_s": 2.8842, "errors": ["spl: mmc init failed with error: -123"]}
+{"tag": "reset-04", "bytes": 25177, "banner_s": 2.8573, "errors": []}
+{"tag": "reset-05", "bytes": 24329, "banner_s": 2.7934, "errors": ["spl: with error: -123"]}
+{"tag": "power-01", "bytes": 24585, "banner_s": 5.1713, "errors": ["MMC: no card presemmc init failed with error: -123"]}
+{"tag": "power-02", "bytes": 25133, "banner_s": 4.7347, "errors": ["spl: mmc init failed with error: -123"]}
+{"tag": "power-03", "bytes": 49415, "banner_s": 6.7955, "errors": ["spl: mmc init failed with error: -123", "spl: mmc init failed with error: -123"]}
+{"tag": "power-04", "bytes": 24246, "banner_s": 5.4098, "errors": ["spl: mmc init failed with error: -123"]}
+{"tag": "power-05", "bytes": 24866, "banner_s": 6.3509, "errors": ["spl: mmc init failed with error: -123"]}
+{"tag": "power-06", "bytes": 24461, "banner_s": 5.2807, "errors": ["spl: mmc init failed with error: -123"]}
+{"tag": "power-07", "bytes": 25055, "banner_s": 5.4977, "errors": ["spl: mmc init failed with error: -123"]}
+{"tag": "power-08", "bytes": 49160, "banner_s": 5.1644, "errors": ["spl: mmc init failed with error: -123", "spl: mmc init failed with1"]}
+{"tag": "power-09", "bytes": 24023, "banner_s": 4.547, "errors": ["spl: mmc init failed with error: -12SPL: A/B-slot: _a, successful: 0, tries-remain: 7"]}
+{"tag": "power-10", "bytes": 24951, "banner_s": 4.6549, "errors": []}

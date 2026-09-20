@@ -2,7 +2,7 @@
 
 ## 2026-09-19 更新
 
-按原文步骤补齐 1.2.1（仅剩 SPL 一行，见表）、1.3.3、1.3.12、1.3.16、2.1.4；3.1.1 于 09-20 完成。启动优化后 2.1.3 冷启动需重测。
+按原文步骤补齐 1.2.1（仅剩 SPL 一行，见表）、1.3.3、1.3.12、1.3.16、2.1.4；3.1.1、1.2.2、2.1.3 于 09-20 完成。启动优化后 2.1.3 冷启动需重测。
 
 ## 2026-09-18 更新
 
@@ -50,7 +50,7 @@ PANIC、ASSERT、watchdog 或 reboot 字样。该观察只是现有镜像的 12h
 | 1.1.5 getprime | 旧表标通过，未写实际耗时输出 | 保存原命令输出；缺失则重跑 `getprime`。 |
 | 1.1.12 MD5 | `md5_test -c 100` 收到 99 行同值 | 核查是否只是串口漏行；保留完整 100 次结果或重跑并保存日志。 |
 | 1.2.1 Reboot 启动异常 | **2026-09-19 按原文 NSH `reboot` ×10**：openvela 与 U-Boot 0 条异常，仅剩厂商 SPL 探 SD 槽 `spl: mmc init failed with error: -123`（10/10） | SPL 这一行需重编 SPL + 重写 idblock 才能去掉，未做；报告中说明。记录：[reboot-logo](xts-rerun-raw/2026-09-19-reboot-logo/README.md) |
-| 1.2.2 Cold boot 启动异常 | 下载模式 `rkdeveloptool rd` 5/5 | 原文要求设备 reset 按键；按硬件可用方式做 5 次并注明与真正断电启动的区别。 |
+| 1.2.2 Cold boot 启动异常 | **2026-09-20**：用户按 RESET 键 5/5 启动成功，平均 2.84s；异常仅厂商 SPL 探 SD 槽一行 | 记录：[coldboot](xts-rerun-raw/2026-09-20-coldboot/README.md) |
 | 1.2.4 Flash 占用 | `nuttx.bin` 大小约 1.20 MB | 原文要求设备端 `df -h` 及硬件 Flash 使用情况；补设备输出、分区/镜像说明。 |
 | 1.3.3 RAM 读写性能 | **2026-09-19 PASS**：`free` maxfree 53,415,488 → `ramtest -w/-h/-b -s 53349952` 各 6 阶段无错，串口 0 字节 | −64 KB 的原因（ramtest 自身栈/TCB 同堆）见 [ramtest-final](xts-rerun-raw/2026-09-19-ramtest-final/README.md) |
 | 1.3.4 RAM 随机读写 | `mkrd -m 10 -s 512 2048`，block 3/3 | 原文要求 `mkrd -m 10 -s 1000 1024` 后在对应 RAM 设备运行 `cmocka_driver_block -m <设备>`；核对实际设备并按原步骤留证。 |
@@ -60,7 +60,7 @@ PANIC、ASSERT、watchdog 或 reboot 字样。该观察只是现有镜像的 12h
 | 1.3.14 时间一致性 | 原采集器约 15h 串口断连，续采到 18h 后暂停，无 24h 终点 | 修正主机时钟及采样时间戳后重跑完整 24h，核对四次采样、终点与起点的相对漂移（≤2 秒）；设时命令伴随 `exec failed: 2`，需查明是否违反“无报错”。 |
 | 1.3.15 Watchdog | 触发复位与恢复，四个 cmocka 子项未跑完 | 原文要求依次 `-r 0/1/2/3`、前三项 assert/栈及复位原因、末项 PASS；先解决测试和驱动行为，再逐项留证。 |
 | 1.3.16 RNG | **2026-09-19 PASS**：原文步骤 `nist_sts 400000` 读 `/dev/urandom/`（指向硬件 RNG），15 类 188 行，最小 P=0.002042，0 处 `*` | 修了 stdio 流数上限 16（lib_fopen）；记录 [nist-sts](xts-rerun-raw/2026-09-19-nist-sts/README.md) |
-| 2.1.3 Cold Boot 时间 | 5 次下载模式复位，平均 4795 ms | 原文要求上下电 10 次、平均 ≤4000 ms；现数值超过门槛且测试方式不同。实测上电 10 次并保留时间戳；若仍超过 4 秒，记失败并优化启动。 |
+| 2.1.3 Cold Boot 时间 | **2026-09-20 PASS**：用户上下电 10 次，平均 **2.844 s**（2.806–2.883），阈值 ≤4 s | 起点取上电后第一行 DDR 日志（拔电产生的 0x00 噪声不算）；记录：[coldboot](xts-rerun-raw/2026-09-20-coldboot/README.md) |
 | 2.1.4 Reboot 时间 | **2026-09-19 PASS**：NSH `reboot` ×10，`NuttShell (NSH)` 平均 **2.76 s**（2.74–2.77），10/10 | 记录：[reboot-logo](xts-rerun-raw/2026-09-19-reboot-logo/README.md)。当日优化：U-Boot 倒计时 0.2s、触摸/TF/摄像头后台初始化（4.47→2.68s，加 logo 2.76s） |
 | 3.1.1 12h 待机 | **2026-09-20 PASS**：KASAN + showinfo 镜像静置 12h，0 次重启、0 行异常关键词、showinfo 713 条心跳无空档、堆无泄漏 | 记录：[kasan-12h](xts-rerun-raw/2026-09-19-kasan-12h/README.md) |
 
