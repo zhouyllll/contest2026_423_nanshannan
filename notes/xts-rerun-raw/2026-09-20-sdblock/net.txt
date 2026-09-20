@@ -1,0 +1,3 @@
+[Kcmocka_driver_block -m /dev/mmcsd1
+
+{"command": "cmocka_driver_block -m /dev/mmcsd1", "host": "192.168.1.50", "port": 2323, "host_at_enter": 1789904287.0617776, "host_at_done": 1789904440.591084, "elapsed_monotonic_s": 160.03182214900153, "host_clock_moved_back": false, "raw": "/home/dministrator/openvela-amlogic/src/contest2026_423_nanshannan/notes/xts-rerun-raw/2026-09-20-sdblock/20260920T113805683316Z-357557602561405-cmocka-driver-block-m-dev-mmcsd1.raw", "text": "/home/dministrator/openvela-amlogic/src/contest2026_423_nanshannan/notes/xts-rerun-raw/2026-09-20-sdblock/20260920T113805683316Z-357557602561405-cmocka-driver-block-m-dev-mmcsd1.txt", "prompt_returned": false}
